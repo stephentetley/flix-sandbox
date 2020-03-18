@@ -1,19 +1,35 @@
+/*
+ * Copyright 2020 Stephen Tetley
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package flix.runtime.library;
 
-
-import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public class SystemPrimitives {
+/**
+ * A wrapper class for System related functions that provides concrete, non-overloaded methods.
+ */
+public class SystemWrapper {
 
     /// This is a "vargs" in Java
-    public static Path pathOf1(String path) {
-        return Path.of(path);
+    public static Path pathsGet1(String path) {
+        return Paths.get(path);
     }
 
     // Stub function for `toString` as it is an interface method.
@@ -65,25 +81,18 @@ public class SystemPrimitives {
         return path.getName(index);
     }
 
-    public static Path currentDirectory() {
-        Path currentDir = Path.of(".");
+    public static Path currentDirectory() throws Exception {
+        Path currentDir = Paths.get(".");
         return currentDir.normalize().toAbsolutePath();
     }
 
-    public static void writeString(Path path, String content) throws Exception {
-        Files.writeString(path, content);
+    public static void writeString(Path path, Charset charset, String content) throws Exception {
+        final CharSequence content2 = content;
+        Files.writeString(path, content2, charset);
         return;
     }
 
-    public static String readString(Path path) throws Exception {
-        try {
-            String s = Files.readString(path);
-            return s;
-        } catch (IOException ex) {
-            ex.printStackTrace();
-            throw new IOException();
-        }
-    }
+
 
     public static String readStringUTF16le(Path path) throws Exception {
         try {

@@ -18,7 +18,7 @@
 namespace Directory {
 
     pub def getCurrentDirectory(): FilePath & Impure =
-        import flix.runtime.library.System:currentDirectory();
+        import flix.runtime.library.SystemWrapper:currentDirectory();
         FilePath(currentDirectory())
 
 

@@ -27,7 +27,7 @@ def getCurrentDirectory01(): FilePath & Impure =
 
 @test
 def readFile01(): String & Impure = 
-    let path = FilePath.new("E:\coding\flix\flix-doodle\factimport\data\colours.txt");
+    let path = FilePath.new("E:\coding\flix\flix-system\data\colours.txt");
     match File.readFile(path, Charset.utf_8()) {
         case Err(msg) => "***" + msg + "***"
         case Ok(s) => s
@@ -35,8 +35,8 @@ def readFile01(): String & Impure =
 
 @test
 def writeFile01(): String & Impure = 
-    let path = FilePath.new("E:\coding\flix\flix-doodle\factimport\data\colours-out.txt");
-    match File.writeFile(path, "red, green, blue") {
+    let path = FilePath.new("E:\coding\flix\flix-system\data\colours-out.txt");
+    match File.writeFile(path, Charset.utf_8(), "red, green, blue") {
         case Err(msg) => "***" + msg + "***"
         case Ok(_) => "Okay"
     }

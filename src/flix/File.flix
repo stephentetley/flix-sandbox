@@ -29,11 +29,13 @@
             case _: ##java.lang.Exception => Err("Exception")
         }
 
-    pub def writeFile(path: FilePath, content: String): Result[Unit, String] & Impure =
+
+    pub def writeFile(path: FilePath, cs: Charset, content: String): Result[Unit, String] & Impure =
         try {
-            import flix.runtime.library.System:writeString(##java.nio.file.Path, String);
+            import flix.runtime.library.SystemWrapper:writeString(##java.nio.file.Path, ##java.nio.charset.Charset, String);
             let FilePath(path1) = path;
-            writeString(path1, content);
+            let Charset(cs1) = cs;
+            writeString(path1, cs1, content);
             Ok()
         }
         catch {
