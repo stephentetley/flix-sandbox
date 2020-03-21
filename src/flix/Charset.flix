@@ -23,36 +23,31 @@ namespace Charset {
 
     pub def iso_8859_1(): Charset = 
         import get java.nio.charset.StandardCharsets:ISO_8859_1 as get_iso_8859_1;
-        Charset(get_iso_8859_1() as & Pure)
+        Charset(get_iso_8859_1()) as & Pure
 
     pub def us_ascii(): Charset = 
         import get java.nio.charset.StandardCharsets:US_ASCII as get_us_ascii;
-        Charset(get_us_ascii() as & Pure)
+        Charset(get_us_ascii()) as & Pure
 
     pub def utf_16(): Charset = 
         import get java.nio.charset.StandardCharsets:UTF_16 as get_utf_16;
-        Charset(get_utf_16() as & Pure)
+        Charset(get_utf_16()) as & Pure
 
     pub def utf_16be(): Charset = 
         import get java.nio.charset.StandardCharsets:UTF_16BE as get_utf_16be;
-        Charset(get_utf_16be() as & Pure)
+        Charset(get_utf_16be()) as & Pure
 
     pub def utf_16le(): Charset = 
         import get java.nio.charset.StandardCharsets:UTF_16LE as get_utf_16le;
-        Charset(get_utf_16le() as & Pure)
+        Charset(get_utf_16le()) as & Pure
 
     pub def utf_8(): Charset = 
         import get java.nio.charset.StandardCharsets:UTF_8 as get_utf_8;
-        Charset(get_utf_8() as & Pure)
-
-    pub def getRepr(cs: Charset): ##java.nio.charset.Charset = 
-        let Charset(cs1) = cs;
-        cs1
+        Charset(get_utf_8()) as & Pure
 
     pub def toString(cs: Charset): String = 
-        import java.nio.charset.Charset.toString() as toStr;
+        import java.nio.charset.Charset.toString() as charsetToString;
         let Charset(cs1) = cs;
-        toStr(cs1) as & Pure
+        charsetToString(cs1) as & Pure
         
-
 }
