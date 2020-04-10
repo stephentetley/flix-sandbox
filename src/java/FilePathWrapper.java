@@ -16,9 +16,6 @@
 
 package flix.runtime.library.system;
 
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -30,7 +27,7 @@ import java.nio.file.Paths;
  */
 public class FilePathWrapper {
 
-    /// This is a "vargs" in Java
+    /// Sub function for `Paths.get` as it is "varargs" in Java.
     public static Path get1(String path) {
         return Paths.get(path);
     }

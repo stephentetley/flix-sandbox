@@ -16,33 +16,21 @@
 
 package flix.runtime.library.system;
 
-import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 /**
- * A wrapper class for System related functions that provides concrete, non-overloaded methods.
- * This is currently a "ragbag" and will be removed at some point.
+ * A wrapper class for File related functions.
+ * This class that provides concrete, non-overloaded methods.
  */
-public class SystemWrapper {
+public class FileWrapper {
 
-
+    /// Sub function for `Files.writeString` as it is "varargs" in Java.
     public static void writeString(Path path, Charset charset, String content) throws Exception {
         final CharSequence content2 = content;
         Files.writeString(path, content2, charset);
-        return;
     }
 
-    public static String readStringUTF16le(Path path) throws Exception {
-        try {
-            Charset cs = Charset.forName("UTF-16LE");
-            String s = Files.readString(path, cs);
-            return s;
-        } catch (IOException ex) {
-            ex.printStackTrace();
-            throw new IOException();
-        }
-    }
+
 }

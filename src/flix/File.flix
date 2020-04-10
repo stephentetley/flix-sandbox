@@ -37,7 +37,7 @@ namespace System/File {
 
     pub def writeFile(path: FilePath, cs: Charset, content: String): Result[Unit, String] & Impure =
         try {
-            import flix.runtime.library.system.SystemWrapper:writeString(##java.nio.file.Path, ##java.nio.charset.Charset, String);
+            import flix.runtime.library.system.FileWrapper:writeString(##java.nio.file.Path, ##java.nio.charset.Charset, String);
             let FilePath(path1) = path;
             let Charset(cs1) = cs;
             writeString(path1, cs1, content);
