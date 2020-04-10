@@ -24,5 +24,19 @@ namespace System/Directory {
             |> System/FilePath.normalize
             |> System/FilePath.toAbsolutePath
 
+    pub def doesDirectoryExist(path: FilePath): Bool & Impure =
+        import flix.runtime.library.system.DirectoryWrapper:isDirectoryFollowLinks(##java.nio.file.Path);
+        let FilePath(p1) = path;
+        p1.isDirectoryFollowLinks()
+
+    pub def doesFileExist(path: FilePath): Bool & Impure =
+        import flix.runtime.library.system.DirectoryWrapper:isRegularFileFollowLinks(##java.nio.file.Path);
+        let FilePath(p1) = path;
+        p1.isRegularFileFollowLinks()
+
+    pub def doesPathExist(path: FilePath): Bool & Impure =
+        import flix.runtime.library.system.DirectoryWrapper:existsFollowLinks(##java.nio.file.Path);
+        let FilePath(p1) = path;
+        p1.existsFollowLinks()
 
 }
