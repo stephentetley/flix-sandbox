@@ -32,60 +32,74 @@ namespace System/FilePath {
     /// Returns a new FilePath.
     ///
     pub def new(s: String): FilePath & Impure =
-        import flix.runtime.library.SystemWrapper:pathsGet1(String);
-        FilePath(pathsGet1(s))
+        import flix.runtime.library.system.FilePathWrapper:get1(String);
+        FilePath(get1(s))
 
     pub def toString(path: FilePath): String & Impure =
-        import flix.runtime.library.SystemWrapper:pathToString(##java.nio.file.Path);
+        import flix.runtime.library.system.FilePathWrapper:toString(##java.nio.file.Path);
         let FilePath(path1) = path;
-        path1.pathToString()
+        path1.toString()
 
     pub def normalize(path: FilePath): FilePath & Impure =
-        import flix.runtime.library.SystemWrapper:pathNormalize(##java.nio.file.Path);
-        let FilePath(path1) = path;
-        FilePath(path1.pathNormalize())
+        import flix.runtime.library.system.FilePathWrapper:normalize(##java.nio.file.Path);
+        let FilePath(p1) = path;
+        FilePath(p1.normalize())
+
+    pub def toAbsolutePath(path: FilePath): FilePath & Impure =
+        import flix.runtime.library.system.FilePathWrapper:toAbsolutePath(##java.nio.file.Path);
+        let FilePath(p1) = path;
+        FilePath(p1.toAbsolutePath())
 
     pub def isAbsolute(path: FilePath): Bool & Impure =
-        import flix.runtime.library.SystemWrapper:pathIsAbsolute(##java.nio.file.Path);
+        import flix.runtime.library.system.FilePathWrapper:isAbsolute(##java.nio.file.Path);
         let FilePath(path1) = path;
-        path1.pathIsAbsolute()
+        path1.isAbsolute()
 
     pub def isRelative(path: FilePath): Bool & Impure = !(isAbsolute(path))
 
     pub def getRoot(path: FilePath): Option[FilePath] & Impure =
-        import flix.runtime.library.SystemWrapper:pathGetRoot(##java.nio.file.Path);
+        import flix.runtime.library.system.FilePathWrapper:getRoot(##java.nio.file.Path);
         let FilePath(path1) = path;
-        let root = path1.pathGetRoot();
-        if (isNull(root)) None else Some(FilePath(root))
+        let root = path1.getRoot();
+        if (isNull(root))
+            None
+        else
+            Some(FilePath(root))
 
     pub def getParent(path: FilePath): Option[FilePath] & Impure =
-        import flix.runtime.library.SystemWrapper:pathGetParent(##java.nio.file.Path);
+        import flix.runtime.library.system.FilePathWrapper:getParent(##java.nio.file.Path);
         let FilePath(path1) = path;
-        let parent = path1.pathGetParent();
-        if (isNull(parent)) None else Some(FilePath(parent))
+        let parent = path1.getParent();
+        if (isNull(parent))
+            None
+        else
+            Some(FilePath(parent))
 
     pub def getFileName(path: FilePath): Option[FilePath] & Impure =
-        import flix.runtime.library.SystemWrapper:pathGetFileName(##java.nio.file.Path);
+        import flix.runtime.library.system.FilePathWrapper:getFileName(##java.nio.file.Path);
         let FilePath(path1) = path;
-        let name = path1.pathGetFileName();
-        if (isNull(name)) None else Some(FilePath(name))
+        let name = path1.getFileName();
+        if (isNull(name))
+            None
+        else
+            Some(FilePath(name))
 
     pub def append(path: FilePath, other: FilePath): FilePath & Impure =
-        import flix.runtime.library.SystemWrapper:pathResolve(##java.nio.file.Path, ##java.nio.file.Path);
+        import flix.runtime.library.system.FilePathWrapper:resolve(##java.nio.file.Path, ##java.nio.file.Path);
         let FilePath(path1) = path;
         let FilePath(other1) = other;
-        FilePath(pathResolve(path1, other1)) |> normalize
+        FilePath(resolve(path1, other1)) |> normalize
 
     pub def getNameCount(path: FilePath): Int32 & Impure =
-        import flix.runtime.library.SystemWrapper:pathGetNameCount(##java.nio.file.Path);
+        import flix.runtime.library.system.FilePathWrapper:getNameCount(##java.nio.file.Path);
         let FilePath(path1) = path;
-        path1.pathGetNameCount()
+        path1.getNameCount()
 
-    pub def getName(index: Int32, path: FilePath): Option[FilePath] & Impure =
+    pub def getNameAt(ix: Int32, path: FilePath): Option[FilePath] & Impure =
         try {
-            import flix.runtime.library.SystemWrapper:pathGetName(##java.nio.file.Path, Int32);
+            import flix.runtime.library.system.FilePathWrapper:getName(##java.nio.file.Path, Int32);
             let FilePath(path1) = path;
-            path1.pathGetName(index) |> FilePath |> Some
+            path1.getName(ix) |> FilePath |> Some
         } catch {
             case _: ##java.lang.Exception => None
         }

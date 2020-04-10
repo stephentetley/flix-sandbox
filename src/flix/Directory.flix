@@ -20,8 +20,9 @@ use System.FilePath.{FilePath};
 namespace System/Directory {
 
     pub def getCurrentDirectory(): FilePath & Impure =
-        import flix.runtime.library.SystemWrapper:currentDirectory();
-        FilePath(currentDirectory())
+        System/FilePath.new(".")
+            |> System/FilePath.normalize
+            |> System/FilePath.toAbsolutePath
 
 
 }
