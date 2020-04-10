@@ -14,22 +14,52 @@
  * limitations under the License.
  */
 
+use System.FilePath;
+use System.FilePath.{FilePath};
 
 namespace System/Environment {
 
     /// Get env var...
-    pub def getEnv(name: String): Result[String, String] & Impure =
-        try {
-            import java.lang.System:getenv(String);
-            let ans = getenv(name);
-            if (isNull(ans))
-                Err("Not found")
-            else
-                Ok(ans)
-        } catch {
-            case _:##java.lang.Exception => Err("System exception")
-        }
+    pub def getEnv(name: String): Result[String, String] & Impure = try {
+        import java.lang.System:getenv(String);
+        let ans = getenv(name);
+        if (isNull(ans))
+            Err("Not found")
+        else
+            Ok(ans)
+    } catch {
+        case _:##java.lang.Exception => Err("System exception")
+    }
 
 
+    pub def getOsName(): String & Impure =
+        import java.lang.System:getProperty(String);
+        getProperty("os.name")
+
+    pub def getOsArch(): String & Impure =
+        import java.lang.System:getProperty(String);
+        getProperty("os.arch")
+
+    pub def getOsVersion(): String & Impure =
+        import java.lang.System:getProperty(String);
+        getProperty("os.version")
+
+    pub def getUserName(): String & Impure =
+        import java.lang.System:getProperty(String);
+        getProperty("user.name")
+
+    pub def getUserDirectory(): FilePath & Impure =
+        import java.lang.System:getProperty(String);
+        let p1 = getProperty("user.dir");
+        System/FilePath.new(p1)
+            |> System/FilePath.normalize
+            |> System/FilePath.toAbsolutePath
+
+    pub def getUserHome(): FilePath & Impure =
+        import java.lang.System:getProperty(String);
+        let p1 = getProperty("user.home");
+        System/FilePath.new(p1)
+            |> System/FilePath.normalize
+            |> System/FilePath.toAbsolutePath
 
 }

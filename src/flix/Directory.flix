@@ -24,19 +24,49 @@ namespace System/Directory {
             |> System/FilePath.normalize
             |> System/FilePath.toAbsolutePath
 
-    pub def doesDirectoryExist(path: FilePath): Bool & Impure =
-        import flix.runtime.library.system.DirectoryWrapper:isDirectoryFollowLinks(##java.nio.file.Path);
-        let FilePath(p1) = path;
-        p1.isDirectoryFollowLinks()
+    pub def getTempDirectory(): FilePath & Impure =
+        import java.lang.System:getProperty(String);
+        let p1 = getProperty("java.io.tmpdir");
+        System/FilePath.new(p1)
+            |> System/FilePath.normalize
+            |> System/FilePath.toAbsolutePath
 
-    pub def doesFileExist(path: FilePath): Bool & Impure =
-        import flix.runtime.library.system.DirectoryWrapper:isRegularFileFollowLinks(##java.nio.file.Path);
-        let FilePath(p1) = path;
-        p1.isRegularFileFollowLinks()
 
     pub def doesPathExist(path: FilePath): Bool & Impure =
         import flix.runtime.library.system.DirectoryWrapper:existsFollowLinks(##java.nio.file.Path);
         let FilePath(p1) = path;
         p1.existsFollowLinks()
+
+    pub def isDirectory(path: FilePath): Bool & Impure =
+        import flix.runtime.library.system.DirectoryWrapper:isDirectoryFollowLinks(##java.nio.file.Path);
+        let FilePath(p1) = path;
+        p1.isDirectoryFollowLinks()
+
+    pub def isFile(path: FilePath): Bool & Impure =
+        import flix.runtime.library.system.DirectoryWrapper:isRegularFileFollowLinks(##java.nio.file.Path);
+        let FilePath(p1) = path;
+        p1.isRegularFileFollowLinks()
+
+    pub def isSymbolicLink(path: FilePath): Bool & Impure =
+        import java.nio.file.Files:isSymbolicLink(##java.nio.file.Path);
+        let FilePath(p1) = path;
+        p1.isSymbolicLink()
+
+    pub def isHidden(path: FilePath): Bool & Impure =
+        import java.nio.file.Files:isHidden(##java.nio.file.Path);
+        let FilePath(p1) = path;
+        p1.isHidden()
+
+    pub def createDirectory(path: FilePath): Unit & Impure =
+        import flix.runtime.library.system.DirectoryWrapper:createDirectory(##java.nio.file.Path);
+        let FilePath(p1) = path;
+        p1.createDirectory()
+
+    /// Create any "missing" directories along the way...
+    pub def createDirectoryAll(path: FilePath): Unit & Impure =
+        import flix.runtime.library.system.DirectoryWrapper:createDirectories(##java.nio.file.Path);
+        let FilePath(p1) = path;
+        p1.createDirectories()
+
 
 }

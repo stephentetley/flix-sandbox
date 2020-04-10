@@ -37,9 +37,22 @@ public class DirectoryWrapper {
         return Files.isDirectory(path);
     }
 
-    // Stub function for `isDirectory` as it is a "varags" method
+    // Stub function for `isRegularFile` as it is a "varags" method
     // with FollowLinks == true.
     public static boolean isRegularFileFollowLinks(Path path) throws Exception {
         return Files.isRegularFile(path);
     }
+
+    // Stub function for `createDirectory` as it is a "varags" method
+    // with no FileAttributes.
+    public static void createDirectory(Path path) throws Exception {
+        Files.createDirectory(path);
+    }
+
+    // Stub function for `createDirectories` as it is a "varags" method
+    // with no FileAttributes.
+    public static void createDirectories(Path path) throws Exception {
+        Files.createDirectories(path);
+    }
+
 }
