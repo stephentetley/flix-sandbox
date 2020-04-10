@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
+use System.FilePath;
+use System.FilePath.{FilePath};
 
-namespace Directory {
+namespace System/Directory {
 
     pub def getCurrentDirectory(): FilePath & Impure =
         import flix.runtime.library.SystemWrapper:currentDirectory();

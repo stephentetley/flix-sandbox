@@ -15,9 +15,21 @@
  */
 
 
-namespace Environment {
+namespace System/Environment {
 
-    /// Get env vars...
+    /// Get env var...
+    pub def getEnv(name: String): Result[String, String] & Impure =
+        try {
+            import java.lang.System:getenv(String);
+            let ans = getenv(name);
+            if (isNull(ans))
+                Err("Not found")
+            else
+                Ok(ans)
+        } catch {
+            case _:##java.lang.Exception => Err("System exception")
+        }
+
 
 
 }

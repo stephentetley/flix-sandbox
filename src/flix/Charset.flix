@@ -14,12 +14,18 @@
  * limitations under the License.
  */
 
-///
-/// Represents a Charset.
-///
-opaque type Charset = ##java.nio.charset.Charset
+use System.Charset;
+use System.Charset.{Charset};
 
-namespace Charset {
+namespace System  {
+    ///
+    /// Represents a Charset.
+    ///
+    pub opaque type Charset = ##java.nio.charset.Charset
+
+}
+
+namespace System/Charset {
 
     pub def iso_8859_1(): Charset = 
         import get java.nio.charset.StandardCharsets:ISO_8859_1 as get_iso_8859_1;
@@ -49,5 +55,5 @@ namespace Charset {
         import java.nio.charset.Charset.toString() as charsetToString;
         let Charset(cs1) = cs;
         charsetToString(cs1) as & Pure
-        
+
 }

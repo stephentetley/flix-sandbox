@@ -14,12 +14,19 @@
  * limitations under the License.
  */
 
-///
-/// Represents a FilePath.
-///
-opaque type FilePath = ##java.nio.file.Path
+use System.FilePath;
+use System.FilePath.{FilePath};
 
-namespace FilePath {
+namespace System {
+
+    ///
+    /// Represents a FilePath.
+    ///
+    pub opaque type FilePath = ##java.nio.file.Path
+
+}
+
+namespace System/FilePath {
 
     ///
     /// Returns a new FilePath.
@@ -88,7 +95,7 @@ namespace FilePath {
             case None => None
             case Some(s) => match String.indexOfRight(s, ".") {
                 case None => None
-                case Some(ix) => Some(String.slice(ix+1, String.length(s), s))
+                case Some(ix) => Some(String.sliceRight(s, ix+1))
             }
         }
 

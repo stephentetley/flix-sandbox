@@ -14,7 +14,12 @@
  * limitations under the License.
  */
 
- namespace File {
+use System.FilePath;
+use System.FilePath.{FilePath};
+use System.Charset;
+use System.Charset.{Charset};
+
+namespace System/File {
 
     /// TODO - test exception
     pub def readFile(path: FilePath, cs: Charset): Result[String, String] & Impure =
@@ -42,4 +47,4 @@
             case _: ##java.io.IOException => Err("IOException")
             case _: ##java.lang.Exception => Err("Exception")
         }
- }
+}
