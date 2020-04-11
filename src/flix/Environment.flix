@@ -32,11 +32,11 @@ namespace System/Environment {
     }
 
     pub def getEnvVars(): Result[Map[String, String], String] & Impure = try {
-        import new flix.runtime.library.system.marshal.UnmarshalEnv() as newIter;
-        import flix.runtime.library.system.marshal.UnmarshalEnv.hasNext();
-        import flix.runtime.library.system.marshal.UnmarshalEnv.next();
-        import flix.runtime.library.system.marshal.PairStringString.get0();
-        import flix.runtime.library.system.marshal.PairStringString.get1();
+        import new flix.runtime.library.system.marshal.UnmarshalEnvVars() as newIter;
+        import flix.runtime.library.system.marshal.UnmarshalEnvVars.hasNext();
+        import flix.runtime.library.system.marshal.UnmarshalEnvVars.next();
+        import flix.runtime.library.system.marshal.TupleStringString.get0();
+        import flix.runtime.library.system.marshal.TupleStringString.get1();
         let iter = newIter();
         let step = () ->
             if (iter.hasNext() == false)

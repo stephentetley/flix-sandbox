@@ -31,6 +31,23 @@ namespace System/Directory {
             |> System/FilePath.normalize
             |> System/FilePath.toAbsolutePath
 
+    pub def contents(path: FilePath): Result[List[FilePath], String] & Impure = try {
+        import new flix.runtime.library.system.marshal.UnmarshalFilesList(##java.nio.file.Path) as newIter;
+        import flix.runtime.library.system.marshal.UnmarshalFilesList.hasNext();
+        import flix.runtime.library.system.marshal.UnmarshalFilesList.next();
+        let FilePath(p1) = path;
+        let iter = newIter(p1);
+        let step = () ->
+            if (iter.hasNext() == false)
+                None
+            else {
+                let x1 = iter.next();
+                Some(FilePath(x1))
+             };
+        Ok(System/Internal/Utils.unfoldListWithIterator(step))
+    } catch {
+        case _: ##java.lang.Exception => Err("list")
+    }
 
     pub def doesPathExist(path: FilePath): Bool & Impure =
         import flix.runtime.library.system.DirectoryWrapper:existsFollowLinks(##java.nio.file.Path);

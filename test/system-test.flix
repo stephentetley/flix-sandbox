@@ -47,3 +47,11 @@ def getEnvVars01(): Result[Unit, String] & Impure =
     let* m1 = System/Environment.getEnvVars();
     Map.foreach((k,v) -> { Console.printLine("Key: " + k); Console.printLine("Value:" + v)}, m1);
     Ok()
+
+@test
+def contents01(): Result[Unit, String] & Impure = 
+    use Result.flatMap;
+    let cwd = System/Directory.getCurrentDirectory();
+    let* xs = System/Directory.contents(cwd);
+    List.foreach(x -> Console.printLine(System/FilePath.toString(x)), xs);
+    Ok()

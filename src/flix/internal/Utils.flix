@@ -23,9 +23,9 @@ namespace System/Internal/Utils {
         case Some(a, st1) => unfoldListHelper(f, st1, xs -> cont(a :: xs))
     }
 
-    pub def unfoldListWithIterator(next: () -> Option[a]): List[a] & e = unfoldListWithIteratorHelper(next, xs -> xs)
+    pub def unfoldListWithIterator(next: () -> Option[a] & e): List[a] & e = unfoldListWithIteratorHelper(next, xs -> xs)
 
-    def unfoldListWithIteratorHelper(next: () -> Option[a], cont: List[a] -> List[a]): List[a] & e = match next() {
+    def unfoldListWithIteratorHelper(next: () -> Option[a] & e, cont: List[a] -> List[a]): List[a] & e = match next() {
         case None => cont(Nil)
         case Some(a) => unfoldListWithIteratorHelper(next, xs -> cont(a :: xs))
     }
