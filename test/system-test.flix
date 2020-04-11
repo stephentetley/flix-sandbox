@@ -1,42 +1,49 @@
 
 
 @test
-def new01(): FilePath & Impure = 
-    FilePath.new("e:/coding/flix")
+def new01(): System.FilePath & Impure = 
+    System/FilePath.new("e:/coding/flix")
 
 @test
-def new02(): FilePath & Impure = 
-    FilePath.new("..")
+def new02(): System.FilePath & Impure = 
+    System/FilePath.new("..")
 
 @test
 def toString01(): String & Impure = 
-    FilePath.new("e:/coding/flix") |> FilePath.toString
+    System/FilePath.new("e:/coding/flix") |> System/FilePath.toString
 
 @test
 def toString02(): String & Impure = 
-    FilePath.new("..") |> FilePath.toString
+    System/FilePath.new("..") |> System/FilePath.toString
 
 
 @test
 def normalize01(): String & Impure = 
-    FilePath.new("c:/root/child1/..") |> FilePath.normalize |> FilePath.toString
+    System/FilePath.new("c:/root/child1/..") |> System/FilePath.normalize |> System/FilePath.toString
 
 @test
-def getCurrentDirectory01(): FilePath & Impure = 
-    Directory.getCurrentDirectory()
+def getCurrentDirectory01(): System.FilePath & Impure = 
+    System/Directory.getCurrentDirectory()
 
 @test
 def readFile01(): String & Impure = 
-    let path = FilePath.new("E:\coding\flix\flix-system\data\colours.txt");
-    match File.readFile(path, Charset.utf_8()) {
+    let path = System/FilePath.new("E:\coding\flix\flix-system\data\colours.txt");
+    match System/File.readFile(path, System/Charset.utf_8()) {
         case Err(msg) => "***" + msg + "***"
         case Ok(s) => s
     }
 
 @test
 def writeFile01(): String & Impure = 
-    let path = FilePath.new("E:\coding\flix\flix-system\data\colours-out.txt");
-    match File.writeFile(path, Charset.utf_8(), "red, green, blue") {
+    let path = System/FilePath.new("E:\coding\flix\flix-system\data\colours-out.txt");
+    match System/File.writeFile(path, System/Charset.utf_8(), "red, green, blue") {
         case Err(msg) => "***" + msg + "***"
         case Ok(_) => "Okay"
     }
+
+@test
+def getEnvVars01(): Result[Unit, String] & Impure = 
+    use Result.flatMap;
+    let* m1 = System/Environment.getEnvVars();
+    Map.foreach((k,v) -> { Console.printLine("Key: " + k); Console.printLine("Value:" + v)}, m1);
+    Ok()

@@ -1,2 +1,3 @@
 # flix-system
-Sketches towards system modules (Files, FilePaths, etc.) for Flix
+
+Work towards system modules (Files, FilePaths, Environment etc.) for Flix

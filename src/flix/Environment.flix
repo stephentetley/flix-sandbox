@@ -20,7 +20,7 @@ use System.FilePath.{FilePath};
 namespace System/Environment {
 
     /// Get env var...
-    pub def getEnv(name: String): Result[String, String] & Impure = try {
+    pub def getEnvVar(name: String): Result[String, String] & Impure = try {
         import java.lang.System:getenv(String);
         let ans = getenv(name);
         if (isNull(ans))
@@ -29,6 +29,27 @@ namespace System/Environment {
             Ok(ans)
     } catch {
         case _:##java.lang.Exception => Err("System exception")
+    }
+
+    pub def getEnvVars(): Result[Map[String, String], String] & Impure = try {
+        import new flix.runtime.library.system.marshal.UnmarshalEnv() as newIter;
+        import flix.runtime.library.system.marshal.UnmarshalEnv.hasNext();
+        import flix.runtime.library.system.marshal.UnmarshalEnv.next();
+        import flix.runtime.library.system.marshal.PairStringString.get0();
+        import flix.runtime.library.system.marshal.PairStringString.get1();
+        let iter = newIter();
+        let step = () ->
+            if (iter.hasNext() == false)
+                None
+            else {
+                let pss = iter.next();
+                let k = pss.get0();
+                let v = pss.get1();
+                Some(k, v)
+             };
+        Ok(System/Internal/Utils.unfoldMapWithIterator(step))
+    } catch {
+        case _: ##java.lang.Exception => Err("getEnvVars")
     }
 
 
