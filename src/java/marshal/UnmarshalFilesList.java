@@ -20,7 +20,6 @@ package flix.runtime.library.system.marshal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.stream.Stream;
 
 public class UnmarshalFilesList {
@@ -35,7 +34,6 @@ public class UnmarshalFilesList {
         return this.iter.hasNext();
     }
 
-    public Path next() {
-        return this.iter.next();
-    }
+    public Path next() { return this.iter.next(); }
+
 }

@@ -55,3 +55,11 @@ def contents01(): Result[Unit, String] & Impure =
     let* xs = System/Directory.contents(cwd);
     List.foreach(x -> Console.printLine(System/FilePath.toString(x)), xs);
     Ok()
+
+@test
+def contentsAll01(): Result[Unit, String] & Impure = 
+    use Result.flatMap;
+    let cwd = System/Directory.getCurrentDirectory();
+    let* xs = System/Directory.contentsAll(cwd, false);
+    List.foreach(x -> Console.printLine(System/FilePath.toString(x)), xs);
+    Ok()

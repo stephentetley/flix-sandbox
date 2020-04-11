@@ -31,6 +31,8 @@ namespace System/Directory {
             |> System/FilePath.normalize
             |> System/FilePath.toAbsolutePath
 
+    /// One level - not recursive
+    /// TODO - return a Stream
     pub def contents(path: FilePath): Result[List[FilePath], String] & Impure = try {
         import new flix.runtime.library.system.marshal.UnmarshalFilesList(##java.nio.file.Path) as newIter;
         import flix.runtime.library.system.marshal.UnmarshalFilesList.hasNext();
@@ -46,7 +48,27 @@ namespace System/Directory {
              };
         Ok(System/Internal/Utils.unfoldListWithIterator(step))
     } catch {
-        case _: ##java.lang.Exception => Err("list")
+        case _: ##java.lang.Exception => Err("contents")
+    }
+
+    /// All levels - recursive
+    /// TODO - return a Stream
+    pub def contentsAll(path: FilePath, followLinks: Bool): Result[List[FilePath], String] & Impure = try {
+        import new flix.runtime.library.system.marshal.UnmarshalFilesWalk(##java.nio.file.Path, Bool) as newIter;
+        import flix.runtime.library.system.marshal.UnmarshalFilesWalk.hasNext();
+        import flix.runtime.library.system.marshal.UnmarshalFilesWalk.next();
+        let FilePath(p1) = path;
+        let iter = newIter(p1, followLinks);
+        let step = () ->
+            if (iter.hasNext() == false)
+                None
+            else {
+                let x1 = iter.next();
+                Some(FilePath(x1))
+             };
+        Ok(System/Internal/Utils.unfoldListWithIterator(step))
+    } catch {
+        case _: ##java.lang.Exception => Err("contentsAll")
     }
 
     pub def doesPathExist(path: FilePath): Bool & Impure =
