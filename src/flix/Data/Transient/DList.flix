@@ -14,14 +14,19 @@
  * limitations under the License.
  */
 
-///
-/// A DList
-///
-enum DList[a] {
-    case DList(List[a] -> List[a])
+use Data/Transient.DList;
+use Data/Transient.DList.{DList};
+
+namespace Data/Transient {
+
+    ///
+    /// A DList
+    ///
+    pub opaque type DList[a] = List[a] -> List[a]
+
 }
 
-namespace DList {
+namespace Data/Transient/DList {
 
     pub def empty(): DList[a] = DList(identity)
 

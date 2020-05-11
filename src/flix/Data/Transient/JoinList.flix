@@ -14,16 +14,20 @@
  * limitations under the License.
  */
 
-///
-/// A JoinList (JoinLists have cheap append)
-///
-enum JoinList[t] {
-    case Empty,
-    case One(t),
-    case Join(JoinList[t], JoinList[t])
+namespace Data/Transient {
+
+    ///
+    /// A JoinList (JoinLists have cheap append)
+    ///
+    enum JoinList[t] {
+        case Empty,
+        case One(t),
+        case Join(JoinList[t], JoinList[t])
+    }
+
 }
 
-namespace JoinList {
+namespace Data/Transient/JoinList {
 
     pub def empty(): JoinList[a] = Empty
 

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+// Note - not in the Data namespace.
+
 ///
 /// The Stream type.
 ///

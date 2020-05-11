@@ -14,18 +14,23 @@
  * limitations under the License.
  */
 
+use Data.FunStringBuilder;
+use Data.FunStringBuilder.{Empty, Text, Char, Join};
 
-///
-/// Represents a functional StringBuilder.
-///
-pub enum FunStringBuilder {
-    case Empty,
-    case Text(String),
-    case Char(Char),
-    case Join(FunStringBuilder, FunStringBuilder)
+namespace Data {
+
+    ///
+    /// Represents a functional StringBuilder.
+    ///
+    pub enum FunStringBuilder {
+        case Empty,
+        case Text(String),
+        case Char(Char),
+        case Join(FunStringBuilder, FunStringBuilder)
+    }
 }
 
-namespace FunStringBuilder {
+namespace Data/FunStringBuilder {
 
 
     ///
