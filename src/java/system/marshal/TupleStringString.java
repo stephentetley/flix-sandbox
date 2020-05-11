@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package flix.runtime.library.system.marshal;
+package flix.runtime.spt.sandbox.system.marshal;
 
 public class TupleStringString {
     private String s1;

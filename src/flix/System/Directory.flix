@@ -34,9 +34,9 @@ namespace System/Directory {
     /// One level - not recursive
     /// TODO - return a Stream
     pub def contents(path: FilePath): Result[List[FilePath], String] & Impure = try {
-        import new flix.runtime.library.system.marshal.UnmarshalFilesList(##java.nio.file.Path) as newIter;
-        import flix.runtime.library.system.marshal.UnmarshalFilesList.hasNext();
-        import flix.runtime.library.system.marshal.UnmarshalFilesList.next();
+        import new flix.runtime.spt.sandbox.system.marshal.UnmarshalFilesList(##java.nio.file.Path) as newIter;
+        import flix.runtime.spt.sandbox.system.marshal.UnmarshalFilesList.hasNext();
+        import flix.runtime.spt.sandbox.system.marshal.UnmarshalFilesList.next();
         let FilePath(p1) = path;
         let iter = newIter(p1);
         let step = () ->
@@ -46,7 +46,7 @@ namespace System/Directory {
                 let x1 = iter.next();
                 Some(FilePath(x1))
              };
-        Ok(System/Internal/Utils.unfoldListWithIterator(step))
+        Ok(List.unfoldWithIter(step))
     } catch {
         case _: ##java.lang.Exception => Err("contents")
     }
@@ -54,9 +54,9 @@ namespace System/Directory {
     /// All levels - recursive
     /// TODO - return a Stream
     pub def contentsAll(path: FilePath, followLinks: Bool): Result[List[FilePath], String] & Impure = try {
-        import new flix.runtime.library.system.marshal.UnmarshalFilesWalk(##java.nio.file.Path, Bool) as newIter;
-        import flix.runtime.library.system.marshal.UnmarshalFilesWalk.hasNext();
-        import flix.runtime.library.system.marshal.UnmarshalFilesWalk.next();
+        import new flix.runtime.spt.sandbox.system.marshal.UnmarshalFilesWalk(##java.nio.file.Path, Bool) as newIter;
+        import flix.runtime.spt.sandbox.system.marshal.UnmarshalFilesWalk.hasNext();
+        import flix.runtime.spt.sandbox.system.marshal.UnmarshalFilesWalk.next();
         let FilePath(p1) = path;
         let iter = newIter(p1, followLinks);
         let step = () ->
@@ -66,23 +66,23 @@ namespace System/Directory {
                 let x1 = iter.next();
                 Some(FilePath(x1))
              };
-        Ok(System/Internal/Utils.unfoldListWithIterator(step))
+        Ok(List.unfoldWithIter(step))
     } catch {
         case _: ##java.lang.Exception => Err("contentsAll")
     }
 
     pub def doesPathExist(path: FilePath): Bool & Impure =
-        import flix.runtime.library.system.DirectoryWrapper:existsFollowLinks(##java.nio.file.Path);
+        import flix.runtime.spt.sandbox.system.DirectoryWrapper:existsFollowLinks(##java.nio.file.Path);
         let FilePath(p1) = path;
         p1.existsFollowLinks()
 
     pub def isDirectory(path: FilePath): Bool & Impure =
-        import flix.runtime.library.system.DirectoryWrapper:isDirectoryFollowLinks(##java.nio.file.Path);
+        import flix.runtime.spt.sandbox.system.DirectoryWrapper:isDirectoryFollowLinks(##java.nio.file.Path);
         let FilePath(p1) = path;
         p1.isDirectoryFollowLinks()
 
     pub def isFile(path: FilePath): Bool & Impure =
-        import flix.runtime.library.system.DirectoryWrapper:isRegularFileFollowLinks(##java.nio.file.Path);
+        import flix.runtime.spt.sandbox.system.DirectoryWrapper:isRegularFileFollowLinks(##java.nio.file.Path);
         let FilePath(p1) = path;
         p1.isRegularFileFollowLinks()
 
@@ -97,13 +97,13 @@ namespace System/Directory {
         p1.isHidden()
 
     pub def createDirectory(path: FilePath): Unit & Impure =
-        import flix.runtime.library.system.DirectoryWrapper:createDirectory(##java.nio.file.Path);
+        import flix.runtime.spt.sandbox.system.DirectoryWrapper:createDirectory(##java.nio.file.Path);
         let FilePath(p1) = path;
         p1.createDirectory()
 
     /// Create any "missing" directories along the way...
     pub def createDirectoryAll(path: FilePath): Unit & Impure =
-        import flix.runtime.library.system.DirectoryWrapper:createDirectories(##java.nio.file.Path);
+        import flix.runtime.spt.sandbox.system.DirectoryWrapper:createDirectories(##java.nio.file.Path);
         let FilePath(p1) = path;
         p1.createDirectories()
 

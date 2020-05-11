@@ -18,8 +18,7 @@ use System.BufferedFileReader;
 use System.BufferedFileReader.{BufferedFileReader};
 use System.FilePath;
 use System.FilePath.{FilePath};
-use System.Charset;
-use System.Charset.{Charset};
+use Text.Charset.{Charset};
 
 namespace System {
 
@@ -34,7 +33,7 @@ namespace System/BufferedFileReader {
     ///
     /// Returns a new mutable StringBuilder.
     ///
-    pub def new(path: FilePath, cs: Charset): BufferedFileReader & Impure =
+    pub def new(path: FilePath, cs: Text.Charset): BufferedFileReader & Impure =
         let FilePath(path1) = path;
         let Charset(cs1) = cs;
         import java.nio.file.Files:newBufferedReader(##java.nio.file.Path, ##java.nio.charset.Charset) as newBufferedReader;

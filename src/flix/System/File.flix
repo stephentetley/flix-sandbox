@@ -16,13 +16,12 @@
 
 use System.FilePath;
 use System.FilePath.{FilePath};
-use System.Charset;
-use System.Charset.{Charset};
+use Text.Charset.{Charset};
 
 namespace System/File {
 
     /// TODO - test exception
-    pub def readFile(path: FilePath, cs: Charset): Result[String, String] & Impure =
+    pub def readFile(path: FilePath, cs: Text.Charset): Result[String, String] & Impure =
         try {
             import java.nio.file.Files:readString(##java.nio.file.Path, ##java.nio.charset.Charset);
             let FilePath(path1) = path;
@@ -35,9 +34,9 @@ namespace System/File {
         }
 
 
-    pub def writeFile(path: FilePath, cs: Charset, content: String): Result[Unit, String] & Impure =
+    pub def writeFile(path: FilePath, cs: Text.Charset, content: String): Result[Unit, String] & Impure =
         try {
-            import flix.runtime.library.system.FileWrapper:writeString(##java.nio.file.Path, ##java.nio.charset.Charset, String);
+            import flix.runtime.spt.sandbox.system.FileWrapper:writeString(##java.nio.file.Path, ##java.nio.charset.Charset, String);
             let FilePath(path1) = path;
             let Charset(cs1) = cs;
             writeString(path1, cs1, content);

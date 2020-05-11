@@ -32,11 +32,11 @@ namespace System/Environment {
     }
 
     pub def getEnvVars(): Result[Map[String, String], String] & Impure = try {
-        import new flix.runtime.library.system.marshal.UnmarshalEnvVars() as newIter;
-        import flix.runtime.library.system.marshal.UnmarshalEnvVars.hasNext();
-        import flix.runtime.library.system.marshal.UnmarshalEnvVars.next();
-        import flix.runtime.library.system.marshal.TupleStringString.get0();
-        import flix.runtime.library.system.marshal.TupleStringString.get1();
+        import new flix.runtime.spt.sandbox.system.marshal.UnmarshalEnvVars() as newIter;
+        import flix.runtime.spt.sandbox.system.marshal.UnmarshalEnvVars.hasNext();
+        import flix.runtime.spt.sandbox.system.marshal.UnmarshalEnvVars.next();
+        import flix.runtime.spt.sandbox.system.marshal.TupleStringString.get0();
+        import flix.runtime.spt.sandbox.system.marshal.TupleStringString.get1();
         let iter = newIter();
         let step = () ->
             if (iter.hasNext() == false)
@@ -47,7 +47,7 @@ namespace System/Environment {
                 let v = pss.get1();
                 Some(k, v)
              };
-        Ok(System/Internal/Utils.unfoldMapWithIterator(step))
+        Ok(Map.unfoldWithIter(step))
     } catch {
         case _: ##java.lang.Exception => Err("getEnvVars")
     }
