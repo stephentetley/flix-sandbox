@@ -26,9 +26,12 @@ namespace I18n/Locale {
     }
 }
 
+// WARNING - Currently this doesn't compile:
+// "Cannot find "##java.util.Locale.IsoCountryCode"
+
 namespace I18n/Locale/IsoCountryCode {
 
-    pub def marshal(x: IsoCountryCode): ##java.util.Locale.IsoCountryCode = 
+    pub def marshal(x: IsoCountryCode): ##java.util.Locale.IsoCountryCode =
         import get java.util.Locale.IsoCountryCode:PART1_ALPHA2 as getPART1_ALPHA2;
         import get java.util.Locale.IsoCountryCode:PART1_ALPHA2 as getPART1_ALPHA3;
         import get java.util.Locale.IsoCountryCode:PART1_ALPHA2 as getPART3;
@@ -38,7 +41,7 @@ namespace I18n/Locale/IsoCountryCode {
             case Part3          => getPART3()
         } as & Pure
 
-    pub def unmarshal(x: ##java.util.Locale.IsoCountryCode): IsoCountryCode = 
+    pub def unmarshal(x: ##java.util.Locale.IsoCountryCode): IsoCountryCode =
         import get java.util.Locale.IsoCountryCode:PART1_ALPHA2 as getPART1_ALPHA2;
         import get java.util.Locale.IsoCountryCode:PART1_ALPHA2 as getPART1_ALPHA3;
         import get java.util.Locale.IsoCountryCode:PART1_ALPHA2 as getPART3;

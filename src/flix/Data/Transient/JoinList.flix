@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+use Data/Transient.JoinList;
+use Data/Transient.JoinList.{Empty, One, Join};
+
 namespace Data/Transient {
 
     ///
@@ -33,22 +36,22 @@ namespace Data/Transient/JoinList {
 
     pub def singleton(x: a): JoinList[a] = One(x)
 
-    pub def append(a: JoinList[a], b: JoinList[a]): JoinList[a] = Join(a,b)
+    pub def append(a: JoinList[a], b: JoinList[a]): JoinList[a] = Join(a, b)
 
-    pub def cons(x: a, a: JoinList[a]): JoinList[a] = Join(One(a),b)
+    pub def cons(x: a, a: JoinList[a]): JoinList[a] = Join(One(x), a)
     
-    pub def snoc(a: JoinList[a], x: a): JoinList[a] = Join(a, One(b))
+    pub def snoc(a: JoinList[a], x: a): JoinList[a] = Join(a, One(x))
 
     pub def toList(a: JoinList[a]): List[a] = toListHelper(a, Nil, xs -> xs)
 
-    def toListHelper(xs: JoinList[a], acc:List[a], cont: List[a] -> List[a]): List[a] =
+    def toListHelper(xs: JoinList[a], ac:List[a], k: List[a] -> List[a]): List[a] =
         match xs {
-            case Empty => cont(acc)
-            case One(a) => cont(a :: acc)
+            case Empty => k(ac)
+            case One(a) => k(a :: ac)
             case Join(l, r) =>
                 // Go Right first
-                toListHelper(r, acc, acc1 ->
-                    toListHelper(l, acc1, cont))
+                toListHelper(r, ac, ac1 ->
+                    toListHelper(l, ac1, k))
         }
 
 
