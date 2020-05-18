@@ -55,4 +55,50 @@ namespace Either {
         case Left(a) => Left(a)
         case Right(b) => Right(g(b))
     }
+
+    pub def fromLeft(d: a, x: Either[a, b]): a = match x {
+        case Left(a) => a
+        case Right(_) => d
+    }
+
+    pub def fromRight(d: b, x: Either[a ,b]): b = match x {
+        case Left(_) => d
+        case Right(b) => b
+    }
+
+    pub def partition(xs: List[Either[a,b]]): (List[a], List[b]) =
+        partitionHelper(xs, ls -> ls, rs -> rs)
+
+    def partitionHelper(xs: List[Either[a,b]], k1: List[a] -> List[a], k2: List[b] -> List[b]): (List[a], List[b]) =
+        match xs {
+            case Nil => (k1(Nil), k2(Nil))
+            case x :: rs => match x {
+                case Left(a) => partitionHelper(rs, zs -> k1(a :: zs), k2)
+                case Right(b) => partitionHelper(rs, k1, zs -> k1(b :: zs))
+            }
+        }
+
+    pub def lefts(xs: List[Either[a,b]]): List[a] =
+        leftsHelper(xs, zs -> zs)
+
+    def leftsHelper(xs: List[Either[a,b]], k: List[a] -> List[a]): List[a] = match xs {
+        case Nil => k(Nil)
+        case x :: rs => match x {
+            case Left(a) => leftsHelper(rs, zs -> k(a :: zs))
+            case Right(_) => leftsHelper(rs, k)
+        }
+    }
+
+    pub def rights(xs: List[Either[a,b]]): List[b] =
+        rightsHelper(xs, zs -> zs)
+
+    def rightsHelper(xs: List[Either[a,b]], k: List[b] -> List[b]): List[b] = match xs {
+        case Nil => k(Nil)
+        case x :: rs => match x {
+            case Left(_) => rightsHelper(rs, k)
+            case Right(b) => rightsHelper(rs, zs -> k(b :: zs))
+        }
+    }
+
+
 }

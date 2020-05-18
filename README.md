@@ -1,3 +1,3 @@
-# flix-system
+# flix-sandbox
 
-Work towards system modules (Files, FilePaths, Environment etc.) for Flix
+Incubator project for candidate library modules for Flix
