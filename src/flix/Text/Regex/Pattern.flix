@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
+use System.Error.{PatternSyntaxException, Generic};
+
 use Regex.Pattern;
 use Regex.Pattern.{Pattern};
-use Regex.Error.{PatternSyntaxException, Generic};
+
 
 namespace Regex {
 
@@ -69,7 +71,7 @@ namespace Regex/Pattern {
     ///
     /// Compile the regular expression `regex` into a Pattern.
     ///
-    pub def compile(regex: String): Result[Pattern, Regex.Error] =
+    pub def compile(regex: String): Result[Pattern, System.Error] =
         try {
             import java.util.regex.Pattern:compile(String);
             Ok(Pattern(compile(regex))) as & Pure
@@ -80,7 +82,7 @@ namespace Regex/Pattern {
     ///
     /// Compile the regular expression `regex` into a Pattern.
     ///
-    pub def compileWithFlags(regex: String, flags: List[Flag]): Result[Pattern, Regex.Error] =
+    pub def compileWithFlags(regex: String, flags: List[Flag]): Result[Pattern, System.Error] =
         try {
             import java.util.regex.Pattern:compile(String, Int32);
             Ok(Pattern(compile(regex, sumFlags(flags)))) as & Pure

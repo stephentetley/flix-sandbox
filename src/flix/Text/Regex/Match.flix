@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
+use System.Error.{IllegalStateException};
+
 use Regex.{Match};
 use Regex.Match.{Match};
 
-use Regex.Error.{IllegalStateException};
 use Regex.Pattern;
 use Regex.Pattern.Pattern;
 use Regex.MatchEvaluator;
@@ -53,7 +54,7 @@ namespace Regex/Match {
         let scref = m1.success;
         deref scref
     
-    pub def content(x: Match): Result[String, Regex.Error] & Impure = 
+    pub def content(x: Match): Result[String, System.Error] & Impure =
         use Regex/Internal/PrimMatcher.{group};
         let Match(m1) = x;
         let matcher = m1.primMatcher;
@@ -64,7 +65,7 @@ namespace Regex/Match {
             Err(IllegalStateException)
 
     
-    pub def evaluate(x: Match, eval: MatchEvaluator[a]): Result[a, Regex.Error] & Impure =         
+    pub def evaluate(x: Match, eval: MatchEvaluator[a]): Result[a, System.Error] & Impure =
         use Regex.MatchEvaluator.{MatchEvaluator};
         let Match(m1) = x;
         let matcher = m1.primMatcher;
@@ -73,7 +74,7 @@ namespace Regex/Match {
             let MatchEvaluator(fn) = eval;
             matcher.fn()
         } else 
-            Err(Regex/Error.IllegalStateException)
+            Err(IllegalStateException)
 
 }        
 

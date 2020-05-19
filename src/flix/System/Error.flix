@@ -16,10 +16,10 @@
 
 
 
-namespace Regex {
+namespace System {
 
     ///
-    /// Represents a compiled Pattern.
+    /// Represents an Error.
     ///
     pub enum Error {
         case PatternSyntaxException,

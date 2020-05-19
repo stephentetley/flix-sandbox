@@ -73,7 +73,7 @@ namespace Regex {
     ///
     /// Rewrite the string `input` by apply the function `f` to the substring produced by each match of the pattern `patt`.
     ///
-    pub def replaceWith(patt: Pattern, eval: MatchEvaluator[String], input: String): Result[String, Regex.Error] & Impure =
+    pub def replaceWith(patt: Pattern, eval: MatchEvaluator[String], input: String): Result[String, System.Error] & Impure =
         use Regex/Internal/PrimMatcher.{newPrimMatcher, replaceAllWith, group};
         let Pattern(p1) = patt;
         let m1 = newPrimMatcher(p1, input);
@@ -83,7 +83,7 @@ namespace Regex {
     ///
     /// Rewrite the string `input` by apply the function `f` to the substring produced by each match of the pattern `patt`.
     ///
-    pub def replaceWithIndex(patt: Pattern, eval: Int32 -> MatchEvaluator[String], input: String): Result[String, Regex.Error] & Impure =
+    pub def replaceWithIndex(patt: Pattern, eval: Int32 -> MatchEvaluator[String], input: String): Result[String, System.Error] & Impure =
         use Regex/Internal/PrimMatcher.{newPrimMatcher, replaceAllWithIndex, group};
         let Pattern(p1) = patt;
         let m1 = newPrimMatcher(p1, input);

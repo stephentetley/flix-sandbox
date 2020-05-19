@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+use System.Error.{PatternSyntaxException, IllegalStateException};
+
 use Regex.MatchEvaluator;
 use Regex.MatchEvaluator.{MatchEvaluator};
-use Regex.Error.{PatternSyntaxException, IllegalStateException};
 use Regex/Internal.PrimMatcher;
 use Regex.Pattern;
 use Regex.Pattern.{Pattern};
@@ -26,7 +27,7 @@ namespace Regex {
     ///
     /// Matcher is a monad (reader, error).
     ///
-    pub opaque type MatchEvaluator[a] = PrimMatcher ~> Result[a, Regex.Error] 
+    pub opaque type MatchEvaluator[a] = PrimMatcher ~> Result[a, System.Error]
 
 }
 
@@ -48,7 +49,7 @@ namespace Regex/MatchEvaluator {
             }
         )        
 
-    def apply1(x: MatchEvaluator[a], m: PrimMatcher): Result[a, Regex.Error] & Impure = 
+    def apply1(x: MatchEvaluator[a], m: PrimMatcher): Result[a, System.Error] & Impure =
         let MatchEvaluator(f) = x;
         f(m)
 
@@ -81,7 +82,7 @@ namespace Regex/MatchEvaluator {
 
 
 
-    def liftPrim(fn : PrimMatcher ~> Result[a, Regex.Error]): MatchEvaluator[a] = 
+    def liftPrim(fn : PrimMatcher ~> Result[a, System.Error]): MatchEvaluator[a] =
         MatchEvaluator(r -> fn(r))
 
 
