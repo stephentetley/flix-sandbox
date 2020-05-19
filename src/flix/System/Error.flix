@@ -29,6 +29,13 @@ namespace System {
         case Generic(String)
     }
 
+    pub def toString(x: Error): String = match x {
+        case PatternSyntaxException     => "PatternSyntaxException"
+        case IllegalStateException      => "IllegalStateException"
+        case IllegalArgumentException   => "IllegalArgumentException"
+        case IndexOutOfBoundsException  => "IndexOutOfBoundsException"
+        case Generic(s)                 => s
+    }
     
 
 }
