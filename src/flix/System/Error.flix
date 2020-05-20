@@ -15,9 +15,14 @@
  */
 
 use System.Error;
-use System.Error.{PatternSyntaxException, IllegalStateException,
-        IllegalArgumentException, IndexOutOfBoundsException,
-        IOException, Generic};
+use System.Error.{IllegalArgumentException,
+        IllegalStateException,
+        IndexOutOfBoundsException,
+        InputMismatchException,
+        IOException,
+        NoSuchElementException,
+        PatternSyntaxException,
+        Generic};
 
 namespace System {
 
@@ -25,11 +30,13 @@ namespace System {
     /// Represents an Error.
     ///
     pub enum Error {
-        case PatternSyntaxException,
-        case IllegalStateException,
         case IllegalArgumentException,
+        case IllegalStateException,
         case IndexOutOfBoundsException,
+        case InputMismatchException,
         case IOException,
+        case NoSuchElementException,
+        case PatternSyntaxException,
         case Generic(String)
     }
 
@@ -38,11 +45,13 @@ namespace System {
 namespace System/Error {
 
     pub def toString(x: Error): String = match x {
-        case PatternSyntaxException     => "PatternSyntaxException"
-        case IllegalStateException      => "IllegalStateException"
         case IllegalArgumentException   => "IllegalArgumentException"
+        case IllegalStateException      => "IllegalStateException"
         case IndexOutOfBoundsException  => "IndexOutOfBoundsException"
+        case InputMismatchException     => "InputMismatchException"
         case IOException                => "IOException"
+        case NoSuchElementException     => "NoSuchElementException"
+        case PatternSyntaxException     => "PatternSyntaxException"
         case Generic(s)                 => s
     }
 
