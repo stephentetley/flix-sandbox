@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use System.Error.{Generic};
 use System.FilePath;
 use System.FilePath.{FilePath};
 
@@ -33,7 +34,7 @@ namespace System/Directory {
 
     /// One level - not recursive
     /// TODO - return a Stream
-    pub def contents(path: FilePath): Result[List[FilePath], String] & Impure = try {
+    pub def contents(path: FilePath): Result[List[FilePath], System.Error] & Impure = try {
         import new flix.runtime.spt.sandbox.system.marshal.UnmarshalFilesList(##java.nio.file.Path) as newIter;
         import flix.runtime.spt.sandbox.system.marshal.UnmarshalFilesList.hasNext();
         import flix.runtime.spt.sandbox.system.marshal.UnmarshalFilesList.next();
@@ -48,12 +49,12 @@ namespace System/Directory {
              };
         Ok(List.unfoldWithIter(step))
     } catch {
-        case _: ##java.lang.Exception => Err("contents")
+        case _: ##java.lang.Exception => Err(Generic("Exception"))
     }
 
     /// All levels - recursive
     /// TODO - return a Stream
-    pub def contentsAll(path: FilePath, followLinks: Bool): Result[List[FilePath], String] & Impure = try {
+    pub def contentsAll(path: FilePath, followLinks: Bool): Result[List[FilePath], System.Error] & Impure = try {
         import new flix.runtime.spt.sandbox.system.marshal.UnmarshalFilesWalk(##java.nio.file.Path, Bool) as newIter;
         import flix.runtime.spt.sandbox.system.marshal.UnmarshalFilesWalk.hasNext();
         import flix.runtime.spt.sandbox.system.marshal.UnmarshalFilesWalk.next();
@@ -68,7 +69,7 @@ namespace System/Directory {
              };
         Ok(List.unfoldWithIter(step))
     } catch {
-        case _: ##java.lang.Exception => Err("contentsAll")
+        case _: ##java.lang.Exception => Err(Generic("Exception"))
     }
 
     pub def doesPathExist(path: FilePath): Bool & Impure =

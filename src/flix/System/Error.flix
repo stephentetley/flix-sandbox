@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-
+use System.Error;
+use System.Error.{PatternSyntaxException, IllegalStateException,
+        IllegalArgumentException, IndexOutOfBoundsException,
+        IOException, Generic};
 
 namespace System {
 
@@ -26,16 +29,21 @@ namespace System {
         case IllegalStateException,
         case IllegalArgumentException,
         case IndexOutOfBoundsException,
+        case IOException,
         case Generic(String)
     }
+
+}
+
+namespace System/Error {
 
     pub def toString(x: Error): String = match x {
         case PatternSyntaxException     => "PatternSyntaxException"
         case IllegalStateException      => "IllegalStateException"
         case IllegalArgumentException   => "IllegalArgumentException"
         case IndexOutOfBoundsException  => "IndexOutOfBoundsException"
+        case IOException                => "IOException"
         case Generic(s)                 => s
     }
-    
 
 }

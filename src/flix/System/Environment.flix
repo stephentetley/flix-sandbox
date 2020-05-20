@@ -14,24 +14,25 @@
  * limitations under the License.
  */
 
+use System.Error.{Generic};
 use System.FilePath;
 use System.FilePath.{FilePath};
 
 namespace System/Environment {
 
     /// Get env var...
-    pub def getEnvVar(name: String): Result[String, String] & Impure = try {
+    pub def getEnvVar(name: String): Result[String, System.Error] & Impure = try {
         import java.lang.System:getenv(String);
         let ans = getenv(name);
         if (isNull(ans))
-            Err("Not found")
+            Err(Generic("Not found"))
         else
             Ok(ans)
     } catch {
-        case _:##java.lang.Exception => Err("System exception")
+        case _:##java.lang.Exception => Err(Generic("Exception"))
     }
 
-    pub def getEnvVars(): Result[Map[String, String], String] & Impure = try {
+    pub def getEnvVars(): Result[Map[String, String], System.Error] & Impure = try {
         import new flix.runtime.spt.sandbox.system.marshal.UnmarshalEnvVars() as newIter;
         import flix.runtime.spt.sandbox.system.marshal.UnmarshalEnvVars.hasNext();
         import flix.runtime.spt.sandbox.system.marshal.UnmarshalEnvVars.next();
@@ -49,7 +50,7 @@ namespace System/Environment {
              };
         Ok(Map.unfoldWithIter(step))
     } catch {
-        case _: ##java.lang.Exception => Err("getEnvVars")
+        case _: ##java.lang.Exception => Err(Generic("Exception"))
     }
 
 

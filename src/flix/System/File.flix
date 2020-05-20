@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use System.Error.{IOException, Generic};
 use System.FilePath;
 use System.FilePath.{FilePath};
 use Text.Charset.{Charset};
@@ -21,7 +22,7 @@ use Text.Charset.{Charset};
 namespace System/File {
 
     /// TODO - test exception
-    pub def readFile(path: FilePath, cs: Text.Charset): Result[String, String] & Impure =
+    pub def readFile(path: FilePath, cs: Text.Charset): Result[String, System.Error] & Impure =
         try {
             import java.nio.file.Files:readString(##java.nio.file.Path, ##java.nio.charset.Charset);
             let FilePath(path1) = path;
@@ -29,12 +30,12 @@ namespace System/File {
             readString(path1, cs1) |> Ok
         }
         catch {
-            case _: ##java.io.IOException => Err("IOException")
-            case _: ##java.lang.Exception => Err("Exception")
+            case _: ##java.io.IOException => Err(IOException)
+            case _: ##java.lang.Exception => Err(Generic("Exception"))
         }
 
 
-    pub def writeFile(path: FilePath, cs: Text.Charset, content: String): Result[Unit, String] & Impure =
+    pub def writeFile(path: FilePath, cs: Text.Charset, content: String): Result[Unit, System.Error] & Impure =
         try {
             import flix.runtime.spt.sandbox.system.FileWrapper:writeString(##java.nio.file.Path, ##java.nio.charset.Charset, String);
             let FilePath(path1) = path;
@@ -43,7 +44,7 @@ namespace System/File {
             Ok()
         }
         catch {
-            case _: ##java.io.IOException => Err("IOException")
-            case _: ##java.lang.Exception => Err("Exception")
+            case _: ##java.io.IOException => Err(IOException)
+            case _: ##java.lang.Exception => Err(Generic("Exception"))
         }
 }
