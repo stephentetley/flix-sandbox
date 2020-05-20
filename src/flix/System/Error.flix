@@ -15,7 +15,8 @@
  */
 
 use System.Error;
-use System.Error.{IllegalArgumentException,
+use System.Error.{ArrayIndexOutOfBoundsException,
+        IllegalArgumentException,
         IllegalStateException,
         IndexOutOfBoundsException,
         InputMismatchException,
@@ -30,6 +31,7 @@ namespace System {
     /// Represents an Error.
     ///
     pub enum Error {
+        case ArrayIndexOutOfBoundsException,
         case IllegalArgumentException,
         case IllegalStateException,
         case IndexOutOfBoundsException,
@@ -45,14 +47,15 @@ namespace System {
 namespace System/Error {
 
     pub def toString(x: Error): String = match x {
-        case IllegalArgumentException   => "IllegalArgumentException"
-        case IllegalStateException      => "IllegalStateException"
-        case IndexOutOfBoundsException  => "IndexOutOfBoundsException"
-        case InputMismatchException     => "InputMismatchException"
-        case IOException                => "IOException"
-        case NoSuchElementException     => "NoSuchElementException"
-        case PatternSyntaxException     => "PatternSyntaxException"
-        case Generic(s)                 => s
+        case ArrayIndexOutOfBoundsException     => "ArrayIndexOutOfBoundsException"
+        case IllegalArgumentException           => "IllegalArgumentException"
+        case IllegalStateException              => "IllegalStateException"
+        case IndexOutOfBoundsException          => "IndexOutOfBoundsException"
+        case InputMismatchException             => "InputMismatchException"
+        case IOException                        => "IOException"
+        case NoSuchElementException             => "NoSuchElementException"
+        case PatternSyntaxException             => "PatternSyntaxException"
+        case Generic(s)                         => s
     }
 
 }
