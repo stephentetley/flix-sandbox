@@ -14,34 +14,46 @@
  * limitations under the License.
  */
 
-use System.Error.{IllegalStateException};
+use System.Error.{IllegalStateException, NoSuchElementException};
 
-use Regex.{Match};
-use Regex.Match.{Match};
+use Text/Regex.{Match};
+use Text/Regex.Match.{Match};
 
-use Regex.Pattern;
-use Regex.Pattern.Pattern;
-use Regex.MatchEvaluator;
+use Text/Regex.Pattern;
+use Text/Regex.Pattern.{Pattern};
+use Text/Regex.MatchEvaluator;
+use Text/Regex.MatchEvaluator.{MatchEvaluator};
 
 /// This is a simple "steppable" matcher like .Net `Regex.Match`.
 
-namespace Regex {
+namespace Text/Regex {
     
-    pub opaque type Match = { primMatcher: Regex/Internal.PrimMatcher, success: Ref[Bool] }
+    pub opaque type Match = { primMatcher: Text/Regex/Internal.PrimMatcher, success: Ref[Bool] }
 
 }
 
-namespace Regex/Match {
+namespace Text/Regex/Match {
 
-    pub def findMatch(pattern: Pattern, input: String): Match & Impure = 
-        use Regex/Internal/PrimMatcher.{newPrimMatcher, find};
+    pub def findMatch(pattern: Pattern, input: String): Match & Impure =
+        use Text/Regex/Internal/PrimMatcher.{newPrimMatcher, find};
         let Pattern(p1) = pattern;
         let m1 = newPrimMatcher(p1, input);
         let sc = m1.find();
         Match({ primMatcher = m1, success = ref sc})
 
+    /// Fails with NoSuchElementException of no match found.
+    pub def tryFindMatch(pattern: Pattern, input: String): Result[Match, System.Error] & Impure =
+        use Text/Regex/Internal/PrimMatcher.{newPrimMatcher, find};
+        let Pattern(p1) = pattern;
+        let m1 = newPrimMatcher(p1, input);
+        let sc = m1.find();
+        if (sc)
+            Ok(Match({ primMatcher = m1, success = ref sc}))
+        else
+            Err(NoSuchElementException)
+
     pub def next(x: Match): Unit & Impure = 
-        use Regex/Internal/PrimMatcher.{newPrimMatcher, find};
+        use Text/Regex/Internal/PrimMatcher.{newPrimMatcher, find};
         let Match(m1) = x;
         let matcher = m1.primMatcher;
         let scref = m1.success;
@@ -55,7 +67,7 @@ namespace Regex/Match {
         deref scref
     
     pub def content(x: Match): Result[String, System.Error] & Impure =
-        use Regex/Internal/PrimMatcher.{group};
+        use Text/Regex/Internal/PrimMatcher.{group};
         let Match(m1) = x;
         let matcher = m1.primMatcher;
         let scref = m1.success;
@@ -66,7 +78,6 @@ namespace Regex/Match {
 
     
     pub def evaluate(x: Match, eval: MatchEvaluator[a]): Result[a, System.Error] & Impure =
-        use Regex.MatchEvaluator.{MatchEvaluator};
         let Match(m1) = x;
         let matcher = m1.primMatcher;
         let scref = m1.success;

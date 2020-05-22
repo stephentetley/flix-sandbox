@@ -16,10 +16,10 @@
 
 use System.Error.{IllegalStateException, IllegalArgumentException, IndexOutOfBoundsException};
 
-use Regex/Internal.{PrimMatcher, PrimMatchEvaluator};
-use Regex/Internal.PrimMatcher.{PrimMatcher};
+use Text/Regex/Internal.{PrimMatcher, PrimMatchEvaluator};
+use Text/Regex/Internal.PrimMatcher.{PrimMatcher};
 
-namespace Regex/Internal {
+namespace Text/Regex/Internal {
 
     ///
     /// Represents a mutable, matching engine for a Pattern.
@@ -33,7 +33,7 @@ namespace Regex/Internal {
 
 }
 
-namespace Regex/Internal/PrimMatcher {
+namespace Text/Regex/Internal/PrimMatcher {
 
     ///
     /// Create a matcher for Pattern `patt` on the source String `input`.

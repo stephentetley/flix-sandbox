@@ -16,11 +16,11 @@
 
 use System.Error.{PatternSyntaxException, Generic};
 
-use Regex.Pattern;
-use Regex.Pattern.{Pattern};
+use Text/Regex.Pattern;
+use Text/Regex.Pattern.{Pattern};
 
 
-namespace Regex {
+namespace Text/Regex {
 
     ///
     /// Represents a compiled Pattern.
@@ -29,7 +29,7 @@ namespace Regex {
 
 }
 
-namespace Regex/Pattern {
+namespace Text/Regex/Pattern {
 
     pub enum Flag {
         case CanonEq,

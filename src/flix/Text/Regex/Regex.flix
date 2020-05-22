@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-use Regex.Pattern;
-use Regex.Pattern.Pattern;
-use Regex.MatchEvaluator;
-use Regex.MatchEvaluator.{MatchEvaluator};
-use Regex/Internal.PrimMatcher;
+use Text/Regex.Pattern;
+use Text/Regex.Pattern.Pattern;
+use Text/Regex.MatchEvaluator;
+use Text/Regex.MatchEvaluator.{MatchEvaluator};
+use Text/Regex/Internal.PrimMatcher;
 
-namespace Regex {
+namespace Text/Regex {
 
     ///
     /// Returns `true` if the entire string `input` is matched by the pattern `patt`.
@@ -28,7 +28,7 @@ namespace Regex {
     /// Note - use `isSubmatch` to search for a substring.
     ///
     pub def isMatch(patt: Pattern, input: String): Bool =
-        use Regex/Internal/PrimMatcher.{newPrimMatcher, isMatch};
+        use Text/Regex/Internal/PrimMatcher.{newPrimMatcher, isMatch};
         let Pattern(p1) = patt;
         let m1 = newPrimMatcher(p1, input) as & Pure;
         m1.isMatch() as & Pure
@@ -37,7 +37,7 @@ namespace Regex {
     /// Returns `true` if the string `s` is matched by the regular expression `pattern` at any point.
     ///
     pub def isSubmatch(patt: Pattern, input: String): Bool =
-        use Regex/Internal/PrimMatcher.{newPrimMatcher, isSubmatch};
+        use Text/Regex/Internal/PrimMatcher.{newPrimMatcher, isSubmatch};
         let Pattern(p1) = patt;
         let m1 = newPrimMatcher(p1, input) as & Pure;
         m1.isSubmatch() as & Pure
@@ -56,7 +56,7 @@ namespace Regex {
     /// Returns `input` with every match of the pattern `patt` replaced by the string `rep`.
     ///
     pub def replace(patt: Pattern, rep: String, input: String): String =
-        use Regex/Internal/PrimMatcher.{newPrimMatcher, replaceAll};
+        use Text/Regex/Internal/PrimMatcher.{newPrimMatcher, replaceAll};
         let Pattern(p1) = patt;
         let m1 = newPrimMatcher(p1, input) as & Pure;
         m1.replaceAll(rep) as & Pure
@@ -65,7 +65,7 @@ namespace Regex {
     /// Returns `input` with the first match of the regular expression `patt` replaced by the string `rep`.
     ///
     pub def replaceFirstMatch(patt: Pattern, rep: String, input: String): String =
-        use Regex/Internal/PrimMatcher.{newPrimMatcher, replaceFirst};
+        use Text/Regex/Internal/PrimMatcher.{newPrimMatcher, replaceFirst};
         let Pattern(p1) = patt;
         let m1 = newPrimMatcher(p1, input) as & Pure;
         m1.replaceFirst(rep) as & Pure
@@ -74,7 +74,7 @@ namespace Regex {
     /// Rewrite the string `input` by apply the function `f` to the substring produced by each match of the pattern `patt`.
     ///
     pub def replaceWith(patt: Pattern, eval: MatchEvaluator[String], input: String): Result[String, System.Error] & Impure =
-        use Regex/Internal/PrimMatcher.{newPrimMatcher, replaceAllWith, group};
+        use Text/Regex/Internal/PrimMatcher.{newPrimMatcher, replaceAllWith, group};
         let Pattern(p1) = patt;
         let m1 = newPrimMatcher(p1, input);
         let MatchEvaluator(rewrite) = eval;
@@ -84,7 +84,7 @@ namespace Regex {
     /// Rewrite the string `input` by apply the function `f` to the substring produced by each match of the pattern `patt`.
     ///
     pub def replaceWithIndex(patt: Pattern, eval: Int32 -> MatchEvaluator[String], input: String): Result[String, System.Error] & Impure =
-        use Regex/Internal/PrimMatcher.{newPrimMatcher, replaceAllWithIndex, group};
+        use Text/Regex/Internal/PrimMatcher.{newPrimMatcher, replaceAllWithIndex, group};
         let Pattern(p1) = patt;
         let m1 = newPrimMatcher(p1, input);
         m1.replaceAllWithIndex(ix -> 

@@ -16,13 +16,13 @@
 
 use System.Error.{PatternSyntaxException, IllegalStateException};
 
-use Regex.MatchEvaluator;
-use Regex.MatchEvaluator.{MatchEvaluator};
-use Regex/Internal.PrimMatcher;
-use Regex.Pattern;
-use Regex.Pattern.{Pattern};
+use Text/Regex.MatchEvaluator;
+use Text/Regex.MatchEvaluator.{MatchEvaluator};
+use Text/Regex/Internal.PrimMatcher;
+use Text/Regex.Pattern;
+use Text/Regex.Pattern.{Pattern};
 
-namespace Regex {
+namespace Text/Regex {
 
     ///
     /// Matcher is a monad (reader, error).
@@ -31,16 +31,19 @@ namespace Regex {
 
 }
 
-namespace Regex/MatchEvaluator {
+namespace Text/Regex/MatchEvaluator {
 
     
     pub def return(x: a): MatchEvaluator[a] = 
         MatchEvaluator(_ -> Ok(x) as & Impure)
 
+    def apply1(x: MatchEvaluator[a], m: PrimMatcher): Result[a, System.Error] & Impure =
+        let MatchEvaluator(f) = x;
+        f(m)
+
     pub def map(f: a -> b & e, x: MatchEvaluator[a]): MatchEvaluator[b] =
         MatchEvaluator(r -> 
-            let MatchEvaluator(f1) = x;
-            match f1(r) { 
+            match apply1(x, r) {
                 case Ok(a) => {
                     let ans = f(a) as & Impure;
                     Ok(ans)
@@ -49,21 +52,12 @@ namespace Regex/MatchEvaluator {
             }
         )        
 
-    def apply1(x: MatchEvaluator[a], m: PrimMatcher): Result[a, System.Error] & Impure =
-        let MatchEvaluator(f) = x;
-        f(m)
-
-    pub def ap(mf: MatchEvaluator[a -> b], x: MatchEvaluator[a]): MatchEvaluator[b] = 
+    pub def ap(mf: MatchEvaluator[a -> b], ma: MatchEvaluator[a]): MatchEvaluator[b] =
         MatchEvaluator(r -> 
-            let MatchEvaluator(f1) = mf;
-            match f1(r) { 
-                case Ok(f) => { 
-                    let MatchEvaluator(f2) = x;
-                    match f2(r) {
-                        case Ok(a) => Ok(f(a))
-                        case Err(e2) => Err(e2)
-                    }
-                    
+            match apply1(mf, r) {
+                case Ok(f) => match apply1(ma, r) {
+                    case Ok(a) => Ok(f(a))
+                    case Err(e2) => Err(e2)
                 }
                 case Err(e1) => Err(e1)
             }
@@ -71,8 +65,7 @@ namespace Regex/MatchEvaluator {
 
     pub def bind(x: MatchEvaluator[a], k: a -> MatchEvaluator[b]): MatchEvaluator[b] = 
         MatchEvaluator(r -> 
-            let MatchEvaluator(f) = x;
-            match f(r) { 
+            match apply1(x, r) {
                 case Ok(a) => apply1(k(a), r)
                 case Err(e) => Err(e)
             }
@@ -87,23 +80,21 @@ namespace Regex/MatchEvaluator {
 
 
 
-    pub def value(): MatchEvaluator[String] = liftPrim(Regex/Internal/PrimMatcher.group)
+    pub def value(): MatchEvaluator[String] = liftPrim(Text/Regex/Internal/PrimMatcher.group)
 
-    pub def transformValue(f: String -> String): MatchEvaluator[String] = 
-        map(f, value())
+    pub def transformValue(f: String -> String): MatchEvaluator[String] = map(f, value())
 
 
-    pub def getStart(): MatchEvaluator[Int32] = 
-        liftPrim(Regex/Internal/PrimMatcher.start)
+    pub def getStart(): MatchEvaluator[Int32] = liftPrim(Text/Regex/Internal/PrimMatcher.start)
 
-    pub def getEnd(): MatchEvaluator[Int32] = liftPrim(Regex/Internal/PrimMatcher.end)
+    pub def getEnd(): MatchEvaluator[Int32] = liftPrim(Text/Regex/Internal/PrimMatcher.end)
         
     /// TODO Check Java indexing, I'm not sure we want to follow the convention of zero = return everything.        
     pub def getCaptureByIndex(ix: Int32): MatchEvaluator[String] = 
-        liftPrim(x -> Regex/Internal/PrimMatcher.groupElementByIndex(x, ix))
+        liftPrim(x -> Text/Regex/Internal/PrimMatcher.groupElementByIndex(x, ix))
 
     pub def getCaptureByName(label: String): MatchEvaluator[String] = 
-        liftPrim(x -> Regex/Internal/PrimMatcher.groupElementByName(x, label))
+        liftPrim(x -> Text/Regex/Internal/PrimMatcher.groupElementByName(x, label))
 
 
     ///
