@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+use System.Error.{IllegalStateException};
 use Text/Regex.Pattern;
 use Text/Regex.Pattern.Pattern;
 use Text/Regex.MatchEvaluator;
@@ -41,6 +41,18 @@ namespace Text/Regex {
         let Pattern(p1) = patt;
         let m1 = newPrimMatcher(p1, input) as & Pure;
         m1.isSubmatch() as & Pure
+
+    /// Whole input matches...
+    pub def evaluateMatch(patt: Pattern, eval: MatchEvaluator[a], input: String): Result[a, System.Error] & Impure =
+        use Text/Regex/Internal/PrimMatcher.{newPrimMatcher, matches};
+        let Pattern(p1) = patt;
+        let m1 = newPrimMatcher(p1, input) as & Pure;
+        if (m1.matches() == true) {
+            let MatchEvaluator(fn) = eval;
+            m1.fn()
+        } else
+            Err(IllegalStateException)
+
 
     ///
     /// Splits the string `s` around matches of the pattern `p`.

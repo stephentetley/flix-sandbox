@@ -43,7 +43,13 @@ namespace Text/Regex/Internal/PrimMatcher {
         let cs1 = input as ##java.lang.CharSequence;
         PrimMatcher(patt.matcher(cs1))
 
+    /// TODO - remove
     pub def isMatch(x: PrimMatcher): Bool & Impure =
+        import java.util.regex.Matcher.matches();
+        let PrimMatcher(x1) = x;
+        x1.matches()
+
+    pub def matches(x: PrimMatcher): Bool & Impure =
         import java.util.regex.Matcher.matches();
         let PrimMatcher(x1) = x;
         x1.matches()
