@@ -1,4 +1,4 @@
-use Test/FlixCheck.{quickCheck, testableFunction, testableBool, genInt32};
+use Test/FlixCheck.{quickCheck, testableFunction, testableBool, genInt32, genList};
 
 def prop_RevUnit(x: Int32): Bool = List.reverse(x :: Nil) == x :: Nil
 
@@ -8,5 +8,10 @@ def test01(): Unit & Impure =
     quickCheck(testable, prop_RevUnit)
 
 
-// pub def bounds(n: Int32): Unit & Impure = 
-//     Console.printLine(Int32.toString(-n) + "," + Int32.toString(n))
+def prop_RevBad(xs: List[Int32]): Bool = List.reverse(xs) == xs
+
+@test
+def test02(): Unit & Impure = 
+    let showList = _ -> "<list>";
+    let testable = testableFunction({show = showList, testable = testableBool, arbitrary = genList(genInt32())});
+    quickCheck(testable, prop_RevBad)

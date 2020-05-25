@@ -174,6 +174,20 @@ namespace Test/FlixCheck {
             Array.init(f, n)
         )
 
+    pub def list(arb: Gen[a], n: Int32): Gen[List[a]] = 
+        if (n <= 0)
+            return(Nil)
+        else 
+            listHelper(arb, n)
+
+    def listHelper(arb: Gen[a], n: Int32): Gen[List[a]] = 
+        Gen((b,r) -> 
+            let f = _ -> apply1(arb, b, r);
+            let arr = Array.init(f, n);
+            Array.toList(arr)
+        )
+
+
 
     pub def oneof(arr: Array[Gen[a]]): Gen[a] = flatMap(x -> x, elements(arr)) 
 
@@ -184,12 +198,12 @@ namespace Test/FlixCheck {
         elements(arr)
 
     pub def genInt32(): Gen[Int32] = 
-        //sized(n -> choose(-n, n))
-        choose(0, 10000)
+        sized(n -> choose(-n, n+1))
+        
 
 
     pub def genInt64(): Gen[Int64] = 
-        sized(n -> { let x = Int32.toInt64(n); chooseInt64(-x, x) })
+        sized(n -> { let x = Int32.toInt64(n); chooseInt64(-x, x + 1i64) })
 
     ///
     /// Returns the absolute value of `x`.
@@ -241,6 +255,9 @@ namespace Test/FlixCheck {
         let* b = genb;
         let* c = genc;
         return((a,b,c))
+
+    pub def genList(gena: Gen[a]): Gen[List[a]] = 
+        sized(n -> bind(choose(0,n+1), x -> list(gena, x)))
 
     type alias Answer = { okay: Option[Bool], stamp: List[String], arguments: List[String] }
 
@@ -346,19 +363,23 @@ namespace Test/FlixCheck {
                 let (rnd1,rnd2) = split2(rnd0);
                 let getConfigSize = config.configSize;
                 let answer = generate(getConfigSize(ntest), rnd2, gen);
-                let showEvery = config.configEvery;
-                Console.printLine(showEvery(ntest, answer.arguments));
+                printEvery(config.configEvery, ntest, answer.arguments);
                 match answer.okay { 
                     case None => tests(config, gen, rnd1, ntest, nfail + 1, stamps)
                     case Some(true) => tests(config, gen, rnd1, ntest + 1, nfail, (answer.stamp :: stamps))
                     case Some(false) => {
-                        Console.printLine("Falsifiable after " + Int32.toString(ntest) + "tests:");
+                        Console.printLine("Falsifiable after " + Int32.toString(ntest) + " tests:");
                         List.foreach(Console.printLine, answer.arguments)
                     }
                 }
             }
         }
 
+    def printEvery(showEvery: (Int32, List[String]) -> String, n: Int32, args: List[String]): Unit & Impure= 
+        match showEvery(n, args) {
+            case "" => () as & Impure
+            case str => Console.printLine(str)
+        }
 
     def done(msg: String, ntest: Int, stamps: List[List[String]]): Unit & Impure = 
         let s = msg + " " + Int32.toString(ntest) + " tests" + makeTable(ntest, stamps);
