@@ -27,15 +27,15 @@ namespace Test/FlixCheck {
         import new java.util.SplittableRandom() as newSplittableRandom;
         Random(newSplittableRandom())
         
-    def nextInt(r: Random, max: Int32): Int32 & Impure = 
-        import java.util.SplittableRandom.nextInt(Int32);
-        let Random(r1) = r;
-        r1.nextInt(max)
+    // def nextInt(r: Random, max: Int32): Int32 & Impure = 
+    //     import java.util.SplittableRandom.nextInt(Int32);
+    //     let Random(r1) = r;
+    //     r1.nextInt(max)
 
-    def nextLong(r: Random, max: Int64): Int64 & Impure = 
-        import java.util.SplittableRandom.nextLong(Int64);
-        let Random(r1) = r;
-        r1.nextLong(max)
+    // def nextLong(r: Random, max: Int64): Int64 & Impure = 
+    //     import java.util.SplittableRandom.nextLong(Int64);
+    //     let Random(r1) = r;
+    //     r1.nextLong(max)
 
     def split(r: Random): Random & Impure = 
         import java.util.SplittableRandom.split();
@@ -50,14 +50,14 @@ namespace Test/FlixCheck {
 
 
     def randomR(lo: Int32, hi: Int32, r: Random): Int32 & Impure = 
-        let max = hi - lo;
-        let v = nextInt(r, max);
-        v + lo
+        import java.util.SplittableRandom.nextInt(Int32, Int32);
+        let Random(r1) = r;
+        r1.nextInt(lo, hi)
 
     def randomR64(lo: Int64, hi: Int64, r: Random): Int64 & Impure = 
-        let max = hi - lo;
-        let v = nextLong(r, max);
-        v + lo
+        import java.util.SplittableRandom.nextLong(Int64, Int64);
+        let Random(r1) = r;
+        r1.nextLong(lo, hi)
 
     def stringCompare(s: String, t: String): Int32 = 
         import java.lang.String.compareTo(String);
@@ -148,7 +148,7 @@ namespace Test/FlixCheck {
     //     return(fn)
 
     pub def generate(n: Int32, rnd: Random, gen: Gen[a]): a & Impure = 
-        let size = randomR(0, n, rnd);
+        let size = randomR(0, Int32.abs(n), rnd);   /// TODO remove abs
         apply1(gen, size, rnd)
 
 
@@ -184,7 +184,8 @@ namespace Test/FlixCheck {
         elements(arr)
 
     pub def genInt32(): Gen[Int32] = 
-        sized(n -> choose(-n, n))
+        //sized(n -> choose(-n, n))
+        choose(0, 10000)
 
 
     pub def genInt64(): Gen[Int64] = 
@@ -264,6 +265,10 @@ namespace Test/FlixCheck {
     pub def testableAnswer(ans: Answer): Property = answer(ans)
 
     pub def testableProperty(x: Property): Property = x
+
+    pub def testableFunction(dict: {show: a -> String, testable: b -> Property, arbitrary: Gen[a]}, f: a -> b): Property = 
+        let dminus = {show = dict.show, testable = dict.testable};
+        forall(dminus, dict.arbitrary, f)
 
     pub def forall(dict: {show: a -> String, testable: b -> Property}, gen: Gen[a], body: a -> b): Property = 
         let argument = (a,ans) -> { 
