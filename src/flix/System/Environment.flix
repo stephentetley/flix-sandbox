@@ -24,7 +24,7 @@ namespace System/Environment {
     pub def getEnvVar(name: String): Result[String, System.Error] & Impure = try {
         import java.lang.System:getenv(String);
         let ans = getenv(name);
-        if (isNull(ans))
+        if (Object.isNull(ans))
             Err(Generic("Not found"))
         else
             Ok(ans)

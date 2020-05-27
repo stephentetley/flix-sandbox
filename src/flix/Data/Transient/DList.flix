@@ -32,10 +32,12 @@ namespace Data/Transient/DList {
 
     pub def singleton(x: a): DList[a] = DList(xs -> x :: xs)
 
+    def compose(f: b -> c, g: a -> b): a -> c = x -> f(g(x))
+
     pub def append(a: DList[a], b: DList[a]): DList[a] = 
         let DList(f) = a; 
         let DList(g) = b;
-        DList(f << g)
+        DList(xs -> f(g(xs)))
 
     pub def cons(x: a, a: DList[a]): DList[a] = 
         let DList(f) = a; 
@@ -43,7 +45,7 @@ namespace Data/Transient/DList {
 
     pub def snoc(a: DList[a], x: a): DList[a] = 
         let DList(f) = a; 
-        DList(f << (xs -> x :: xs))
+        DList(compose(f, ys -> x :: ys))
 
     pub def toList(xs: DList[a]): List[a] =
         let DList(f) = xs;

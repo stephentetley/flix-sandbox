@@ -61,7 +61,7 @@ namespace System/FilePath {
         import java.nio.file.Path.getRoot();
         let FilePath(path1) = path;
         let root = path1.getRoot();
-        if (isNull(root))
+        if (Object.isNull(root))
             None
         else
             Some(FilePath(root))
@@ -70,7 +70,7 @@ namespace System/FilePath {
         import java.nio.file.Path.getParent();
         let FilePath(path1) = path;
         let parent = path1.getParent();
-        if (isNull(parent))
+        if (Object.isNull(parent))
             None
         else
             Some(FilePath(parent))
@@ -79,7 +79,7 @@ namespace System/FilePath {
         import java.nio.file.Path.getFileName();
         let FilePath(path1) = path;
         let name = path1.getFileName();
-        if (isNull(name))
+        if (Object.isNull(name))
             None
         else
             Some(FilePath(name))

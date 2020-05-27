@@ -41,7 +41,7 @@ namespace Either {
     }
 
 
-    pub def either(f: a -> b, g: b -> c, x: Either[a, b]): c = match x {
+    pub def either(f: a -> c, g: b -> c, x: Either[a, b]): c = match x {
         case Left(a) => f(a)
         case Right(b) => g(b)
     }
@@ -73,8 +73,8 @@ namespace Either {
         match xs {
             case Nil => (k1(Nil), k2(Nil))
             case x :: rs => match x {
-                case Left(a) => partitionHelper(rs, zs -> k1(a :: zs), k2)
-                case Right(b) => partitionHelper(rs, k1, zs -> k1(b :: zs))
+                case Left(a) => partitionHelper(rs, ys -> k1(a :: ys), k2)
+                case Right(b) => partitionHelper(rs, k1, zs -> k2(b :: zs))
             }
         }
 
