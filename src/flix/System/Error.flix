@@ -16,13 +16,18 @@
 
 use System.Error;
 use System.Error.{ArrayIndexOutOfBoundsException,
+        Exception,
         IllegalArgumentException,
         IllegalStateException,
         IndexOutOfBoundsException,
         InputMismatchException,
         IOException,
         NoSuchElementException,
+        NullPointerException,
         PatternSyntaxException,
+        RuntimeException,
+        SecurityException,
+        UnsupportedOperationException,
         Generic};
 
 namespace System {
@@ -32,13 +37,18 @@ namespace System {
     ///
     pub enum Error {
         case ArrayIndexOutOfBoundsException,
+        case Exception,
         case IllegalArgumentException,
         case IllegalStateException,
         case IndexOutOfBoundsException,
         case InputMismatchException,
         case IOException,
         case NoSuchElementException,
+        case NullPointerException,
         case PatternSyntaxException,
+        case RuntimeException,
+        case SecurityException,
+        case UnsupportedOperationException,
         case Generic(String)
     }
 
@@ -48,13 +58,18 @@ namespace System/Error {
 
     pub def toString(x: Error): String = match x {
         case ArrayIndexOutOfBoundsException     => "ArrayIndexOutOfBoundsException"
+        case Exception                          => "Exception"
         case IllegalArgumentException           => "IllegalArgumentException"
         case IllegalStateException              => "IllegalStateException"
         case IndexOutOfBoundsException          => "IndexOutOfBoundsException"
         case InputMismatchException             => "InputMismatchException"
         case IOException                        => "IOException"
         case NoSuchElementException             => "NoSuchElementException"
+        case NullPointerException               => "NullPointerException"
         case PatternSyntaxException             => "PatternSyntaxException"
+        case RuntimeException                   => "RuntimeException"
+        case SecurityException                  => "SecurityException"
+        case UnsupportedOperationException      => "UnsupportedOperationException"
         case Generic(s)                         => s
     }
 
