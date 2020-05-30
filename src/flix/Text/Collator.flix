@@ -22,15 +22,15 @@ namespace Text/Collator {
     ///
     /// Test equality of strings `s1` and `s2` ignoring case.
     ///
-    pub def equalsCI(s1: String, s2: String): Bool =
-        equalsCIHelper(s1, s2) as & Pure
+    pub def equals(s1: String, s2: String): Bool =
+        equalsHelper(s1, s2) as & Pure
 
     ///
     /// Helper function for `equalsCI`.
     ///
     /// Uses a Collator to be accurate with the locale of the JVM.
     ///
-    def equalsCIHelper(s1: String, s2: String): Bool & Impure =
+    def equalsHelper(s1: String, s2: String): Bool & Impure =
          import java.text.Collator:getInstance();
          import java.text.Collator.setStrength(Int32) as setStrength!;
          import java.text.Collator.compare(String, String);

@@ -46,8 +46,19 @@ namespace Text/Regex {
     pub def evaluateMatch(patt: Pattern, eval: MatchEvaluator[a], input: String): Result[a, System.Error] & Impure =
         use Text/Regex/Internal/PrimMatcher.{newPrimMatcher, matches};
         let Pattern(p1) = patt;
-        let m1 = newPrimMatcher(p1, input) as & Pure;
+        let m1 = newPrimMatcher(p1, input);
         if (m1.matches() == true) {
+            let MatchEvaluator(fn) = eval;
+            m1.fn()
+        } else
+            Err(IllegalStateException)
+
+    /// Input matches at least once (left to right)...
+    pub def evaluateSubmatch(patt: Pattern, eval: MatchEvaluator[a], input: String): Result[a, System.Error] & Impure =
+        use Text/Regex/Internal/PrimMatcher.{newPrimMatcher, isSubmatch};
+        let Pattern(p1) = patt;
+        let m1 = newPrimMatcher(p1, input);
+        if (m1.isSubmatch() == true) {
             let MatchEvaluator(fn) = eval;
             m1.fn()
         } else

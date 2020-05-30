@@ -33,6 +33,7 @@ namespace Text/Regex {
 
 namespace Text/Regex/MatchEvaluator {
 
+
     
     pub def return(x: a): MatchEvaluator[a] = 
         MatchEvaluator(_ -> Ok(x) as & Impure)
