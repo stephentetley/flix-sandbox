@@ -32,21 +32,21 @@ namespace System/FilePath {
     /// Returns a new FilePath.
     ///
     pub def new(s: String): FilePath & Impure =
-        import java.nio.file.Paths:get(String, Array[String]) as get1;
-        FilePath(get1(s, []))
+        import flix.runtime.spt.sandbox.system.FilePathWrapper:get1(String) as get1;
+        FilePath(get1(s))
 
     pub def toString(path: FilePath): String & Impure =
-        import java.nio.file.Path.toString();
+        import flix.runtime.spt.sandbox.system.FilePathWrapper:toString(##java.nio.file.Path);
         let FilePath(path1) = path;
         path1.toString()
 
     pub def normalize(path: FilePath): FilePath & Impure =
-        import java.nio.file.Path.normalize();
+        import flix.runtime.spt.sandbox.system.FilePathWrapper:normalize(##java.nio.file.Path);
         let FilePath(p1) = path;
         FilePath(p1.normalize())
 
     pub def toAbsolutePath(path: FilePath): FilePath & Impure =
-        import java.nio.file.Path.toAbsolutePath();
+        import flix.runtime.spt.sandbox.system.FilePathWrapper:toAbsolutePath(##java.nio.file.Path);
         let FilePath(p1) = path;
         FilePath(p1.toAbsolutePath())
 

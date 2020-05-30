@@ -97,4 +97,15 @@ namespace System/Process {
             case _: ##java.lang.Exception => Err(Exception)
         }
 
+    pub def getError(x:Process, cs: Text.Charset): Result[String, System.Error] & Impure =
+        import flix.runtime.spt.sandbox.system.ProcessWrapper:getError(##java.lang.Process, ##java.nio.charset.Charset);
+        try {
+            let Process(x1) = x;
+            let Charset(cs1) = cs;
+            let str = getError(x1, cs1);
+            Ok(str)
+        } catch {
+            case _: ##java.lang.Exception => Err(Exception)
+        }
+
 }

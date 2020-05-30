@@ -16,4 +16,10 @@ public class ProcessWrapper {
         InputStream ins = proc.getInputStream();
         return new String(ins.readAllBytes(), cs);
     }
+
+    public static String getError(Process proc, Charset cs) throws Exception {
+        InputStream ins = proc.getErrorStream();
+        return new String(ins.readAllBytes(), cs);
+    }
+
 }
