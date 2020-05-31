@@ -33,6 +33,7 @@ use Text.Charset.{Charset};
 
 use System.Process;
 use System.Process.{Process};
+use System.FilePath.{FilePath};
 use System.ProcessBuilder;
 use System.ProcessBuilder.{ProcessBuilder};
 
@@ -55,6 +56,24 @@ namespace System/Process {
         let argArray = newStringArray();
         Array.foreach(x -> argArray.snoc(x), args);
         ProcessBuilder(create(cmd, argArray))
+
+    pub def directory!(x: ProcessBuilder, path: System.FilePath): Unit & Impure =
+        import java.lang.ProcessBuilder.directory(##java.io.File);
+        import new java.io.File(String) as newFile;
+        let ProcessBuilder(x1) = x;
+        let f1 = System/FilePath.toString(path).newFile();
+        x1.directory(f1);
+        ()
+
+    pub def getDirectory(x: ProcessBuilder): System.FilePath & Impure =
+        import java.lang.ProcessBuilder.directory();
+        import java.io.File.toPath();
+        let ProcessBuilder(x1) = x;
+        let p1 = x1.directory().toPath();
+        FilePath(p1)
+
+
+
 
     pub def start(x: ProcessBuilder): Result[Process, System.Error] & Impure = 
         import java.lang.ProcessBuilder.start();
