@@ -85,10 +85,10 @@ namespace System/FilePath {
             Some(FilePath(name))
 
     pub def append(path: FilePath, other: FilePath): FilePath & Impure =
-        import java.nio.file.Path.resolve(##java.nio.file.Path);
-        let FilePath(path1) = path;
-        let FilePath(other1) = other;
-        FilePath(resolve(path1, other1)) |> normalize
+        import flix.runtime.spt.sandbox.system.FilePathWrapper:resolve(##java.nio.file.Path, ##java.nio.file.Path);
+        let FilePath(p1) = path;
+        let FilePath(p2) = other;
+        FilePath(resolve(p1, p2)) |> normalize
 
     pub def getNameCount(path: FilePath): Int32 & Impure =
         import java.nio.file.Path.getNameCount();
