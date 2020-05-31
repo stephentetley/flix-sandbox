@@ -170,4 +170,38 @@ namespace Text/Regex/MatchEvaluator {
     pub def lift10(f: (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10) -> u & f, o1: MatchEvaluator[t1], o2: MatchEvaluator[t2], o3: MatchEvaluator[t3], o4: MatchEvaluator[t4], o5: MatchEvaluator[t5], o6: MatchEvaluator[t6], o7: MatchEvaluator[t7], o8: MatchEvaluator[t8], o9: MatchEvaluator[t9], o10: MatchEvaluator[t10]): MatchEvaluator[u] & f =
         ap(lift9(f, o1, o2, o3, o4, o5, o6, o7, o8, o9), o10)
 
+
+    ///
+    /// Returns a 2 element tuple with the results of applying the evaluators `o1` and `o2`.
+    ///
+    /// Returns an error if evaluating either `o1` or `o2` is an error.
+    ///
+    pub def tuple2(o1: MatchEvaluator[t1], o2: MatchEvaluator[t2]): MatchEvaluator[(t1, t2)] =
+        lift2((x,y) -> (x,y), o1, o2)
+
+    ///
+    /// Returns a 3 element tuple with the results of applying the evaluators `o1`, `o2` and `o3`.
+    ///
+    /// Returns an error if evaluating any of `o1`, `o2` and `o3` is an error.
+    ///
+    pub def tuple3(o1: MatchEvaluator[t1], o2: MatchEvaluator[t2], o3: MatchEvaluator[t3]): MatchEvaluator[(t1, t2, t3)] =
+        lift3((x1, x2, x3) -> (x1, x2, x3), o1, o2, o3)
+
+    ///
+    /// Returns a 4 element tuple with the results of applying the evaluators `o1`, `o2`, `o3` and `o4`.
+    ///
+    /// Returns an error if evaluating any of `o1`, `o2`, `o3` and `o4` is an error.
+    ///
+    pub def tuple4(o1: MatchEvaluator[t1], o2: MatchEvaluator[t2], o3: MatchEvaluator[t3], o4: MatchEvaluator[t4]): MatchEvaluator[(t1, t2, t3, t4)]  =
+        lift4((x1, x2, x3, x4) -> (x1, x2, x3, x4), o1, o2, o3, o4)
+
+    ///
+    /// Returns a 5 element tuple with the results of applying the evaluators `o1`, `o2`, ... `o5`.
+    ///
+    /// Returns an error if evaluating any of `o1`, `o2`, ... `o5` is an error.
+    ///
+    pub def tuple5(o1: MatchEvaluator[t1], o2: MatchEvaluator[t2], o3: MatchEvaluator[t3], o4: MatchEvaluator[t4], o5: MatchEvaluator[t5]): MatchEvaluator[(t1, t2, t3, t4, t5)]  =
+        lift5((x1, x2, x3, x4, x5) -> (x1, x2, x3, x4, x5), o1, o2, o3, o4, o5)
+
+
 }
