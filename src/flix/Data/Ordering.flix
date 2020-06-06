@@ -34,6 +34,11 @@ namespace Ordering {
         case GT => 1
     }
 
+    pub def toString(x: Ordering): String = match x {
+        case LT => "LT"
+        case EQ => "EQ"
+        case GT => "GT"
+    }
 
 
 }

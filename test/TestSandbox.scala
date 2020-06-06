@@ -14,23 +14,11 @@
  * limitations under the License.
  */
 
-package flix.runtime.spt.sandbox.system;
+package spt.sandobox
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import ca.uwaterloo.flix.util.{FlixTest, Options}
+import org.scalatest.Suites
 
-/**
- * A wrapper class for java.nio.file.Path, java.nio.file.Paths and related functions.
- * `Paths.get` is a varargs function which causes problems if we pass an array from from Flix.
- * This class that provides concrete, non-overloaded methods.
- */
-public class FilePathWrapper {
-
-    /// Sub function for `Paths.get` as it is "varargs" in Java.
-    public static Path get1(String path) {
-        return Paths.get(path);
-    }
-
-
-
-}
+class TestSandbox extends Suites(
+  new FlixTest("TestFilePath", "main/test/spt/sandbox/TestFilePath.flix")(Options.TestWithLibrary),
+)

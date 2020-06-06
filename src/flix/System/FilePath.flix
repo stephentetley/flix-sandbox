@@ -28,6 +28,8 @@ namespace System {
 
 namespace System/FilePath {
 
+    /// Note - current set of operations should be pure?
+
     ///
     /// Returns a new FilePath.
     ///
@@ -35,18 +37,27 @@ namespace System/FilePath {
         import flix.runtime.spt.sandbox.system.FilePathWrapper:get1(String) as get1;
         FilePath(get1(s))
 
+    ///
+    /// Returns `true` if `x` == `y`.
+    ///
+    pub def equals(x: FilePath, y: FilePath): Bool =
+        import java.nio.file.Path.equals(##java.lang.Object);
+        let FilePath(x1) = x;
+        let FilePath(y1) = y;
+        x1.equals(y1 as ##java.lang.Object) as & Pure
+
     pub def toString(path: FilePath): String & Impure =
-        import flix.runtime.spt.sandbox.system.FilePathWrapper:toString(##java.nio.file.Path);
+        import java.nio.file.Path.toString();
         let FilePath(path1) = path;
         path1.toString()
 
     pub def normalize(path: FilePath): FilePath & Impure =
-        import flix.runtime.spt.sandbox.system.FilePathWrapper:normalize(##java.nio.file.Path);
+        import java.nio.file.Path.normalize();
         let FilePath(p1) = path;
         FilePath(p1.normalize())
 
     pub def toAbsolutePath(path: FilePath): FilePath & Impure =
-        import flix.runtime.spt.sandbox.system.FilePathWrapper:toAbsolutePath(##java.nio.file.Path);
+        import java.nio.file.Path.toAbsolutePath();
         let FilePath(p1) = path;
         FilePath(p1.toAbsolutePath())
 
@@ -85,10 +96,10 @@ namespace System/FilePath {
             Some(FilePath(name))
 
     pub def append(path: FilePath, other: FilePath): FilePath & Impure =
-        import flix.runtime.spt.sandbox.system.FilePathWrapper:resolve(##java.nio.file.Path, ##java.nio.file.Path);
+        import java.nio.file.Path.resolve(##java.nio.file.Path);
         let FilePath(p1) = path;
         let FilePath(p2) = other;
-        FilePath(resolve(p1, p2)) |> normalize
+        FilePath(p1.resolve(p2)) |> normalize
 
     pub def getNameCount(path: FilePath): Int32 & Impure =
         import java.nio.file.Path.getNameCount();
@@ -96,8 +107,8 @@ namespace System/FilePath {
         path1.getNameCount()
 
     pub def getNameAt(ix: Int32, path: FilePath): Option[FilePath] & Impure =
+        import java.nio.file.Path.getName(Int32);
         try {
-            import java.nio.file.Path.getName(Int32);
             let FilePath(path1) = path;
             path1.getName(ix) |> FilePath |> Some
         } catch {
