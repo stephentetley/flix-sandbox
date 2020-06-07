@@ -21,4 +21,5 @@ import org.scalatest.Suites
 
 class TestSandbox extends Suites(
   new FlixTest("TestFilePath", "main/test/spt/sandbox/TestFilePath.flix")(Options.TestWithLibrary),
+  new FlixTest("TestPattern", "main/test/spt/sandbox/TestPattern.flix")(Options.TestWithLibrary),
 )
