@@ -99,7 +99,8 @@ namespace System/FilePath {
         import java.nio.file.Path.resolve(##java.nio.file.Path);
         let FilePath(p1) = path;
         let FilePath(p2) = other;
-        FilePath(p1.resolve(p2)) |> normalize
+        let ans = FilePath(p1.resolve(p2));
+        normalize(ans)
 
     pub def getNameCount(path: FilePath): Int32 & Impure =
         import java.nio.file.Path.getNameCount();
@@ -110,7 +111,8 @@ namespace System/FilePath {
         import java.nio.file.Path.getName(Int32);
         try {
             let FilePath(path1) = path;
-            path1.getName(ix) |> FilePath |> Some
+            let name1 = path1.getName(ix);
+            Some(FilePath(name1))
         } catch {
             case _: ##java.lang.Exception => None
         }

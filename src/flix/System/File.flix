@@ -27,7 +27,7 @@ namespace System/File {
             import java.nio.file.Files:readString(##java.nio.file.Path, ##java.nio.charset.Charset);
             let FilePath(path1) = path;
             let Charset(cs1) = cs;
-            readString(path1, cs1) |> Ok
+            Ok(readString(path1, cs1))
         }
         catch {
             case _: ##java.io.IOException => Err(IOException)

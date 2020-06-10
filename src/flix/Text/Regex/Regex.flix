@@ -53,6 +53,8 @@ namespace Text/Regex {
         } else
             Err(IllegalStateException)
 
+
+
     /// Input matches at least once (left to right)...
     pub def evaluateSubmatch(patt: Pattern, eval: MatchEvaluator[a], input: String): Result[a, System.Error] & Impure =
         use Text/Regex/Internal/PrimMatcher.{newPrimMatcher, isSubmatch};
@@ -64,6 +66,30 @@ namespace Text/Regex {
         } else
             Err(IllegalStateException)
 
+    /// Match input within region, match must start at start of region...
+    pub def startsWithWithin(patt: Pattern, input: String, start: Int32, end: Int32): Result[String, System.Error] & Impure =
+        use Text/Regex/Internal/PrimMatcher.{newPrimMatcher, setRegion!, lookingAt, group};
+        let Pattern(p1) = patt;
+        let m1 = newPrimMatcher(p1, input);
+        m1.setRegion!(start, end);
+        if (m1.lookingAt() == true)
+            m1.group()
+        else
+            Err(IllegalStateException)
+
+
+
+    /// Whole input matches within region...
+    pub def evaluateMatchWithin(patt: Pattern, eval: MatchEvaluator[a], input: String, start: Int32, end: Int32): Result[a, System.Error] & Impure =
+        use Text/Regex/Internal/PrimMatcher.{newPrimMatcher, matches, setRegion!};
+        let Pattern(p1) = patt;
+        let m1 = newPrimMatcher(p1, input);
+        m1.setRegion!(start, end);
+        if (m1.matches() == true) {
+            let MatchEvaluator(fn) = eval;
+            m1.fn()
+        } else
+            Err(IllegalStateException)
 
     ///
     /// Splits the string `s` around matches of the pattern `p`.
