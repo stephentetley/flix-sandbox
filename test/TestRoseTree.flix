@@ -31,7 +31,7 @@ def drawTree01(): String =
     drawTree(t1)
 
 /////////////////////////////////////////////////////////////////////////////
-// flatten                                                                //
+// flatten                                                                 //
 /////////////////////////////////////////////////////////////////////////////
 
 @test
@@ -58,5 +58,34 @@ def flatten04(): Bool =
     let t1 = RoseTree("a1", RoseTree("b2", RoseTree("c3", Nil) :: Nil) :: RoseTree("d2", Nil) :: Nil);
     flatten(t1) == "a1" :: "b2" :: "c3" :: "d2" :: Nil
 
+/////////////////////////////////////////////////////////////////////////////
+// foldRoseTree                                                            //
+/////////////////////////////////////////////////////////////////////////////
 
+def sum(xs: List[Int32]): Int32 = List.foldRight((x,y) -> x + y, 0, xs)
+
+@test
+def foldRoseTree01(): Bool =
+    use Data/RoseTree.{foldRoseTree};
+    let t1 = RoseTree(1, Nil);
+    foldRoseTree((x,xs) -> x + sum(xs), t1) == 1
+
+@test
+def foldRoseTree02(): Bool =
+    use Data/RoseTree.{foldRoseTree};
+    let t1 = RoseTree(1, RoseTree(2, Nil) :: Nil);
+    foldRoseTree((x,xs) -> x + sum(xs), t1) == 3
+
+@test
+def foldRoseTree03(): Bool =
+    use Data/RoseTree.{foldRoseTree};
+    let t1 = RoseTree(1, RoseTree(2, Nil) :: RoseTree(3, Nil) :: Nil);
+    foldRoseTree((x,xs) -> x + sum(xs), t1) == 6
+
+@test
+def foldRoseTree04(): Bool =
+    use Data/RoseTree.{foldRoseTree};
+    let t1 = RoseTree(1, RoseTree(2, RoseTree(3, Nil) :: Nil) :: RoseTree(4, Nil) :: Nil);
+    foldRoseTree((x,xs) -> x + sum(xs), t1) == 10
+    
 }

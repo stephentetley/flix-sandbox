@@ -80,4 +80,25 @@ namespace Data/RoseTree {
         case x :: rs => flattenHelper(x, vs1 -> flattenForest(rs, vs2 -> k(List.append(vs1, vs2))))
     }
 
+    ///
+    /// Tree catamorphism
+    ///
+    pub def foldRoseTree(f: (a, List[b]) -> b, t: RoseTree[a]): b =
+        foldRoseTreeHelper(f, t, identity)
+
+    ///
+    /// Helper for `foldRoseTree` in CPS.
+    ///
+    def foldRoseTreeHelper(f: (a, List[b]) -> b, t: RoseTree[a], k: b -> b): b = match t {
+        case RoseTree(x,kids) => foldForest(f, kids, vs -> k(f(x,vs)))
+    }
+
+    ///
+    /// Helper for `foldRoseTree` in CPS.
+    ///
+    def foldForest(f: (a, List[b]) -> b, ts: Forest[a], k: List[b] -> b): b = match ts {
+        case Nil => k(Nil)
+        case x :: rs => foldRoseTreeHelper(f, x, v -> foldForest(f, rs, vs -> k(v :: vs)))
+    }
+
 }
