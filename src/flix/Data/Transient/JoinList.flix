@@ -116,6 +116,17 @@ namespace Data/Transient/JoinList {
             repeatHelper(a, n-1, ac1)
         }
 
+    pub def map(f: a -> b, t: JoinList[a]): JoinList[b] =
+        mapHelper(f, t, identity)
+
+    ///
+    /// Helper for `map` in CPS.
+    ///
+    def mapHelper(f: a -> b, t: JoinList[a], k: JoinList[b] -> JoinList[b]): JoinList[b] = match t {
+        case Empty => k(Empty)
+        case One(a) => k(One(f(a)))
+        case Join(xs, ys) => mapHelper(f, xs, vs1 -> mapHelper(f, ys, vs2 -> k(Join(vs1, vs2))))
+    }
 
 
 }

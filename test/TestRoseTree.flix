@@ -87,5 +87,34 @@ def foldRoseTree04(): Bool =
     use Data/RoseTree.{foldRoseTree};
     let t1 = RoseTree(1, RoseTree(2, RoseTree(3, Nil) :: Nil) :: RoseTree(4, Nil) :: Nil);
     foldRoseTree((x,xs) -> x + sum(xs), t1) == 10
-    
+
+/////////////////////////////////////////////////////////////////////////////
+// map                                                                     //
+/////////////////////////////////////////////////////////////////////////////
+
+@test
+def map01(): Bool =
+    use Data/RoseTree.{map, foldRoseTree};
+    let t1 = RoseTree(1, Nil) |> map(x -> x + 1);
+    foldRoseTree((x,xs) -> x + sum(xs), t1) == 2
+
+@test
+def map02(): Bool =
+    use Data/RoseTree.{map, foldRoseTree};
+    let t1 = RoseTree(1, RoseTree(2, Nil) :: Nil) |> map(x -> x + 1);
+    foldRoseTree((x,xs) -> x + sum(xs), t1) == 5
+
+
+@test
+def map03(): Bool =
+    use Data/RoseTree.{map, foldRoseTree};
+    let t1 = RoseTree(1, RoseTree(2, Nil) :: RoseTree(3, Nil) :: Nil) |> map(x -> x + 1);
+    foldRoseTree((x,xs) -> x + sum(xs), t1) == 9
+
+@test
+def map04(): Bool =
+    use Data/RoseTree.{map, foldRoseTree};
+    let t1 = RoseTree(1, RoseTree(2, RoseTree(3, Nil) :: Nil) :: RoseTree(4, Nil) :: Nil) |> map(x -> x + 1);
+    foldRoseTree((x,xs) -> x + sum(xs), t1) == 14
+
 }

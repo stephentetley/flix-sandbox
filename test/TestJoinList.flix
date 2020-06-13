@@ -92,4 +92,21 @@ def foldLeft01(): Bool =
     use Data/Transient/JoinList.{repeat, foldLeft};
     let xs = repeat(1, 1000000);
     foldLeft((a,b) -> Int32.max(a,b), 0, xs) == 1
+
+/////////////////////////////////////////////////////////////////////////////
+// map                                                                     //
+/////////////////////////////////////////////////////////////////////////////
+
+@test
+def map01(): Bool =
+    use Data/Transient/JoinList.{toList, map, empty};
+    let xs = map(x -> x+1, empty(): JoinList[Int32]);
+    toList(xs) == Nil
+
+@test
+def map02(): Bool =
+    use Data/Transient/JoinList.{toList, map, singleton};
+    let xs: JoinList[Int32] = map(x -> x+1, singleton(1));
+    toList(xs) == 2 :: Nil
+
 }

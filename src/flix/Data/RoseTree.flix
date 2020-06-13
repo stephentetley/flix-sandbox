@@ -101,4 +101,15 @@ namespace Data/RoseTree {
         case x :: rs => foldRoseTreeHelper(f, x, v -> foldForest(f, rs, vs -> k(v :: vs)))
     }
 
+    pub def map(f: a -> b, t: RoseTree[a]): RoseTree[b] =
+        mapHelper(f, t, identity)
+
+    def mapHelper(f: a -> b, t: RoseTree[a], k: RoseTree[b] -> RoseTree[b]): RoseTree[b] = match t {
+        case RoseTree(a,xs) => mapForest(f, xs, vs -> k(RoseTree(f(a), vs)))
+    }
+
+    def mapForest(f: a -> b, ts: Forest[a], k: Forest[b] -> RoseTree[b]): RoseTree[b] = match ts {
+        case Nil => k(Nil)
+        case x :: rs => mapHelper(f, x, v1 -> mapForest(f, rs, vs -> k(v1 :: vs)))
+    }
 }
