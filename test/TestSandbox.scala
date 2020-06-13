@@ -20,6 +20,8 @@ import ca.uwaterloo.flix.util.{FlixTest, Options}
 import org.scalatest.Suites
 
 class TestSandbox extends Suites(
+  new FlixTest("TestDList", "main/test/spt/sandbox/TestDList.flix")(Options.TestWithLibrary),
+  new FlixTest("TestJoinList", "main/test/spt/sandbox/TestJoinList.flix")(Options.TestWithLibrary),
   new FlixTest("TestFilePath", "main/test/spt/sandbox/TestFilePath.flix")(Options.TestWithLibrary),
   new FlixTest("TestPattern", "main/test/spt/sandbox/TestPattern.flix")(Options.TestWithLibrary),
 )

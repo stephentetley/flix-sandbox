@@ -15,17 +15,19 @@
  */
 
 use Data/Transient.JoinList;
-use Data/Transient.JoinList.{Empty, One, Join};
+use Data/Transient.JoinList1.{Empty, One, Join};
 
 namespace Data/Transient {
 
     ///
     /// A JoinList (JoinLists have cheap append)
     ///
-    enum JoinList[t] {
+    type alias JoinList[a] = JoinList1[a]
+
+    enum JoinList1[t] {
         case Empty,
         case One(t),
-        case Join(JoinList[t], JoinList[t])
+        case Join(JoinList1[t], JoinList1[t])
     }
 
 }
@@ -54,6 +56,10 @@ namespace Data/Transient/JoinList {
                     toListHelper(l, ac1, k))
         }
 
+    pub def fromList(xs: List[a]): JoinList[a] =
+        List.foldRight(cons, empty(), xs)
 
+    pub def concat(xss: List[JoinList[a]]): JoinList[a] =
+        List.foldLeft(append, empty(), xss)
 
 }

@@ -87,6 +87,8 @@ namespace Text/Regex/Pattern {
             case _: ##java.util.regex.PatternSyntaxException => Err(PatternSyntaxException)
         }
 
+
+
     ///
     /// Compile the regular expression `regex` into a Pattern.
     ///

@@ -28,11 +28,16 @@ namespace Data/Transient {
 
 namespace Data/Transient/DList {
 
+    ///
+    /// Helper
+    ///
+    def compose(f: b -> c, g: a -> b): a -> c = x -> f(g(x))
+
     pub def empty(): DList[a] = DList(identity)
 
     pub def singleton(x: a): DList[a] = DList(xs -> x :: xs)
 
-    def compose(f: b -> c, g: a -> b): a -> c = x -> f(g(x))
+
 
     pub def append(a: DList[a], b: DList[a]): DList[a] = 
         let DList(f) = a; 
@@ -50,5 +55,19 @@ namespace Data/Transient/DList {
     pub def toList(xs: DList[a]): List[a] =
         let DList(f) = xs;
         f(Nil)
+
+    pub def fromList(xs: List[a]): DList[a] =
+        DList(ys -> List.append(xs, ys))
+
+    pub def apply(xs: DList[a], ys: List[a]): List[a] =
+        let DList(f) = xs;
+        f(ys)
+
+    pub def concat(xss: List[DList[a]]): DList[a] =
+        List.foldLeft(append, empty(), xss)
+
+    pub def foldRight(f: (a,b) -> b, ac: b, xs: DList[a]): b =
+        List.foldRight(f, ac, toList(xs))
+
 
 }
