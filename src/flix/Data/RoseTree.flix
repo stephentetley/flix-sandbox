@@ -14,15 +14,19 @@
  * limitations under the License.
  */
 
-// Note - not in the Data namespace.
+use Data.RoseTree;
+use Data.RoseTree.{RoseTree};
 
-pub enum RoseTree[a] {
-    case RoseTree(a, List[RoseTree[a]])
+namespace Data {
+
+    pub enum RoseTree[a] {
+        case RoseTree(a, List[RoseTree[a]])
+    }
 }
 
-type alias Forest[a] = List[RoseTree[a]]
+namespace Data/RoseTree {
 
-namespace RoseTree {
+    type alias Forest[a] = List[RoseTree[a]]
 
     def shift1(first: String, other: String, xs: List[String], k: List[String] -> List[String]): List[String] = 
         match xs { 
@@ -62,5 +66,18 @@ namespace RoseTree {
     pub def drawTree (x: RoseTree[String]): String = drawTree1(x, xs -> xs) |> String.unlines
 
     pub def drawForest (x: Forest[String]): String = String.unlines(List.map(drawTree, x))
-    
+
+    pub def flatten(x: RoseTree[a]): List[a] =
+        flattenHelper(x, identity)
+
+    def flattenHelper(x: RoseTree[a], k: List[a] -> List[a]): List[a] = match x {
+        case RoseTree(a, Nil) => k(a :: Nil)
+        case RoseTree(a, xs) => flattenForest(xs, vs -> k(a :: vs))
+    }
+
+    def flattenForest(xs: Forest[a], k: List[a] -> List[a]): List[a] = match xs {
+        case Nil => k(Nil)
+        case x :: rs => flattenHelper(x, vs1 -> flattenForest(rs, vs2 -> k(List.append(vs1, vs2))))
+    }
+
 }

@@ -24,6 +24,9 @@ namespace Data/Transient {
     ///
     type alias JoinList[a] = JoinList1[a]
 
+    ///
+    /// Internal JoinList implementation, not pub.
+    ///
     enum JoinList1[t] {
         case Empty,
         case One(t),
