@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-namespace TestFilePath {
+namespace System/TestFilePath {
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -22,7 +22,7 @@ namespace TestFilePath {
 /////////////////////////////////////////////////////////////////////////////
 
 @test
-def toString01(): Bool & Impure =
+def toString01(): Bool =
     let p1 = System/FilePath.new("src.flix");
     System/FilePath.toString(p1) == "src.flix"
 
@@ -33,13 +33,13 @@ def toString01(): Bool & Impure =
 /////////////////////////////////////////////////////////////////////////////
 
 @test
-def normalize01(): Bool & Impure =
+def normalize01(): Bool =
     let p1 = System/FilePath.new("c:/root/../root2") |> System/FilePath.normalize;
     let p2 = System/FilePath.new("c:/root2");
     System/FilePath.equals(p1, p2)
 
 @test
-def normalize02(): Bool & Impure =
+def normalize02(): Bool =
     let p1 = System/FilePath.new("c:/root/child1/..") |> System/FilePath.normalize;
     let p2 = System/FilePath.new("c:/root/");
     System/FilePath.equals(p1, p2)
@@ -49,7 +49,7 @@ def normalize02(): Bool & Impure =
 /////////////////////////////////////////////////////////////////////////////
 
 @test
-def toAbsolutePath01(): Bool & Impure =
+def toAbsolutePath01(): Bool =
     let p1 = System/FilePath.new("c:/root/child1.txt") |> System/FilePath.toAbsolutePath;
     let p2 = System/FilePath.new("c:/root/child1.txt");
     System/FilePath.equals(p1, p2)

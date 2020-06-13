@@ -27,6 +27,7 @@ class TestSandbox extends Suites(
   // Regex
   new FlixTest("TestPattern", "main/test/spt/sandbox/TestPattern.flix")(Options.TestWithLibrary),
   // System
-  new FlixTest("TestFilePath", "main/test/spt/sandbox/TestFilePath.flix")(Options.TestWithLibrary),
+  new FlixTest("System/TestEnvironment", "main/test/spt/sandbox/System/TestEnvironment.flix")(Options.TestWithLibrary),
+  new FlixTest("System/TestFilePath", "main/test/spt/sandbox/System/TestFilePath.flix")(Options.TestWithLibrary),
 
 )

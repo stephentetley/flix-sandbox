@@ -54,32 +54,38 @@ namespace System/Environment {
     }
 
 
-    pub def getOsName(): String & Impure =
+    pub def getOsName(): String =
         import java.lang.System:getProperty(String);
-        getProperty("os.name")
+        getProperty("os.name") as & Pure
 
-    pub def getOsArch(): String & Impure =
+    pub def getOsArch(): String =
         import java.lang.System:getProperty(String);
-        getProperty("os.arch")
+        getProperty("os.arch") as & Pure
 
-    pub def getOsVersion(): String & Impure =
+    pub def getOsVersion(): String =
         import java.lang.System:getProperty(String);
-        getProperty("os.version")
+        getProperty("os.version") as & Pure
 
-    pub def getUserName(): String & Impure =
+    pub def getPathSeparator(): String =
         import java.lang.System:getProperty(String);
-        getProperty("user.name")
+        getProperty("path.separator") as & Pure
+
+
+    pub def getUserName(): String =
+        import java.lang.System:getProperty(String);
+        getProperty("user.name") as & Pure
 
     pub def getUserDirectory(): FilePath & Impure =
         import java.lang.System:getProperty(String);
+        // Assume "user.dir" can change during a programs lifetime
         let p1 = getProperty("user.dir");
         System/FilePath.new(p1)
             |> System/FilePath.normalize
             |> System/FilePath.toAbsolutePath
 
-    pub def getUserHome(): FilePath & Impure =
+    pub def getUserHome(): FilePath =
         import java.lang.System:getProperty(String);
-        let p1 = getProperty("user.home");
+        let p1 = getProperty("user.home") as & Pure;
         System/FilePath.new(p1)
             |> System/FilePath.normalize
             |> System/FilePath.toAbsolutePath

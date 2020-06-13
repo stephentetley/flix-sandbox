@@ -106,7 +106,14 @@ def map01(): Bool =
 @test
 def map02(): Bool =
     use Data/Transient/JoinList.{toList, map, singleton};
-    let xs: JoinList[Int32] = map(x -> x+1, singleton(1));
-    toList(xs) == 2 :: Nil
+    let xs = map(x -> x+1, singleton(0));
+    toList(xs) == 1 :: Nil
+
+
+@test
+def map03(): Bool =
+    use Data/Transient/JoinList.{toList, map, cons, singleton};
+    let xs = map(x -> x+1, cons(1, singleton(0)));
+    toList(xs) == 2 :: 1 :: Nil
 
 }

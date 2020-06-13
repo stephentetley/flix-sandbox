@@ -21,9 +21,7 @@ use System.FilePath.{FilePath};
 namespace System/Directory {
 
     pub def getCurrentDirectory(): FilePath & Impure =
-        System/FilePath.new(".")
-            |> System/FilePath.normalize
-            |> System/FilePath.toAbsolutePath
+        System/Environment.getUserDirectory()
 
     pub def getTempDirectory(): FilePath & Impure =
         import java.lang.System:getProperty(String);
