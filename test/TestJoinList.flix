@@ -73,4 +73,23 @@ def concat04(): Bool =
     let xs = concat(fromList(1 :: 2 :: Nil) :: singleton(3) :: Nil);
     toList(xs) == 1 :: 2 :: 3 :: Nil
 
+/////////////////////////////////////////////////////////////////////////////
+// foldRight                                                               //
+/////////////////////////////////////////////////////////////////////////////
+
+@test
+def foldRight01(): Bool =
+    use Data/Transient/JoinList.{repeat, foldRight};
+    let xs = repeat(1, 1000000);
+    foldRight((a,b) -> Int32.max(a,b), 0, xs) == 1
+
+/////////////////////////////////////////////////////////////////////////////
+// foldLeft                                                                //
+/////////////////////////////////////////////////////////////////////////////
+
+@test
+def foldLeft01(): Bool =
+    use Data/Transient/JoinList.{repeat, foldLeft};
+    let xs = repeat(1, 1000000);
+    foldLeft((a,b) -> Int32.max(a,b), 0, xs) == 1
 }

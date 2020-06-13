@@ -44,8 +44,11 @@ namespace Data/Transient/JoinList {
     
     pub def snoc(a: JoinList[a], x: a): JoinList[a] = Join(a, One(x))
 
-    pub def toList(a: JoinList[a]): List[a] = toListHelper(a, Nil, xs -> xs)
+    pub def toList(a: JoinList[a]): List[a] = toListHelper(a, Nil, identity)
 
+    ///
+    /// Helper for `toList` in CPS.
+    ///
     def toListHelper(xs: JoinList[a], ac:List[a], k: List[a] -> List[a]): List[a] =
         match xs {
             case Empty => k(ac)
@@ -61,5 +64,55 @@ namespace Data/Transient/JoinList {
 
     pub def concat(xss: List[JoinList[a]]): JoinList[a] =
         List.foldLeft(append, empty(), xss)
+
+    ///
+    /// Right-associative fold of a JoinList.
+    ///
+    pub def foldRight(f: (a, b) -> b, ac: b, xs: JoinList[a]): b =
+        foldRightHelper(f, ac, xs, identity)
+
+    ///
+    /// Helper for `foldRight` in CPS.
+    ///
+    def foldRightHelper(f: (a, b) -> b, ac: b, xs: JoinList[a], k: b -> b): b = match xs {
+        case Empty => k(ac)
+        case One(a) => k(f(a, ac))
+        case Join(x,y) =>
+            foldRightHelper(f, ac, y, ac1 -> foldRightHelper(f, ac1, x, ac2 -> k(ac2)))
+    }
+
+
+    ///
+    /// Left-associative fold of a JoinList.
+    ///
+    pub def foldLeft(f: (b, a) -> b, ac: b, xs: JoinList[a]): b =
+        foldLeftHelper(f, ac, xs, identity)
+
+    ///
+    /// Helper for `foldLeft` in CPS.
+    ///
+    def foldLeftHelper(f: (b, a) -> b, ac: b, xs: JoinList[a], k: b -> b): b = match xs {
+        case Empty => k(ac)
+        case One(a) => k(f(ac, a))
+        case Join(x,y) =>
+            foldLeftHelper(f, ac, x, ac1 -> foldLeftHelper(f, ac1, y, ac2 -> k(ac2)))
+    }
+
+    ///
+    /// Returns a list with the element `a` repeated `n` times.
+    ///
+    /// Returns `Nil` if `n < 0`.
+    ///
+    pub def repeat(a: a, n: Int32): JoinList[a] = repeatHelper(a, n, Empty)
+
+    def repeatHelper(a: a, n: Int32, ac: JoinList[a]): JoinList[a] =
+        if (n <= 0)
+            ac
+        else {
+            let ac1 = cons(a, ac);
+            repeatHelper(a, n-1, ac1)
+        }
+
+
 
 }

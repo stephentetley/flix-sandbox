@@ -69,5 +69,8 @@ namespace Data/Transient/DList {
     pub def foldRight(f: (a,b) -> b, ac: b, xs: DList[a]): b =
         List.foldRight(f, ac, toList(xs))
 
+    pub def map(f: a -> b, xs: DList[a]): DList[b] =
+        foldRight((x,ac) -> cons(f(x), ac), empty(), xs)
+
 
 }
