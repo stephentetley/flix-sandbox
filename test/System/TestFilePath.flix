@@ -183,4 +183,26 @@ def stripExtensions03(): Bool =
     let ans = p1.stripExtensions("txt");
     ans == None
 
+/////////////////////////////////////////////////////////////////////////////
+// putBaseName                                                             //
+/////////////////////////////////////////////////////////////////////////////
+
+@test
+def putBaseName01(): Bool =
+    use System/FilePath.{putBaseName, getFileName, toString};
+    let p1 = System/FilePath.new("c:/root/file1.txt");
+    let p2 = p1.putBaseName("file2");
+    p2.getFileName() |> Option.map(toString) == Some("file2.txt")
+
+/////////////////////////////////////////////////////////////////////////////
+// split                                                                   //
+/////////////////////////////////////////////////////////////////////////////
+
+@test
+def split01(): Bool =
+    use System/FilePath.{split};
+    let p1 = System/FilePath.new("c:/root/file1.txt");
+    let xs = p1.split();
+    List.length(xs) == 3
+
 }
