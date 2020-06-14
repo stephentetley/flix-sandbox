@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use Data.RoseTree;
+use Data.{RoseTree, RoseForest};
 use Data.RoseTree.{RoseTree};
 
 namespace Data {
@@ -22,11 +22,12 @@ namespace Data {
     pub enum RoseTree[a] {
         case RoseTree(a, List[RoseTree[a]])
     }
+
+    type alias RoseForest[a] = List[RoseTree[a]]
 }
 
 namespace Data/RoseTree {
 
-    type alias Forest[a] = List[RoseTree[a]]
 
     def shift1(first: String, other: String, xs: List[String], k: List[String] -> List[String]): List[String] = 
         match xs { 
@@ -65,7 +66,7 @@ namespace Data/RoseTree {
 
     pub def drawTree (x: RoseTree[String]): String = drawTree1(x, xs -> xs) |> String.unlines
 
-    pub def drawForest (x: Forest[String]): String = String.unlines(List.map(drawTree, x))
+    pub def drawForest (x: RoseForest[String]): String = String.unlines(List.map(drawTree, x))
 
     pub def flatten(x: RoseTree[a]): List[a] =
         flattenHelper(x, identity)
@@ -75,7 +76,7 @@ namespace Data/RoseTree {
         case RoseTree(a, xs) => flattenForest(xs, vs -> k(a :: vs))
     }
 
-    def flattenForest(xs: Forest[a], k: List[a] -> List[a]): List[a] = match xs {
+    def flattenForest(xs: RoseForest[a], k: List[a] -> List[a]): List[a] = match xs {
         case Nil => k(Nil)
         case x :: rs => flattenHelper(x, vs1 -> flattenForest(rs, vs2 -> k(List.append(vs1, vs2))))
     }
@@ -90,15 +91,15 @@ namespace Data/RoseTree {
     /// Helper for `foldRoseTree` in CPS.
     ///
     def foldRoseTreeHelper(f: (a, List[b]) -> b, t: RoseTree[a], k: b -> b): b = match t {
-        case RoseTree(x,kids) => foldForest(f, kids, vs -> k(f(x,vs)))
+        case RoseTree(x,kids) => foldRoseForest(f, kids, vs -> k(f(x,vs)))
     }
 
     ///
     /// Helper for `foldRoseTree` in CPS.
     ///
-    def foldForest(f: (a, List[b]) -> b, ts: Forest[a], k: List[b] -> b): b = match ts {
+    def foldRoseForest(f: (a, List[b]) -> b, ts: RoseForest[a], k: List[b] -> b): b = match ts {
         case Nil => k(Nil)
-        case x :: rs => foldRoseTreeHelper(f, x, v -> foldForest(f, rs, vs -> k(v :: vs)))
+        case x :: rs => foldRoseTreeHelper(f, x, v -> foldRoseForest(f, rs, vs -> k(v :: vs)))
     }
 
     pub def map(f: a -> b, t: RoseTree[a]): RoseTree[b] =
@@ -108,7 +109,7 @@ namespace Data/RoseTree {
         case RoseTree(a,xs) => mapForest(f, xs, vs -> k(RoseTree(f(a), vs)))
     }
 
-    def mapForest(f: a -> b, ts: Forest[a], k: Forest[b] -> RoseTree[b]): RoseTree[b] = match ts {
+    def mapForest(f: a -> b, ts: RoseForest[a], k: RoseForest[b] -> RoseTree[b]): RoseTree[b] = match ts {
         case Nil => k(Nil)
         case x :: rs => mapHelper(f, x, v1 -> mapForest(f, rs, vs -> k(v1 :: vs)))
     }
