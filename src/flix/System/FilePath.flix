@@ -117,14 +117,106 @@ namespace System/FilePath {
             case _: ##java.lang.Exception => None
         }
 
-    pub def getExtension(path: FilePath): Option[String] =
+    pub def hasExtension(path: FilePath): Bool =
         match getFileName(path) |> Option.map(toString) {
-            case None => None
-            case Some(s) => match String.indexOfRight(s, ".") {
-                case None => None
-                case Some(ix) => Some(String.sliceRight(s, ix+1))
-            }
+            case None => false
+            case Some(str) => String.isInfixOf(".", str)
         }
 
+
+    pub def getExtension(path: FilePath): Option[String] =
+        use Option.flatMap;
+        let* s = getFileName(path) |> Option.map(toString);
+        let* ix = String.indexOfRight(".", s);
+        Some(String.sliceRight(s, ix+1))
+
+    ///
+    /// Replaces the extension.
+    /// If the filepath has multiple extenstion only the rightmost extension
+    /// is replaced.
+    ///
+    pub def putExtension(path: FilePath, ext: String): FilePath =
+        match getExtension(path) {
+            case Some(ext0) => {
+                let str = toString(path);
+                let lhs = String.dropRight(String.length(ext0), str);
+                new(lhs + ext)
+            }
+            case None => path
+        }
+
+    ///
+    /// Drop only the rightmost extension if the filepath has mutliple
+    /// extensions, i.e. "archive.tar.gz" becomes "archive.tar".
+    ///
+    pub def dropExtension(path: FilePath): FilePath = match getExtension(path) {
+        case Some(ext) => {
+            let str = toString(path);
+            let lhs = String.dropRight(String.length(ext) + 1, str);
+            new(lhs)
+        }
+        case None => path
+    }
+
+    pub def splitExtension(path: FilePath): (FilePath, Option[String]) =
+        (dropExtension(path), getExtension(path))
+
+    /// Suffixes the extension `ext` even if the path already has an extension.
+    /// e.g. addExtension("archive.tar", "gz") == "archive.tar.gz"
+    pub def addExtension(path: FilePath, ext: String): FilePath =
+        if (String.isEmpty(ext))
+            path
+        else {
+            let str = toString(path);
+            new(str + "." + ext)
+        }
+
+    pub def getExtensions(path: FilePath): Option[String] =
+        use Option.flatMap;
+        let* s = getFileName(path) |> Option.map(toString);
+        let* ix = String.indexOfLeft(".", s);
+        Some(String.sliceRight(s, ix+1))
+
+    ///
+    /// Drop all extensions if the filepath has mutliple extensions,
+    /// i.e. "archive.tar.gz" becomes "archive".
+    ///
+    pub def dropExtensions(path: FilePath): FilePath = match getExtensions(path) {
+            case Some(ext) => {
+                let str = toString(path);
+                let lhs = String.dropRight(String.length(ext) + 1, str);
+                new(lhs)
+            }
+            case None => path
+        }
+
+    pub def putExtensions(path: FilePath, ext: String): FilePath =
+        match getExtensions(path) {
+            case Some(ext0) => {
+                let str = toString(path);
+                let lhs = String.dropRight(String.length(ext0), str);
+                new(lhs + ext)
+            }
+            case None => path
+        }
+
+    pub def splitExtensions(path: FilePath): (FilePath, Option[String]) =
+        (dropExtensions(path), getExtensions(path))
+
+    pub def stripExtension(path: FilePath, ext: String ): Option[FilePath] =
+        use Option.flatMap;
+        let* ext1 = getExtension(path);
+        if (ext1 == ext)
+            Some(dropExtension(path))
+        else
+            None
+
+    pub def stripExtensions(path: FilePath, exts: String ): Option[FilePath] =
+        use Option.flatMap;
+        let* exts1 = getExtensions(path);
+        if (exts1 == exts)
+            Some(dropExtensions(path))
+        else
+            None
 
  }

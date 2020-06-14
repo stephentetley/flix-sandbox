@@ -54,4 +54,133 @@ def toAbsolutePath01(): Bool =
     let p2 = System/FilePath.new("c:/root/child1.txt");
     System/FilePath.equals(p1, p2)
 
+/////////////////////////////////////////////////////////////////////////////
+// getExtension                                                            //
+/////////////////////////////////////////////////////////////////////////////
+
+@test
+def getExtension01(): Bool =
+    use System/FilePath.{getExtension};
+    let p1 = System/FilePath.new("c:/root/child1.txt");
+    getExtension(p1) == Some("txt")
+
+@test
+def getExtension02(): Bool =
+    use System/FilePath.{getExtension};
+    let p1 = System/FilePath.new("file.txt");
+    getExtension(p1) == Some("txt")
+
+@test
+def getExtension03(): Bool =
+    use System/FilePath.{getExtension};
+    let p1 = System/FilePath.new("c:/root");
+    getExtension(p1) == None
+
+@test
+def getExtension04(): Bool =
+    use System/FilePath.{getExtension};
+    let p1 = System/FilePath.new("c:/root/file.001.txt");
+    getExtension(p1) == Some("txt")
+
+/////////////////////////////////////////////////////////////////////////////
+// putExtension                                                            //
+/////////////////////////////////////////////////////////////////////////////
+
+@test
+def putExtension01(): Bool =
+    use System/FilePath.{putExtension, getFileName, toString};
+    let p1 = System/FilePath.new("c:/root/file1.txt");
+    let p2 = putExtension(p1, "md");
+    getFileName(p2) |> Option.map(toString) == Some("file1.md")
+
+/////////////////////////////////////////////////////////////////////////////
+// dropExtension                                                           //
+/////////////////////////////////////////////////////////////////////////////
+
+@test
+def dropExtension01(): Bool =
+    use System/FilePath.{dropExtension, getFileName, toString};
+    let p1 = System/FilePath.new("c:/root/file1.txt");
+    let p2 = dropExtension(p1);
+    getFileName(p2) |> Option.map(toString) == Some("file1")
+
+/////////////////////////////////////////////////////////////////////////////
+// addExtension                                                            //
+/////////////////////////////////////////////////////////////////////////////
+
+@test
+def addExtension01(): Bool =
+    use System/FilePath.{addExtension, getFileName, toString};
+    let p1 = System/FilePath.new("archive.tar");
+    let p2 = p1.addExtension("gz");
+    getFileName(p2) |> Option.map(toString) == Some("archive.tar.gz")
+
+/////////////////////////////////////////////////////////////////////////////
+// dropExtensions                                                          //
+/////////////////////////////////////////////////////////////////////////////
+
+@test
+def dropExtensions01(): Bool =
+    use System/FilePath.{dropExtensions, getFileName, toString};
+    let p1 = System/FilePath.new("c:/root/file1.txt");
+    let p2 = dropExtensions(p1);
+    getFileName(p2) |> Option.map(toString) == Some("file1")
+
+@test
+def dropExtensions02(): Bool =
+    use System/FilePath.{dropExtensions, getFileName, toString};
+    let p1 = System/FilePath.new("c:/root/archive.tar.gz");
+    let p2 = dropExtensions(p1);
+    getFileName(p2) |> Option.map(toString) == Some("archive")
+
+/////////////////////////////////////////////////////////////////////////////
+// stripExtension                                                          //
+/////////////////////////////////////////////////////////////////////////////
+
+@test
+def stripExtension01(): Bool =
+    use System/FilePath.{stripExtension, getFileName, toString};
+    let p1 = System/FilePath.new("c:/root/file1.txt");
+    let ans = p1.stripExtension("txt");
+    ans |> Option.flatMap(getFileName) |> Option.map(toString) == Some("file1")
+
+@test
+def stripExtension02(): Bool =
+    use System/FilePath.{stripExtension, getFileName, toString};
+    let p1 = System/FilePath.new("c:/root/archive.tar.gz");
+    let ans = p1.stripExtension("gz");
+    ans |> Option.flatMap(getFileName) |> Option.map(toString) == Some("archive.tar")
+
+@test
+def stripExtension03(): Bool =
+    use System/FilePath.{stripExtension, getFileName, toString};
+    let p1 = System/FilePath.new("c:/root/file1");
+    let ans = p1.stripExtension("txt");
+    ans == None
+
+/////////////////////////////////////////////////////////////////////////////
+// stripExtensions                                                         //
+/////////////////////////////////////////////////////////////////////////////
+
+@test
+def stripExtensions01(): Bool =
+    use System/FilePath.{stripExtensions, getFileName, toString};
+    let p1 = System/FilePath.new("c:/root/file1.txt");
+    let ans = p1.stripExtensions("txt");
+    ans |> Option.flatMap(getFileName) |> Option.map(toString) == Some("file1")
+
+@test
+def stripExtensions02(): Bool =
+    use System/FilePath.{stripExtensions, getFileName, toString};
+    let p1 = System/FilePath.new("c:/root/archive.tar.gz");
+    let ans = p1.stripExtensions("tar.gz");
+    ans |> Option.flatMap(getFileName) |> Option.map(toString) == Some("archive")
+
+@test
+def stripExtensions03(): Bool =
+    use System/FilePath.{stripExtensions, getFileName, toString};
+    let p1 = System/FilePath.new("c:/root/file1");
+    let ans = p1.stripExtensions("txt");
+    ans == None
+
 }
