@@ -71,6 +71,25 @@ namespace Text/Regex/Internal/PrimMatcher {
         let PrimMatcher(x1) = x;
         x1.find()
 
+    pub def findFrom(x: PrimMatcher, start: Int32): Bool & Impure =
+        import java.util.regex.Matcher.find(Int32);
+        let PrimMatcher(x1) = x;
+        x1.find(start)
+
+    pub def reset(x: PrimMatcher): Unit & Impure =
+        import java.util.regex.Matcher.reset();
+        let PrimMatcher(x1) = x;
+        x1.reset();
+        ()
+
+    pub def resetInput(x: PrimMatcher, input: String): Unit & Impure =
+        import java.util.regex.Matcher.reset(##java.lang.CharSequence);
+        let PrimMatcher(x1) = x;
+        let cs = input as ##java.lang.CharSequence;
+        x1.reset(cs);
+        ()
+
+
     pub def region(x: PrimMatcher, start: Int32, end: Int32): Result[Unit, System.Error] & Impure =
         import java.util.regex.Matcher.region(Int32, Int32);
         try {

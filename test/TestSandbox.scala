@@ -25,6 +25,7 @@ class TestSandbox extends Suites(
   new FlixTest("Data/TestJoinList", "main/test/spt/sandbox/Data/TestJoinList.flix")(Options.TestWithLibrary),
   new FlixTest("Data/TestRoseTree", "main/test/spt/sandbox/Data/TestRoseTree.flix")(Options.TestWithLibrary),
   // Text
+  new FlixTest("Text/TestMatcher", "main/test/spt/sandbox/Text/TestMatcher.flix")(Options.TestWithLibrary),
   new FlixTest("Text/TestPattern", "main/test/spt/sandbox/Text/TestPattern.flix")(Options.TestWithLibrary),
   new FlixTest("Text/TestRegex", "main/test/spt/sandbox/Text/TestRegex.flix")(Options.TestWithLibrary),
   // System

@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-use System.Error.{IllegalStateException, NoSuchElementException};
+use System.Error.{IllegalStateException, NoSuchElementException, Generic};
 
 use Text/Regex.{Matcher};
 use Text/Regex.Matcher.{Matcher};
 
-use Text/Regex.Pattern.{Pattern};
 use Text/Regex/Internal.{PrimMatcher};
+use Text/Regex.Pattern.{Pattern};
+use Text/Regex.{MatchEvaluator};
+use Text/Regex.MatchEvaluator.{MatchEvaluator};
 
 /// This is a "steppable" matcher like .Net `Regex.Match` but wrapped as a monad.
 
@@ -43,6 +45,9 @@ namespace Text/Regex/Matcher {
 
     pub def return(x: a): Matcher[a] =
         Matcher(_ -> Ok(x) as & Impure)
+
+    pub def fail(msg: String): Matcher[a] =
+        Matcher(_ -> Err(Generic(msg)) as & Impure)
 
     def apply1(x: Matcher[a], m: PrimMatcher): Result[a, System.Error] & Impure =
         let Matcher(f) = x;
@@ -85,11 +90,25 @@ namespace Text/Regex/Matcher {
 
     pub def ignore(x: Matcher[a]): Matcher[Unit] = map(_ -> (), x)
 
-    pub def next(): Matcher[Unit] =
-        ignore(liftPrim(x -> Ok(Text/Regex/Internal/PrimMatcher.find(x))))
+    pub def find(): Matcher[Bool] =
+        liftPrim(x -> Ok(Text/Regex/Internal/PrimMatcher.find(x)))
+
+    pub def findFrom(start: Int32): Matcher[Bool] =
+        liftPrim(x -> Ok(Text/Regex/Internal/PrimMatcher.findFrom(x, start)))
 
     pub def content(): Matcher[String] =
         liftPrim(Text/Regex/Internal/PrimMatcher.group)
+
+    pub def evaluate(eval: MatchEvaluator[a]): Matcher[a] =
+        let MatchEvaluator(fn) = eval;
+        Matcher(r -> fn(r))
+
+    pub def getMatch(): Matcher[String] =
+        let* ans = find();
+        if (ans)
+            content()
+        else
+            fail("getMatch")
 
     def ifThenElse(cond: Matcher[s], thenm: s -> Matcher[t], elsem: Matcher[t]): Matcher[t] =
         Matcher(r ->
@@ -100,6 +119,16 @@ namespace Text/Regex/Matcher {
         )
 
     pub def done(): Matcher[Bool] = ifThenElse(content(), _ -> return(false), return(true))
+
+
+    pub def reset!(): Matcher[Unit] =
+        liftPrim(x -> Ok(Text/Regex/Internal/PrimMatcher.reset(x)))
+
+    pub def resetInput!(input: String): Matcher[Unit] =
+        liftPrim(x -> Ok(Text/Regex/Internal/PrimMatcher.resetInput(x, input)))
+
+    pub def setRegion!(start: Int32, end: Int32): Matcher[Unit] =
+        liftPrim(x -> Text/Regex/Internal/PrimMatcher.region(x, start, end))
 
 }        
 
