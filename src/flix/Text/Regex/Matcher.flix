@@ -1,0 +1,107 @@
+/*
+ * Copyright 2020 Stephen Tetley
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+use System.Error.{IllegalStateException, NoSuchElementException};
+
+use Text/Regex.{Matcher};
+use Text/Regex.Matcher.{Matcher};
+
+use Text/Regex.Pattern.{Pattern};
+use Text/Regex/Internal.{PrimMatcher};
+
+/// This is a "steppable" matcher like .Net `Regex.Match` but wrapped as a monad.
+
+namespace Text/Regex {
+    
+    pub opaque type Matcher[a] = PrimMatcher ~> Result[a, System.Error]
+
+}
+
+namespace Text/Regex/Matcher {
+
+    pub def runMatcher(ma: Matcher[a], regex: String, input: String): Result[a, System.Error] & Impure =
+        use Result.flatMap;
+        use Text/Regex/Internal/PrimMatcher.{newPrimMatcher};
+        let* patt = Text/Regex/Pattern.compile(regex);
+        let Matcher(m1) = ma;
+        let Pattern(p1) = patt;
+        let prim = newPrimMatcher(p1, input);
+        m1(prim)
+
+    pub def return(x: a): Matcher[a] =
+        Matcher(_ -> Ok(x) as & Impure)
+
+    def apply1(x: Matcher[a], m: PrimMatcher): Result[a, System.Error] & Impure =
+        let Matcher(f) = x;
+        f(m)
+
+    pub def map(f: a -> b & e, x: Matcher[a]): Matcher[b] =
+        Matcher(r ->
+            match apply1(x, r) {
+                case Ok(a) => {
+                    let ans = f(a) as & Impure;
+                    Ok(ans)
+                }
+                case Err(e) => Err(e)
+            }
+        )
+
+    pub def ap(mf: Matcher[a -> b], ma: Matcher[a]): Matcher[b] =
+        Matcher(r ->
+            match apply1(mf, r) {
+                case Ok(f) => match apply1(ma, r) {
+                    case Ok(a) => Ok(f(a))
+                    case Err(e2) => Err(e2)
+                }
+                case Err(e1) => Err(e1)
+            }
+        )
+
+    pub def bind(x: Matcher[a], k: a -> Matcher[b]): Matcher[b] =
+        Matcher(r ->
+            match apply1(x, r) {
+                case Ok(a) => apply1(k(a), r)
+                case Err(e) => Err(e)
+            }
+        )
+
+    pub def flatMap(k: a -> Matcher[b], x: Matcher[a]): Matcher[b] = bind(x, k)
+
+    def liftPrim(fn : PrimMatcher ~> Result[a, System.Error]): Matcher[a] =
+        Matcher(r -> fn(r))
+
+    pub def ignore(x: Matcher[a]): Matcher[Unit] = map(_ -> (), x)
+
+    pub def next(): Matcher[Unit] =
+        ignore(liftPrim(x -> Ok(Text/Regex/Internal/PrimMatcher.find(x))))
+
+    pub def content(): Matcher[String] =
+        liftPrim(Text/Regex/Internal/PrimMatcher.group)
+
+    def ifThenElse(cond: Matcher[s], thenm: s -> Matcher[t], elsem: Matcher[t]): Matcher[t] =
+        Matcher(r ->
+            match apply1(cond, r) {
+                case Ok(a) => apply1(thenm(a), r)
+                case Err(_) => apply1(elsem, r)
+            }
+        )
+
+    pub def done(): Matcher[Bool] = ifThenElse(content(), _ -> return(false), return(true))
+
+}        
+
+
+
