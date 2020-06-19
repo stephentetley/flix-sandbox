@@ -21,11 +21,12 @@ import org.scalatest.Suites
 
 class TestSandbox extends Suites(
   // Data
-  new FlixTest("TestDList", "main/test/spt/sandbox/TestDList.flix")(Options.TestWithLibrary),
-  new FlixTest("TestJoinList", "main/test/spt/sandbox/TestJoinList.flix")(Options.TestWithLibrary),
-  new FlixTest("TestRoseTree", "main/test/spt/sandbox/TestRoseTree.flix")(Options.TestWithLibrary),
-  // Regex
-  new FlixTest("TestPattern", "main/test/spt/sandbox/TestPattern.flix")(Options.TestWithLibrary),
+  new FlixTest("Data/TestDList", "main/test/spt/sandbox/Data/TestDList.flix")(Options.TestWithLibrary),
+  new FlixTest("Data/TestJoinList", "main/test/spt/sandbox/Data/TestJoinList.flix")(Options.TestWithLibrary),
+  new FlixTest("Data/TestRoseTree", "main/test/spt/sandbox/Data/TestRoseTree.flix")(Options.TestWithLibrary),
+  // Text
+  new FlixTest("Text/TestPattern", "main/test/spt/sandbox/Text/TestPattern.flix")(Options.TestWithLibrary),
+  new FlixTest("Text/TestRegex", "main/test/spt/sandbox/Text/TestRegex.flix")(Options.TestWithLibrary),
   // System
   new FlixTest("System/TestEnvironment", "main/test/spt/sandbox/System/TestEnvironment.flix")(Options.TestWithLibrary),
   new FlixTest("System/TestFilePath", "main/test/spt/sandbox/System/TestFilePath.flix")(Options.TestWithLibrary),

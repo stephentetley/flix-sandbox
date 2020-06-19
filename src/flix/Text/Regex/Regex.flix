@@ -28,19 +28,19 @@ namespace Text/Regex {
     /// Note - use `isSubmatch` to search for a substring.
     ///
     pub def isMatch(patt: Pattern, input: String): Bool =
-        use Text/Regex/Internal/PrimMatcher.{newPrimMatcher, isMatch};
+        use Text/Regex/Internal/PrimMatcher.{newPrimMatcher, matches};
         let Pattern(p1) = patt;
         let m1 = newPrimMatcher(p1, input) as & Pure;
-        m1.isMatch() as & Pure
+        m1.matches() as & Pure
 
     ///
     /// Returns `true` if the string `s` is matched by the regular expression `pattern` at any point.
     ///
     pub def isSubmatch(patt: Pattern, input: String): Bool =
-        use Text/Regex/Internal/PrimMatcher.{newPrimMatcher, isSubmatch};
+        use Text/Regex/Internal/PrimMatcher.{newPrimMatcher, find};
         let Pattern(p1) = patt;
         let m1 = newPrimMatcher(p1, input) as & Pure;
-        m1.isSubmatch() as & Pure
+        m1.find() as & Pure
 
     /// Whole input matches...
     pub def evaluateMatch(patt: Pattern, eval: MatchEvaluator[a], input: String): Result[a, System.Error] & Impure =
@@ -57,10 +57,10 @@ namespace Text/Regex {
 
     /// Input matches at least once (left to right)...
     pub def evaluateSubmatch(patt: Pattern, eval: MatchEvaluator[a], input: String): Result[a, System.Error] & Impure =
-        use Text/Regex/Internal/PrimMatcher.{newPrimMatcher, isSubmatch};
+        use Text/Regex/Internal/PrimMatcher.{newPrimMatcher, find};
         let Pattern(p1) = patt;
         let m1 = newPrimMatcher(p1, input);
-        if (m1.isSubmatch() == true) {
+        if (m1.find() == true) {
             let MatchEvaluator(fn) = eval;
             m1.fn()
         } else
@@ -68,10 +68,11 @@ namespace Text/Regex {
 
     /// Match input within region, match must start at start of region...
     pub def startsWithWithin(patt: Pattern, input: String, start: Int32, end: Int32): Result[String, System.Error] & Impure =
-        use Text/Regex/Internal/PrimMatcher.{newPrimMatcher, setRegion!, lookingAt, group};
+        use Result.flatMap;
+        use Text/Regex/Internal/PrimMatcher.{newPrimMatcher, region, lookingAt, group};
         let Pattern(p1) = patt;
         let m1 = newPrimMatcher(p1, input);
-        m1.setRegion!(start, end);
+        let* _ = m1.region(start, end);
         if (m1.lookingAt() == true)
             m1.group()
         else
@@ -81,10 +82,11 @@ namespace Text/Regex {
 
     /// Whole input matches within region...
     pub def evaluateMatchWithin(patt: Pattern, eval: MatchEvaluator[a], input: String, start: Int32, end: Int32): Result[a, System.Error] & Impure =
-        use Text/Regex/Internal/PrimMatcher.{newPrimMatcher, matches, setRegion!};
+        use Result.flatMap;
+        use Text/Regex/Internal/PrimMatcher.{newPrimMatcher, matches, region};
         let Pattern(p1) = patt;
         let m1 = newPrimMatcher(p1, input);
-        m1.setRegion!(start, end);
+        let* _ = m1.region(start, end);
         if (m1.matches() == true) {
             let MatchEvaluator(fn) = eval;
             m1.fn()

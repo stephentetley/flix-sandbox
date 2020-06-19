@@ -29,7 +29,7 @@ namespace Text/Regex/Internal {
     ///
     /// Represents a match `evaluator` a function that generates a value from a match (typically a replacement String).
     ///
-    type alias PrimMatchEvaluator[a] = PrimMatcher -> Result[a, System.Error] & Impure
+    type alias PrimMatchEvaluator[a] = PrimMatcher ~> Result[a, System.Error]
 
 }
 
@@ -43,14 +43,6 @@ namespace Text/Regex/Internal/PrimMatcher {
         let cs1 = input as ##java.lang.CharSequence;
         PrimMatcher(patt.matcher(cs1))
 
-    /// TODO - remove...
-    /// Should be wrapping the java primitives with the java names, changing names
-    /// is for the higher level modules.
-    pub def isMatch(x: PrimMatcher): Bool & Impure =
-        import java.util.regex.Matcher.matches();
-        let PrimMatcher(x1) = x;
-        x1.matches()
-
     pub def matches(x: PrimMatcher): Bool & Impure =
         import java.util.regex.Matcher.matches();
         let PrimMatcher(x1) = x;
@@ -61,10 +53,6 @@ namespace Text/Regex/Internal/PrimMatcher {
         let PrimMatcher(x1) = x;
         x1.lookingAt()
 
-    pub def isSubmatch(x: PrimMatcher): Bool & Impure =
-        import java.util.regex.Matcher.find();
-        let PrimMatcher(x1) = x;
-        x1.find()
 
     /// No exception.
     pub def replaceAll(x: PrimMatcher, rep: String): String & Impure =
@@ -82,6 +70,16 @@ namespace Text/Regex/Internal/PrimMatcher {
         import java.util.regex.Matcher.find();
         let PrimMatcher(x1) = x;
         x1.find()
+
+    pub def region(x: PrimMatcher, start: Int32, end: Int32): Result[Unit, System.Error] & Impure =
+        import java.util.regex.Matcher.region(Int32, Int32);
+        try {
+            let PrimMatcher(x1) = x;
+            x1.region(start, end);
+            Ok()
+        } catch {
+            case _: ##java.lang.IndexOutOfBoundsException => Err(IndexOutOfBoundsException)
+        }
 
     pub def start(x: PrimMatcher): Result[Int32, System.Error] & Impure =
         import java.util.regex.Matcher.start();
@@ -201,15 +199,7 @@ namespace Text/Regex/Internal/PrimMatcher {
             replaceAllWithIndexHelper(x, eval, sb, ix+1)
         }
 
-    pub def setRegion!(x: PrimMatcher, start: Int32, end: Int32): Result[Unit, System.Error] & Impure =
-        import java.util.regex.Matcher.region(Int32, Int32);
-        try {
-            let PrimMatcher(x1) = x;
-            x1.region(start, end);
-            Ok()
-        } catch {
-            case _: ##java.lang.IndexOutOfBoundsException => Err(IndexOutOfBoundsException)
-        }
+
 
 
 }
