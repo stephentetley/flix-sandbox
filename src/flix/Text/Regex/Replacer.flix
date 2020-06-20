@@ -26,6 +26,7 @@ use Text/Regex.{MatchEvaluator};
 use Text/Regex.MatchEvaluator.{MatchEvaluator};
 
 /// This is a "steppable" replacer like Matcher.
+/// Index is nuber of `finds` not the number of replacements.
 
 namespace Text/Regex {
     
@@ -42,7 +43,8 @@ namespace Text/Regex/Replacer {
         let Replacer(r1) = rep;
         let Pattern(p1) = patt;
         let prim = newPrimMatcher(p1, input);
-        match r1(sb, prim, 0) {
+        /// Start index at -1 because we haven't fund anything yet...
+        match r1(sb, prim, -1) {
             case Ok(a, _) => {
                 let s = StringBuilder.toString(sb);
                 Ok((a, s))
@@ -121,18 +123,23 @@ namespace Text/Regex/Replacer {
 
     pub def appendReplacement!(replacement: String): Replacer[Unit] =
         use Text/Regex/Internal/PrimMatcher.{appendReplacement};
-        Replacer((sb, m, n) ->
-            match appendReplacement(m, sb, replacement) {
-                case Ok() => Ok((), n + 1)
-                case Err(e) => Err(e)
-            }
-        )
+        liftWriterPrim((m,sb) -> appendReplacement(m, sb, replacement))
+
+    pub def getIndex(): Replacer[Int32] =
+        Replacer((_, _, n) -> Ok((n, n)) as & Impure)
+
+    def incrementFinds!(incr: Bool): Replacer[Unit] =
+        Replacer((_, _, n) -> Ok(((), if (incr) n + 1 else n)) as & Impure)
 
     pub def find(): Replacer[Bool] =
-        liftPrim(x -> Ok(Text/Regex/Internal/PrimMatcher.find(x)))
+        let* bfound = liftPrim(x -> Ok(Text/Regex/Internal/PrimMatcher.find(x)));
+        let* _ = incrementFinds!(bfound);
+        return(bfound)
 
     pub def findFrom(start: Int32): Replacer[Bool] =
-        liftPrim(x -> Ok(Text/Regex/Internal/PrimMatcher.findFrom(x, start)))
+        let* bfound = liftPrim(x -> Ok(Text/Regex/Internal/PrimMatcher.findFrom(x, start)));
+        let* _ = incrementFinds!(bfound);
+        return(bfound)
 
     pub def content(): Replacer[String] =
         liftPrim(Text/Regex/Internal/PrimMatcher.group)
@@ -183,10 +190,59 @@ namespace Text/Regex/Replacer {
             countWith(append, append(a, acc), n-1, ma)
         }
 
-    pub def count(n: Int32, ma: Replacer[a]): Replacer[List[a]] =
+    pub def count(n: Int32, rep: Replacer[a]): Replacer[List[a]] =
         use Data/Transient/DList.{empty, snoc, toList};
-        map(toList, countWith((x, xs) -> snoc(xs, x), empty(), n, ma))
+        map(toList, countWith((x, xs) -> snoc(xs, x), empty(), n, rep))
 
+    pub def count_(n: Int32, rep: Replacer[a]): Replacer[Unit] =
+        countWith((_,ac) -> ac, (), n, rep)
+
+    /// Strategies
+
+    pub def evaluateReplaceAll!(eval: MatchEvaluator[String]): Replacer[Unit] =
+        let* more = find();
+        if (more) {
+            let* s = evaluate(eval);
+            let* _ = appendReplacement!(s);
+            evaluateReplaceAll!(eval)
+        } else
+            appendTail!()
+
+    pub def evaluateReplaceSome!(eval: MatchEvaluator[Option[String]]): Replacer[Unit] =
+        let* more = find();
+        if (more) {
+            let* opt = evaluate(eval);
+            let* _ = match opt {
+                        case Some(s) => appendReplacement!(s)
+                        case None => return()
+                    };
+            evaluateReplaceSome!(eval)
+        } else
+            appendTail!()
+
+
+    pub def evaluateReplaceAllWithIndex!(eval: Int32 -> MatchEvaluator[String]): Replacer[Unit] =
+        let* more = find();
+        if (more) {
+            let* ix = getIndex();
+            let* s = evaluate(eval(ix));
+            let* _ = appendReplacement!(s);
+            evaluateReplaceAllWithIndex!(eval)
+        } else
+            appendTail!()
+
+    pub def evaluateReplaceSomeWithIndex!(eval: Int32 -> MatchEvaluator[Option[String]]): Replacer[Unit] =
+        let* more = find();
+        if (more) {
+            let* ix = getIndex();
+            let* opt = evaluate(eval(ix));
+            let* _ = match opt {
+                        case Some(s) => appendReplacement!(s)
+                        case None => return()
+                    };
+            evaluateReplaceSomeWithIndex!(eval)
+        } else
+            appendTail!()
 
 }        
 

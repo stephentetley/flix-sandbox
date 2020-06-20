@@ -145,24 +145,15 @@ namespace Text/Regex {
     /// Rewrite the string `input` by apply the function `f` to the substring produced by each match of the pattern `patt`.
     ///
     pub def replaceWith(patt: Pattern, eval: MatchEvaluator[String], input: String): Result[String, System.Error] & Impure =
-        use Text/Regex/Internal/PrimMatcher.{newPrimMatcher, group};
-        use Text/Regex/Internal/Replace.{replaceAllWith};
-        let Pattern(p1) = patt;
-        let m1 = newPrimMatcher(p1, input);
-        let MatchEvaluator(rewrite) = eval;
-        m1.replaceAllWith(rewrite)
+        use Text/Regex/Replacer.{execReplacer, evaluateReplaceAll!};
+        execReplacer(evaluateReplaceAll!(eval), patt, input)
 
     ///
     /// Rewrite the string `input` by apply the function `f` to the substring produced by each match of the pattern `patt`.
     ///
     pub def replaceWithIndex(patt: Pattern, eval: Int32 -> MatchEvaluator[String], input: String): Result[String, System.Error] & Impure =
-        use Text/Regex/Internal/PrimMatcher.{newPrimMatcher, group};
-        use Text/Regex/Internal/Replace.{replaceAllWithIndex};
-        let Pattern(p1) = patt;
-        let m1 = newPrimMatcher(p1, input);
-        m1.replaceAllWithIndex(ix -> 
-            let MatchEvaluator(rewrite) = eval(ix);
-            rewrite
-        )
+        use Text/Regex/Replacer.{execReplacer, evaluateReplaceAllWithIndex!};
+        execReplacer(evaluateReplaceAllWithIndex!(eval), patt, input)
+
 
 }
