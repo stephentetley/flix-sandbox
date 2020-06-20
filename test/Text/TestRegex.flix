@@ -31,5 +31,21 @@ def isMatch01(): Bool =
     };
     step() |> Result.isOk
 
+/////////////////////////////////////////////////////////////////////////////
+// results                                                                 //
+/////////////////////////////////////////////////////////////////////////////
+
+@test
+def results01(): Bool & Impure =
+    use Result.flatMap;
+    use Text/Regex.{results};
+    use Text/Regex/MatchEvaluator.{value};
+    let step = () -> {
+        let* p1 = Text/Regex/Pattern.compile("\p{Alpha}+");
+        let strm = results(p1, value(), "aa bb cc");
+        Ok(strm)
+    };
+    Result.map(Data/Stream.toList, step()) == Ok("aa" :: "bb" :: "cc" :: Nil)
+
 
 }

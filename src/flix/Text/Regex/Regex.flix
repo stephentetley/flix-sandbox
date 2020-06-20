@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 use System.Error.{IllegalStateException};
+use Data.Stream;
+
 use Text/Regex.Pattern;
 use Text/Regex.Pattern.Pattern;
 use Text/Regex.MatchEvaluator;
@@ -101,6 +103,24 @@ namespace Text/Regex {
         let Pattern(p1) = patt;
         let cs1 = s as ##java.lang.CharSequence;
         p1.split(cs1)
+
+    ///
+    /// Stream...
+    ///
+    pub def results(patt: Pattern, eval: MatchEvaluator[a], input: String): Stream[a] & Impure =
+        use Text/Regex/Internal/PrimMatcher.{newPrimMatcher, find};
+        let Pattern(p1) = patt;
+        let MatchEvaluator(fn1) = eval;
+        let m1 = newPrimMatcher(p1, input);
+        let streamiter: Data/Stream.Iterator[a] =  {
+              hasNext = () -> find(m1)
+            , next = () -> match fn1(m1) {
+                    case Ok(a) => a
+                    case Err(_) => panic("Regex.results - impossible")
+                }
+            , finalize = () -> () as & Impure
+        };
+        Data/Stream.fromIterator(streamiter)
 
 
     ///
