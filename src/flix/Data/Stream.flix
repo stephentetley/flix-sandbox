@@ -166,6 +166,7 @@ namespace Data/Stream {
         };
         Stream({ generate = gen, finalize = iterFinal })
 
+
     ///
     /// Returns a stream of all integers between `b` (inclusive) and `e` (exclusive).
     ///
