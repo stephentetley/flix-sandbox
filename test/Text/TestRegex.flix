@@ -18,18 +18,127 @@ namespace TestRegex {
 
 
 /////////////////////////////////////////////////////////////////////////////
-// isMatch                                                                 //
+// matches                                                                 //
 /////////////////////////////////////////////////////////////////////////////
 
 @test
-def isMatch01(): Bool =
+def matches01(): Bool =
     use Result.flatMap;
-    use Text/Regex.{isMatch};
+    use Text/Regex.{matches};
     let step = () -> {
         let* p1 = Text/Regex/Pattern.compile(".*");
-        Ok(isMatch(p1, ""))
+        Ok("".matches(p1))
     };
-    step() |> Result.isOk
+    step() == Ok(true)
+
+@test
+def matches02(): Bool =
+    use Result.flatMap;
+    use Text/Regex.{matches};
+    let step = () -> {
+        let* p1 = Text/Regex/Pattern.compile(".*");
+        Ok("a".matches(p1))
+    };
+    step() == Ok(true)
+
+@test
+def matches03(): Bool =
+    use Result.flatMap;
+    use Text/Regex.{matches};
+    let step = () -> {
+        let* p1 = Text/Regex/Pattern.compile(".+");
+        Ok("".matches(p1))
+    };
+    step() == Ok(false)
+
+@test
+def matches04(): Bool =
+    use Result.flatMap;
+    use Text/Regex.{matches};
+    let step = () -> {
+        let* p1 = Text/Regex/Pattern.compile("\d+");    // 1+ digits
+        Ok("aaa".matches(p1))
+    };
+    step() == Ok(false)
+
+@test
+def matches05(): Bool =
+    use Result.flatMap;
+    use Text/Regex.{matches};
+    let step = () -> {
+        let* p1 = Text/Regex/Pattern.compile("\d+");
+        Ok("1234a".matches(p1))
+    };
+    step() == Ok(false)
+
+/////////////////////////////////////////////////////////////////////////////
+// contains                                                                //
+/////////////////////////////////////////////////////////////////////////////
+
+@test
+def contains01(): Bool =
+    use Result.flatMap;
+    use Text/Regex.{contains};
+    let step = () -> {
+        let* p1 = Text/Regex/Pattern.compile("\d+");
+        Ok("".contains(p1))
+    };
+    step() == Ok(false)
+
+@test
+def contains02(): Bool =
+    use Result.flatMap;
+    use Text/Regex.{contains};
+    let step = () -> {
+        let* p1 = Text/Regex/Pattern.compile("\d+");
+        Ok("123".contains(p1))
+    };
+    step() == Ok(true)
+
+@test
+def contains03(): Bool =
+    use Result.flatMap;
+    use Text/Regex.{contains};
+    let step = () -> {
+        let* p1 = Text/Regex/Pattern.compile("\d+");
+        Ok("123abc".contains(p1))
+    };
+    step() == Ok(true)
+
+/////////////////////////////////////////////////////////////////////////////
+// startsWith                                                              //
+/////////////////////////////////////////////////////////////////////////////
+
+@test
+def startsWith01(): Bool =
+    use Result.flatMap;
+    use Text/Regex.{startsWith};
+    let step = () -> {
+        let* p1 = Text/Regex/Pattern.compile("\d+");
+        Ok("".startsWith(p1))
+    };
+    step() == Ok(false)
+
+@test
+def startsWith02(): Bool =
+    use Result.flatMap;
+    use Text/Regex.{startsWith};
+    let step = () -> {
+        let* p1 = Text/Regex/Pattern.compile("\d+");
+        Ok("123".startsWith(p1))
+    };
+    step() == Ok(true)
+
+@test
+def startsWith03(): Bool =
+    use Result.flatMap;
+    use Text/Regex.{startsWith};
+    let step = () -> {
+        let* p1 = Text/Regex/Pattern.compile("\d+");
+        Ok("123abc".startsWith(p1))
+    };
+    step() == Ok(true)
+
 
 /////////////////////////////////////////////////////////////////////////////
 // results                                                                 //

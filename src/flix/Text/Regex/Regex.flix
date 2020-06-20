@@ -27,22 +27,32 @@ namespace Text/Regex {
     ///
     /// Returns `true` if the entire string `input` is matched by the pattern `patt`.
     ///
-    /// Note - use `isSubmatch` to search for a substring.
+    /// Note - use `contains` to search for a substring.
     ///
-    pub def isMatch(patt: Pattern, input: String): Bool =
+    pub def matches(input: String, patt: Pattern): Bool =
         use Text/Regex/Internal/PrimMatcher.{newPrimMatcher, matches};
         let Pattern(p1) = patt;
         let m1 = newPrimMatcher(p1, input) as & Pure;
         m1.matches() as & Pure
 
     ///
-    /// Returns `true` if the string `s` is matched by the regular expression `pattern` at any point.
+    /// Returns `true` if the string `input` is matched by the regular expression pattern `patt` at any point.
     ///
-    pub def isSubmatch(patt: Pattern, input: String): Bool =
+    pub def contains(input: String, patt: Pattern): Bool =
         use Text/Regex/Internal/PrimMatcher.{newPrimMatcher, find};
         let Pattern(p1) = patt;
         let m1 = newPrimMatcher(p1, input) as & Pure;
         m1.find() as & Pure
+
+    ///
+    /// Returns `true` if the string `input` starts the regular expression pattern `patt`.
+    ///
+    pub def startsWith(input: String, patt: Pattern): Bool =
+        use Text/Regex/Internal/PrimMatcher.{newPrimMatcher, lookingAt};
+        let Pattern(p1) = patt;
+        let m1 = newPrimMatcher(p1, input) as & Pure;
+        m1.lookingAt() as & Pure
+
 
     /// Whole input matches...
     pub def evaluateMatch(patt: Pattern, eval: MatchEvaluator[a], input: String): Result[a, System.Error] & Impure =
