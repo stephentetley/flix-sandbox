@@ -194,21 +194,41 @@ namespace Text/Regex/Replacer {
         use Data/Transient/DList.{empty, snoc, toList};
         map(toList, countWith((x, xs) -> snoc(xs, x), empty(), n, rep))
 
-    pub def count_(n: Int32, rep: Replacer[a]): Replacer[Unit] =
-        countWith((_,ac) -> ac, (), n, rep)
+
 
     /// Strategies
 
-    pub def evaluateReplaceAll!(eval: MatchEvaluator[String]): Replacer[Unit] =
+    pub def rewriteAll!(fn: String -> String): Replacer[Unit] =
+        let* more = find();
+        if (more) {
+            let* s = content();
+            let* _ = appendReplacement!(fn(s));
+            rewriteAll!(fn)
+        } else
+            appendTail!()
+
+    pub def evalRewriteAll!(eval: MatchEvaluator[String]): Replacer[Unit] =
         let* more = find();
         if (more) {
             let* s = evaluate(eval);
             let* _ = appendReplacement!(s);
-            evaluateReplaceAll!(eval)
+            evalRewriteAll!(eval)
         } else
             appendTail!()
 
-    pub def evaluateReplaceSome!(eval: MatchEvaluator[Option[String]]): Replacer[Unit] =
+    pub def rewriteSome!(fn: String -> Option[String]): Replacer[Unit] =
+        let* more = find();
+        if (more) {
+            let* s = content();
+            let* _ = match fn(s) {
+                        case Some(s1) => appendReplacement!(s1)
+                        case None => return()
+                    };
+            rewriteSome!(fn)
+        } else
+            appendTail!()
+
+    pub def evalRewriteSome!(eval: MatchEvaluator[Option[String]]): Replacer[Unit] =
         let* more = find();
         if (more) {
             let* opt = evaluate(eval);
@@ -216,22 +236,46 @@ namespace Text/Regex/Replacer {
                         case Some(s) => appendReplacement!(s)
                         case None => return()
                     };
-            evaluateReplaceSome!(eval)
+            evalRewriteSome!(eval)
+        } else
+            appendTail!()
+
+    pub def rewriteAllWithIndex!(fn: (Int32, String) -> String): Replacer[Unit] =
+        let* more = find();
+        if (more) {
+            let* ix = getIndex();
+            let* s = content();
+            let* _ = appendReplacement!(fn(ix, s));
+            rewriteAllWithIndex!(fn)
         } else
             appendTail!()
 
 
-    pub def evaluateReplaceAllWithIndex!(eval: Int32 -> MatchEvaluator[String]): Replacer[Unit] =
+    pub def evalRewriteAllWithIndex!(eval: Int32 -> MatchEvaluator[String]): Replacer[Unit] =
         let* more = find();
         if (more) {
             let* ix = getIndex();
             let* s = evaluate(eval(ix));
             let* _ = appendReplacement!(s);
-            evaluateReplaceAllWithIndex!(eval)
+            evalRewriteAllWithIndex!(eval)
         } else
             appendTail!()
 
-    pub def evaluateReplaceSomeWithIndex!(eval: Int32 -> MatchEvaluator[Option[String]]): Replacer[Unit] =
+    pub def rewriteSomeWithIndex!(fn: (Int32, String) -> Option[String]): Replacer[Unit] =
+        let* more = find();
+        if (more) {
+            let* ix = getIndex();
+            let* s = content();
+            let* _ = match fn(ix, s) {
+                        case Some(s1) => appendReplacement!(s1)
+                        case None => return()
+                    };
+            rewriteSomeWithIndex!(fn)
+        } else
+            appendTail!()
+
+
+    pub def evalRewriteSomeWithIndex!(eval: Int32 -> MatchEvaluator[Option[String]]): Replacer[Unit] =
         let* more = find();
         if (more) {
             let* ix = getIndex();
@@ -240,9 +284,42 @@ namespace Text/Regex/Replacer {
                         case Some(s) => appendReplacement!(s)
                         case None => return()
                     };
-            evaluateReplaceSomeWithIndex!(eval)
+            evalRewriteSomeWithIndex!(eval)
         } else
             appendTail!()
+
+
+
+    pub def rewriteCount!(ntimes: Int32, fn: String -> String): Replacer[Unit] =
+        if (ntimes < 0)
+            return()
+        else
+            rewriteCountHelper!(ntimes, fn, 0)
+
+    def rewriteCountHelper!(ntimes: Int32, fn: String -> String, i: Int32): Replacer[Unit] =
+        let* more = find();
+        if (more || i < ntimes) {
+            let* s = content();
+            let* _ = appendReplacement!(fn(s));
+            rewriteCountHelper!(ntimes, fn, i + 1)
+        } else
+            appendTail!()
+
+    pub def evalRewriteCount!(ntimes: Int32, eval: MatchEvaluator[String]): Replacer[Unit] =
+        if (ntimes < 0)
+            return()
+        else
+            evalRewriteCountHelper!(ntimes, eval, 0)
+
+    def evalRewriteCountHelper!(ntimes: Int32, eval: MatchEvaluator[String], i: Int32): Replacer[Unit] =
+        let* more = find();
+        if (more || i < ntimes) {
+            let* s = evaluate(eval);
+            let* _ = appendReplacement!(s);
+            evalRewriteCountHelper!(ntimes, eval, i + 1)
+        } else
+            appendTail!()
+
 
 }        
 
