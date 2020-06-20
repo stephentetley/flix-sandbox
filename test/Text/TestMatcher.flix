@@ -23,8 +23,8 @@ namespace TestMatcher {
 
 @test
 def return01(): Bool & Impure =
-    use Text/Regex/Matcher.{runMatcher, return};
-    runMatcher(return(3), ".*", "aaaaa") == Ok(3)
+    use Text/Regex/Matcher.{runsMatcher, return};
+    runsMatcher(return(3), ".*", "aaaaa") == Ok(3)
 
 /////////////////////////////////////////////////////////////////////////////
 // getMatch                                                                //
@@ -32,17 +32,28 @@ def return01(): Bool & Impure =
 
 @test
 def getMatch01(): Bool & Impure =
-    use Text/Regex/Matcher.{runMatcher, getMatch};
-    runMatcher(getMatch(), ".*", "aa") == Ok("aa")
+    use Text/Regex/Matcher.{runsMatcher, getMatch};
+    runsMatcher(getMatch(), ".*", "aa") == Ok("aa")
 
 
 @test
 def getMatch02(): Bool & Impure =
-    use Text/Regex/Matcher.{runMatcher, flatMap, return, getMatch};
+    use Text/Regex/Matcher.{runsMatcher, flatMap, return, getMatch};
     let p1 = {
         let* _ = getMatch();
         let* b = getMatch();
         return(b)
     };
-    runMatcher(p1, "\w+", "aa bb") == Ok("bb")
+    runsMatcher(p1, "\w+", "aa bb") == Ok("bb")
+
+/////////////////////////////////////////////////////////////////////////////
+// count                                                                   //
+/////////////////////////////////////////////////////////////////////////////
+
+@test
+def count01(): Bool & Impure =
+    use Text/Regex/Matcher.{runsMatcher, getMatch, count};
+    let regex = "\p{Alpha}+";
+    runsMatcher(count(3, getMatch()), regex, "aa bb cc") == Ok("aa" :: "bb" :: "cc" :: Nil)
+
 }

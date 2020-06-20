@@ -90,13 +90,32 @@ namespace Text/Regex/MatchEvaluator {
 
     pub def getEnd(): MatchEvaluator[Int32] = liftPrim(Text/Regex/Internal/PrimMatcher.end)
         
-    /// TODO Check Java indexing, I'm not sure we want to follow the convention of zero = return everything.        
+    ///
+    /// Note - this function uses 0-indexing, the equivalent Java method `group(int group)` uses 1-indexing.
+    ///
     pub def getCaptureByIndex(ix: Int32): MatchEvaluator[String] = 
-        liftPrim(x -> Text/Regex/Internal/PrimMatcher.groupElementByIndex(x, ix))
+        liftPrim(x -> Text/Regex/Internal/PrimMatcher.groupElementByIndex(x, ix+1))
 
     pub def getCaptureByName(label: String): MatchEvaluator[String] = 
         liftPrim(x -> Text/Regex/Internal/PrimMatcher.groupElementByName(x, label))
 
+    ///
+    /// Note - this function uses 0-indexing, the equivalent Java method `group(int group)` uses 1-indexing.
+    ///
+    pub def getCaptureStartByIndex(ix: Int32): MatchEvaluator[Int32] =
+        liftPrim(x -> Text/Regex/Internal/PrimMatcher.groupStartByIndex(x, ix+1))
+
+    pub def getCaptureStartByName(label: String): MatchEvaluator[Int32] =
+        liftPrim(x -> Text/Regex/Internal/PrimMatcher.groupStartByName(x, label))
+
+    ///
+    /// Note - this function uses 0-indexing, the equivalent Java method `group(int group)` uses 1-indexing.
+    ///
+    pub def getCaptureEndByIndex(ix: Int32): MatchEvaluator[Int32] =
+        liftPrim(x -> Text/Regex/Internal/PrimMatcher.groupEndByIndex(x, ix+1))
+
+    pub def getCaptureEndByName(label: String): MatchEvaluator[Int32] =
+        liftPrim(x -> Text/Regex/Internal/PrimMatcher.groupEndByName(x, label))
 
     ///
     /// Applies the binary function `f` to the values in `o1` and `o2`.

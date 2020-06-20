@@ -20,6 +20,7 @@ use Text/Regex.{Matcher};
 use Text/Regex.Matcher.{Matcher};
 
 use Text/Regex/Internal.{PrimMatcher};
+use Text/Regex.Pattern;
 use Text/Regex.Pattern.{Pattern};
 use Text/Regex.{MatchEvaluator};
 use Text/Regex.MatchEvaluator.{MatchEvaluator};
@@ -34,14 +35,22 @@ namespace Text/Regex {
 
 namespace Text/Regex/Matcher {
 
-    pub def runMatcher(ma: Matcher[a], regex: String, input: String): Result[a, System.Error] & Impure =
+    pub def runMatcher(ma: Matcher[a], patt: Pattern, input: String): Result[a, System.Error] & Impure =
         use Result.flatMap;
         use Text/Regex/Internal/PrimMatcher.{newPrimMatcher};
-        let* patt = Text/Regex/Pattern.compile(regex);
         let Matcher(m1) = ma;
         let Pattern(p1) = patt;
         let prim = newPrimMatcher(p1, input);
         m1(prim)
+
+    ///
+    /// Version of `runMatcher` that takes a regex string and compiles it to a Pattern.
+    ///
+    pub def runsMatcher(ma: Matcher[a], regex: String, input: String): Result[a, System.Error] & Impure =
+        use Result.flatMap;
+        let* patt = Text/Regex/Pattern.compile(regex);
+        runMatcher(ma, patt, input)
+
 
     pub def return(x: a): Matcher[a] =
         Matcher(_ -> Ok(x) as & Impure)
@@ -90,6 +99,12 @@ namespace Text/Regex/Matcher {
 
     pub def ignore(x: Matcher[a]): Matcher[Unit] = map(_ -> (), x)
 
+    pub def matches(): Matcher[Bool] =
+        liftPrim(x -> Ok(Text/Regex/Internal/PrimMatcher.matches(x)))
+
+    pub def lookingAt(): Matcher[Bool] =
+        liftPrim(x -> Ok(Text/Regex/Internal/PrimMatcher.lookingAt(x)))
+
     pub def find(): Matcher[Bool] =
         liftPrim(x -> Ok(Text/Regex/Internal/PrimMatcher.find(x)))
 
@@ -129,6 +144,23 @@ namespace Text/Regex/Matcher {
 
     pub def setRegion!(start: Int32, end: Int32): Matcher[Unit] =
         liftPrim(x -> Text/Regex/Internal/PrimMatcher.region(x, start, end))
+
+    pub def setPattern!(patt: Pattern): Matcher[Unit] =
+        let Pattern(p1) = patt;
+        liftPrim(x -> Ok(Text/Regex/Internal/PrimMatcher.usePattern(x, p1)))
+
+    pub def countWith(append: (a, ac) -> ac, acc: ac, n: Int32, ma: Matcher[a]): Matcher[ac] =
+        if (n <= 0)
+            return(acc)
+        else {
+            let* a = ma;
+            countWith(append, append(a, acc), n-1, ma)
+        }
+
+    pub def count(n: Int32, ma: Matcher[a]): Matcher[List[a]] =
+        use Data/Transient/DList.{empty, snoc, toList};
+        map(toList, countWith((x, xs) -> snoc(xs, x), empty(), n, ma))
+
 
 }        
 
