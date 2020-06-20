@@ -14,31 +14,38 @@
  * limitations under the License.
  */
 
-// Note - not in the Data namespace.
+use Data.Stream;
+use Data.Stream.{Stream};
+use Data.Step;
+use Data.Step.{Done, Skip, Yield};
 
-///
-/// The Stream type.
-///
-/// A stream provides "demand driven" access to its elements - successive
-/// elements are only produced when needed. Internally the stream is
-/// represented as a "pull stream" plus a finalizer.
-///
-/// Note - a stream is not "replayable".
-///
-pub opaque type Stream[a] = { generate: Unit ~> (Unit ~> Step[a]), finalize: Unit ~> Unit }
+namespace Data {
 
-///
-/// The internal type of stream answers.
-/// `Skip` allows us to write `filter` and other functions that do not
-/// necessarily produce a value at each step.
-///
-enum Step[a] {
-    case Done,
-    case Skip,
-    case Yield(a)
+    ///
+    /// The Stream type.
+    ///
+    /// A stream provides "demand driven" access to its elements - successive
+    /// elements are only produced when needed. Internally the stream is
+    /// represented as a "pull stream" plus a finalizer.
+    ///
+    /// Note - a stream is not "replayable".
+    ///
+    pub opaque type Stream[a] = { generate: Unit ~> (Unit ~> Step[a]), finalize: Unit ~> Unit }
+
+    ///
+    /// The internal type of stream answers, not pub.
+    /// `Skip` allows us to write `filter` and other functions that do not
+    /// necessarily produce a value at each step.
+    ///
+    enum Step[a] {
+        case Done,
+        case Skip,
+        case Yield(a)
+    }
+
 }
 
-namespace Stream { 
+namespace Data/Stream {
 
     ///
     /// Returns the empty stream.
