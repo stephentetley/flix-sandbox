@@ -81,15 +81,21 @@ namespace Text/Regex/MatchEvaluator {
 
 
 
-    pub def value(): MatchEvaluator[String] = liftPrim(Text/Regex/Internal/PrimMatcher.group)
+    pub def content(): MatchEvaluator[String] = liftPrim(Text/Regex/Internal/PrimMatcher.group)
 
-    pub def transformValue(f: String -> String): MatchEvaluator[String] = map(f, value())
+    pub def transformContent(f: String -> String): MatchEvaluator[String] = map(f, content())
 
 
     pub def getStart(): MatchEvaluator[Int32] = liftPrim(Text/Regex/Internal/PrimMatcher.start)
 
     pub def getEnd(): MatchEvaluator[Int32] = liftPrim(Text/Regex/Internal/PrimMatcher.end)
-        
+
+    ///
+    ///
+    pub def getRange(): MatchEvaluator[(Int32, Int32)] =
+        lift2((x,y) -> (x,y), getStart(), getEnd())
+
+
     ///
     /// Note - this function uses 0-indexing, the equivalent Java method `group(int group)` uses 1-indexing.
     ///

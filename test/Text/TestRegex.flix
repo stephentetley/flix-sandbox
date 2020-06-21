@@ -192,13 +192,41 @@ def evalStartsWith01(): Bool & Impure =
 def results01(): Bool & Impure =
     use Result.flatMap;
     use Text/Regex.{results};
-    use Text/Regex/MatchEvaluator.{value};
+    use Text/Regex/MatchEvaluator.{content};
     let step = () -> {
         let* p1 = Text/Regex/Pattern.compile("\p{Alpha}+");
-        let strm = results(p1, value(), "aa bb cc");
+        let strm = results("aa bb cc", p1, content());
         Ok(strm)
     };
     Result.map(Data/Stream.toList, step()) == Ok("aa" :: "bb" :: "cc" :: Nil)
 
+/////////////////////////////////////////////////////////////////////////////
+// contentResults                                                          //
+/////////////////////////////////////////////////////////////////////////////
 
+@test
+def contentResults01(): Bool & Impure =
+    use Result.flatMap;
+    use Text/Regex.{contentResults};
+    let step = () -> {
+        let* p1 = Text/Regex/Pattern.compile("\p{Alpha}+");
+        let strm = contentResults("aa bb cc", p1);
+        Ok(strm)
+    };
+    Result.map(Data/Stream.toList, step()) == Ok("aa" :: "bb" :: "cc" :: Nil)
+
+/////////////////////////////////////////////////////////////////////////////
+// rangeResults                                                            //
+/////////////////////////////////////////////////////////////////////////////
+
+@test
+def rangeResults01(): Bool & Impure =
+    use Result.flatMap;
+    use Text/Regex.{rangeResults};
+    let step = () -> {
+        let* p1 = Text/Regex/Pattern.compile("\p{Alpha}+");
+        let strm = rangeResults("aa bb cc", p1);
+        Ok(strm)
+    };
+    Result.map(Data/Stream.toList, step()) == Ok((0,2) :: (3,5) :: (6,8) :: Nil)
 }
