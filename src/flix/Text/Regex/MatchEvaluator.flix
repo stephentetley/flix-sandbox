@@ -93,29 +93,38 @@ namespace Text/Regex/MatchEvaluator {
     ///
     /// Note - this function uses 0-indexing, the equivalent Java method `group(int group)` uses 1-indexing.
     ///
-    pub def getCaptureByIndex(ix: Int32): MatchEvaluator[String] = 
+    pub def getCapture(ix: Int32): MatchEvaluator[String] =
         liftPrim(x -> Text/Regex/Internal/PrimMatcher.groupElementByIndex(x, ix+1))
 
-    pub def getCaptureByName(label: String): MatchEvaluator[String] = 
+    pub def getNamedCapture(label: String): MatchEvaluator[String] =
         liftPrim(x -> Text/Regex/Internal/PrimMatcher.groupElementByName(x, label))
 
     ///
     /// Note - this function uses 0-indexing, the equivalent Java method `group(int group)` uses 1-indexing.
     ///
-    pub def getCaptureStartByIndex(ix: Int32): MatchEvaluator[Int32] =
+    pub def getCaptureStart(ix: Int32): MatchEvaluator[Int32] =
         liftPrim(x -> Text/Regex/Internal/PrimMatcher.groupStartByIndex(x, ix+1))
 
-    pub def getCaptureStartByName(label: String): MatchEvaluator[Int32] =
+    pub def getNamedCaptureStart(label: String): MatchEvaluator[Int32] =
         liftPrim(x -> Text/Regex/Internal/PrimMatcher.groupStartByName(x, label))
 
     ///
     /// Note - this function uses 0-indexing, the equivalent Java method `group(int group)` uses 1-indexing.
     ///
-    pub def getCaptureEndByIndex(ix: Int32): MatchEvaluator[Int32] =
+    pub def getCaptureEnd(ix: Int32): MatchEvaluator[Int32] =
         liftPrim(x -> Text/Regex/Internal/PrimMatcher.groupEndByIndex(x, ix+1))
 
-    pub def getCaptureEndByName(label: String): MatchEvaluator[Int32] =
+    pub def getNamedCaptureEnd(label: String): MatchEvaluator[Int32] =
         liftPrim(x -> Text/Regex/Internal/PrimMatcher.groupEndByName(x, label))
+
+    ///
+    /// Note - this function uses 0-indexing, the equivalent Java method `group(int group)` uses 1-indexing.
+    ///
+    pub def getCaptureRange(ix: Int32): MatchEvaluator[(Int32, Int32)] =
+        lift2((x,y) -> (x,y), getCaptureStart(ix), getCaptureEnd(ix))
+
+    pub def getNamedCaptureRange(label: String): MatchEvaluator[(Int32, Int32)] =
+        lift2((x,y) -> (x,y), getNamedCaptureStart(label), getNamedCaptureEnd(label))
 
     ///
     /// Applies the binary function `f` to the values in `o1` and `o2`.

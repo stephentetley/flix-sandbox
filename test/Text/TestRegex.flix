@@ -139,6 +139,50 @@ def startsWith03(): Bool =
     };
     step() == Ok(true)
 
+/////////////////////////////////////////////////////////////////////////////
+// evalMatches                                                             //
+/////////////////////////////////////////////////////////////////////////////
+
+@test
+def evalMatches01(): Bool & Impure =
+    use Result.flatMap;
+    use Text/Regex.{evalMatches};
+    let eval = Text/Regex/MatchEvaluator.getNamedCapture("num");
+    let step = () -> {
+        let* p1 = Text/Regex/Pattern.compile("(?<num>\d+)");
+        "123".evalMatches(p1, eval)
+    };
+    step() == Ok("123")
+
+/////////////////////////////////////////////////////////////////////////////
+// evalContains                                                            //
+/////////////////////////////////////////////////////////////////////////////
+
+@test
+def evalContains01(): Bool & Impure =
+    use Result.flatMap;
+    use Text/Regex.{evalContains};
+    let eval = Text/Regex/MatchEvaluator.getNamedCapture("num");
+    let step = () -> {
+        let* p1 = Text/Regex/Pattern.compile("(?<num>\d+)");
+        "aa 123 bb".evalContains(p1, eval)
+    };
+    step() == Ok("123")
+
+/////////////////////////////////////////////////////////////////////////////
+// evalStartsWith                                                          //
+/////////////////////////////////////////////////////////////////////////////
+
+@test
+def evalStartsWith01(): Bool & Impure =
+    use Result.flatMap;
+    use Text/Regex.{evalStartsWith};
+    let eval = Text/Regex/MatchEvaluator.getNamedCapture("num");
+    let step = () -> {
+        let* p1 = Text/Regex/Pattern.compile("(?<num>\d+)");
+        "123 bb".evalStartsWith(p1, eval)
+    };
+    step() == Ok("123")
 
 /////////////////////////////////////////////////////////////////////////////
 // results                                                                 //

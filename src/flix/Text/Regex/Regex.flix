@@ -55,7 +55,10 @@ namespace Text/Regex {
 
 
     /// Whole input matches...
-    pub def evaluateMatch(patt: Pattern, eval: MatchEvaluator[a], input: String): Result[a, System.Error] & Impure =
+    /// The MatchEvaluator `eval` is potentially impure (e.g. it might create an array),
+    /// so this function is impure.
+    ///
+    pub def evalMatches(input: String, patt: Pattern, eval: MatchEvaluator[a]): Result[a, System.Error] & Impure =
         use Text/Regex/Internal/PrimMatcher.{newPrimMatcher, matches};
         let Pattern(p1) = patt;
         let m1 = newPrimMatcher(p1, input);
@@ -68,11 +71,26 @@ namespace Text/Regex {
 
 
     /// Input matches at least once (left to right)...
-    pub def evaluateSubmatch(patt: Pattern, eval: MatchEvaluator[a], input: String): Result[a, System.Error] & Impure =
+    ///
+    /// The MatchEvaluator `eval` is potentially impure (e.g. it might create an array),
+    /// so this function is impure.
+    ///
+    pub def evalContains(input: String, patt: Pattern, eval: MatchEvaluator[a]): Result[a, System.Error] & Impure =
         use Text/Regex/Internal/PrimMatcher.{newPrimMatcher, find};
         let Pattern(p1) = patt;
         let m1 = newPrimMatcher(p1, input);
         if (m1.find() == true) {
+            let MatchEvaluator(fn) = eval;
+            m1.fn()
+        } else
+            Err(IllegalStateException)
+
+    /// Input matches at least once (left to right)...
+    pub def evalStartsWith(input: String, patt: Pattern, eval: MatchEvaluator[a]): Result[a, System.Error] & Impure =
+        use Text/Regex/Internal/PrimMatcher.{newPrimMatcher, lookingAt};
+        let Pattern(p1) = patt;
+        let m1 = newPrimMatcher(p1, input);
+        if (m1.lookingAt() == true) {
             let MatchEvaluator(fn) = eval;
             m1.fn()
         } else
