@@ -77,3 +77,51 @@ def getFlags03(): Bool =
     step() == Ok(CanonEq :: Multiline :: Nil) || step() == Ok(Multiline :: CanonEq :: Nil)
 
 }
+
+/////////////////////////////////////////////////////////////////////////////
+// unmatchable                                                             //
+/////////////////////////////////////////////////////////////////////////////
+
+@test
+def unmatchable01(): Bool =
+    use Text/Regex/Pattern.{unmatchable};
+    Text/Regex.contains("", unmatchable()) == false
+
+@test
+def unmatchable02(): Bool =
+    use Text/Regex/Pattern.{unmatchable};
+    Text/Regex.contains("aaa", unmatchable()) == false
+
+@test
+def unmatchable03(): Bool =
+    use Text/Regex/Pattern.{unmatchable};
+    use String.{unlines};
+    Text/Regex.contains("aaa bbb", unmatchable()) == false
+
+@test
+def unmatchable04(): Bool =
+    use Text/Regex/Pattern.{unmatchable};
+    use String.{unlines};
+    Text/Regex.contains(unlines("aaa" :: "bbb" :: Nil), unmatchable()) == false
+
+@test
+def unmatchable05(): Bool =
+    use Text/Regex/Pattern.{unmatchable};
+    Text/Regex.matches("", unmatchable()) == false
+
+@test
+def unmatchable06(): Bool =
+    use Text/Regex/Pattern.{unmatchable};
+    Text/Regex.matches("aaa", unmatchable()) == false
+
+@test
+def unmatchable07(): Bool =
+    use Text/Regex/Pattern.{unmatchable};
+    use String.{unlines};
+    Text/Regex.matches("aaa bbb", unmatchable()) == false
+
+@test
+def unmatchable08(): Bool =
+    use Text/Regex/Pattern.{unmatchable};
+    use String.{unlines};
+    Text/Regex.matches(unlines("aaa" :: "bbb" :: Nil), unmatchable()) == false

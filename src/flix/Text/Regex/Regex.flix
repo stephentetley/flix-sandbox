@@ -158,6 +158,14 @@ namespace Text/Regex {
         p1.split(cs1)
 
     ///
+    /// Splits the string `s` around matches of the pattern `p`.
+    ///
+    pub def boundedSplit(input: String, patt: Pattern, start: Int32, end: Int32): Array[String] & Impure =
+        let input1 = String.slice(input, start, end);
+        split(input1, patt)
+
+
+    ///
     /// Stream...
     ///
     pub def results(input: String, patt: Pattern, eval: MatchEvaluator[a]): Stream[a] & Impure =

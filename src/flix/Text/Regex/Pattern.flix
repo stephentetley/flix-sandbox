@@ -101,6 +101,32 @@ namespace Text/Regex/Pattern {
             case _: ##java.lang.IllegalArgumentException =>  Err(Generic("Regex/Pattern.compileWithFlags - illegal argument error"))
         }
 
+    ///
+    /// Irrefutabily compile the regular expression `regex` into a Pattern.
+    /// If compilation fails the pattern will be substituted by the "unmatchable" pattern.
+    ///
+    /// Use this only in circumstances where you know the `regex` is a valid pattern
+    /// and you need to avoid wrapping it in an `Ok`.
+    ///
+    pub def irrefutableCompile(regex: String): Pattern =
+        import java.util.regex.Pattern:compile(String);
+        try {
+            Pattern(compile(regex)) as & Pure
+        } catch {
+            case _: ##java.util.regex.PatternSyntaxException => unmatchable()
+        }
+
+    ///
+    /// Return the unmatchable pattern - a pattern that will not match any input.
+    ///
+    pub def unmatchable(): Pattern =
+        import java.util.regex.Pattern:compile(String);
+        try {
+            Pattern(compile("^\b$")) as & Pure
+        } catch {
+            case _: ##java.util.regex.PatternSyntaxException => panic("Pattern.unmatchable - impossible")
+        }
+
 
     pub def quote(s: String): String =
         import java.util.regex.Pattern:quote(String);
