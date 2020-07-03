@@ -18,6 +18,7 @@ package flix.runtime.spt.sandbox.system;
 
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
 
 /**
@@ -26,7 +27,13 @@ import java.nio.file.Path;
  */
 public class FileWrapper {
 
-    /// Sub function for `Files.writeString` as it is "varargs" in Java.
+
+    /// Stub function for `Files.exists` as it is "varargs" in Java.
+    public static boolean exists(Path path) throws Exception {
+        return Files.exists(path, LinkOption.NOFOLLOW_LINKS);
+    }
+
+    /// Stub function for `Files.writeString` as it is "varargs" in Java.
     public static void writeString(Path path, Charset charset, String content) throws Exception {
         final CharSequence content2 = content;
         Files.writeString(path, content2, charset);

@@ -14,12 +14,22 @@
  * limitations under the License.
  */
 
-use System.Error.{IOException, Generic};
+use System.Error.{FileNotFoundException, IOException, Generic};
 use System.FilePath;
 use System.FilePath.{FilePath};
 use Text.Charset.{Charset};
 
 namespace System/File {
+
+    pub def exists(path: FilePath): Result[Bool, System.Error] & Impure =
+        try {
+            import flix.runtime.spt.sandbox.system.FileWrapper:exists(##java.nio.file.Path);
+            let FilePath(path1) = path;
+            Ok(exists(path1))
+        } catch {
+            case _: ##java.lang.SecurityException => Err(IOException)
+        }
+
 
     /// TODO - test exception
     pub def readFile(path: FilePath, cs: Text.Charset): Result[String, System.Error] & Impure =
@@ -30,6 +40,7 @@ namespace System/File {
             Ok(readString(path1, cs1))
         }
         catch {
+            case _: ##java.io.FileNotFoundException => Err(FileNotFoundException)
             case _: ##java.io.IOException => Err(IOException)
             case _: ##java.lang.Exception => Err(Generic("Exception"))
         }

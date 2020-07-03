@@ -17,6 +17,7 @@
 use System.Error;
 use System.Error.{ArrayIndexOutOfBoundsException,
         Exception,
+        FileNotFoundException,
         IllegalArgumentException,
         IllegalStateException,
         IndexOutOfBoundsException,
@@ -38,6 +39,7 @@ namespace System {
     pub enum Error {
         case ArrayIndexOutOfBoundsException,
         case Exception,
+        case FileNotFoundException,
         case IllegalArgumentException,
         case IllegalStateException,
         case IndexOutOfBoundsException,
@@ -59,6 +61,7 @@ namespace System/Error {
     pub def toString(x: Error): String = match x {
         case ArrayIndexOutOfBoundsException     => "ArrayIndexOutOfBoundsException"
         case Exception                          => "Exception"
+        case FileNotFoundException              => "FileNotFoundException"
         case IllegalArgumentException           => "IllegalArgumentException"
         case IllegalStateException              => "IllegalStateException"
         case IndexOutOfBoundsException          => "IndexOutOfBoundsException"
