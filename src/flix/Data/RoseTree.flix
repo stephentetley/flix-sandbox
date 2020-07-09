@@ -113,4 +113,16 @@ namespace Data/RoseTree {
         case Nil => k(Nil)
         case x :: rs => mapHelper(f, x, v1 -> mapForest(f, rs, vs -> k(v1 :: vs)))
     }
+
+    /// Traversal order is preorder (check...)
+    pub def foreach(f: a ~> Unit, t: RoseTree[a]): Unit & Impure =
+        let RoseTree(a,xs) = t;
+        f(a);
+        foreachForest(f, xs)
+
+    def foreachForest(f: a ~> Unit, ts: RoseForest[a]): Unit & Impure = match ts {
+        case Nil => ()
+        case x :: rs => { foreach(f, x); foreachForest(f, rs) }
+    }
+
 }
