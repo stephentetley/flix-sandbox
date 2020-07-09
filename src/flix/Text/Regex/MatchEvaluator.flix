@@ -282,5 +282,44 @@ namespace Text/Regex/MatchEvaluator {
     pub def tuple5(o1: MatchEvaluator[t1], o2: MatchEvaluator[t2], o3: MatchEvaluator[t3], o4: MatchEvaluator[t4], o5: MatchEvaluator[t5]): MatchEvaluator[(t1, t2, t3, t4, t5)]  =
         lift5((x1, x2, x3, x4, x5) -> (x1, x2, x3, x4, x5), o1, o2, o3, o4, o5)
 
+    ///
+    /// Returns a 6 element tuple with the results of applying the evaluators `o1`, `o2`, ... `o6`.
+    ///
+    /// Returns an error if evaluating any of `o1`, `o2`, ... `o6` is an error.
+    ///
+    pub def tuple6(o1: MatchEvaluator[t1], o2: MatchEvaluator[t2], o3: MatchEvaluator[t3], o4: MatchEvaluator[t4], o5: MatchEvaluator[t5], o6: MatchEvaluator[t6]): MatchEvaluator[(t1, t2, t3, t4, t5, t6)]  =
+        lift6((x1, x2, x3, x4, x5, x6) -> (x1, x2, x3, x4, x5, x6), o1, o2, o3, o4, o5, o6)
+
+    ///
+    /// Returns a 7 element tuple with the results of applying the evaluators `o1`, `o2`, ... `o7`.
+    ///
+    /// Returns an error if evaluating any of `o1`, `o2`, ... `o7` is an error.
+    ///
+    pub def tuple7(o1: MatchEvaluator[t1], o2: MatchEvaluator[t2], o3: MatchEvaluator[t3], o4: MatchEvaluator[t4], o5: MatchEvaluator[t5], o6: MatchEvaluator[t6], o7: MatchEvaluator[t7]): MatchEvaluator[(t1, t2, t3, t4, t5, t6, t7)]  =
+        lift7((x1, x2, x3, x4, x5, x6, x7) -> (x1, x2, x3, x4, x5, x6, x7), o1, o2, o3, o4, o5, o6, o7)
+
+    ///
+    /// Returns a 8 element tuple with the results of applying the evaluators `o1`, `o2`, ... `o8`.
+    ///
+    /// Returns an error if evaluating any of `o1`, `o2`, ... `o8` is an error.
+    ///
+    pub def tuple8(o1: MatchEvaluator[t1], o2: MatchEvaluator[t2], o3: MatchEvaluator[t3], o4: MatchEvaluator[t4], o5: MatchEvaluator[t5], o6: MatchEvaluator[t6], o7: MatchEvaluator[t7], o8: MatchEvaluator[t8]): MatchEvaluator[(t1, t2, t3, t4, t5, t6, t7, t8)]  =
+        lift8((x1, x2, x3, x4, x5, x6, x7, x8) -> (x1, x2, x3, x4, x5, x6, x7, x8), o1, o2, o3, o4, o5, o6, o7, o8)
+
+    ///
+    /// Returns a 9 element tuple with the results of applying the evaluators `o1`, `o2`, ... `o9`.
+    ///
+    /// Returns an error if evaluating any of `o1`, `o2`, ... `o9` is an error.
+    ///
+    pub def tuple9(o1: MatchEvaluator[t1], o2: MatchEvaluator[t2], o3: MatchEvaluator[t3], o4: MatchEvaluator[t4], o5: MatchEvaluator[t5], o6: MatchEvaluator[t6], o7: MatchEvaluator[t7], o8: MatchEvaluator[t8], o9: MatchEvaluator[t9]): MatchEvaluator[(t1, t2, t3, t4, t5, t6, t7, t8, t9)]  =
+        lift9((x1, x2, x3, x4, x5, x6, x7, x8, x9) -> (x1, x2, x3, x4, x5, x6, x7, x8, x9), o1, o2, o3, o4, o5, o6, o7, o8, o9)
+
+    ///
+    /// Returns a 10 element tuple with the results of applying the evaluators `o1`, `o2`, ... `o10`.
+    ///
+    /// Returns an error if evaluating any of `o1`, `o2`, ... `o10` is an error.
+    ///
+    pub def tuple10(o1: MatchEvaluator[t1], o2: MatchEvaluator[t2], o3: MatchEvaluator[t3], o4: MatchEvaluator[t4], o5: MatchEvaluator[t5], o6: MatchEvaluator[t6], o7: MatchEvaluator[t7], o8: MatchEvaluator[t8], o9: MatchEvaluator[t9], o10: MatchEvaluator[t10]): MatchEvaluator[(t1, t2, t3, t4, t5, t6, t7, t8, t9, t10)]  =
+        lift10((x1, x2, x3, x4, x5, x6, x7, x8, x9, x10) -> (x1, x2, x3, x4, x5, x6, x7, x8, x9, x10), o1, o2, o3, o4, o5, o6, o7, o8, o9, o10)
 
 }
