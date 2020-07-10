@@ -76,7 +76,6 @@ def getFlags03(): Bool =
     };
     step() == Ok(CanonEq :: Multiline :: Nil) || step() == Ok(Multiline :: CanonEq :: Nil)
 
-}
 
 /////////////////////////////////////////////////////////////////////////////
 // unmatchable                                                             //
@@ -125,3 +124,5 @@ def unmatchable08(): Bool =
     use Text/Regex/Pattern.{unmatchable};
     use String.{unlines};
     Text/Regex.matches(unlines("aaa" :: "bbb" :: Nil), unmatchable()) == false
+
+}

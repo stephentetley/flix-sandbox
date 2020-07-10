@@ -28,6 +28,7 @@ namespace I18n/Locale {
 
 // WARNING - Currently this doesn't compile:
 // "Cannot find "##java.util.Locale.IsoCountryCode"
+// ... problem is inner classes
 
 namespace I18n/Locale/IsoCountryCode {
 
