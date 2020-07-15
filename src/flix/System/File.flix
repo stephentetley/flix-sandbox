@@ -31,6 +31,26 @@ namespace System/File {
         }
 
 
+    pub def delete(path: FilePath): Result[Unit, System.Error] & Impure =
+        try {
+            import java.nio.file.Files:delete(##java.nio.file.Path);
+            let FilePath(path1) = path;
+            delete(path1);
+            Ok()
+        } catch {
+            case _: ##java.lang.Exception => Err(IOException)
+        }
+
+    pub def deleteIfExists(path: FilePath): Result[Unit, System.Error] & Impure =
+        try {
+            import java.nio.file.Files:deleteIfExists(##java.nio.file.Path);
+            let FilePath(path1) = path;
+            deleteIfExists(path1);
+            Ok()
+        } catch {
+            case _: ##java.lang.Exception => Err(IOException)
+        }
+
     /// TODO - test exception
     pub def readFile(path: FilePath, cs: Text.Charset): Result[String, System.Error] & Impure =
         try {

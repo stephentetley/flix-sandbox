@@ -108,7 +108,7 @@ namespace Text/Regex/Pattern {
     /// Use this only in circumstances where you know the `regex` is a valid pattern
     /// and you need to avoid wrapping it in an `Ok`.
     ///
-    pub def irrefutableCompile(regex: String): Pattern =
+    pub def irrefutablePattern(regex: String): Pattern =
         import java.util.regex.Pattern:compile(String);
         try {
             Pattern(compile(regex)) as & Pure
