@@ -864,12 +864,12 @@ namespace Data/Stream {
     ///
     def foldResultHelper(f: (b,a) -> Result[b, err] & e, sf: Unit ~> Step[a], ac: b): Result[b, err] & Impure =
         match sf() {
-            case Done => Ok(ac)
+            case Done => Ok(ac) as & Impure
             case Skip => foldResultHelper(f, sf, ac)
             case Yield(a) => match f(ac, a) {
-                case Err(err) => Err(err)
+                case Err(err) => Err(err) as & Impure
                 case Ok(ac1) => foldResultHelper(f, sf, ac1)
-            } as & Impure
+            }
         }
 
 }
