@@ -853,7 +853,7 @@ namespace Data/Stream {
     ///
     pub def foldResult(f: (b, a) -> Result[b, err] & e, ac: b, s: Stream[a]): Result[b, err] & Impure =
         let generate1 = getGenerator(s);
-        let finalize1 = getGenerator(s);
+        let finalize1 = getFinalizer(s);
         let sf = generate1();
         let ans = foldResultHelper(f, sf, ac);
         finalize1();
@@ -869,6 +869,103 @@ namespace Data/Stream {
             case Yield(a) => match f(ac, a) {
                 case Err(err) => Err(err) as & Impure
                 case Ok(ac1) => foldResultHelper(f, sf, ac1)
+            }
+        }
+
+    ///
+    /// ...Collects all Somes, not short-circuiting...
+    ///
+    pub def chooseToList(f: a -> Option[b] & e, s: Stream[a]): List[b] & Impure =
+        let generate1 = getGenerator(s);
+        let finalize1 = getFinalizer(s);
+        let sf = generate1();
+        let ans = chooseToListHelper(f, sf, ks -> ks as & Impure);
+        finalize1();
+        ans
+
+    ///
+    /// Helper function for `chooseToList`.
+    ///
+    def chooseToListHelper(f: a -> Option[b] & f, sf: Unit ~> Step[a], k: List[b] ~> List[b]): List[b] & Impure =
+        match sf() {
+            case Done => k(Nil)
+            case Skip => chooseToListHelper(f, sf, k)
+            case Yield(a) => match f(a) {
+                case None => chooseToListHelper(f, sf, k)
+                case Some(x) => chooseToListHelper(f, sf, ks -> k(x :: ks))
+            }
+        }
+
+    ///
+    /// ...Multiple results at each step, not short-circuiting...
+    ///
+    pub def collectToList(f: a -> List[b] & e, s: Stream[a]): List[b] & Impure =
+        let generate1 = getGenerator(s);
+        let finalize1 = getFinalizer(s);
+        let sf = generate1();
+        let ans = collectToListHelper(f, sf, ks -> ks as & Impure);
+        finalize1();
+        ans
+
+    ///
+    /// Helper function for `collectToList`.
+    ///
+    def collectToListHelper(f: a -> List[b] & f, sf: Unit ~> Step[a], k: List[b] ~> List[b]): List[b] & Impure =
+        match sf() {
+            case Done => k(Nil)
+            case Skip => collectToListHelper(f, sf, k)
+            case Yield(a) => {
+                let xs = f(a);
+                collectToListHelper(f, sf, ks -> k(xs ::: ks))
+            }
+        }
+
+
+    ///
+    /// Short-circuiting, fails on first None...
+    ///
+    pub def traverseToListOption(f: a -> Option[b] & e, s: Stream[a]): Option[List[b]] & Impure =
+        let generate1 = getGenerator(s);
+        let finalize1 = getFinalizer(s);
+        let sf = generate1();
+        let ans = traverseToListOptionHelper(f, sf, _ -> None as & Impure,  ks -> Some(ks) as & Impure);
+        finalize1();
+        ans
+
+    ///
+    /// Helper function for `traverseToListOption`.
+    ///
+    def traverseToListOptionHelper(f: a -> Option[b] & f, sf: Unit ~> Step[a], fk: Unit ~> Option[List[b]], sk: List[b] ~> Option[List[b]]): Option[List[b]] & Impure =
+        match sf() {
+            case Done => sk(Nil)
+            case Skip => traverseToListOptionHelper(f, sf, fk, sk)
+            case Yield(a) => match f(a) {
+                case None => fk()
+                case Some(x) => traverseToListOptionHelper(f, sf, fk, ks -> sk(x :: ks))
+            }
+        }
+
+    ///
+    /// Short-circuiting, fails on first Err...
+    ///
+    pub def traverseToListResult(f: a -> Result[b, e] & f, s: Stream[a]): Result[List[b], e] & Impure =
+        let generate1 = getGenerator(s);
+        let finalize1 = getFinalizer(s);
+        let sf = generate1();
+        let ans = traverseToListResultHelper(f, sf, e -> Err(e) as & Impure,  ks -> Ok(ks) as & Impure);
+        finalize1();
+        ans
+
+    ///
+    /// Helper function for `traverseToListResult`.
+    ///
+    def traverseToListResultHelper(f: a -> Result[b, e] & f, sf: Unit ~> Step[a], fk: e ~> Result[List[b], e], sk: List[b] ~> Result[List[b], e]): Result[List[b], e] & Impure =
+        match sf() {
+            case Done => sk(Nil)
+            case Skip => traverseToListResultHelper(f, sf, fk, sk)
+            case Yield(a) => match f(a) {
+                case Err(err) => fk(err)
+                case Ok(x) => traverseToListResultHelper(f, sf, fk, ks -> sk(x :: ks))
             }
         }
 
