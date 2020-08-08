@@ -95,6 +95,8 @@ namespace Text/Regex/MatchEvaluator {
 
     pub def getEnd(): MatchEvaluator[Int32] = liftPrim(Text/Regex/Internal/PrimMatcher.end)
 
+    pub def getLength(): MatchEvaluator[Int32] = lift2((x,y) -> y - x, getStart(), getEnd())
+
     ///
     ///
     pub def getRange(): MatchEvaluator[(Int32, Int32)] =

@@ -713,7 +713,30 @@ namespace Data/Stream {
                         else
                             Yield(a)
                 };
-                next
+            next
+        };
+        Stream({ generate = gen, finalize = getFinalizer(s) })
+
+    ///
+    /// Returns a stream of every element in `s` where `f` produces a value `Some(x)`.
+    ///
+    pub def choose(f: a -> Option[b] & e, s: Stream[a]): Stream[b] =
+        let gen = () -> {
+            let generate1 = getGenerator(s);
+            let sf = generate1();
+            let next = () ->
+                match sf() {
+                    case Done => Done
+                    case Skip => Skip
+                    case Yield(a) => {
+                        let ans = f(a) as & Impure;
+                        match ans {
+                            case Some(b) => Yield(b)
+                            case None => Skip
+                        }
+                    }
+                };
+            next
         };
         Stream({ generate = gen, finalize = getFinalizer(s) })
 
@@ -851,7 +874,7 @@ namespace Data/Stream {
     /// Applies `f` to a start value `ac` and all `Ok` elements in `s` going from left to right.
     /// If an `Err` is encountered the stream closed and the error is returned.
     ///
-    pub def foldResult(f: (b, a) -> Result[b, err] & e, ac: b, s: Stream[a]): Result[b, err] & Impure =
+    pub def foldResult(f: (b, a) -> Result[b, e] & f, ac: b, s: Stream[a]): Result[b, e] & Impure =
         let generate1 = getGenerator(s);
         let finalize1 = getFinalizer(s);
         let sf = generate1();
@@ -968,5 +991,6 @@ namespace Data/Stream {
                 case Ok(x) => traverseToListResultHelper(f, sf, fk, ks -> sk(x :: ks))
             }
         }
+
 
 }
