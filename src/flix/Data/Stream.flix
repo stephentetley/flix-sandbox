@@ -993,4 +993,32 @@ namespace Data/Stream {
         }
 
 
+    ///
+    /// Applies `f` to every element of `s`.
+    ///
+    /// The function `f` must be impure.
+    /// Fails on first error.
+    ///
+    pub def foreachResult(f: a ~> Result[b, e], s: Stream[a]): Result[Unit, e] & Impure =
+        let generate1 = getGenerator(s);
+        let finalize1 = getFinalizer(s);
+        let sf = generate1();
+        let ans = foreachResultHelper(f, sf);
+        finalize1();
+        ans
+
+    ///
+    /// Helper function for `foreachResult`.
+    ///
+    def foreachResultHelper(f: a ~> Result[b, e], sf : Unit ~> Step[a]): Result[Unit, e] & Impure =
+        match sf() {
+            case Done => Ok()
+            case Skip => foreachResultHelper(f, sf)
+            case Yield(a) => match f(a) {
+                case Ok(_) => foreachResultHelper(f, sf)
+                case Err(e) => Err(e)
+            }
+        }
+
+
 }
