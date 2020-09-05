@@ -191,7 +191,7 @@ namespace System/FilePath {
     pub def hasExtension(path: FilePath): Bool =
         match getFileName(path) |> Option.map(toString) {
             case None => false
-            case Some(str) => String.isInfixOf(".", str)
+            case Some(str) => String.startsWith(".", str)
         }
 
 

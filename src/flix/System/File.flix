@@ -65,6 +65,22 @@ namespace System/File {
             case _: ##java.lang.Exception => Err(Generic("Exception"))
         }
 
+    pub def readFileWithBOM(path: FilePath, cs: Text.Charset): Result[String, System.Error] & Impure =
+        try {
+            import flix.runtime.spt.sandbox.system.FileWrapper:readFileWithBOM(##java.nio.file.Path,
+                                                                               ##java.nio.charset.Charset) as readWithBOM;
+            let FilePath(path1) = path;
+            let Charset(cs1) = cs;
+            Ok(readWithBOM(path1, cs1))
+        }
+        catch {
+            case _: ##java.io.FileNotFoundException => Err(FileNotFoundException)
+            case _: ##java.io.IOException => Err(IOException)
+            case _: ##java.lang.Exception => Err(Generic("Exception"))
+        }
+
+
+
 
     pub def writeFile(path: FilePath, cs: Text.Charset, content: String): Result[Unit, System.Error] & Impure =
         try {

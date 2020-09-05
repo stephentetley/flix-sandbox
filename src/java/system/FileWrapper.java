@@ -16,6 +16,10 @@
 
 package flix.runtime.spt.sandbox.system;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.input.BOMInputStream;
+
+import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
@@ -39,5 +43,13 @@ public class FileWrapper {
         Files.writeString(path, content2, charset);
     }
 
+    public static String readFileWithBOM(Path path, Charset charset) throws Exception {
+        File file = path.toFile();
+        FileInputStream instream = new FileInputStream(file);
+        Reader reader = new InputStreamReader(new BOMInputStream(instream, false), charset);
+        String answer = IOUtils.toString(reader);
+        reader.close();
+        return answer;
+    }
 
 }

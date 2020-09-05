@@ -874,7 +874,7 @@ namespace Data/Stream {
     /// Applies `f` to a start value `ac` and all `Ok` elements in `s` going from left to right.
     /// If an `Err` is encountered the stream closed and the error is returned.
     ///
-    pub def foldResult(f: (b, a) -> Result[b, e] & f, ac: b, s: Stream[a]): Result[b, e] & Impure =
+    pub def foldResult(f: (b, a) -> Result[b, e] & ef, ac: b, s: Stream[a]): Result[b, e] & Impure =
         let generate1 = getGenerator(s);
         let finalize1 = getFinalizer(s);
         let sf = generate1();
@@ -885,13 +885,16 @@ namespace Data/Stream {
     ///
     /// Helper function for `foldResult`.
     ///
-    def foldResultHelper(f: (b,a) -> Result[b, err] & e, sf: Unit ~> Step[a], ac: b): Result[b, err] & Impure =
+    def foldResultHelper(f: (b, a) -> Result[b, err] & ef, sf: Unit ~> Step[a], ac: b): Result[b, err] & Impure =
         match sf() {
-            case Done => Ok(ac) as & Impure
+            case Done => Ok(ac)
             case Skip => foldResultHelper(f, sf, ac)
-            case Yield(a) => match f(ac, a) {
-                case Err(err) => Err(err) as & Impure
-                case Ok(ac1) => foldResultHelper(f, sf, ac1)
+            case Yield(a) => {
+                let ans = f(ac, a) as & Impure;
+                match ans {
+                    case Err(err) => Err(err)
+                    case Ok(ac1) => foldResultHelper(f, sf, ac1)
+                }
             }
         }
 
