@@ -102,7 +102,7 @@ namespace Data/RowReader/RowWithHeadersEvaluator {
     // Cell readers, by label only
 
     /// Note - answer is trimmed, use `getCell` if you need exact contents
-    pub def getString(label: String): RowWithHeadersEvaluator[String] =
+    pub def getStringNamed(label: String): RowWithHeadersEvaluator[String] =
         map(String.trim, getCell(label))
 
     pub def getCell(label: String): RowWithHeadersEvaluator[String] =
@@ -118,52 +118,52 @@ namespace Data/RowReader/RowWithHeadersEvaluator {
             }
         })
 
-    pub def evalMatches(label: String, patt: Text/Regex.Pattern, eval: Text/Regex.MatchEvaluator[a]): RowWithHeadersEvaluator[a] =
-        let* input = getString(label);
+    pub def evalMatchesNamed(label: String, patt: Text/Regex.Pattern, eval: Text/Regex.MatchEvaluator[a]): RowWithHeadersEvaluator[a] =
+        let* input = getStringNamed(label);
         let* ans = liftOperation(_ -> Text/Regex.evalMatches(input, patt, eval));
         return(ans)
 
-    pub def evalContains(label: String, patt: Text/Regex.Pattern, eval: Text/Regex.MatchEvaluator[a]): RowWithHeadersEvaluator[a] =
-        let* input = getString(label);
+    pub def evalContainsNamed(label: String, patt: Text/Regex.Pattern, eval: Text/Regex.MatchEvaluator[a]): RowWithHeadersEvaluator[a] =
+        let* input = getStringNamed(label);
         let* ans = liftOperation(_ -> Text/Regex.evalContains(input, patt, eval));
         return(ans)
 
-    pub def getInt8(label: String): RowWithHeadersEvaluator[Int8] =
-        let* s = getString(label);
+    pub def getInt8Named(label: String): RowWithHeadersEvaluator[Int8] =
+        let* s = getStringNamed(label);
         liftResult(Int8.fromString(s) |> Result.mapErr(_ -> InputMismatchException))
 
-    pub def getInt16(label: String): RowWithHeadersEvaluator[Int16] =
-        let* s = getString(label);
+    pub def getInt16Named(label: String): RowWithHeadersEvaluator[Int16] =
+        let* s = getStringNamed(label);
         liftResult(Int16.fromString(s) |> Result.mapErr(_ -> InputMismatchException))
 
-    pub def getInt32(label: String): RowWithHeadersEvaluator[Int32] =
-        let* s = getString(label);
+    pub def getInt32Named(label: String): RowWithHeadersEvaluator[Int32] =
+        let* s = getStringNamed(label);
         liftResult(Int32.fromString(s) |> Result.mapErr(_ -> InputMismatchException))
 
-    pub def getInt64(label: String): RowWithHeadersEvaluator[Int64] =
-        let* s = getString(label);
+    pub def getInt64Named(label: String): RowWithHeadersEvaluator[Int64] =
+        let* s = getStringNamed(label);
         liftResult(Int64.fromString(s) |> Result.mapErr(_ -> InputMismatchException))
 
-    pub def getFloat32(label: String): RowWithHeadersEvaluator[Float32] =
-        let* s = getString(label);
+    pub def getFloat32Named(label: String): RowWithHeadersEvaluator[Float32] =
+        let* s = getStringNamed(label);
         liftResult(Float32.fromString(s) |> Result.mapErr(_ -> InputMismatchException))
 
-    pub def getFloat64(label: String): RowWithHeadersEvaluator[Float64] =
-        let* s = getString(label);
+    pub def getFloat64Named(label: String): RowWithHeadersEvaluator[Float64] =
+        let* s = getStringNamed(label);
         liftResult(Float64.fromString(s) |> Result.mapErr(_ -> InputMismatchException))
 
-    pub def getLocalDate(label: String, formatter: Time/Format.DateFormatter): RowWithHeadersEvaluator[Time.LocalDate] =
-        let* input = getString(label);
+    pub def getLocalDateNamed(label: String, formatter: Time/Format.DateFormatter): RowWithHeadersEvaluator[Time.LocalDate] =
+        let* input = getStringNamed(label);
         let* ans = liftResult(Time/LocalDate.parse(input, formatter));
         return(ans)
 
-    pub def getLocalDateTime(label: String, formatter: Time/Format.DateTimeFormatter): RowWithHeadersEvaluator[Time.LocalDateTime] =
-        let* input = getString(label);
+    pub def getLocalDateTimeNamed(label: String, formatter: Time/Format.DateTimeFormatter): RowWithHeadersEvaluator[Time.LocalDateTime] =
+        let* input = getStringNamed(label);
         let* ans = liftResult(Time/LocalDateTime.parse(input, formatter));
         return(ans)
 
     pub def getLocalTime(label: String, formatter: Time/Format.TimeFormatter): RowWithHeadersEvaluator[Time.LocalTime] =
-        let* input = getString(label);
+        let* input = getStringNamed(label);
         let* ans = liftResult(Time/LocalTime.parse(input, formatter));
         return(ans)
 

@@ -139,43 +139,46 @@ namespace Text/Regex/MatchEvaluator {
     pub def getNamedCaptureRange(label: String): MatchEvaluator[(Int32, Int32)] =
         lift2((x,y) -> (x,y), getNamedCaptureStart(label), getNamedCaptureEnd(label))
 
-    pub def getCaptureInt8(ix: Int32): MatchEvaluator[Int8] =
+
+
+
+    pub def getInt8At(ix: Int32): MatchEvaluator[Int8] =
         let* str = getCapture(ix);
         liftOperation(_ -> Int8.fromString(str) |> Result.mapErr(Generic) as & Impure)
 
-    pub def getNamedCaptureInt8(label: String): MatchEvaluator[Int8] =
+    pub def getInt8Named(label: String): MatchEvaluator[Int8] =
         let* str = getNamedCapture(label);
         liftOperation(_ -> Int8.fromString(str) |> Result.mapErr(Generic) as & Impure)
 
-    pub def getCaptureInt16(ix: Int32): MatchEvaluator[Int16] =
+    pub def getInt16At(ix: Int32): MatchEvaluator[Int16] =
         let* str = getCapture(ix);
         liftOperation(_ -> Int16.fromString(str) |> Result.mapErr(Generic) as & Impure)
 
-    pub def getNamedCaptureInt16(label: String): MatchEvaluator[Int16] =
+    pub def getInt16Named(label: String): MatchEvaluator[Int16] =
         let* str = getNamedCapture(label);
         liftOperation(_ -> Int16.fromString(str) |> Result.mapErr(Generic) as & Impure)
 
-    pub def getCaptureInt32(ix: Int32): MatchEvaluator[Int32] =
+    pub def getInt32At(ix: Int32): MatchEvaluator[Int32] =
         let* str = getCapture(ix);
         liftOperation(_ -> Int32.fromString(str) |> Result.mapErr(Generic) as & Impure)
 
-    pub def getNamedCaptureInt32(label: String): MatchEvaluator[Int32] =
+    pub def getInt32Named(label: String): MatchEvaluator[Int32] =
         let* str = getNamedCapture(label);
         liftOperation(_ -> Int32.fromString(str) |> Result.mapErr(Generic) as & Impure)
 
-    pub def getCaptureInt64(ix: Int32): MatchEvaluator[Int64] =
+    pub def getInt64At(ix: Int32): MatchEvaluator[Int64] =
         let* str = getCapture(ix);
         liftOperation(_ -> Int64.fromString(str) |> Result.mapErr(Generic) as & Impure)
 
-    pub def getNamedCaptureInt64(label: String): MatchEvaluator[Int64] =
+    pub def getInt64Named(label: String): MatchEvaluator[Int64] =
         let* str = getNamedCapture(label);
         liftOperation(_ -> Int64.fromString(str) |> Result.mapErr(Generic) as & Impure)
 
-    pub def getCaptureBigInt(ix: Int32): MatchEvaluator[BigInt] =
+    pub def getBigIntAt(ix: Int32): MatchEvaluator[BigInt] =
         let* str = getCapture(ix);
         liftOperation(_ -> BigInt.fromString(str) |> Result.mapErr(Generic) as & Impure)
 
-    pub def getNamedCaptureBigInt(label: String): MatchEvaluator[BigInt] =
+    pub def getBigIntNamed(label: String): MatchEvaluator[BigInt] =
         let* str = getNamedCapture(label);
         liftOperation(_ -> BigInt.fromString(str) |> Result.mapErr(Generic) as & Impure)
 

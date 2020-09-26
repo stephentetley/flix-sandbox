@@ -18,7 +18,7 @@
 
 
 ///
-/// The Stream type.
+/// The PullStream type.
 ///
 /// A stream provides "demand driven" access to its elements - successive
 /// elements are only produced when needed. Internally the stream is
@@ -177,7 +177,7 @@ namespace PullStream {
     ///
     /// Helper function for `range`.
     ///
-    /// Precodition: b < e
+    /// Precondition: b < e
     ///
     def rangeHelper(b: Int32, e: Int32): PullStream[Int32] =
         let gen = () -> {

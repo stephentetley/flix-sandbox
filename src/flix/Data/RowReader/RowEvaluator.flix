@@ -94,7 +94,7 @@ namespace Data/RowReader/RowEvaluator {
     // Cell readers, by index only
 
     /// Note - answer is trimmed, use `getCell` if you need exact contents
-    pub def getString(ix: Int32): RowEvaluator[String] =
+    pub def getStringAt(ix: Int32): RowEvaluator[String] =
         map(String.trim, getCell(ix))
 
     pub def getCell(ix: Int32): RowEvaluator[String] =
@@ -108,54 +108,54 @@ namespace Data/RowReader/RowEvaluator {
         )
 
 
-    pub def evalMatches(ix: Int32, patt: Text/Regex.Pattern, eval: Text/Regex.MatchEvaluator[a]): RowEvaluator[a] =
-        let* input = getString(ix);
+    pub def evalMatchesAt(ix: Int32, patt: Text/Regex.Pattern, eval: Text/Regex.MatchEvaluator[a]): RowEvaluator[a] =
+        let* input = getStringAt(ix);
         let* ans = liftOperation(_ -> Text/Regex.evalMatches(input, patt, eval));
         return(ans)
 
-    pub def evalContains(ix: Int32, patt: Text/Regex.Pattern, eval: Text/Regex.MatchEvaluator[a]): RowEvaluator[a] =
-        let* input = getString(ix);
+    pub def evalContainsAt(ix: Int32, patt: Text/Regex.Pattern, eval: Text/Regex.MatchEvaluator[a]): RowEvaluator[a] =
+        let* input = getStringAt(ix);
         let* ans = liftOperation(_ -> Text/Regex.evalContains(input, patt, eval));
         return(ans)
 
-    pub def getInt8(ix: Int32): RowEvaluator[Int8] =
-        let* s = getString(ix);
+    pub def getInt8At(ix: Int32): RowEvaluator[Int8] =
+        let* s = getStringAt(ix);
         liftResult(Int8.fromString(s) |> Result.mapErr(_ -> InputMismatchException))
 
-    pub def getInt16(ix: Int32): RowEvaluator[Int16] =
-        let* s = getString(ix);
+    pub def getInt16At(ix: Int32): RowEvaluator[Int16] =
+        let* s = getStringAt(ix);
         liftResult(Int16.fromString(s) |> Result.mapErr(_ -> InputMismatchException))
 
-    pub def getInt32(ix: Int32): RowEvaluator[Int32] =
-        let* s = getString(ix);
+    pub def getInt32At(ix: Int32): RowEvaluator[Int32] =
+        let* s = getStringAt(ix);
         liftResult(Int32.fromString(s) |> Result.mapErr(_ -> InputMismatchException))
 
-    pub def getInt64(ix: Int32): RowEvaluator[Int64] =
-        let* s = getString(ix);
+    pub def getInt64At(ix: Int32): RowEvaluator[Int64] =
+        let* s = getStringAt(ix);
         liftResult(Int64.fromString(s) |> Result.mapErr(_ -> InputMismatchException))
 
-    pub def getFloat32(ix: Int32): RowEvaluator[Float32] =
-        let* s = getString(ix);
+    pub def getFloat32At(ix: Int32): RowEvaluator[Float32] =
+        let* s = getStringAt(ix);
         liftResult(Float32.fromString(s) |> Result.mapErr(_ -> InputMismatchException))
 
-    pub def getFloat64(ix: Int32): RowEvaluator[Float64] =
-        let* s = getString(ix);
+    pub def getFloat64At(ix: Int32): RowEvaluator[Float64] =
+        let* s = getStringAt(ix);
         liftResult(Float64.fromString(s) |> Result.mapErr(_ -> InputMismatchException))
 
-    pub def getLocalDate(ix: Int32, formatter: Time/Format.DateFormatter): RowEvaluator[Time.LocalDate] =
-        let* input = getString(ix);
+    pub def getLocalDateAt(ix: Int32, formatter: Time/Format.DateFormatter): RowEvaluator[Time.LocalDate] =
+        let* input = getStringAt(ix);
         let* ans = liftResult(Time/LocalDate.parse(input, formatter));
         return(ans)
 
 
-    pub def getLocalDateTime(ix: Int32, formatter: Time/Format.DateTimeFormatter): RowEvaluator[Time.LocalDateTime] =
-        let* input = getString(ix);
+    pub def getLocalDateTimeAt(ix: Int32, formatter: Time/Format.DateTimeFormatter): RowEvaluator[Time.LocalDateTime] =
+        let* input = getStringAt(ix);
         let* ans = liftResult(Time/LocalDateTime.parse(input, formatter));
         return(ans)
 
 
-    pub def getLocalTime(ix: Int32, formatter: Time/Format.TimeFormatter): RowEvaluator[Time.LocalTime] =
-        let* input = getString(ix);
+    pub def getLocalTimeAt(ix: Int32, formatter: Time/Format.TimeFormatter): RowEvaluator[Time.LocalTime] =
+        let* input = getStringAt(ix);
         let* ans = liftResult(Time/LocalTime.parse(input, formatter));
         return(ans)
 
