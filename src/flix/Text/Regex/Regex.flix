@@ -217,7 +217,7 @@ namespace Text/Regex {
         m1.replaceFirst(rep) as & Pure
 
     ///
-    /// Rewrite the string `input` by apply the function `f` to the substring produced by each match of the pattern `patt`.
+    /// Rewrite the string `input` by applying the function `f` to the substring produced by each match of the pattern `patt`.
     ///
     pub def rewriteWith(input: String, patt: Pattern, eval: MatchEvaluator[String]): Result[String, System.Error] & Impure =
         use Text/Regex/Replacer.{execReplacer, evalRewriteAll!};
