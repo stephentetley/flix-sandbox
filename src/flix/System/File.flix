@@ -41,6 +41,18 @@ namespace System/File {
             case _: ##java.lang.Exception => Err(IOException)
         }
 
+    pub def copy(source: FilePath, target: FilePath): Result[Unit, System.Error] & Impure =
+        try {
+            import flix.runtime.spt.sandbox.system.FileWrapper:copy(##java.nio.file.Path, ##java.nio.file.Path);
+            let FilePath(source1) = source;
+            let FilePath(target1) = target;
+            let _ = copy(source1, target1);
+            Ok()
+        } catch {
+            case _: ##java.lang.Exception => Err(IOException)
+        }
+
+
     pub def deleteIfExists(path: FilePath): Result[Unit, System.Error] & Impure =
         try {
             import java.nio.file.Files:deleteIfExists(##java.nio.file.Path);
