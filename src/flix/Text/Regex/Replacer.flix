@@ -298,7 +298,7 @@ namespace Text/Regex/Replacer {
 
     def rewriteCountHelper!(ntimes: Int32, fn: String -> String, i: Int32): Replacer[Unit] =
         let* more = find();
-        if (more || i < ntimes) {
+        if (more or i < ntimes) {
             let* s = content();
             let* _ = appendReplacement!(fn(s));
             rewriteCountHelper!(ntimes, fn, i + 1)
@@ -313,7 +313,7 @@ namespace Text/Regex/Replacer {
 
     def evalRewriteCountHelper!(ntimes: Int32, eval: MatchEvaluator[String], i: Int32): Replacer[Unit] =
         let* more = find();
-        if (more || i < ntimes) {
+        if (more or i < ntimes) {
             let* s = evaluate(eval);
             let* _ = appendReplacement!(s);
             evalRewriteCountHelper!(ntimes, eval, i + 1)

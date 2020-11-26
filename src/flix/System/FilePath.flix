@@ -66,7 +66,7 @@ namespace System/FilePath {
         let FilePath(path1) = path;
         path1.isAbsolute() as & Pure
 
-    pub def isRelative(path: FilePath): Bool = !(isAbsolute(path))
+    pub def isRelative(path: FilePath): Bool = not isAbsolute(path)
 
     pub def getRoot(path: FilePath): Option[FilePath] =
         import java.nio.file.Path.getRoot();
@@ -105,7 +105,7 @@ namespace System/FilePath {
             case None => file
         }
 
-
+    /// e.g. getBaseName('/home/stephen/temp01.txt') = "temp01"
     pub def getBaseName(path: FilePath): Option[String] =
         use Option.flatMap;
         let* file = getFileName(path);

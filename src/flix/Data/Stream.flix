@@ -158,7 +158,7 @@ namespace Data/Stream {
         let iterFinal = iterator.finalize;
         let gen = () -> {
             let next = () ->
-                if (!hasNext()) 
+                if (not hasNext())
                     Done 
                 else 
                     Yield(iterNext());
@@ -829,7 +829,7 @@ namespace Data/Stream {
                     case Skip => Skip
                     case Yield(a) => {
                         let i = deref ix;
-                        if (i < b || i >= e) {
+                        if (i < b or i >= e) {
                             ix := i + 1;
                             Skip
                         } else {
