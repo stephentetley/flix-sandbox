@@ -82,11 +82,27 @@ namespace Chain {
     ///
     pub def length(xs: Chain[a]): Int32 = foldRight((_, ac) -> ac + 1, 0, xs)
 
+    ///
+    /// Returns `ys` appended to `xs`.
+    ///
+    pub def append(xs: Chain[a], ys: Chain[a]): Chain[a] = match (xs, ys) {
+        case (Empty, _) => ys
+        case (_, Empty) => xs
+        case (_, _) => Chain(xs, ys)
+    }
 
-    pub def append(a: Chain[a], b: Chain[a]): Chain[a] = match (a, b) {
-        case (Empty, _) => b
-        case (_, Empty) => a
-        case (_, _) => Chain(a, b)
+    ///
+    /// Returns `true` if and only if `xs` contains the element `a`.
+    ///
+    pub def memberOf(a: a, xs: Chain[a]): Bool = memberOfHelper(a, xs, x -> x)
+
+    ///
+    /// Helper function for `memberOf`.
+    ///
+    def memberOfHelper(a: a, xs: Chain[a], k: Bool -> Bool): Bool = match xs {
+        case Empty => k(false)
+        case One(x) => k(x == a)
+        case Chain(ls, rs) => memberOfHelper(a, ls, ans -> if (ans) k(true) else memberOfHelper(a, rs, k))
     }
 
     pub def cons(x: a, xs: Chain[a]): Chain[a] = match xs {

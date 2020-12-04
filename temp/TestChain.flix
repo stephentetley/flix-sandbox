@@ -88,6 +88,62 @@ def length03(): Bool = Chain.length(Chain.fromList(1 :: 2 :: Nil)) == 2
 def length04(): Bool = Chain.length(Chain.fromList(1 :: 2 :: 3 :: Nil)) == 3
 
 /////////////////////////////////////////////////////////////////////////////
+// append                                                                  //
+/////////////////////////////////////////////////////////////////////////////
+@test
+def append01(): Bool = Chain.toList(Chain.append(Chain.empty(), Chain.empty())) == Nil
+
+@test
+def append02(): Bool = Chain.toList(Chain.append(Chain.empty(), Chain.singleton(1))) == 1 :: Nil
+
+@test
+def append03(): Bool =
+    Chain.toList(Chain.append(Chain.empty(), Chain.fromList(1 :: 2 :: Nil))) == 1 :: 2 :: Nil
+
+@test
+def append04(): Bool = Chain.toList(Chain.append(Chain.singleton(1), Chain.empty()))== 1 :: Nil
+
+@test
+def append05(): Bool =
+    Chain.toList(Chain.append(Chain.fromList(1 :: 2 :: Nil), Chain.empty())) == 1 :: 2 :: Nil
+
+@test
+def append06(): Bool =
+    Chain.toList(Chain.append(Chain.singleton(1), Chain.singleton(2))) == 1 :: 2 :: Nil
+
+@test
+def append07(): Bool =
+    Chain.toList(Chain.append(Chain.fromList(1 :: 2 :: Nil), Chain.fromList(3 :: Nil))) == 1 :: 2 :: 3 :: Nil
+
+@test
+def append08(): Bool =
+    Chain.toList(Chain.append(Chain.fromList(1 :: Nil), Chain.fromList(2 :: 3 :: Nil))) == 1 :: 2 :: 3 :: Nil
+
+/////////////////////////////////////////////////////////////////////////////
+// memberOf                                                                //
+/////////////////////////////////////////////////////////////////////////////
+@test
+def memberOf01(): Bool = Chain.memberOf(0, Chain.empty()) == false
+
+@test
+def memberOf02(): Bool = Chain.memberOf(0, Chain.fromList(1 :: Nil)) == false
+
+@test
+def memberOf03(): Bool = Chain.memberOf(0, Chain.fromList(0 :: Nil)) == true
+
+@test
+def memberOf04(): Bool = Chain.memberOf(0, Chain.fromList(1 :: 2 :: Nil)) == false
+
+@test
+def memberOf05(): Bool = Chain.memberOf(1, Chain.fromList(1 :: 2 :: Nil)) == true
+
+@test
+def memberOf06(): Bool = Chain.memberOf(2, Chain.fromList(1 :: 2 :: Nil)) == true
+
+@test
+def memberOf07(): Bool = Chain.memberOf(3, Chain.fromList(1 :: 2 :: Nil)) == false
+
+/////////////////////////////////////////////////////////////////////////////
 // concat                                                                  //
 /////////////////////////////////////////////////////////////////////////////
 
