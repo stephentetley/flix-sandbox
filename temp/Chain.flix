@@ -44,6 +44,16 @@ namespace Chain {
 
     pub def singleton(x: a): Chain[a] = One(x)
 
+    pub def cons(x: a, xs: Chain[a]): Chain[a] = match xs {
+        case Empty => One(x)
+        case _ => Chain(One(x), xs)
+    }
+
+    pub def snoc(xs: Chain[a], x: a): Chain[a] = match xs {
+        case Empty => One(x)
+        case _ => Chain(xs, One(x))
+    }
+
 
     ///
     /// Returns true if and only if `xs` is the empty chain, i.e. `Empty`.
@@ -153,21 +163,114 @@ namespace Chain {
         case Chain(ls, rs) => memberOfHelper(a, ls, ans -> if (ans) k(true) else memberOfHelper(a, rs, k))
     }
 
-    pub def cons(x: a, xs: Chain[a]): Chain[a] = match xs {
-        case Empty => One(x)
-        case _ => Chain(One(x), xs)
+    ///
+    /// Returns the position of `a` in `xs`.
+    ///
+    /// Returns `-1` if `a` does not exist in `xs`.
+    ///
+    pub def indexOf(a: a, xs: Chain[a]): Int32 = indexOfHelper(a, 0, viewLeft(xs), x -> x)
+
+    ///
+    /// Helper function for `indexOf`.
+    ///
+    def indexOfHelper(a: a, ac: Int32, vx: ViewLeft[a], k: Int32 -> Int32): Int32 = match vx {
+        case NoneLeft => k(-1)
+        case SomeLeft(x, xs) => if (x == a) k(ac) else indexOfHelper(a, ac + 1, viewLeft(xs), k)
     }
 
-    pub def <+(x: a, xs: Chain[a]): Chain[a] = cons(x, xs)
+    ///
+    /// Alias for `findLeft`.
+    ///
+    /// The function `f` must be pure.
+    ///
+    pub def find(f: a -> Bool, xs: Chain[a]): Option[a] = findLeft(f, xs)
 
-    pub def snoc(xs: Chain[a], x: a): Chain[a] = match xs {
-        case Empty => One(x)
-        case _ => Chain(xs, One(x))
+    ///
+    /// Optionally returns the first element of `xs` that satisfies the predicate `f` when searching from left to right.
+    ///
+    /// The function `f` must be pure.
+    ///
+    pub def findLeft(f: a -> Bool, xs: Chain[a]): Option[a] = match viewLeft(xs) {
+        case NoneLeft => None
+        case SomeLeft(x, rs) => if (f(x)) Some(x) else findLeft(f, rs)
     }
 
-    pub def +>(xs: Chain[a], x: a): Chain[a] = snoc(xs, x)
+    ///
+    /// Optionally returns the first element of `xs` that satisfies the predicate `f` when searching from right to left.
+    ///
+    /// The function `f` must be pure.
+    ///
+    pub def findRight(f: a -> Bool, xs: Chain[a]): Option[a] = match viewRight(xs) {
+        case NoneRight => None
+        case SomeRight(rs, x) => if (f(x)) Some(x) else findRight(f, rs)
+    }
 
-    pub def toList(a: Chain[a]): List[a] = toListHelper(a, Nil, identity)
+    ///
+    /// Returns a list of all integers between `b` (inclusive) and `e` (exclusive).
+    ///
+    /// Returns `Nil` if `b >= e`.
+    ///
+    pub def range(b: Int32, e: Int32): Chain[Int32] = rangeHelper(b, e, xs -> xs)
+
+    ///
+    /// Helper function for `range`.
+    ///
+    def rangeHelper(b: Int32, e: Int32, k: Chain[Int32] -> Chain[Int32]): Chain[Int32] =
+        if (b >= e) k(Empty) else rangeHelper(b + 1, e, xs -> k(cons(b,xs)))
+
+    ///
+    /// Returns a list with the element `a` repeated `n` times.
+    ///
+    /// Returns `Nil` if `n < 0`.
+    ///
+    pub def repeat(a: a, n: Int32): Chain[a] = repeatHelper(a, n, Empty)
+
+    ///
+    /// Helper function for `repeat`.
+    ///
+    def repeatHelper(a: a, n: Int32, ac: Chain[a]): Chain[a] =
+        if (n <= 0)
+            ac
+        else {
+            let ac1 = cons(a, ac);
+            repeatHelper(a, n-1, ac1)
+        }
+
+    ///
+    /// Returns the result of applying `f` to every element in `xs`.
+    ///
+    /// That is, the result is of the form: `f(x1) :: f(x2) :: ...`.
+    ///
+    pub def map(f: a -> b, t: Chain[a]): Chain[b] =
+        mapHelper(f, t, xs -> xs)
+
+    ///
+    /// Helper function for `map`.
+    ///
+    def mapHelper(f: a -> b, t: Chain[a], k: Chain[b] -> Chain[b]): Chain[b] = match t {
+        case Empty => k(Empty)
+        case One(a) => k(One(f(a)))
+        case Chain(xs, ys) => mapHelper(f, xs, vs1 -> mapHelper(f, ys, vs2 -> k(Chain(vs1, vs2))))
+    }
+
+    ///
+    /// Returns the result of applying `f` to every element in `xs` along with that element's index.
+    ///
+    /// That is, the result is of the form: `f(x1, 0) :: f(x2, 1) :: ...`.
+    ///
+    pub def mapWithIndex(f: (a, Int32) -> b & e, xs: Chain[a]): Chain[b] & e =
+        mapWithIndexHelper(f, xs, 0, Empty)
+
+    ///
+    /// Helper function for `mapWithIndex`.
+    ///
+    def mapWithIndexHelper(f: (a, Int32) -> b & e, xs: Chain[a], i: Int32, ac: Chain[b]): Chain[b] & e =
+        match viewLeft(xs) {
+            case NoneLeft => ac
+            case SomeLeft(x, rs) => {let a = f(x, i); mapWithIndexHelper(f, rs, i+1, snoc(ac, a))}
+        }
+
+    pub def toList(xs: Chain[a]): List[a] = toListHelper(xs, Nil, ks -> ks)
 
     ///
     /// Helper for `toList` in CPS.
@@ -221,32 +324,6 @@ namespace Chain {
             foldLeftHelper(f, ac, x, ac1 -> foldLeftHelper(f, ac1, y, ac2 -> k(ac2)))
     }
 
-    ///
-    /// Returns a list with the element `a` repeated `n` times.
-    ///
-    /// Returns `Nil` if `n < 0`.
-    ///
-    pub def repeat(a: a, n: Int32): Chain[a] = repeatHelper(a, n, Empty)
-
-    def repeatHelper(a: a, n: Int32, ac: Chain[a]): Chain[a] =
-        if (n <= 0)
-            ac
-        else {
-            let ac1 = cons(a, ac);
-            repeatHelper(a, n-1, ac1)
-        }
-
-    pub def map(f: a -> b, t: Chain[a]): Chain[b] =
-        mapHelper(f, t, identity)
-
-    ///
-    /// Helper function for `map`.
-    ///
-    def mapHelper(f: a -> b, t: Chain[a], k: Chain[b] -> Chain[b]): Chain[b] = match t {
-        case Empty => k(Empty)
-        case One(a) => k(One(f(a)))
-        case Chain(xs, ys) => mapHelper(f, xs, vs1 -> mapHelper(f, ys, vs2 -> k(Chain(vs1, vs2))))
-    }
 
     ///
     /// Returns `true` if and only if `xs` and `ys` and equal.
