@@ -120,6 +120,72 @@ def append08(): Bool =
     Chain.toList(Chain.append(Chain.fromList(1 :: Nil), Chain.fromList(2 :: 3 :: Nil))) == 1 :: 2 :: 3 :: Nil
 
 /////////////////////////////////////////////////////////////////////////////
+// viewLeft                                                                //
+/////////////////////////////////////////////////////////////////////////////
+@test
+def viewLeft01(): Bool = match Chain.viewLeft(Chain.empty()) {
+    case NoneLeft => true
+    case _ => false
+}
+
+@test
+def viewLeft02(): Bool = match Chain.viewLeft(Chain.singleton(1)) {
+    case SomeLeft(1, xs) if xs == Chain.empty() => true
+    case _ => false
+}
+
+@test
+def viewLeft03(): Bool = match Chain.viewLeft(Chain.fromList(1 :: 2 :: Nil)) {
+    case SomeLeft(1, xs) if xs == Chain.singleton(2) => true
+    case _ => false
+}
+
+@test
+def viewLeft04(): Bool = match Chain.viewLeft(Chain.fromList(1 :: 2 :: 3 :: Nil)) {
+    case SomeLeft(1, xs) if xs == Chain.fromList(2 :: 3 :: Nil) => true
+    case _ => false
+}
+
+@test
+def viewLeft05(): Bool = match Chain.viewLeft(Chain.fromList(1 :: 2 :: 3 :: 4 :: Nil)) {
+    case SomeLeft(1, xs) if xs == Chain.fromList(2 :: 3 :: 4 :: Nil) => true
+    case _ => false
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// viewRight                                                               //
+/////////////////////////////////////////////////////////////////////////////
+@test
+def viewRight01(): Bool = match Chain.viewRight(Chain.empty()) {
+    case NoneRight => true
+    case _ => false
+}
+
+@test
+def viewRight02(): Bool = match Chain.viewRight(Chain.singleton(1)) {
+    case SomeRight(xs, 1) if xs == Chain.empty() => true
+    case _ => false
+}
+
+@test
+def viewRight03(): Bool = match Chain.viewRight(Chain.fromList(1 :: 2 :: Nil)) {
+    case SomeRight(xs, 2) if xs == Chain.singleton(1) => true
+    case _ => false
+}
+
+@test
+def viewRight04(): Bool = match Chain.viewRight(Chain.fromList(1 :: 2 :: 3 :: Nil)) {
+    case SomeRight(xs, 3) if xs == Chain.fromList(1 :: 2 :: Nil) => true
+    case _ => false
+}
+
+@test
+def viewRight05(): Bool = match Chain.viewRight(Chain.fromList(1 :: 2 :: 3 :: 4 :: Nil)) {
+    case SomeRight(xs, 4) if xs == Chain.fromList(1 :: 2 :: 3 :: Nil) => true
+    case _ => false
+}
+
+/////////////////////////////////////////////////////////////////////////////
 // memberOf                                                                //
 /////////////////////////////////////////////////////////////////////////////
 @test

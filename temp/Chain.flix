@@ -27,6 +27,17 @@ enum Chain[t] {
     case Chain(Chain[t], Chain[t])
 }
 
+
+enum ViewLeft[t] {
+    case NoneLeft
+    case SomeLeft(t, Chain[t])
+}
+
+enum ViewRight[t] {
+    case NoneRight
+    case SomeRight(Chain[t], t)
+}
+
 namespace Chain {
 
     pub def empty(): Chain[a] = Empty
@@ -92,6 +103,43 @@ namespace Chain {
     }
 
     ///
+    /// Deconstruct a Chain from the left end.
+    ///
+    pub def viewLeft(xs: Chain[a]): ViewLeft[a] = viewLeftHelper(xs, Empty, x -> x)
+
+    ///
+    /// Helper function for `viewLeft`.
+    ///
+    /// Precondition: `xs` has been properly formed with no internal `Empty` nodes.
+    /// This means that `Empty` can only be encountered on the first match and it
+    /// can ignore the accumulator which is also `Empty` the first time this is called.
+    ///
+    def viewLeftHelper(xs: Chain[a], ac: Chain[a], k: ViewLeft[a] -> ViewLeft[a]): ViewLeft[a] =
+        match xs {
+            case Empty => k(NoneLeft)
+            case One(x) => k(SomeLeft(x, ac))
+            case Chain(ls, rs) => viewLeftHelper(ls, append(rs, ac),  k)
+        }
+
+    ///
+    /// Deconstruct a Chain from the right end.
+    ///
+    pub def viewRight(xs: Chain[a]): ViewRight[a] = viewRightHelper(xs, Empty, x -> x)
+
+    ///
+    /// Helper function for `viewRight`.
+    ///
+    /// Precondition: `xs` has been properly formed with no internal `Empty` nodes.
+    /// This means that `Empty` can only be encountered on the first match and it
+    /// can ignore the accumulator which is also `Empty` the first time this is called.
+    ///
+    def viewRightHelper(xs: Chain[a], ac: Chain[a], k: ViewRight[a] -> ViewRight[a]): ViewRight[a] = match xs {
+        case Empty => k(NoneRight)
+        case One(x) => k(SomeRight(ac, x))
+        case Chain(ls, rs) => viewRightHelper(rs, append(ac, ls),  k)
+    }
+
+    ///
     /// Returns `true` if and only if `xs` contains the element `a`.
     ///
     pub def memberOf(a: a, xs: Chain[a]): Bool = memberOfHelper(a, xs, x -> x)
@@ -110,10 +158,14 @@ namespace Chain {
         case _ => Chain(One(x), xs)
     }
 
+    pub def <+(x: a, xs: Chain[a]): Chain[a] = cons(x, xs)
+
     pub def snoc(xs: Chain[a], x: a): Chain[a] = match xs {
         case Empty => One(x)
         case _ => Chain(xs, One(x))
     }
+
+    pub def +>(xs: Chain[a], x: a): Chain[a] = snoc(xs, x)
 
     pub def toList(a: Chain[a]): List[a] = toListHelper(a, Nil, identity)
 
@@ -188,7 +240,7 @@ namespace Chain {
         mapHelper(f, t, identity)
 
     ///
-    /// Helper for `map` in CPS.
+    /// Helper function for `map`.
     ///
     def mapHelper(f: a -> b, t: Chain[a], k: Chain[b] -> Chain[b]): Chain[b] = match t {
         case Empty => k(Empty)
@@ -196,5 +248,27 @@ namespace Chain {
         case Chain(xs, ys) => mapHelper(f, xs, vs1 -> mapHelper(f, ys, vs2 -> k(Chain(vs1, vs2))))
     }
 
+    ///
+    /// Returns `true` if and only if `xs` and `ys` and equal.
+    ///
+    pub def __eq(xs: Chain[a], ys: Chain[a]): Bool = eqHelper(viewLeft(xs), viewLeft(ys), x -> x)
+
+    ///
+    /// Helper function for `__eq`.
+    ///
+    /// Note: Chains are considered equal if their (ordered) list of elements are equal.
+    ///
+    /// Because they may have different shapes due to construction we use a view to
+    /// decide equality which imposes an order on the Chain.
+    ///
+    def eqHelper(vx: ViewLeft[a], vy: ViewLeft[a], k: Bool -> Bool): Bool = match (vx, vy) {
+        case (NoneLeft, NoneLeft) => k(true)
+        case (SomeLeft(x, xs), SomeLeft(y, ys)) =>
+            if (x == y)
+                eqHelper(viewLeft(xs), viewLeft(ys), k)
+            else
+                k(false)
+        case (_, _) => k(false)
+    }
 
 }
