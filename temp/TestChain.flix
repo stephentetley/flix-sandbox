@@ -45,6 +45,7 @@ def singleton02(): Bool =
 /////////////////////////////////////////////////////////////////////////////
 // head                                                                    //
 /////////////////////////////////////////////////////////////////////////////
+
 @test
 def head01(): Bool = Chain.head(Chain.fromList(Nil)) == None
 
@@ -60,6 +61,7 @@ def head04(): Bool = Chain.head(Chain.fromList(3 :: 2 :: 1 :: Nil)) == Some(3)
 /////////////////////////////////////////////////////////////////////////////
 // last                                                                    //
 /////////////////////////////////////////////////////////////////////////////
+
 @test
 def last01(): Bool = Chain.last(Chain.empty()) == None
 
@@ -75,6 +77,7 @@ def last04(): Bool = Chain.last(Chain.fromList(1 :: 2 :: 3 :: Nil)) == Some(3)
 /////////////////////////////////////////////////////////////////////////////
 // length                                                                  //
 /////////////////////////////////////////////////////////////////////////////
+
 @test
 def length01(): Bool = Chain.length(Chain.empty()) == 0
 
@@ -90,6 +93,7 @@ def length04(): Bool = Chain.length(Chain.fromList(1 :: 2 :: 3 :: Nil)) == 3
 /////////////////////////////////////////////////////////////////////////////
 // append                                                                  //
 /////////////////////////////////////////////////////////////////////////////
+
 @test
 def append01(): Bool = Chain.toList(Chain.append(Chain.empty(), Chain.empty())) == Nil
 
@@ -122,6 +126,7 @@ def append08(): Bool =
 /////////////////////////////////////////////////////////////////////////////
 // viewLeft                                                                //
 /////////////////////////////////////////////////////////////////////////////
+
 @test
 def viewLeft01(): Bool = match Chain.viewLeft(Chain.empty()) {
     case NoneLeft => true
@@ -155,6 +160,7 @@ def viewLeft05(): Bool = match Chain.viewLeft(Chain.fromList(1 :: 2 :: 3 :: 4 ::
 /////////////////////////////////////////////////////////////////////////////
 // viewRight                                                               //
 /////////////////////////////////////////////////////////////////////////////
+
 @test
 def viewRight01(): Bool = match Chain.viewRight(Chain.empty()) {
     case NoneRight => true
@@ -212,6 +218,7 @@ def memberOf07(): Bool = Chain.memberOf(3, Chain.fromList(1 :: 2 :: Nil)) == fal
 /////////////////////////////////////////////////////////////////////////////
 // indexOf                                                                 //
 /////////////////////////////////////////////////////////////////////////////
+
 @test
 def indexOf01(): Bool = Chain.indexOf(0, Chain.empty()) == -1
 
@@ -230,10 +237,10 @@ def indexOf05(): Bool = Chain.indexOf(1, Chain.fromList(1 :: 2 :: Nil)) == 0
 @test
 def indexOf06(): Bool = Chain.indexOf(2, Chain.fromList(1 :: 2 :: Nil)) == 1
 
-
 /////////////////////////////////////////////////////////////////////////////
 // find                                                                    //
 /////////////////////////////////////////////////////////////////////////////
+
 @test
 def find01(): Bool = Chain.find(i -> i > 2, Chain.empty()) == None
 
@@ -258,6 +265,7 @@ def find07(): Bool = Chain.find(i -> i > 2, Chain.fromList(6 :: 7 :: Nil)) == So
 /////////////////////////////////////////////////////////////////////////////
 // findLeft                                                                //
 /////////////////////////////////////////////////////////////////////////////
+
 @test
 def findLeft01(): Bool = Chain.findLeft(i -> i > 2, Chain.empty()) == None
 
@@ -282,6 +290,7 @@ def findLeft07(): Bool = Chain.findLeft(i -> i > 2, Chain.fromList(6 :: 7 :: Nil
 /////////////////////////////////////////////////////////////////////////////
 // findRight                                                               //
 /////////////////////////////////////////////////////////////////////////////
+
 @test
 def findRight01(): Bool = Chain.findRight(i -> i > 2, Chain.fromList(Nil)) == None
 
@@ -306,6 +315,7 @@ def findRight07(): Bool = Chain.findRight(i -> i > 2, Chain.fromList(6 :: 7 :: N
 /////////////////////////////////////////////////////////////////////////////
 // range                                                                   //
 /////////////////////////////////////////////////////////////////////////////
+
 @test
 def range01(): Bool = Chain.range(1, 0) == Chain.empty()
 
@@ -324,6 +334,7 @@ def range05(): Bool = Chain.range(1, 4) == Chain.fromList(1 :: 2 :: 3 :: Nil)
 /////////////////////////////////////////////////////////////////////////////
 // repeat                                                                  //
 /////////////////////////////////////////////////////////////////////////////
+
 @test
 def repeat01(): Bool = Chain.repeat(1, -1) == Chain.empty()
 
@@ -340,8 +351,105 @@ def repeat04(): Bool = Chain.repeat(1, 2) == Chain.fromList(1 :: 1 :: Nil)
 def repeat05(): Bool = Chain.repeat(1, 3) == Chain.fromList(1 :: 1 :: 1 :: Nil)
 
 /////////////////////////////////////////////////////////////////////////////
+// scan                                                                    //
+/////////////////////////////////////////////////////////////////////////////
+
+@test
+def scan01(): Bool =
+    Chain.scan((i, b) -> if (b) i+1 else i+2, 1, Chain.empty()) == Chain.fromList(1 :: Nil)
+
+@test
+def scan02(): Bool =
+    Chain.scan((i, b) -> if (b) i+1 else i+2, 1, Chain.fromList(false :: Nil)) == Chain.fromList(1 :: 3 :: Nil)
+
+@test
+def scan03(): Bool =
+    Chain.scan((i, b) -> if (b) i+1 else i+2, 1, Chain.fromList(true :: Nil)) == Chain.fromList(1 :: 2 :: Nil)
+
+@test
+def scan04(): Bool =
+    Chain.scan((i, b) -> if (b) i+1 else i+2, 1, Chain.fromList(false :: false :: Nil)) == Chain.fromList(1 :: 3 :: 5 :: Nil)
+
+@test
+def scan05(): Bool =
+    Chain.scan((i, b) -> if (b) i+1 else i+2, 1, Chain.fromList(false :: true :: Nil)) == Chain.fromList(1 :: 3 :: 4 :: Nil)
+
+@test
+def scan06(): Bool =
+    Chain.scan((i, b) -> if (b) i+1 else i+2, 1, Chain.fromList(true :: false :: Nil)) == Chain.fromList(1 :: 2 :: 4 :: Nil)
+
+@test
+def scan07(): Bool =
+    Chain.scan((i, b) -> if (b) i+1 else i+2, 1, Chain.fromList(true :: true :: Nil)) == Chain.fromList(1 :: 2 :: 3 :: Nil)
+
+/////////////////////////////////////////////////////////////////////////////
+// scanLeft                                                                //
+/////////////////////////////////////////////////////////////////////////////
+
+@test
+def scanLeft01(): Bool =
+    Chain.scanLeft((i, b) -> if (b) i+1 else i+2, 1, Chain.fromList(Nil)) == Chain.fromList(1 :: Nil)
+
+@test
+def scanLeft02(): Bool =
+    Chain.scanLeft((i, b) -> if (b) i+1 else i+2, 1, Chain.fromList(false :: Nil)) == Chain.fromList(1 :: 3 :: Nil)
+
+@test
+def scanLeft03(): Bool =
+    Chain.scanLeft((i, b) -> if (b) i+1 else i+2, 1, Chain.fromList(true :: Nil)) == Chain.fromList(1 :: 2 :: Nil)
+
+@test
+def scanLeft04(): Bool =
+    Chain.scanLeft((i, b) -> if (b) i+1 else i+2, 1, Chain.fromList(false :: false :: Nil)) == Chain.fromList(1 :: 3 :: 5 :: Nil)
+
+@test
+def scanLeft05(): Bool =
+    Chain.scanLeft((i, b) -> if (b) i+1 else i+2, 1, Chain.fromList(false :: true :: Nil)) == Chain.fromList(1 :: 3 :: 4 :: Nil)
+
+@test
+def scanLeft06(): Bool =
+    Chain.scanLeft((i, b) -> if (b) i+1 else i+2, 1, Chain.fromList(true :: false :: Nil)) == Chain.fromList(1 :: 2 :: 4 :: Nil)
+
+@test
+def scanLeft07(): Bool =
+    Chain.scanLeft((i, b) -> if (b) i+1 else i+2, 1, Chain.fromList(true :: true :: Nil)) == Chain.fromList(1 :: 2 :: 3 :: Nil)
+
+/////////////////////////////////////////////////////////////////////////////
+// scanRight                                                               //
+/////////////////////////////////////////////////////////////////////////////
+
+@test
+def scanRight01(): Bool =
+    Chain.scanRight((b, i) -> if (b) i+1 else i+2, 1, Chain.fromList(Nil)) == Chain.fromList(1 :: Nil)
+
+@test
+def scanRight02(): Bool =
+    Chain.scanRight((b, i) -> if (b) i+1 else i+2, 1, Chain.fromList(false :: Nil)) == Chain.fromList(3 :: 1 :: Nil)
+
+@test
+def scanRight03(): Bool =
+    Chain.scanRight((b, i) -> if (b) i+1 else i+2, 1, Chain.fromList(true :: Nil)) == Chain.fromList(2 :: 1 :: Nil)
+
+@test
+def scanRight04(): Bool =
+    Chain.scanRight((b, i) -> if (b) i+1 else i+2, 1, Chain.fromList(false :: false :: Nil)) == Chain.fromList(5 :: 3 :: 1 :: Nil)
+
+@test
+def scanRight05(): Bool =
+    Chain.scanRight((b, i) -> if (b) i+1 else i+2, 1, Chain.fromList(false :: true :: Nil)) == Chain.fromList(4 :: 2 :: 1 :: Nil)
+
+@test
+def scanRight06(): Bool =
+    Chain.scanRight((b, i) -> if (b) i+1 else i+2, 1, Chain.fromList(true :: false :: Nil)) == Chain.fromList(4 :: 3 :: 1 :: Nil)
+
+@test
+def scanRight07(): Bool =
+    Chain.scanRight((b, i) -> if (b) i+1 else i+2, 1, Chain.fromList(true :: true :: Nil)) == Chain.fromList(3 :: 2 :: 1 :: Nil)
+
+/////////////////////////////////////////////////////////////////////////////
 // map                                                                     //
 /////////////////////////////////////////////////////////////////////////////
+
 @test
 def map01(): Bool = Chain.map(i -> i > 2, Chain.empty()) == Chain.empty()
 
@@ -366,6 +474,7 @@ def map07(): Bool = Chain.map(i -> i > 2, Chain.fromList(7 :: 8 :: Nil)) == Chai
 /////////////////////////////////////////////////////////////////////////////
 // mapWithIndex                                                            //
 /////////////////////////////////////////////////////////////////////////////
+
 @test
 def mapWithIndex01(): Bool =
     Chain.mapWithIndex((e, i) -> if (i < 1) e > 2 else e <= 2, Chain.fromList(Nil)) == Chain.empty()
@@ -393,6 +502,75 @@ def mapWithIndex06(): Bool =
 @test
 def mapWithIndex07(): Bool =
     Chain.mapWithIndex((e, i) -> if (i < 1) e > 2 else e <= 2, Chain.fromList(7 :: 8 :: Nil)) == Chain.fromList(true :: false :: Nil)
+
+/////////////////////////////////////////////////////////////////////////////
+// flatMap                                                                 //
+/////////////////////////////////////////////////////////////////////////////
+
+@test
+def flatMap01(): Bool = Chain.flatMap(i -> Chain.repeat(i, i), Chain.fromList(Nil)) == Chain.empty()
+
+@test
+def flatMap02(): Bool = Chain.flatMap(i -> Chain.repeat(i, i), Chain.fromList(0 :: Nil)) == Chain.empty()
+
+@test
+def flatMap03(): Bool = Chain.flatMap(i -> Chain.repeat(i, i), Chain.fromList(1 :: Nil)) == Chain.fromList(1 :: Nil)
+
+@test
+def flatMap04(): Bool = Chain.flatMap(i -> Chain.repeat(i, i), Chain.fromList(2 :: Nil)) == Chain.fromList(2 :: 2 :: Nil)
+
+@test
+def flatMap05(): Bool = Chain.flatMap(i -> Chain.repeat(i, i), Chain.fromList(1 :: 2 :: Nil)) == Chain.fromList(1 :: 2 :: 2 :: Nil)
+
+@test
+def flatMap06(): Bool = Chain.flatMap(i -> Chain.repeat(i, i), Chain.fromList(2 :: 3 :: Nil)) == Chain.fromList(2 :: 2 :: 3 :: 3 :: 3 :: Nil)
+
+/////////////////////////////////////////////////////////////////////////////
+// reverse                                                                 //
+/////////////////////////////////////////////////////////////////////////////
+
+@test
+def reverse01(): Bool = Chain.reverse(Chain.empty()) == Chain.empty()
+
+@test
+def reverse02(): Bool = Chain.reverse(Chain.fromList(1 :: Nil)) == Chain.fromList(1 :: Nil)
+
+@test
+def reverse03(): Bool = Chain.reverse(Chain.fromList(1 :: 2 :: Nil)) == Chain.fromList(2 :: 1 :: Nil)
+
+@test
+def reverse04(): Bool = Chain.reverse(Chain.fromList(1 :: 1 :: Nil)) == Chain.fromList(1 :: 1 :: Nil)
+
+@test
+def reverse05(): Bool = Chain.reverse(Chain.fromList(1 :: 2 :: 3 :: Nil)) == Chain.fromList(3 :: 2 :: 1 :: Nil)
+
+@test
+def reverse06(): Bool = Chain.reverse(Chain.fromList(1 :: 2 :: 3 :: 4 :: Nil)) == Chain.fromList(4 :: 3 :: 2 :: 1 :: Nil)
+
+/////////////////////////////////////////////////////////////////////////////
+// intersperse                                                             //
+/////////////////////////////////////////////////////////////////////////////
+
+@test
+def intersperse01(): Bool =
+    Chain.intersperse(11, Chain.empty()) == Chain.empty()
+
+@test
+def intersperse02(): Bool =
+    Chain.intersperse(11, Chain.fromList(1 :: Nil)) == Chain.fromList(1 :: Nil)
+
+@test
+def intersperse03(): Bool =
+    Chain.intersperse(11, Chain.fromList(1 :: 2 :: Nil)) == Chain.fromList(1 :: 11 :: 2 :: Nil)
+
+@test
+def intersperse04(): Bool =
+    Chain.intersperse(11, Chain.fromList(1 :: 2 :: 3 :: Nil)) == Chain.fromList(1 :: 11 :: 2 :: 11 :: 3 :: Nil)
+
+@test
+def intersperse05(): Bool =
+    Chain.intersperse(11, Chain.fromList(1 :: 2 :: 3 :: 4 :: Nil)) == Chain.fromList(1 :: 11 :: 2 :: 11 :: 3 :: 11 :: 4 :: Nil)
+
 
 /////////////////////////////////////////////////////////////////////////////
 // concat                                                                  //
@@ -442,5 +620,144 @@ def foldLeft01(): Bool =
     let xs = repeat(1, 1000000);
     foldLeft((a,b) -> Int32.max(a,b), 0, xs) == 1
 
+/////////////////////////////////////////////////////////////////////////////
+// dropLeft                                                                //
+/////////////////////////////////////////////////////////////////////////////
+
+@test
+def dropLeft01(): Bool = Chain.dropLeft(-1, Chain.fromList(Nil)) == Chain.empty()
+
+@test
+def dropLeft02(): Bool = Chain.dropLeft(0, Chain.fromList(Nil)) == Chain.empty()
+
+@test
+def dropLeft03(): Bool = Chain.dropLeft(1, Chain.fromList(Nil)) == Chain.empty()
+
+@test
+def dropLeft04(): Bool = Chain.dropLeft(-1, Chain.fromList(1 :: Nil)) == Chain.fromList(1 :: Nil)
+
+@test
+def dropLeft05(): Bool = Chain.dropLeft(0, Chain.fromList(1 :: Nil)) == Chain.fromList(1 :: Nil)
+
+@test
+def dropLeft06(): Bool = Chain.dropLeft(1, Chain.fromList(1 :: Nil)) == Chain.fromList(Nil)
+
+@test
+def dropLeft07(): Bool = Chain.dropLeft(2, Chain.fromList(1 :: Nil)) == Chain.fromList(Nil)
+
+@test
+def dropLeft08(): Bool = Chain.dropLeft(0, Chain.fromList(1 :: 2 :: Nil)) == Chain.fromList(1 :: 2 :: Nil)
+
+@test
+def dropLeft09(): Bool = Chain.dropLeft(1, Chain.fromList(1 :: 2 :: Nil)) == Chain.fromList(2 :: Nil)
+
+@test
+def dropLeft10(): Bool = Chain.dropLeft(2, Chain.fromList(1 :: 2 :: Nil)) == Chain.fromList(Nil)
+
+@test
+def dropLeft11(): Bool = Chain.dropLeft(2, Chain.fromList(1 :: 2 :: 3 :: 4 :: 5 :: 6 :: Nil)) == Chain.fromList(3 :: 4 :: 5 :: 6 :: Nil)
+
+@test
+def dropLeft12(): Bool = Chain.dropLeft(4, Chain.fromList(1 :: 2 :: 3 :: 4 :: 5 :: 6 :: Nil)) == Chain.fromList(5 :: 6 :: Nil)
+
+/////////////////////////////////////////////////////////////////////////////
+// dropRight                                                               //
+/////////////////////////////////////////////////////////////////////////////
+
+@test
+def ddropRight01(): Bool = Chain.dropRight(-1, Chain.fromList(Nil)) == Chain.empty()
+
+@test
+def dropRight02(): Bool = Chain.dropRight(0, Chain.fromList(Nil)) == Chain.empty()
+
+@test
+def dropRight03(): Bool = Chain.dropRight(1, Chain.fromList(Nil)) == Chain.empty()
+
+@test
+def dropRight04(): Bool = Chain.dropRight(-1, Chain.fromList(1 :: Nil)) == Chain.fromList(1 :: Nil)
+
+@test
+def dropRight05(): Bool = Chain.dropRight(0, Chain.fromList(1 :: Nil)) == Chain.fromList(1 :: Nil)
+
+@test
+def dropRight06(): Bool = Chain.dropRight(1, Chain.fromList(1 :: Nil)) == Chain.fromList(Nil)
+
+@test
+def dropRight07(): Bool = Chain.dropRight(2, Chain.fromList(1 :: Nil)) == Chain.fromList(Nil)
+
+@test
+def dropRight08(): Bool = Chain.dropRight(0, Chain.fromList(1 :: 2 :: Nil)) == Chain.fromList(1 :: 2 :: Nil)
+
+@test
+def dropRight09(): Bool = Chain.dropRight(1, Chain.fromList(1 :: 2 :: Nil)) == Chain.fromList(1 :: Nil)
+
+@test
+def dropRight10(): Bool = Chain.dropRight(2, Chain.fromList(1 :: 2 :: Nil)) == Chain.fromList(Nil)
+
+@test
+def dropRight11(): Bool = Chain.dropRight(2, Chain.fromList(1 :: 2 :: 3 :: 4 :: 5 :: 6 :: Nil)) == Chain.fromList(1 :: 2 :: 3 :: 4 :: Nil)
+
+@test
+def dropRight12(): Bool = Chain.dropRight(4, Chain.fromList(1 :: 2 :: 3 :: 4 :: 5 :: 6 :: Nil)) == Chain.fromList(1 :: 2 :: Nil)
+
+/////////////////////////////////////////////////////////////////////////////
+// dropWhileLeft                                                           //
+/////////////////////////////////////////////////////////////////////////////
+
+@test
+def dropWhileLeft01(): Bool = Chain.dropWhileLeft(i -> i > 3, Chain.fromList(Nil)) == Chain.fromList(Nil)
+
+@test
+def dropWhileLeft02(): Bool = Chain.dropWhileLeft(i -> i > 3, Chain.fromList(1 :: Nil)) == Chain.fromList(1 :: Nil)
+
+@test
+def dropWhileLeft03(): Bool = Chain.dropWhileLeft(i -> i > 3, Chain.fromList(4 :: Nil)) == Chain.fromList(Nil)
+
+@test
+def dropWhileLeft04(): Bool = Chain.dropWhileLeft(i -> i > 3, Chain.fromList(1 :: 2 :: Nil)) == Chain.fromList(1 :: 2 :: Nil)
+
+@test
+def dropWhileLeft05(): Bool = Chain.dropWhileLeft(i -> i > 3, Chain.fromList(1 :: 5 :: Nil)) == Chain.fromList(1 :: 5 :: Nil)
+
+@test
+def dropWhileLeft06(): Bool = Chain.dropWhileLeft(i -> i > 3, Chain.fromList(5 :: 1 :: Nil)) == Chain.fromList(1 :: Nil)
+
+@test
+def dropWhileLeft07(): Bool = Chain.dropWhileLeft(i -> i > 3, Chain.fromList(5 :: 8 :: Nil)) == Chain.fromList(Nil)
+
+@test
+def dropWhileLeft08(): Bool =
+    Chain.dropWhileLeft(i -> i > 3, Chain.fromList(4 :: 6 :: -3 :: 11 :: -5 :: 1 :: 2 :: 16 :: 7 :: 1 :: 7 :: Nil)) ==
+                        Chain.fromList(-3 :: 11 :: -5 :: 1 :: 2 :: 16 :: 7 :: 1 :: 7 :: Nil)
+
+/////////////////////////////////////////////////////////////////////////////
+// dropWhileRight                                                          //
+/////////////////////////////////////////////////////////////////////////////
+
+@test
+def dropWhileRight01(): Bool = Chain.dropWhileRight(i -> i > 3, Chain.fromList(Nil)) == Chain.fromList(Nil)
+
+@test
+def dropWhileRight02(): Bool = Chain.dropWhileRight(i -> i > 3, Chain.fromList(1 :: Nil)) == Chain.fromList(1 :: Nil)
+
+@test
+def dropWhileRight03(): Bool = Chain.dropWhileRight(i -> i > 3, Chain.fromList(4 :: Nil)) == Chain.fromList(Nil)
+
+@test
+def dropWhileRight04(): Bool = Chain.dropWhileRight(i -> i > 3, Chain.fromList(1 :: 2 :: Nil)) == Chain.fromList(1 :: 2 :: Nil)
+
+@test
+def dropWhileRight05(): Bool = Chain.dropWhileRight(i -> i > 3, Chain.fromList(1 :: 5 :: Nil)) == Chain.fromList(1 :: Nil)
+
+@test
+def dropWhileRight06(): Bool = Chain.dropWhileRight(i -> i > 3, Chain.fromList(5 :: 1 :: Nil)) == Chain.fromList(5 :: 1 :: Nil)
+
+@test
+def dropWhileRight07(): Bool = Chain.dropWhileRight(i -> i > 3, Chain.fromList(5 :: 8 :: Nil)) == Chain.fromList(Nil)
+
+@test
+def dropWhileRight08(): Bool =
+    Chain.dropWhileRight(i -> i > 3, Chain.fromList(4 :: 6 :: -3 :: 11 :: -5 :: 1 :: 2 :: 16 :: 7 :: 1 :: 7 :: Nil)) ==
+                        Chain.fromList(4 :: 6 :: -3 :: 11 :: -5 :: 1 :: 2 :: 16 :: 7 :: 1 :: Nil)
 
 }
