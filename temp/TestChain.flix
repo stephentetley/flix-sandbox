@@ -760,4 +760,83 @@ def dropWhileRight08(): Bool =
     Chain.dropWhileRight(i -> i > 3, Chain.fromList(4 :: 6 :: -3 :: 11 :: -5 :: 1 :: 2 :: 16 :: 7 :: 1 :: 7 :: Nil)) ==
                         Chain.fromList(4 :: 6 :: -3 :: 11 :: -5 :: 1 :: 2 :: 16 :: 7 :: 1 :: Nil)
 
+/////////////////////////////////////////////////////////////////////////////
+// takeLeft                                                                //
+/////////////////////////////////////////////////////////////////////////////
+@test
+def takeLeft01(): Bool = Chain.takeLeft(-1, Chain.fromList(Nil)) == Chain.fromList(Nil)
+
+@test
+def takeLeft02(): Bool = Chain.takeLeft(0, Chain.fromList(Nil)) == Chain.fromList(Nil)
+
+@test
+def takeLeft03(): Bool = Chain.takeLeft(1, Chain.fromList(Nil)) == Chain.fromList(Nil)
+
+@test
+def takeLeft04(): Bool = Chain.takeLeft(-1, Chain.fromList(1 :: Nil)) == Chain.fromList(Nil)
+
+@test
+def takeLeft05(): Bool = Chain.takeLeft(0, Chain.fromList(1 :: Nil)) == Chain.fromList(Nil)
+
+@test
+def takeLeft06(): Bool = Chain.takeLeft(1, Chain.fromList(1 :: Nil)) == Chain.fromList(1 :: Nil)
+
+@test
+def takeLeft07(): Bool = Chain.takeLeft(2, Chain.fromList(1 :: Nil)) == Chain.fromList(1 :: Nil)
+
+@test
+def takeLeft08(): Bool = Chain.takeLeft(0, Chain.fromList(1 :: 2 :: Nil)) == Chain.fromList(Nil)
+
+@test
+def takeLeft09(): Bool = Chain.takeLeft(1, Chain.fromList(1 :: 2 :: Nil)) == Chain.fromList(1 :: Nil)
+
+@test
+def takeLeft10(): Bool = Chain.takeLeft(2, Chain.fromList(1 :: 2 :: Nil)) == Chain.fromList(1 :: 2 :: Nil)
+
+@test
+def takeLeft11(): Bool = Chain.takeLeft(2, Chain.fromList(1 :: 2 :: 3 :: 4 :: 5 :: 6 :: Nil)) == Chain.fromList(1 :: 2 :: Nil)
+
+@test
+def takeLeft12(): Bool = Chain.takeLeft(4, Chain.fromList(1 :: 2 :: 3 :: 4 :: 5 :: 6 :: Nil)) == Chain.fromList(1 :: 2 :: 3 :: 4 :: Nil)
+
+/////////////////////////////////////////////////////////////////////////////
+// takeRight                                                               //
+/////////////////////////////////////////////////////////////////////////////
+
+@test
+def takeRight01(): Bool = Chain.takeRight(-1, Chain.fromList(Nil)) == Chain.fromList(Nil)
+
+@test
+def takeRight02(): Bool = Chain.takeRight(0, Chain.fromList(Nil)) == Chain.fromList(Nil)
+
+@test
+def takeRight03(): Bool = Chain.takeRight(1, Chain.fromList(Nil)) == Chain.fromList(Nil)
+
+@test
+def takeRight04(): Bool = Chain.takeRight(-1, Chain.fromList(1 :: Nil)) == Chain.fromList(Nil)
+
+@test
+def takeRight05(): Bool = Chain.takeRight(0, Chain.fromList(1 :: Nil)) == Chain.fromList(Nil)
+
+@test
+def takeRight06(): Bool = Chain.takeRight(1, Chain.fromList(1 :: Nil)) == Chain.fromList(1 :: Nil)
+
+@test
+def takeRight07(): Bool = Chain.takeRight(2, Chain.fromList(1 :: Nil)) == Chain.fromList(1 :: Nil)
+
+@test
+def takeRight08(): Bool = Chain.takeRight(0, Chain.fromList(1 :: 2 :: Nil)) == Chain.fromList(Nil)
+
+@test
+def takeRight09(): Bool = Chain.takeRight(1, Chain.fromList(1 :: 2 :: Nil)) == Chain.fromList(2 :: Nil)
+
+@test
+def takeRight10(): Bool = Chain.takeRight(2, Chain.fromList(1 :: 2 :: Nil)) == Chain.fromList(1 :: 2 :: Nil)
+
+@test
+def takeRight11(): Bool = Chain.takeRight(2, Chain.fromList(1 :: 2 :: 3 :: 4 :: 5 :: 6 :: Nil)) == Chain.fromList(5 :: 6 :: Nil)
+
+@test
+def takeRight12(): Bool = Chain.takeRight(4, Chain.fromList(1 :: 2 :: 3 :: 4 :: 5 :: 6 :: Nil)) == Chain.fromList(3 :: 4 :: 5 :: 6 :: Nil)
+
 }

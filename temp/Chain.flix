@@ -392,7 +392,7 @@ namespace Chain {
         foldLeftHelper(f, ac, xs, identity)
 
     ///
-    /// Helper for `foldLeft` in CPS.
+    /// Helper for function for `foldLeft`.
     ///
     def foldLeftHelper(f: (b, a) -> b, ac: b, xs: Chain[a], k: b -> b): b = match xs {
         case Empty => k(ac)
@@ -444,6 +444,43 @@ namespace Chain {
         case NoneRight => Empty
         case SomeRight(rs, x) => if (f(x)) dropWhileRight(f, rs) else xs
     }
+
+    ///
+    /// Returns the first `n` elements of `xs`.
+    ///
+    /// Returns `xs` if `n > length(xs)`.
+    /// Returns `Nil` if `n < 0`.
+    ///
+    pub def takeLeft(n: Int32, xs: Chain[a]): Chain[a] = takeLeftHelper(n, xs, Empty)
+
+    ///
+    /// Helper for function for `takeLeft`.
+    ///
+    def takeLeftHelper(n: Int32, xs: Chain[a], ac: Chain[a]): Chain[a] =
+        if (n < 0) Empty else match (n, viewLeft(xs)) {
+            case (_, NoneLeft) => ac
+            case (0, _) => ac
+            case (i, SomeLeft(x, rs)) => takeLeftHelper(i-1, rs, snoc(ac, x))
+        }
+
+    ///
+    /// Returns the last `n` elements of `xs`.
+    ///
+    /// Returns `xs` if `n > length(xs)`.
+    /// Returns `Nil` if `n < 0`.
+    ///
+    pub def takeRight(n: Int32, xs: Chain[a]): Chain[a] = takeRightHelper(n, xs, Empty)
+
+    ///
+    /// Helper for function for `takeRight`.
+    ///
+    def takeRightHelper(n: Int32, xs: Chain[a], ac: Chain[a]): Chain[a] =
+        if (n < 0) Empty else match (n, viewRight(xs)) {
+            case (_, NoneRight) => ac
+            case (0, _) => ac
+            case (i, SomeRight(rs, x)) => takeRightHelper(i-1, rs, cons(x, ac))
+        }
+
 
     ///
     /// Returns `true` if and only if `xs` and `ys` and equal.
