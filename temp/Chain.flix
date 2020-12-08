@@ -368,37 +368,33 @@ namespace Chain {
     pub def concat(xss: List[Chain[a]]): Chain[a] =
         List.foldLeft(append, empty(), xss)
 
-    ///
-    /// Right-associative fold of a Chain.
-    ///
-    pub def foldRight(f: (a, b) -> b, ac: b, xs: Chain[a]): b =
-        foldRightHelper(f, ac, xs, identity)
+
+
 
     ///
-    /// Helper for `foldRight` in CPS.
+    /// Applies `f` to a start value `s` and all elements in `xs` going from left to right.
     ///
-    def foldRightHelper(f: (a, b) -> b, ac: b, xs: Chain[a], k: b -> b): b = match xs {
-        case Empty => k(ac)
-        case One(a) => k(f(a, ac))
-        case Chain(x,y) =>
-            foldRightHelper(f, ac, y, ac1 -> foldRightHelper(f, ac1, x, ac2 -> k(ac2)))
+    /// That is, the result is of the form: `f(...f(f(s, x1), x2)..., xn)`.
+    ///
+    pub def foldLeft(f: (b, a) -> b & ef, ac: b, xs: Chain[a]): b & ef = match viewLeft(xs) {
+        case NoneLeft => ac
+        case SomeLeft(x, rs) => {
+            let b = f(ac, x);
+            foldLeft(f, b, rs)
+        }
     }
 
-
     ///
-    /// Left-associative fold of a Chain.
+    /// Applies `f` to a start value `s` and all elements in `xs` going from right to left.
     ///
-    pub def foldLeft(f: (b, a) -> b, ac: b, xs: Chain[a]): b =
-        foldLeftHelper(f, ac, xs, identity)
-
+    /// That is, the result is of the form: `f(x1, ...f(xn-1, f(xn, s))...)`.
     ///
-    /// Helper for function for `foldLeft`.
-    ///
-    def foldLeftHelper(f: (b, a) -> b, ac: b, xs: Chain[a], k: b -> b): b = match xs {
-        case Empty => k(ac)
-        case One(a) => k(f(ac, a))
-        case Chain(x,y) =>
-            foldLeftHelper(f, ac, x, ac1 -> foldLeftHelper(f, ac1, y, ac2 -> k(ac2)))
+    pub def foldRight(f: (a, b) -> b & ef, ac: b, xs: Chain[a]): b & ef = match viewRight(xs) {
+        case NoneRight => ac
+        case SomeRight(rs, x) => {
+            let b = f(x, ac);
+            foldRight(f, b, rs)
+        }
     }
 
     ///
@@ -481,6 +477,47 @@ namespace Chain {
             case (i, SomeRight(rs, x)) => takeRightHelper(i-1, rs, cons(x, ac))
         }
 
+    ///
+    /// Returns the longest prefix of `xs` that satisfies the predicate `f`.
+    ///
+    /// The function `f` must be pure.
+    ///
+    pub def takeWhileLeft(f: a -> Bool, xs: Chain[a]): Chain[a] = takeWhileLeftHelper(f, xs, Empty)
+
+    ///
+    /// Helper for function for `takeWhileLeft`.
+    ///
+    def takeWhileLeftHelper(f: a -> Bool, xs: Chain[a], ac: Chain[a]): Chain[a] = match viewLeft(xs) {
+        case NoneLeft => ac
+        case SomeLeft(x, rs) => if (f(x)) takeWhileLeftHelper(f, rs, snoc(ac, x)) else ac
+    }
+
+    ///
+    /// Returns the longest suffix of `xs` that satisfies the predicate `f`.
+    ///
+    /// The function `f` must be pure.
+    ///
+    pub def takeWhileRight(f: a -> Bool, xs: Chain[a]): Chain[a] = takeWhileRightHelper(f, xs, Empty)
+
+    ///
+    /// Helper for function for `takeWhileRight`.
+    ///
+    def takeWhileRightHelper(f: a -> Bool, xs: Chain[a], ac: Chain[a]): Chain[a] = match viewRight(xs) {
+        case NoneRight => ac
+        case SomeRight(rs, x) => if (f(x)) takeWhileRightHelper(f, rs, cons(x, ac)) else ac
+    }
+
+    ///
+    /// Returns the chain `xs` as an array.
+    ///
+    pub def toArray(xs: Chain[a]) : Array[a] & Impure = match head(xs) {
+        case None => []
+        case Some(x) =>
+            let a = Array.new(x, length(xs));
+            let f = (i,b) -> { a[i] = b; i + 1 };
+            foldLeft(f, 0, xs);
+            a
+        }
 
     ///
     /// Returns `true` if and only if `xs` and `ys` and equal.

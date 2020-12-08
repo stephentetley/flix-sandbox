@@ -601,24 +601,38 @@ def concat04(): Bool =
     toList(xs) == 1 :: 2 :: 3 :: Nil
 
 /////////////////////////////////////////////////////////////////////////////
-// foldRight                                                               //
-/////////////////////////////////////////////////////////////////////////////
-
-@test
-def foldRight01(): Bool =
-    use Chain.{repeat, foldRight};
-    let xs = repeat(1, 1000000);
-    foldRight((a,b) -> Int32.max(a,b), 0, xs) == 1
-
-/////////////////////////////////////////////////////////////////////////////
 // foldLeft                                                                //
 /////////////////////////////////////////////////////////////////////////////
 
 @test
-def foldLeft01(): Bool =
-    use Chain.{repeat, foldLeft};
-    let xs = repeat(1, 1000000);
-    foldLeft((a,b) -> Int32.max(a,b), 0, xs) == 1
+def foldLeft01(): Bool = Chain.foldLeft((i, e) -> (i - e)*(e % 2 + 1), 100, Chain.fromList(Nil)) == 100
+
+@test
+def foldLeft02(): Bool = Chain.foldLeft((i, e) -> (i - e)*(e % 2 + 1), 100, Chain.fromList(1 :: Nil)) == 198
+
+@test
+def foldLeft03(): Bool = Chain.foldLeft((i, e) -> (i - e)*(e % 2 + 1), 100, Chain.fromList(1 :: 2 :: Nil)) == 196
+
+@test
+def foldLeft04(): Bool = Chain.foldLeft((i, e) -> (i - e)*(e % 2 + 1), 100, Chain.fromList(1 :: 2 :: 3 :: Nil)) == 386
+
+
+/////////////////////////////////////////////////////////////////////////////
+// foldRight                                                               //
+/////////////////////////////////////////////////////////////////////////////
+
+@test
+def foldRight01(): Bool = Chain.foldRight((e, i) -> (i - e)*(e % 2 + 1), 100, Chain.fromList(Nil)) == 100
+
+@test
+def foldRight02(): Bool = Chain.foldRight((e, i) -> (i - e)*(e % 2 + 1), 100, Chain.fromList(1 :: Nil)) == 198
+
+@test
+def foldRight03(): Bool = Chain.foldRight((e, i) -> (i - e)*(e % 2 + 1), 100, Chain.fromList(1 :: 2 :: Nil)) == 194
+
+@test
+def foldRight04(): Bool = Chain.foldRight((e, i) -> (i - e)*(e % 2 + 1), 100, Chain.fromList(1 :: 2 :: 3 :: Nil)) == 382
+
 
 /////////////////////////////////////////////////////////////////////////////
 // dropLeft                                                                //
@@ -838,5 +852,88 @@ def takeRight11(): Bool = Chain.takeRight(2, Chain.fromList(1 :: 2 :: 3 :: 4 :: 
 
 @test
 def takeRight12(): Bool = Chain.takeRight(4, Chain.fromList(1 :: 2 :: 3 :: 4 :: 5 :: 6 :: Nil)) == Chain.fromList(3 :: 4 :: 5 :: 6 :: Nil)
+
+/////////////////////////////////////////////////////////////////////////////
+// takeWhileLeft                                                           //
+/////////////////////////////////////////////////////////////////////////////
+
+@test
+def takeWhileLeft01(): Bool = Chain.takeWhileLeft(i -> i > 3, Chain.fromList(Nil)) == Chain.fromList(Nil)
+
+@test
+def takeWhileLeft02(): Bool = Chain.takeWhileLeft(i -> i > 3, Chain.fromList(1 :: Nil)) == Chain.fromList(Nil)
+
+@test
+def takeWhileLeft03(): Bool = Chain.takeWhileLeft(i -> i > 3, Chain.fromList(4 :: Nil)) == Chain.fromList(4 :: Nil)
+
+@test
+def takeWhileLeft04(): Bool = Chain.takeWhileLeft(i -> i > 3, Chain.fromList(1 :: 2 :: Nil)) == Chain.fromList(Nil)
+
+@test
+def takeWhileLeft05(): Bool = Chain.takeWhileLeft(i -> i > 3, Chain.fromList(1 :: 5 :: Nil)) == Chain.fromList(Nil)
+
+@test
+def takeWhileLeft06(): Bool = Chain.takeWhileLeft(i -> i > 3, Chain.fromList(5 :: 1 :: Nil)) == Chain.fromList(5 :: Nil)
+
+@test
+def takeWhileLeft07(): Bool = Chain.takeWhileLeft(i -> i > 3, Chain.fromList(5 :: 8 :: Nil)) == Chain.fromList(5 :: 8 :: Nil)
+
+@test
+def takeWhileLeft08(): Bool = Chain.takeWhileLeft(i -> i > 3, Chain.fromList(4 :: 6 :: -3 :: 11 :: -5 :: 1 :: 2 :: 16 :: 7 :: 1 :: 7 :: Nil)) ==
+                        Chain.fromList(4 :: 6 :: Nil)
+
+/////////////////////////////////////////////////////////////////////////////
+// takeWhileRight                                                          //
+/////////////////////////////////////////////////////////////////////////////
+
+@test
+def takeWhileRight01(): Bool = Chain.takeWhileRight(i -> i > 3, Chain.fromList(Nil)) == Chain.fromList(Nil)
+
+@test
+def takeWhileRight02(): Bool = Chain.takeWhileRight(i -> i > 3, Chain.fromList(1 :: Nil)) == Chain.fromList(Nil)
+
+@test
+def takeWhileRight03(): Bool = Chain.takeWhileRight(i -> i > 3, Chain.fromList(4 :: Nil)) == Chain.fromList(4 :: Nil)
+
+@test
+def takeWhileRight04(): Bool = Chain.takeWhileRight(i -> i > 3, Chain.fromList(1 :: 2 :: Nil)) == Chain.fromList(Nil)
+
+@test
+def takeWhileRight05(): Bool = Chain.takeWhileRight(i -> i > 3, Chain.fromList(1 :: 5 :: Nil)) == Chain.fromList(5 :: Nil)
+
+@test
+def takeWhileRight06(): Bool = Chain.takeWhileRight(i -> i > 3, Chain.fromList(5 :: 1 :: Nil)) == Chain.fromList(Nil)
+
+@test
+def takeWhileRight07(): Bool = Chain.takeWhileRight(i -> i > 3, Chain.fromList(5 :: 8 :: Nil)) == Chain.fromList(5 :: 8 :: Nil)
+
+@test
+def takeWhileRight08(): Bool = Chain.takeWhileRight(i -> i > 3, Chain.fromList(4 :: 6 :: -3 :: 11 :: -5 :: 1 :: 2 :: 16 :: 7 :: 1 :: 7 :: Nil)) ==
+                        Chain.fromList(7 :: Nil)
+
+/////////////////////////////////////////////////////////////////////////////
+// toArray                                                                 //
+/////////////////////////////////////////////////////////////////////////////
+
+@test
+def toArray01(): Bool & Impure =
+    let xs: Chain[Int32] = Chain.empty();
+    let a: Array[Int32] = Chain.toArray(xs);
+    Array.sameElements(a, []: Array[Int32])
+
+@test
+def toArray02(): Bool & Impure =
+    let a = Chain.toArray(Chain.singleton(1));
+    Array.sameElements(a, [1])
+
+@test
+def toArray03(): Bool & Impure =
+    let a = Chain.toArray(Chain.fromList(1 :: 2 :: Nil));
+    Array.sameElements(a, [1,2])
+
+@test
+def toArray04(): Bool & Impure =
+    let a = Chain.toArray(Chain.fromList(1 :: 2 :: 3 :: Nil));
+    Array.sameElements(a, [1,2,3])
 
 }
