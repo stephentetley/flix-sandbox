@@ -365,11 +365,65 @@ namespace Chain {
     pub def fromList(xs: List[a]): Chain[a] =
         List.foldRight(cons, empty(), xs)
 
-    pub def concat(xss: List[Chain[a]]): Chain[a] =
-        List.foldLeft(append, empty(), xss)
+    ///
+    /// Returns the number of elements in `xs` that satisfy the predicate `f`.
+    ///
+    /// The function `f` must be pure.
+    ///
+    pub def count(f: a -> Bool, xs: Chain[a]): Int32 = countHelper(f, xs, 0)
 
+    ///
+    /// Helper function for `count`.
+    ///
+    def countHelper(f: a -> Bool, xs: Chain[a], ac: Int32): Int32 = match viewLeft(xs) {
+        case NoneLeft => ac
+        case SomeLeft(x, rs) => if (f(x)) countHelper(f, rs, ac + 1) else countHelper(f, rs, ac)
+    }
 
+    ///
+    /// Returns the concatenation of the elements in `xs`.
+    ///
+    pub def flatten(xs: Chain[Chain[a]]): Chain[a] =
+        foldLeft(append, empty(), xs)
 
+    ///
+    /// Returns `true` if and only if at least one element in `xs` satisfies the predicate `f`.
+    ///
+    /// Returns `false` if `xs` is empty.
+    ///
+    /// The function `f` must be pure.
+    ///
+    pub def exists(f: a -> Bool, xs: Chain[a]): Bool = match viewLeft(xs) {
+        case NoneLeft => false
+        case SomeLeft(x, rs) => if (f(x)) true else exists(f, rs)
+    }
+
+    ///
+    /// Returns `true` if and only if all elements in `xs` satisfy the predicate `f`.
+    ///
+    /// Returns `true` if `xs` is empty.
+    ///
+    /// The function `f` must be pure.
+    ///
+    pub def forall(f: a -> Bool, xs: Chain[a]): Bool = match viewLeft(xs) {
+        case NoneLeft => true
+        case SomeLeft(x, rs) => if (not f(x)) false else forall(f, rs)
+    }
+
+    ///
+    /// Returns a list of every element in `xs` that satisfies the predicate `f`.
+    ///
+    /// The function `f` must be pure.
+    ///
+    pub def filter(f: a -> Bool, xs: Chain[a]): Chain[a] = filterHelper(f, xs, Empty)
+
+    ///
+    /// Helper function for `filter`.
+    ///
+    def filterHelper(f: a -> Bool, xs: Chain[a], ac: Chain[a]): Chain[a] = match viewLeft(xs) {
+        case NoneLeft => ac
+        case SomeLeft(x, rs) => if (f(x)) filterHelper(f, rs, snoc(ac, x)) else filterHelper(f, rs, ac)
+    }
 
     ///
     /// Applies `f` to a start value `s` and all elements in `xs` going from left to right.

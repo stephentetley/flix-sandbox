@@ -571,34 +571,156 @@ def intersperse04(): Bool =
 def intersperse05(): Bool =
     Chain.intersperse(11, Chain.fromList(1 :: 2 :: 3 :: 4 :: Nil)) == Chain.fromList(1 :: 11 :: 2 :: 11 :: 3 :: 11 :: 4 :: Nil)
 
+/////////////////////////////////////////////////////////////////////////////
+// count                                                                   //
+/////////////////////////////////////////////////////////////////////////////
+
+@test
+def count01(): Bool = Chain.count(i -> i > 3, Chain.fromList(Nil)) == 0
+
+@test
+def count02(): Bool = Chain.count(i -> i > 3, Chain.fromList(1 :: Nil)) == 0
+
+@test
+def count03(): Bool = Chain.count(i -> i > 3, Chain.fromList(4 :: Nil)) == 1
+
+@test
+def count04(): Bool = Chain.count(i -> i > 3, Chain.fromList(1 :: 2 :: Nil)) == 0
+
+@test
+def count05(): Bool = Chain.count(i -> i > 3, Chain.fromList(1 :: 8 :: Nil)) == 1
+
+@test
+def count06(): Bool = Chain.count(i -> i > 3, Chain.fromList(8 :: 1 :: Nil)) == 1
+
+@test
+def count07(): Bool = Chain.count(i -> i > 3, Chain.fromList(6 :: 7 :: Nil)) == 2
 
 /////////////////////////////////////////////////////////////////////////////
-// concat                                                                  //
+// flatten                                                                 //
 /////////////////////////////////////////////////////////////////////////////
 
 @test
-def concat01(): Bool =
-    use Chain.{toList, concat};
-    let xs = concat(Nil);
-    toList(xs) == Nil
+def flatten01(): Bool = Chain.flatten(Chain.fromList(Nil)) == Chain.fromList(Nil)
 
 @test
-def concat02(): Bool =
-    use Chain.{toList, concat, singleton};
-    let xs = concat(singleton(1) :: Nil);
-    toList(xs) == 1 :: Nil
+def flatten02(): Bool = Chain.flatten(Chain.fromList(Chain.fromList(Nil) :: Nil)) == Chain.fromList(Nil)
 
 @test
-def concat03(): Bool =
-    use Chain.{toList, concat, singleton};
-    let xs = concat(singleton(1) :: singleton(2) :: Nil);
-    toList(xs) == 1 :: 2 :: Nil
+def flatten03(): Bool = Chain.flatten(Chain.fromList(Chain.fromList(1 :: Nil) :: Nil)) == Chain.fromList(1 :: Nil)
 
 @test
-def concat04(): Bool =
-    use Chain.{toList, concat, singleton, fromList};
-    let xs = concat(fromList(1 :: 2 :: Nil) :: singleton(3) :: Nil);
-    toList(xs) == 1 :: 2 :: 3 :: Nil
+def flatten04(): Bool = Chain.flatten(Chain.fromList(Chain.fromList(1 :: 2 :: Nil) :: Nil)) == Chain.fromList(1 :: 2 :: Nil)
+
+@test
+def flatten05(): Bool = Chain.flatten(Chain.fromList(Chain.fromList(Nil) :: Chain.fromList(Nil) :: Nil)) == Chain.fromList(Nil)
+
+@test
+def flatten06(): Bool = Chain.flatten(Chain.fromList(Chain.fromList(1 :: Nil) :: Chain.fromList(Nil) :: Nil)) == Chain.fromList(1 :: Nil)
+
+@test
+def flatten07(): Bool = Chain.flatten(Chain.fromList(Chain.fromList(Nil) :: Chain.fromList(1 :: Nil) :: Nil)) == Chain.fromList(1 :: Nil)
+
+@test
+def flatten08(): Bool = Chain.flatten(Chain.fromList(Chain.fromList(1 :: Nil) :: Chain.fromList(2 :: Nil) :: Nil)) == Chain.fromList(1 :: 2 :: Nil)
+
+@test
+def flatten09(): Bool = Chain.flatten(Chain.fromList(Chain.fromList(1 :: 2 :: Nil) :: Chain.fromList(3 :: 4 :: 5 :: Nil) :: Nil)) == Chain.fromList(1 :: 2 :: 3 :: 4 :: 5 :: Nil)
+
+@test
+def flatten10(): Bool = Chain.flatten(Chain.fromList(Chain.fromList(1 :: Nil) :: Chain.fromList(2 :: 3 :: Nil) :: Chain.fromList(4 :: Nil) :: Nil)) == Chain.fromList(1 :: 2 :: 3 :: 4 :: Nil)
+/////////////////////////////////////////////////////////////////////////////
+// exists                                                                  //
+/////////////////////////////////////////////////////////////////////////////
+
+@test
+def exists01(): Bool = Chain.exists(i -> i > 3, Chain.fromList(Nil)) == false
+
+@test
+def exists02(): Bool = Chain.exists(i -> i > 3, Chain.fromList(1 :: Nil)) == false
+
+@test
+def exists03(): Bool = Chain.exists(i -> i > 3, Chain.fromList(5 :: Nil)) == true
+
+@test
+def exists04(): Bool = Chain.exists(i -> i > 3, Chain.fromList(1 :: 2 :: Nil)) == false
+
+@test
+def exists05(): Bool = Chain.exists(i -> i > 3, Chain.fromList(1 :: 6 :: Nil)) == true
+
+@test
+def exists06(): Bool = Chain.exists(i -> i > 3, Chain.fromList(6 :: 1 :: Nil)) == true
+
+@test
+def exists07(): Bool = Chain.exists(i -> i > 3, Chain.fromList(16 :: 6 :: Nil)) == true
+
+@test
+def exists08(): Bool = Chain.exists(i -> i > 3, Chain.fromList(1 :: -9 :: 3 :: Nil)) == false
+
+@test
+def exists09(): Bool = Chain.exists(i -> i > 3, Chain.fromList(1 :: 9 :: 3 :: Nil)) == true
+
+/////////////////////////////////////////////////////////////////////////////
+// forall                                                                  //
+/////////////////////////////////////////////////////////////////////////////
+
+@test
+def forall01(): Bool = Chain.forall(i -> i > 3, Chain.fromList(Nil)) == true
+
+@test
+def forall02(): Bool = Chain.forall(i -> i > 3, Chain.fromList(1 :: Nil)) == false
+
+@test
+def forall03(): Bool = Chain.forall(i -> i > 3, Chain.fromList(5 :: Nil)) == true
+
+@test
+def forall04(): Bool = Chain.forall(i -> i > 3, Chain.fromList(1 :: 2 :: Nil)) == false
+
+@test
+def forall05(): Bool = Chain.forall(i -> i > 3, Chain.fromList(1 :: 6 :: Nil)) == false
+
+@test
+def forall06(): Bool = Chain.forall(i -> i > 3, Chain.fromList(6 :: 1 :: Nil)) == false
+
+@test
+def forall07(): Bool = Chain.forall(i -> i > 3, Chain.fromList(16 :: 6 :: Nil)) == true
+
+@test
+def forall08(): Bool = Chain.forall(i -> i > 3, Chain.fromList(1 :: -9 :: 3 :: Nil)) == false
+
+@test
+def forall09(): Bool = Chain.forall(i -> i > 3, Chain.fromList(1 :: 9 :: 3 :: Nil)) == false
+
+@test
+def forall10(): Bool = Chain.forall(i -> i > 3, Chain.fromList(11 :: 9 :: 31 :: Nil)) == true
+
+/////////////////////////////////////////////////////////////////////////////
+// filter                                                                  //
+/////////////////////////////////////////////////////////////////////////////
+
+@test
+def filter01(): Bool = Chain.filter(i -> i > 3, Chain.fromList(Nil)) == Chain.fromList(Nil)
+
+@test
+def filter02(): Bool = Chain.filter(i -> i > 3, Chain.fromList(2 :: Nil)) == Chain.fromList(Nil)
+
+@test
+def filter03(): Bool = Chain.filter(i -> i > 3, Chain.fromList(4 :: Nil)) == Chain.fromList(4 :: Nil)
+
+@test
+def filter04(): Bool = Chain.filter(i -> i > 3, Chain.fromList(1 :: 3 :: Nil)) == Chain.fromList(Nil)
+
+@test
+def filter05(): Bool = Chain.filter(i -> i > 3, Chain.fromList(1 :: 8 :: Nil)) == Chain.fromList(8 :: Nil)
+
+@test
+def filter06(): Bool = Chain.filter(i -> i > 3, Chain.fromList(8 :: 1 :: Nil)) == Chain.fromList(8 :: Nil)
+
+@test
+def filter07(): Bool = Chain.filter(i -> i > 3, Chain.fromList(8 :: 9 :: Nil)) == Chain.fromList(8 :: 9 :: Nil)
+
+@test
+def filter08(): Bool = Chain.filter(i -> i > 3, Chain.fromList(1 :: 4 :: 11 :: 2 :: -22 :: 17 :: Nil)) == Chain.fromList(4 :: 11 :: 17 :: Nil)
 
 /////////////////////////////////////////////////////////////////////////////
 // foldLeft                                                                //
