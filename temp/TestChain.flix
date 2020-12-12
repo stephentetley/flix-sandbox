@@ -1032,6 +1032,136 @@ def takeWhileRight07(): Bool = Chain.takeWhileRight(i -> i > 3, Chain.fromList(5
 @test
 def takeWhileRight08(): Bool = Chain.takeWhileRight(i -> i > 3, Chain.fromList(4 :: 6 :: -3 :: 11 :: -5 :: 1 :: 2 :: 16 :: 7 :: 1 :: 7 :: Nil)) ==
                         Chain.fromList(7 :: Nil)
+/////////////////////////////////////////////////////////////////////////////
+// filterMap                                                               //
+/////////////////////////////////////////////////////////////////////////////
+
+@test
+def filterMap01(): Bool = Chain.filterMap(i -> if (i % 2 == 0) Some(i/2) else None, Chain.fromList(Nil)) == Chain.fromList(Nil)
+
+@test
+def filterMap02(): Bool = Chain.filterMap(i -> if (i % 2 == 0) Some(i/2) else None, Chain.fromList(1 :: Nil)) == Chain.fromList(Nil)
+
+@test
+def filterMap03(): Bool = Chain.filterMap(i -> if (i % 2 == 0) Some(i/2) else None, Chain.fromList(2 :: Nil)) == Chain.fromList(1 :: Nil)
+
+@test
+def filterMap04(): Bool = Chain.filterMap(i -> if (i % 2 == 0) Some(i/2) else None, Chain.fromList(1 :: 3 :: Nil)) == Chain.fromList(Nil)
+
+@test
+def filterMap05(): Bool = Chain.filterMap(i -> if (i % 2 == 0) Some(i/2) else None, Chain.fromList(1 :: 4 :: Nil)) == Chain.fromList(2 :: Nil)
+
+@test
+def filterMap06(): Bool = Chain.filterMap(i -> if (i % 2 == 0) Some(i/2) else None, Chain.fromList(6 :: -1 :: Nil)) == Chain.fromList(3 :: Nil)
+
+@test
+def filterMap07(): Bool = Chain.filterMap(i -> if (i % 2 == 0) Some(i/2) else None, Chain.fromList(8 :: 6 :: Nil)) == Chain.fromList(4 :: 3 :: Nil)
+
+@test
+def filterMap08(): Bool = Chain.filterMap(i -> if (i % 2 == 0) Some(i/2) else None, Chain.fromList(0 :: 1 :: 2 :: 3 :: 4 :: 5 :: 10 :: Nil)) ==
+                        Chain.fromList(0 :: 1 :: 2 :: 5 :: Nil)
+
+/////////////////////////////////////////////////////////////////////////////
+// findMap                                                                 //
+/////////////////////////////////////////////////////////////////////////////
+
+@test
+def findMap01(): Bool = Chain.findMap(i -> if (i % 2 == 0) Some(i/2) else None, Chain.fromList(Nil)) == None
+
+@test
+def findMap02(): Bool = Chain.findMap(i -> if (i % 2 == 0) Some(i/2) else None, Chain.fromList(1 :: Nil)) == None
+
+@test
+def findMap03(): Bool = Chain.findMap(i -> if (i % 2 == 0) Some(i/2) else None, Chain.fromList(2 :: Nil)) == Some(1)
+
+@test
+def findMap04(): Bool = Chain.findMap(i -> if (i % 2 == 0) Some(i/2) else None, Chain.fromList(1 :: 3 :: Nil)) == None
+
+@test
+def findMap05(): Bool = Chain.findMap(i -> if (i % 2 == 0) Some(i/2) else None, Chain.fromList(1 :: 4 :: Nil)) == Some(2)
+
+@test
+def findMap06(): Bool = Chain.findMap(i -> if (i % 2 == 0) Some(i/2) else None, Chain.fromList(6 :: -1 :: Nil)) == Some(3)
+
+@test
+def findMap07(): Bool = Chain.findMap(i -> if (i % 2 == 0) Some(i/2) else None, Chain.fromList(8 :: 6 :: Nil)) == Some(4)
+
+@test
+def findMap08(): Bool = Chain.findMap(i -> if (i % 2 == 0) Some(i/2) else None, Chain.fromList(0 :: 1 :: 2 :: 3 :: 4 :: 5 :: 10 :: Nil)) == Some(0)
+
+/////////////////////////////////////////////////////////////////////////////
+// toList                                                                  //
+/////////////////////////////////////////////////////////////////////////////
+
+@test
+def toList01(): Bool = Chain.toList(Chain.empty()) == Nil
+
+@test
+def toList02(): Bool = Chain.toList(Chain.singleton(1)) == 1 :: Nil
+
+@test
+def toList03(): Bool = Chain.toList(Chain.cons(1, Chain.singleton(2))) == 1 :: 2 :: Nil
+
+/////////////////////////////////////////////////////////////////////////////
+// toSet                                                                   //
+/////////////////////////////////////////////////////////////////////////////
+
+@test
+def toSet01(): Bool = Chain.toSet(Chain.empty()) == Set#{}
+
+@test
+def toSet02(): Bool = Chain.toSet(Chain.fromList(1 :: Nil)) == Set#{1}
+
+@test
+def toSet03(): Bool = Chain.toSet(Chain.fromList(1 :: 2 :: Nil)) == Set#{1, 2}
+
+@test
+def toSet04(): Bool = Chain.toSet(Chain.fromList(1 :: 1 :: Nil)) == Set#{1}
+
+@test
+def toSet05(): Bool = Chain.toSet(Chain.fromList(1 :: 2 :: 3 :: Nil)) == Set#{1, 2, 3}
+
+@test
+def toSet06(): Bool = Chain.toSet(Chain.fromList(1 :: 2 :: 1 :: Nil)) == Set#{1, 2}
+
+@test
+def toSet07(): Bool = Chain.toSet(Chain.fromList(1 :: 1 :: 2 :: Nil)) == Set#{1, 2}
+
+@test
+def toSet08(): Bool = Chain.toSet(Chain.fromList(2 :: 1 :: 2 :: 3 :: 4 :: 5 :: 6 :: 3 :: 3 :: Nil)) == Set#{1, 2, 3, 4, 5, 6}
+
+/////////////////////////////////////////////////////////////////////////////
+// toMap                                                                   //
+/////////////////////////////////////////////////////////////////////////////
+
+@test
+def toMap01(): Bool = Chain.toMap(Chain.fromList(Nil)) == Map#{}
+
+@test
+def toMap02(): Bool = Chain.toMap(Chain.fromList((1, true) :: Nil)) == Map#{1 -> true}
+
+@test
+def toMap03(): Bool = Chain.toMap(Chain.fromList((1, true) :: (2, false) :: Nil)) == Map#{1 -> true, 2 -> false}
+
+@test
+def toMap04(): Bool = Chain.toMap(Chain.fromList((1, true) :: (1, false) :: Nil)) == Map#{1 -> true}
+
+
+/////////////////////////////////////////////////////////////////////////////
+// foreach                                                                 //
+/////////////////////////////////////////////////////////////////////////////
+
+@test
+def foreach01(): Bool & Impure =
+    let r = ref 21;
+    Chain.foreach(x -> r := x, Chain.empty());
+    21 == deref r
+
+@test
+def foreach02(): Bool & Impure =
+    let r = ref 21;
+    Chain.foreach(x -> r := x, Chain.fromList(1 :: 2 :: 3 :: Nil));
+    3 == deref r
 
 /////////////////////////////////////////////////////////////////////////////
 // toArray                                                                 //

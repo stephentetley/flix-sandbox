@@ -346,25 +346,6 @@ namespace Chain {
         case SomeLeft(x, rs) => intersperseHelper(sep, rs, ac `snoc` sep `snoc` x)
     }
 
-
-    pub def toList(xs: Chain[a]): List[a] = toListHelper(xs, Nil, ks -> ks)
-
-    ///
-    /// Helper for `toList` in CPS.
-    ///
-    def toListHelper(xs: Chain[a], ac:List[a], k: List[a] -> List[a]): List[a] =
-        match xs {
-            case Empty => k(ac)
-            case One(a) => k(a :: ac)
-            case Chain(l, r) =>
-                // Go Right first
-                toListHelper(r, ac, ac1 ->
-                    toListHelper(l, ac1, k))
-        }
-
-    pub def fromList(xs: List[a]): Chain[a] =
-        List.foldRight(cons, empty(), xs)
-
     ///
     /// Returns the number of elements in `xs` that satisfy the predicate `f`.
     ///
@@ -559,6 +540,72 @@ namespace Chain {
     def takeWhileRightHelper(f: a -> Bool, xs: Chain[a], ac: Chain[a]): Chain[a] = match viewRight(xs) {
         case NoneRight => ac
         case SomeRight(rs, x) => if (f(x)) takeWhileRightHelper(f, rs, cons(x, ac)) else ac
+    }
+
+    ///
+    /// Collects the results of applying the partial function `f` to every element in `xs`.
+    ///
+    pub def filterMap(f: a -> Option[b] & e, xs: Chain[a]): Chain[b] & e =
+        let step = (ac, x) -> match f(x) {
+                                case None => ac
+                                case Some(v) => snoc(ac, v)
+        };
+        foldLeft(step, empty(), xs)
+
+    ///
+    /// Returns the first non-None result of applying the partial function `f` to each element of `xs`.
+    ///
+    /// Returns `None` if every element of `xs` is `None`.
+    ///
+    pub def findMap(f: a -> Option[b] & e, xs: Chain[a]): Option[b] & e = match viewLeft(xs) {
+        case NoneLeft => None
+        case SomeLeft(x, rs) => match f(x) {
+                            case None => findMap(f, rs)
+                            case Some(v) => Some(v)
+        }
+    }
+
+    ///
+    /// Returns `xs` as a list.
+    ///
+    pub def toList(xs: Chain[a]): List[a] =
+        foldRight((x,ac) -> x :: ac, Nil, xs)
+
+    ///
+    /// Returns the list `xs` as a chain.
+    ///
+    pub def fromList(xs: List[a]): Chain[a] =
+        List.foldLeft(snoc, empty(), xs)
+
+    ///
+    /// Returns `xs` as a mutable list.
+    ///
+    pub def toMut(xs: Chain[a]): MutList[a] & Impure =
+        MutList(ref toArray(xs), ref length(xs))
+
+    ///
+    /// Returns the list `xs` as a set.
+    ///
+    pub def toSet(xs: Chain[a]): Set[a] = foldRight(Set.insert, Set.empty(), xs)
+
+
+    ///
+    /// Returns the association list `xs` as a map.
+    ///
+    /// If `xs` contains multiple mappings with the same key, `toMap` does not
+    /// make any guarantees about which mapping will be in the resulting map.
+    ///
+    pub def toMap(xs: Chain[(a, b)]): Map[a, b] = foldRight((x, m) -> Map.insert(fst(x), snd(x), m), Map.empty(), xs)
+
+
+    ///
+    /// Applies `f` to every element of `xs`.
+    ///
+    /// The function `f` must be impure.
+    ///
+    pub def foreach(f: a ~> Unit, xs: Chain[a]): Unit & Impure = match viewLeft(xs) {
+        case NoneLeft => ()
+        case SomeLeft(x, rs) => f(x); foreach(f, rs)
     }
 
     ///
