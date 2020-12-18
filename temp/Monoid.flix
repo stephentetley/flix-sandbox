@@ -66,6 +66,65 @@ instance Monoid[(a1, a2, a3)] with [a1 : Monoid, a2 : Monoid, a3: Monoid] {
     }
 }
 
+instance Monoid[(a1, a2, a3, a4)] with [a1 : Monoid, a2 : Monoid, a3: Monoid, a4: Monoid] {
+    def empty(): (a1, a2, a3, a4) = (Monoid.empty(), Monoid.empty(), Monoid.empty(), Monoid.empty())
+    def combine(x: (a1, a2, a3, a4), y: (a1, a2, a3, a4)): (a1, a2, a3, a4) = match (x, y) {
+        case ((x1, x2, x3, x4), (y1, y2, y3, y4)) => (Monoid.combine(x1, y1), Monoid.combine(x2, y2), Monoid.combine(x3, y3), Monoid.combine(x4, y4))
+    }
+}
+
+instance Monoid[(a1, a2, a3, a4, a5)] with [a1 : Monoid, a2 : Monoid, a3: Monoid, a4: Monoid, a5: Monoid] {
+    def empty(): (a1, a2, a3, a4, a5) = (Monoid.empty(), Monoid.empty(), Monoid.empty(), Monoid.empty(), Monoid.empty())
+    def combine(x: (a1, a2, a3, a4, a5), y: (a1, a2, a3, a4, a5)): (a1, a2, a3, a4, a5) = match (x, y) {
+        case ((x1, x2, x3, x4, x5), (y1, y2, y3, y4, y5)) => (Monoid.combine(x1, y1), Monoid.combine(x2, y2), Monoid.combine(x3, y3), Monoid.combine(x4, y4), Monoid.combine(x5, y5))
+    }
+}
+
+instance Monoid[(a1, a2, a3, a4, a5, a6)] with [a1 : Monoid, a2 : Monoid, a3: Monoid, a4: Monoid, a5: Monoid, a6: Monoid] {
+    def empty(): (a1, a2, a3, a4, a5, a6) = (Monoid.empty(), Monoid.empty(), Monoid.empty(), Monoid.empty(), Monoid.empty(), Monoid.empty())
+    def combine(x: (a1, a2, a3, a4, a5, a6), y: (a1, a2, a3, a4, a5, a6)): (a1, a2, a3, a4, a5, a6) = match (x, y) {
+        case ((x1, x2, x3, x4, x5, x6), (y1, y2, y3, y4, y5, y6)) => (Monoid.combine(x1, y1), Monoid.combine(x2, y2), Monoid.combine(x3, y3), Monoid.combine(x4, y4), Monoid.combine(x5, y5), Monoid.combine(x6, y6))
+    }
+}
+
+instance Monoid[(a1, a2, a3, a4, a5, a6, a7)] with [a1 : Monoid, a2 : Monoid, a3: Monoid, a4: Monoid, a5: Monoid, a6: Monoid, a7: Monoid] {
+    def empty(): (a1, a2, a3, a4, a5, a6, a7) = (Monoid.empty(), Monoid.empty(), Monoid.empty(), Monoid.empty(), Monoid.empty(), Monoid.empty(), Monoid.empty())
+    def combine(x: (a1, a2, a3, a4, a5, a6, a7), y: (a1, a2, a3, a4, a5, a6, a7)): (a1, a2, a3, a4, a5, a6, a7) = match (x, y) {
+        case ((x1, x2, x3, x4, x5, x6, x7), (y1, y2, y3, y4, y5, y6, y7)) => (Monoid.combine(x1, y1), Monoid.combine(x2, y2), Monoid.combine(x3, y3), Monoid.combine(x4, y4), Monoid.combine(x5, y5), Monoid.combine(x6, y6), Monoid.combine(x7, y7))
+    }
+}
+
+instance Monoid[(a1, a2, a3, a4, a5, a6, a7, a8)] with [a1 : Monoid, a2 : Monoid, a3: Monoid, a4: Monoid, a5: Monoid, a6: Monoid, a7: Monoid, a8: Monoid] {
+    def empty(): (a1, a2, a3, a4, a5, a6, a7, a8) = (Monoid.empty(), Monoid.empty(), Monoid.empty(), Monoid.empty(), Monoid.empty(), Monoid.empty(), Monoid.empty(), Monoid.empty())
+    def combine(x: (a1, a2, a3, a4, a5, a6, a7, a8), y: (a1, a2, a3, a4, a5, a6, a7, a8)): (a1, a2, a3, a4, a5, a6, a7, a8) = match (x, y) {
+        case ((x1, x2, x3, x4, x5, x6, x7, x8), (y1, y2, y3, y4, y5, y6, y7, y8)) => (Monoid.combine(x1, y1), Monoid.combine(x2, y2), Monoid.combine(x3, y3), Monoid.combine(x4, y4), Monoid.combine(x5, y5), Monoid.combine(x6, y6), Monoid.combine(x7, y7), Monoid.combine(x8, y8))
+    }
+}
+
+instance Monoid[(a1, a2, a3, a4, a5, a6, a7, a8, a9)] with [a1 : Monoid, a2 : Monoid, a3: Monoid, a4: Monoid, a5: Monoid, a6: Monoid, a7: Monoid, a8: Monoid, a9: Monoid] {
+    def empty(): (a1, a2, a3, a4, a5, a6, a7, a8, a9) = (Monoid.empty(), Monoid.empty(), Monoid.empty(), Monoid.empty(), Monoid.empty(), Monoid.empty(), Monoid.empty(), Monoid.empty(), Monoid.empty())
+    def combine(x: (a1, a2, a3, a4, a5, a6, a7, a8, a9), y: (a1, a2, a3, a4, a5, a6, a7, a8, a9)): (a1, a2, a3, a4, a5, a6, a7, a8, a9) = match (x, y) {
+        case ((x1, x2, x3, x4, x5, x6, x7, x8, x9), (y1, y2, y3, y4, y5, y6, y7, y8, y9)) => (Monoid.combine(x1, y1), Monoid.combine(x2, y2), Monoid.combine(x3, y3), Monoid.combine(x4, y4), Monoid.combine(x5, y5), Monoid.combine(x6, y6), Monoid.combine(x7, y7), Monoid.combine(x8, y8), Monoid.combine(x9, y9))
+    }
+}
+
+instance Monoid[(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10)] with [a1 : Monoid, a2 : Monoid, a3: Monoid, a4: Monoid, a5: Monoid, a6: Monoid, a7: Monoid, a8: Monoid, a9: Monoid, a10: Monoid] {
+    def empty(): (a1, a2, a3, a4, a5, a6, a7, a8, a9, a10) = (Monoid.empty(), Monoid.empty(), Monoid.empty(), Monoid.empty(), Monoid.empty(), Monoid.empty(), Monoid.empty(), Monoid.empty(), Monoid.empty(), Monoid.empty())
+    def combine(x: (a1, a2, a3, a4, a5, a6, a7, a8, a9, a10), y: (a1, a2, a3, a4, a5, a6, a7, a8, a9, a10)): (a1, a2, a3, a4, a5, a6, a7, a8, a9, a10) = match (x, y) {
+        case ((x1, x2, x3, x4, x5, x6, x7, x8, x9, x10), (y1, y2, y3, y4, y5, y6, y7, y8, y9, y10)) => (Monoid.combine(x1, y1), Monoid.combine(x2, y2), Monoid.combine(x3, y3), Monoid.combine(x4, y4), Monoid.combine(x5, y5), Monoid.combine(x6, y6), Monoid.combine(x7, y7), Monoid.combine(x8, y8), Monoid.combine(x9, y9), Monoid.combine(x10, y10))
+    }
+}
+
+instance Monoid[Validation[t, e]] with [t : Monoid] {
+    def empty(): Validation[t, e] = Success(Monoid.empty())
+    def combine(x: Validation[t, e], y: Validation[t, e]): Validation[t, e] = match (x, y) {
+        case (Success(x1), Success(y1)) => Success(Monoid.combine(x1, y1))
+        case (Failure(es1), Failure(es2)) => Failure(Nel.append(es1, es2))
+        case (Failure(_), _) => x
+        case (_, Failure(_)) => y
+    }
+}
+
 
 instance Monoid[List[a]] {
     def empty(): List[a] = Nil
