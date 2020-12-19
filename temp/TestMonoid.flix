@@ -310,4 +310,48 @@ def validationCombine03(): Bool = combine(Failure(Nel.singleton("e1")), Success(
 @test
 def validationCombine04(): Bool = combine(Success("a"), Success("1")): Validation[String, String] == Success("a1")
 
+/////////////////////////////////////////////////////////////////////////////
+// List                                                                    //
+/////////////////////////////////////////////////////////////////////////////
+
+@test
+def listEmpty01(): Bool = empty(): List[Int32] == Nil
+
+@test
+def listCombine01(): Bool = combine(Nil, Nil): List[Int32] == Nil
+
+@test
+def listCombine02(): Bool = combine(1 :: Nil, Nil) == 1 :: Nil
+
+@test
+def listCombine03(): Bool = combine(Nil, 2 :: Nil) == 2 :: Nil
+
+@test
+def listCombine04(): Bool = combine(1 :: Nil, 2 :: Nil) == 1 :: 2 :: Nil
+
+@test
+def listCombine05(): Bool = combine(1 :: 2 :: Nil, 1 :: 2 :: Nil) == 1 :: 2 :: 1 :: 2 :: Nil
+
+/////////////////////////////////////////////////////////////////////////////
+// Set                                                                     //
+/////////////////////////////////////////////////////////////////////////////
+
+@test
+def setEmpty01(): Bool = empty(): Set[Int32] == Set#{}
+
+@test
+def setCombine01(): Bool = combine(Set#{}, Set#{}): Set[Int32] == Set#{}
+
+@test
+def setCombine02(): Bool = combine(Set#{1}, Set#{}) == Set#{1}
+
+@test
+def setCombine03(): Bool = combine(Set#{}, Set#{2}) == Set#{2}
+
+@test
+def setCombine04(): Bool = combine(Set#{1}, Set#{2}) == Set#{1, 2}
+
+@test
+def setCombine05(): Bool = combine(Set#{1, 2}, Set#{1, 2}) == Set#{1, 2}
+
 }

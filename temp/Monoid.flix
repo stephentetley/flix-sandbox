@@ -27,8 +27,8 @@ pub class Monoid[a] {
     ///
     /// Returns the result of __combining__ `x` and `y`.
     ///
-    /// When Flix ha Superclasses this function should be moved into the
-    /// class Semigroup.
+    /// [When Flix has Superclasses this function should be moved into the
+    /// class Semigroup.]
     ///
     pub def combine(x: a, y: a): a
 }
@@ -125,12 +125,14 @@ instance Monoid[Validation[t, e]] with [t : Monoid] {
     }
 }
 
-
 instance Monoid[List[a]] {
     def empty(): List[a] = Nil
     def combine(x: List[a], y: List[a]): List[a] = List.append(x, y)
 }
 
+///
+/// `combine` is set union.
+///
 instance Monoid[Set[a]] {
     def empty(): Set[a] = Set.empty()
     def combine(x: Set[a], y: Set[a]): Set[a] = Set.union(x, y)
