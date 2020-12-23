@@ -27,6 +27,24 @@ enum Chain[t] {
     case Chain(Chain[t], Chain[t])
 }
 
+instance ToString[Chain[a]] with [a : ToString] {
+    def toString(xs: Chain[a]): String =
+        let fn = () -> {
+            let sb = StringBuilder.new();
+            StringBuilder.appendString!(sb, "Chain#{");
+            Chain.foldLeft((ac, x) -> {
+                if (ac < 1)
+                    StringBuilder.appendString!(sb, "${x}")
+                else
+                    StringBuilder.appendString!(sb, ", ${x}");
+                ac + 1}, 0, xs);
+            StringBuilder.appendString!(sb, "}");
+            StringBuilder.toString(sb)
+        };
+        fn() as & Pure
+
+}
+
 
 enum ViewLeft[t] {
     case NoneLeft
