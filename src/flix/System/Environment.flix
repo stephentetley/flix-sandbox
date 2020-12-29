@@ -14,25 +14,26 @@
  * limitations under the License.
  */
 
-use System.Error.{Generic};
-use System.FilePath;
-use System.FilePath.{FilePath};
+
 
 namespace System/Environment {
 
+    use System.FilePath;
+    use System.FilePath.{FilePath};
+
     /// Get env var...
-    pub def getEnvVar(name: String): Result[String, System.Error] & Impure = try {
+    pub def getEnvVar(name: String): Option[String] & Impure = try {
         import java.lang.System:getenv(String);
         let ans = getenv(name);
-        if (Object.isNull(ans))
-            Err(Generic("Not found"))
+        if (not Object.isNull(ans))
+            Some(ans)
         else
-            Ok(ans)
+            None
     } catch {
-        case _:##java.lang.Exception => Err(Generic("Exception"))
+        case _:##java.lang.Exception => None
     }
 
-    pub def getEnvVars(): Result[Map[String, String], System.Error] & Impure = try {
+    pub def getEnvVars(): Option[Map[String, String]] & Impure = try {
         import new flix.runtime.spt.sandbox.system.marshal.UnmarshalEnvVars() as newIter;
         import flix.runtime.spt.sandbox.system.marshal.UnmarshalEnvVars.hasNext();
         import flix.runtime.spt.sandbox.system.marshal.UnmarshalEnvVars.next();
@@ -48,9 +49,9 @@ namespace System/Environment {
                 let v = pss.get1();
                 Some(k, v)
              };
-        Ok(Map.unfoldWithIter(step))
+        Some(Map.unfoldWithIter(step))
     } catch {
-        case _: ##java.lang.Exception => Err(Generic("Exception"))
+        case _: ##java.lang.Exception => None
     }
 
 

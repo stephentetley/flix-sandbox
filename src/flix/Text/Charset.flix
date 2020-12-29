@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-use Text.Charset;
-use Text.Charset.{Charset};
 
 namespace Text  {
     ///
@@ -23,9 +21,19 @@ namespace Text  {
     ///
     pub opaque type Charset = ##java.nio.charset.Charset
 
+    instance ToString[Charset] {
+        def toString(cs: Charset): String =
+            import java.nio.charset.Charset.toString() as toS;
+            let Charset(cs1) = cs;
+            toS(cs1) as & Pure
+    }
+
 }
 
 namespace Text/Charset {
+
+    use Text.Charset;
+    use Text.Charset.{Charset};
 
     pub def iso_8859_1(): Charset = 
         import get java.nio.charset.StandardCharsets:ISO_8859_1 as get_iso_8859_1;
@@ -51,9 +59,5 @@ namespace Text/Charset {
         import get java.nio.charset.StandardCharsets:UTF_8 as get_utf_8;
         Charset(get_utf_8()) as & Pure
 
-    pub def toString(cs: Charset): String = 
-        import java.nio.charset.Charset.toString() as charsetToString;
-        let Charset(cs1) = cs;
-        charsetToString(cs1) as & Pure
 
 }

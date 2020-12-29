@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+/// This module is now considered deprecated...
+
 use System.Error;
 use System.Error.{ArrayIndexOutOfBoundsException,
         Exception,

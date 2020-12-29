@@ -81,6 +81,23 @@ namespace Test/FlixCheck {
 
     pub opaque type Gen[a] = (Int32, Random) ~> a
 
+    pub class Arbitrary[a] {
+        pub def arbitrary(): Gen[a]
+    }
+
+    pub class Coarbitrary[a] {
+        pub def coarbitrary(x: a, ma: Gen[b]): Gen[b]
+    }
+
+    instance Arbitrary[Bool] {
+        def arbitrary(): Gen[Bool] =
+            let* arr = liftAction(_ -> [true, false]);
+            elements(arr)
+    }
+
+    instance Coarbitrary[Bool] {
+        def coarbitrary(b: Bool, ma: Gen[b]): Gen[b] = variant(if (b) 0 else 1, ma)
+    }
 
     pub def run(x: Gen[a], bounds: Int32): a & Impure = 
         let r1 = newRandom();
@@ -89,9 +106,9 @@ namespace Test/FlixCheck {
 
     pub def return(x: a): Gen[a] = Gen((_,_) -> x as & Impure)
 
-    def apply1(x: Gen[a], b: Int32, r: Random): a & Impure =
+    def apply1(x: Gen[a], n: Int32, r: Random): a & Impure =
         let Gen(f) = x;
-        f(b, r)
+        f(n, r)
 
     pub def map(f: a -> b, x: Gen[a]): Gen[b] = 
         Gen((b,r) -> 
@@ -101,7 +118,7 @@ namespace Test/FlixCheck {
 
 
     pub def ap(mf: Gen[a -> b], ma: Gen[a]): Gen[b] =
-        Gen((b,r)-> 
+        Gen((b,r) ->
             let f = apply1(mf, b, r);
             let a = apply1(ma, b, r);
             f(a)
@@ -143,9 +160,18 @@ namespace Test/FlixCheck {
     pub def rand(): Gen[Random] = 
         Gen((_,r) -> r as & Impure)
 
-    // pub def promote(f: a ~> Gen[b]): Gen[a ~> b] = 
-    //     let* fn = a -> liftAction(_ -> f(a));
-    //     return(fn)
+    ///
+    /// /// Promote is difficult (impossible?) to type in presence of effects
+    ///
+    /// pub def promote(f: a ~> Gen[b]): Gen[a ~> b] =
+    ///     Gen((n, r) ->
+    ///         let f1: a ~> b = a -> {
+    ///             let mf: Gen[b] = f(a);
+    ///             let ans: b = apply1(mf, n, r);
+    ///             ans
+    ///             };
+    ///         f1
+    ///     )
 
     pub def generate(n: Int32, rnd: Random, gen: Gen[a]): a & Impure = 
         let size = randomR(0, Int32.abs(n), rnd);   /// TODO remove abs
@@ -156,6 +182,27 @@ namespace Test/FlixCheck {
         let* r1 = rand();
         let* v = liftAction(_ -> randomR(lo, hi, r1));
         return(v)
+
+    pub def variant(v: Int32, m: Gen[a]): Gen[a] =
+        Gen((n,r) ->
+            let Gen(mf) = m;
+            mf(n, makeRands(r, v))
+        )
+
+    def makeRands(r0: Random, n: Int32): Random & Impure =
+        if (n <= 0)
+            r0
+        else {
+            let (r1, r2) = split2(r0);
+            let n1 = n / 2;
+            let s = n % 2;
+            if (s == 0)
+                makeRands(r1, n1)
+            else
+                makeRands(r2, n1)
+
+        }
+
 
     def chooseInt64(lo:Int64, hi: Int64): Gen[Int64] = 
         let* r1 = rand();

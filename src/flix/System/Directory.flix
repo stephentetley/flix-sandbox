@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-use System.Error.{Generic};
-use System.FilePath;
-use System.FilePath.{FilePath};
 
 namespace System/Directory {
+
+
+    use System.Error.{Generic};
+    use System.FilePath;
+    use System.FilePath.{FilePath};
 
     pub def getCurrentDirectory(): FilePath & Impure =
         System/Environment.getUserDirectory()
@@ -32,7 +34,7 @@ namespace System/Directory {
 
     /// One level - not recursive
     /// TODO - return a Stream
-    pub def contents(path: FilePath): Result[List[FilePath], System.Error] & Impure = try {
+    pub def contents(path: FilePath): Option[List[FilePath]] & Impure = try {
         import new flix.runtime.spt.sandbox.system.marshal.UnmarshalFilesList(##java.nio.file.Path) as newIter;
         import flix.runtime.spt.sandbox.system.marshal.UnmarshalFilesList.hasNext();
         import flix.runtime.spt.sandbox.system.marshal.UnmarshalFilesList.next();
@@ -45,14 +47,14 @@ namespace System/Directory {
                 let x1 = iter.next();
                 Some(FilePath(x1))
              };
-        Ok(List.unfoldWithIter(step))
+        Some(List.unfoldWithIter(step))
     } catch {
-        case _: ##java.lang.Exception => Err(Generic("Exception"))
+        case _: ##java.lang.Exception => None
     }
 
     /// All levels - recursive
     /// TODO - return a Stream
-    pub def contentsAll(path: FilePath, followLinks: Bool): Result[List[FilePath], System.Error] & Impure = try {
+    pub def contentsAll(path: FilePath, followLinks: Bool): Option[List[FilePath]] & Impure = try {
         import new flix.runtime.spt.sandbox.system.marshal.UnmarshalFilesWalk(##java.nio.file.Path, Bool) as newIter;
         import flix.runtime.spt.sandbox.system.marshal.UnmarshalFilesWalk.hasNext();
         import flix.runtime.spt.sandbox.system.marshal.UnmarshalFilesWalk.next();
@@ -65,9 +67,9 @@ namespace System/Directory {
                 let x1 = iter.next();
                 Some(FilePath(x1))
              };
-        Ok(List.unfoldWithIter(step))
+        Some(List.unfoldWithIter(step))
     } catch {
-        case _: ##java.lang.Exception => Err(Generic("Exception"))
+        case _: ##java.lang.Exception => None
     }
 
     pub def doesPathExist(path: FilePath): Bool & Impure =
