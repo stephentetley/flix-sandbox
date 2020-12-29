@@ -14,29 +14,31 @@
  * limitations under the License.
  */
 
-use System.Error.{IllegalStateException, NoSuchElementException, Generic};
 
-use Text/Regex.{Replacer};
-use Text/Regex.Replacer.{Replacer};
-
-use Text/Regex/Internal.{PrimMatcher};
-use Text/Regex.Pattern;
-use Text/Regex.Pattern.{Pattern};
-use Text/Regex.{MatchEvaluator};
-use Text/Regex.MatchEvaluator.{MatchEvaluator};
 
 /// This is a "steppable" replacer like Matcher.
 /// Index is nuber of `finds` not the number of replacements.
 
 namespace Text/Regex {
+
+    use Text/Regex/Internal.{PrimMatcher};
     
-    pub opaque type Replacer[a] = (StringBuilder, PrimMatcher, Int32) ~> Result[(a, Int32), System.Error]
+    pub opaque type Replacer[a] = (StringBuilder, PrimMatcher, Int32) ~> Result[(a, Int32), String]
 
 }
 
 namespace Text/Regex/Replacer {
 
-    pub def runReplacer(rep: Replacer[a], patt: Pattern, input: String): Result[(a, String), System.Error] & Impure =
+    use Text/Regex.{Replacer};
+    use Text/Regex.Replacer.{Replacer};
+
+    use Text/Regex/Internal.{PrimMatcher};
+    use Text/Regex.Pattern;
+    use Text/Regex.Pattern.{Pattern};
+    use Text/Regex.{MatchEvaluator};
+    use Text/Regex.MatchEvaluator.{MatchEvaluator};
+
+    pub def runReplacer(rep: Replacer[a], patt: Pattern, input: String): Result[(a, String), String] & Impure =
         use Result.flatMap;
         use Text/Regex/Internal/PrimMatcher.{newPrimMatcher};
         let sb = StringBuilder.new();
@@ -52,27 +54,27 @@ namespace Text/Regex/Replacer {
             case Err(e) => Err(e)
         }
 
-    pub def execReplacer(rep: Replacer[a], patt: Pattern, input: String): Result[String, System.Error] & Impure =
+    pub def execReplacer(rep: Replacer[a], patt: Pattern, input: String): Result[String, String] & Impure =
         runReplacer(rep, patt, input) |> Result.map(snd)
 
     ///
     /// Version of `runReplacer` that takes a regex string and compiles it to a Pattern.
     ///
-    pub def runsReplacer(rep: Replacer[a], regex: String, input: String): Result[(a, String), System.Error] & Impure =
+    pub def runsReplacer(rep: Replacer[a], regex: String, input: String): Result[(a, String), String] & Impure =
         use Result.flatMap;
-        let* patt = Text/Regex/Pattern.compile(regex);
+        let* patt = Option.toOk(Text/Regex/Pattern.compile(regex), "runsReplacer - invalid regex: ${regex}");
         runReplacer(rep, patt, input)
 
-    pub def execsReplacer(rep: Replacer[a], regex: String, input: String): Result[String, System.Error] & Impure =
+    pub def execsReplacer(rep: Replacer[a], regex: String, input: String): Result[String, String] & Impure =
         runsReplacer(rep, regex, input) |> Result.map(snd)
 
     pub def return(x: a): Replacer[a] =
         Replacer((_, _, n) -> Ok(x, n) as & Impure)
 
     pub def fail(msg: String): Replacer[a] =
-        Replacer((_, _, _) -> Err(Generic(msg)) as & Impure)
+        Replacer((_, _, _) -> Err(msg) as & Impure)
 
-    def apply1(rep: Replacer[a], sb: StringBuilder, m: PrimMatcher, n: Int32): Result[(a, Int32), System.Error] & Impure =
+    def apply1(rep: Replacer[a], sb: StringBuilder, m: PrimMatcher, n: Int32): Result[(a, Int32), String] & Impure =
         let Replacer(f) = rep;
         f(sb, m, n)
 
@@ -111,10 +113,10 @@ namespace Text/Regex/Replacer {
     pub def ignore(x: Replacer[a]): Replacer[Unit] = map(_ -> (), x)
 
 
-    def liftPrim(fn : PrimMatcher ~> Result[a, System.Error]): Replacer[a] =
+    def liftPrim(fn : PrimMatcher ~> Result[a, String]): Replacer[a] =
         Replacer((_, m, n) -> Result.map(x -> (x, n), fn(m)))
 
-    def liftWriterPrim(fn : (PrimMatcher, StringBuilder) ~> Result[a, System.Error]): Replacer[a] =
+    def liftWriterPrim(fn : (PrimMatcher, StringBuilder) ~> Result[a, String]): Replacer[a] =
         Replacer((sb, m, n) -> Result.map(x -> (x, n), fn(m, sb)))
 
     pub def appendTail!(): Replacer[Unit] =

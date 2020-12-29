@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-use System.Error.{PatternSyntaxException, Generic};
 
-use Text/Regex.Pattern;
-use Text/Regex.Pattern.{Pattern};
+
 
 
 namespace Text/Regex {
@@ -27,9 +25,23 @@ namespace Text/Regex {
     ///
     pub opaque type Pattern = ##java.util.regex.Pattern
 
+    instance ToString[Pattern] {
+        ///
+        /// Return the string representation of the Pattern `patt`.
+        ///
+        def toString(patt: Pattern): String =
+            import java.util.regex.Pattern.toString();
+            let Pattern(p1) = patt;
+            p1.toString() as & Pure
+
+    }
+
 }
 
 namespace Text/Regex/Pattern {
+
+    use Text/Regex.Pattern;
+    use Text/Regex.Pattern.{Pattern};
 
     pub enum Flag {
         case CanonEq,
@@ -79,12 +91,14 @@ namespace Text/Regex/Pattern {
     ///
     /// Compile the regular expression `regex` into a Pattern.
     ///
-    pub def compile(regex: String): Result[Pattern, System.Error] =
+    /// Returns `None` if the regex is ill-formed and cannot be compiled.
+    ///
+    pub def compile(regex: String): Option[Pattern] =
         import java.util.regex.Pattern:compile(String);
         try {
-            Ok(Pattern(compile(regex))) as & Pure
+            Some(Pattern(compile(regex))) as & Pure
         } catch {
-            case _: ##java.util.regex.PatternSyntaxException => Err(PatternSyntaxException)
+            case _: ##java.util.regex.PatternSyntaxException => None
         }
 
 
@@ -92,13 +106,14 @@ namespace Text/Regex/Pattern {
     ///
     /// Compile the regular expression `regex` into a Pattern.
     ///
-    pub def compileWithFlags(regex: String, flags: List[Flag]): Result[Pattern, System.Error] =
+    /// Returns `None` if the regex is ill-formed and cannot be compiled.
+    ///
+    pub def compileWithFlags(regex: String, flags: List[Flag]): Option[Pattern] =
         import java.util.regex.Pattern:compile(String, Int32);
         try {
-            Ok(Pattern(compile(regex, sumFlags(flags)))) as & Pure
+            Some(Pattern(compile(regex, sumFlags(flags)))) as & Pure
         } catch {
-            case _: ##java.util.regex.PatternSyntaxException => Err(PatternSyntaxException)
-            case _: ##java.lang.IllegalArgumentException =>  Err(Generic("Regex/Pattern.compileWithFlags - illegal argument error"))
+            case _: ##java.lang.Exception => None
         }
 
     ///
@@ -133,13 +148,6 @@ namespace Text/Regex/Pattern {
         s.quote() as & Pure
 
 
-    ///
-    /// Return the string representation of the Pattern `patt`.
-    ///
-    pub def toString(patt: Pattern): String =
-        import java.util.regex.Pattern.toString();
-        let Pattern(p1) = patt;
-        p1.toString() as & Pure
 
 
     ///

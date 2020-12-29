@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-use System.Error.{IllegalStateException, IllegalArgumentException, IndexOutOfBoundsException};
 
-use Text/Regex/Internal.{PrimMatcher, PrimMatchEvaluator};
-use Text/Regex/Internal.PrimMatcher.{PrimMatcher};
 
 namespace Text/Regex/Internal {
+
 
     ///
     /// Represents a mutable, matching engine for a Pattern.
@@ -29,11 +27,15 @@ namespace Text/Regex/Internal {
     ///
     /// Represents a match `evaluator` a function that generates a value from a match (typically a replacement String).
     ///
-    type alias PrimMatchEvaluator[a] = PrimMatcher ~> Result[a, System.Error]
+    type alias PrimMatchEvaluator[a] = ##java.util.regex.Matcher ~> Result[a, String]
 
 }
 
 namespace Text/Regex/Internal/PrimMatcher {
+
+
+    use Text/Regex/Internal.{PrimMatcher, PrimMatchEvaluator};
+    use Text/Regex/Internal.PrimMatcher.{PrimMatcher};
 
     ///
     /// Create a matcher for Pattern `patt` on the source String `input`.
@@ -95,42 +97,42 @@ namespace Text/Regex/Internal/PrimMatcher {
         x1.usePattern(patt);
         ()
 
-    pub def region(x: PrimMatcher, start: Int32, end: Int32): Result[Unit, System.Error] & Impure =
+    pub def region(x: PrimMatcher, start: Int32, end: Int32): Result[Unit, String] & Impure =
         import java.util.regex.Matcher.region(Int32, Int32);
         try {
             let PrimMatcher(x1) = x;
             x1.region(start, end);
             Ok()
         } catch {
-            case _: ##java.lang.IndexOutOfBoundsException => Err(IndexOutOfBoundsException)
+            case _: ##java.lang.Exception => Err("region")
         }
 
-    pub def start(x: PrimMatcher): Result[Int32, System.Error] & Impure =
+    pub def start(x: PrimMatcher): Result[Int32, String] & Impure =
         import java.util.regex.Matcher.start();
         try {
             let PrimMatcher(x1) = x;
             Ok(x1.start())
         } catch {
-            case _: ##java.lang.IllegalStateException => Err(IllegalStateException)
+            case _: ##java.lang.Exception => Err("start")
         }
 
-    pub def end(x: PrimMatcher): Result[Int32, System.Error] & Impure =
+    pub def end(x: PrimMatcher): Result[Int32, String] & Impure =
         import java.util.regex.Matcher.end();
         try {
             let PrimMatcher(x1) = x;
             Ok(x1.end())
         } catch {
-            case _: ##java.lang.IllegalStateException => Err(IllegalStateException)
+            case _: ##java.lang.Exception => Err("end")
         }
 
     ///
-    pub def group(x: PrimMatcher): Result[String, System.Error] & Impure =
+    pub def group(x: PrimMatcher): Result[String, String] & Impure =
         import java.util.regex.Matcher.group();
         try { 
             let PrimMatcher(m1) = x;
             Ok(m1.group())
         } catch {
-            case _: ##java.lang.IllegalStateException => Err(IllegalStateException)
+            case _: ##java.lang.Exception => Err("group")
         }
 
 
@@ -146,70 +148,64 @@ namespace Text/Regex/Internal/PrimMatcher {
         m1.groupCount()
 
     /// This follows the Java convention where index 0 matches everything.
-    pub def groupElementByIndex(x: PrimMatcher, ix: Int32): Result[String, System.Error] & Impure =
+    pub def groupElementAt(x: PrimMatcher, ix: Int32): Result[String, String] & Impure =
         import java.util.regex.Matcher.group(Int32);
         try {
             let PrimMatcher(m1) = x;
             Ok(m1.group(ix))
         } catch {
-            case _: ##java.lang.IllegalStateException => Err(IllegalStateException)
-            case _: ##java.lang.IndexOutOfBoundsException => Err(IndexOutOfBoundsException)
+            case _: ##java.lang.Exception => Err("groupElementAt")
         }
 
-    pub def groupElementByName(x: PrimMatcher, label: String): Result[String, System.Error] & Impure =
+    pub def groupElementNamed(x: PrimMatcher, label: String): Result[String, String] & Impure =
         import java.util.regex.Matcher.group(String);
         try {
             let PrimMatcher(m1) = x;
             Ok(m1.group(label))
         } catch {
-            case _: ##java.lang.IllegalStateException => Err(IllegalStateException)
-            case _: ##java.lang.IllegalArgumentException => Err(IllegalArgumentException)
+            case _: ##java.lang.Exception => Err("groupElementNamed")
         }
 
     /// This follows the Java convention where index 0 matches everything.
-    pub def groupStartByIndex(x: PrimMatcher, ix: Int32): Result[Int32, System.Error] & Impure =
+    pub def groupStartAt(x: PrimMatcher, ix: Int32): Result[Int32, String] & Impure =
         import java.util.regex.Matcher.start(Int32);
         try {
             let PrimMatcher(m1) = x;
             Ok(m1.start(ix))
         } catch {
-            case _: ##java.lang.IllegalStateException => Err(IllegalStateException)
-            case _: ##java.lang.IndexOutOfBoundsException => Err(IndexOutOfBoundsException)
+            case _: ##java.lang.Exception => Err("groupStartAt")
         }
 
-    pub def groupStartByName(x: PrimMatcher, label: String): Result[Int32, System.Error] & Impure =
+    pub def groupStartNamed(x: PrimMatcher, label: String): Result[Int32, String] & Impure =
         import java.util.regex.Matcher.start(String);
         try {
             let PrimMatcher(m1) = x;
             Ok(m1.start(label))
         } catch {
-            case _: ##java.lang.IllegalStateException => Err(IllegalStateException)
-            case _: ##java.lang.IllegalArgumentException => Err(IllegalArgumentException)
+            case _: ##java.lang.Exception => Err("groupStartNamed")
         }
 
     /// This follows the Java convention where index 0 matches everything.
-    pub def groupEndByIndex(x: PrimMatcher, ix: Int32): Result[Int32, System.Error] & Impure =
+    pub def groupEndAt(x: PrimMatcher, ix: Int32): Result[Int32, String] & Impure =
         import java.util.regex.Matcher.end(Int32);
         try {
             let PrimMatcher(m1) = x;
             Ok(m1.end(ix))
         } catch {
-            case _: ##java.lang.IllegalStateException => Err(IllegalStateException)
-            case _: ##java.lang.IndexOutOfBoundsException => Err(IndexOutOfBoundsException)
+            case _: ##java.lang.Exception => Err("groupEndAt")
         }
 
-    pub def groupEndByName(x: PrimMatcher, label: String): Result[Int32, System.Error] & Impure =
+    pub def groupEndNamed(x: PrimMatcher, label: String): Result[Int32, String] & Impure =
         import java.util.regex.Matcher.end(String);
         try {
             let PrimMatcher(m1) = x;
             Ok(m1.end(label))
         } catch {
-            case _: ##java.lang.IllegalStateException => Err(IllegalStateException)
-            case _: ##java.lang.IllegalArgumentException => Err(IllegalArgumentException)
+            case _: ##java.lang.Exception => Err("groupEndNamed")
         }
 
     /// 
-    pub def appendReplacement(x: PrimMatcher, sb: StringBuilder, rep: String): Result[Unit, System.Error] & Impure =
+    pub def appendReplacement(x: PrimMatcher, sb: StringBuilder, rep: String): Result[Unit, String] & Impure =
         import java.util.regex.Matcher.appendReplacement(##java.lang.StringBuilder, String);    
         try {
             let PrimMatcher(x1) = x;
@@ -217,9 +213,7 @@ namespace Text/Regex/Internal/PrimMatcher {
             let _ = x1.appendReplacement(sb1, rep);
             Ok()
         } catch { 
-            case _: ##java.lang.IllegalStateException => Err(IllegalStateException) 
-            case _: ##java.lang.IndexOutOfBoundsException => Err(IndexOutOfBoundsException)
-            case _: ##java.lang.IllegalArgumentException => Err(IllegalArgumentException)
+            case _: ##java.lang.Exception => Err("appendReplacement")
         }
 
     /// No exceptions.

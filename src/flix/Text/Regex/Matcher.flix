@@ -14,28 +14,30 @@
  * limitations under the License.
  */
 
-use System.Error.{IllegalStateException, NoSuchElementException, Generic};
-
-use Text/Regex.{Matcher};
-use Text/Regex.Matcher.{Matcher};
-
-use Text/Regex/Internal.{PrimMatcher};
-use Text/Regex.Pattern;
-use Text/Regex.Pattern.{Pattern};
-use Text/Regex.{MatchEvaluator};
-use Text/Regex.MatchEvaluator.{MatchEvaluator};
 
 /// This is a "steppable" matcher like .Net `Regex.Match` but wrapped as a monad.
 
 namespace Text/Regex {
-    
-    pub opaque type Matcher[a] = PrimMatcher ~> Result[a, System.Error]
+
+    use Text/Regex/Internal.{PrimMatcher};
+
+    pub opaque type Matcher[a] = PrimMatcher ~> Result[a, String]
 
 }
 
 namespace Text/Regex/Matcher {
 
-    pub def runMatcher(ma: Matcher[a], patt: Pattern, input: String): Result[a, System.Error] & Impure =
+
+    use Text/Regex.{Matcher};
+    use Text/Regex.Matcher.{Matcher};
+
+    use Text/Regex/Internal.{PrimMatcher};
+    use Text/Regex.Pattern;
+    use Text/Regex.Pattern.{Pattern};
+    use Text/Regex.{MatchEvaluator};
+    use Text/Regex.MatchEvaluator.{MatchEvaluator};
+
+    pub def runMatcher(ma: Matcher[a], patt: Pattern, input: String): Result[a, String] & Impure =
         use Result.flatMap;
         use Text/Regex/Internal/PrimMatcher.{newPrimMatcher};
         let Matcher(m1) = ma;
@@ -46,9 +48,9 @@ namespace Text/Regex/Matcher {
     ///
     /// Version of `runMatcher` that takes a regex string and compiles it to a Pattern.
     ///
-    pub def runsMatcher(ma: Matcher[a], regex: String, input: String): Result[a, System.Error] & Impure =
+    pub def runsMatcher(ma: Matcher[a], regex: String, input: String): Result[a, String] & Impure =
         use Result.flatMap;
-        let* patt = Text/Regex/Pattern.compile(regex);
+        let* patt = Option.toOk(Text/Regex/Pattern.compile(regex), "runsMatcher - invalid regex: ${regex}");
         runMatcher(ma, patt, input)
 
 
@@ -56,9 +58,9 @@ namespace Text/Regex/Matcher {
         Matcher(_ -> Ok(x) as & Impure)
 
     pub def fail(msg: String): Matcher[a] =
-        Matcher(_ -> Err(Generic(msg)) as & Impure)
+        Matcher(_ -> Err(msg) as & Impure)
 
-    def apply1(x: Matcher[a], m: PrimMatcher): Result[a, System.Error] & Impure =
+    def apply1(x: Matcher[a], m: PrimMatcher): Result[a, String] & Impure =
         let Matcher(f) = x;
         f(m)
 
@@ -94,7 +96,7 @@ namespace Text/Regex/Matcher {
 
     pub def flatMap(k: a -> Matcher[b], x: Matcher[a]): Matcher[b] = bind(x, k)
 
-    def liftPrim(fn : PrimMatcher ~> Result[a, System.Error]): Matcher[a] =
+    def liftPrim(fn : PrimMatcher ~> Result[a, String]): Matcher[a] =
         Matcher(r -> fn(r))
 
     pub def ignore(x: Matcher[a]): Matcher[Unit] = map(_ -> (), x)

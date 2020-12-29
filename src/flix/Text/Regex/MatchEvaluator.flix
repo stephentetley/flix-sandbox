@@ -14,33 +14,38 @@
  * limitations under the License.
  */
 
-use System.Error.{PatternSyntaxException, Generic};
 
-use Text/Regex.MatchEvaluator;
-use Text/Regex.MatchEvaluator.{MatchEvaluator};
-use Text/Regex/Internal.PrimMatcher;
-use Text/Regex.Pattern;
-use Text/Regex.Pattern.{Pattern};
 
 namespace Text/Regex {
+
+    use Text/Regex/Internal.PrimMatcher;
 
     ///
     /// Matcher is a monad (reader, error).
     ///
-    pub opaque type MatchEvaluator[a] = PrimMatcher ~> Result[a, System.Error]
+    pub opaque type MatchEvaluator[a] = PrimMatcher ~> Result[a, String]
 
 }
 
 namespace Text/Regex/MatchEvaluator {
 
+    use FromString.fromString;
 
-    
+    use Text/Regex.MatchEvaluator;
+    use Text/Regex.MatchEvaluator.{MatchEvaluator};
+    use Text/Regex/Internal.PrimMatcher;
+    use Text/Regex.Pattern;
+    use Text/Regex.Pattern.{Pattern};
+
     pub def return(x: a): MatchEvaluator[a] = 
         MatchEvaluator(_ -> Ok(x) as & Impure)
 
-    def apply1(x: MatchEvaluator[a], m: PrimMatcher): Result[a, System.Error] & Impure =
+    def apply1(x: MatchEvaluator[a], m: PrimMatcher): Result[a, String] & Impure =
         let MatchEvaluator(f) = x;
         f(m)
+
+    pub def throwError(msg: String): MatchEvaluator[b] = 
+        MatchEvaluator(_ -> Err(msg) as & Impure)
 
     pub def map(f: a -> b & ef, x: MatchEvaluator[a]): MatchEvaluator[b] =
         MatchEvaluator(r -> 
@@ -76,13 +81,19 @@ namespace Text/Regex/MatchEvaluator {
 
 
 
-    def liftPrim(fn : PrimMatcher ~> Result[a, System.Error]): MatchEvaluator[a] =
+    def liftPrim(fn : PrimMatcher ~> Result[a, String]): MatchEvaluator[a] =
         MatchEvaluator(r -> fn(r))
 
-    pub def liftResult(x: Result[a, System.Error]): MatchEvaluator[a] =
+    pub def liftOption(x: Option[a], errMsg: String): MatchEvaluator[a] = match x { 
+        case Some(x1) => return(x1)
+        case None => throwError(errMsg)
+    }
+        
+
+    pub def liftResult(x: Result[a, String]): MatchEvaluator[a] =
         MatchEvaluator(_ -> x as & Impure)
 
-    pub def liftOperation(fn: Unit ~> Result[a, System.Error]): MatchEvaluator[a] =
+    pub def liftOperation(fn: Unit ~> Result[a, String]): MatchEvaluator[a] =
         MatchEvaluator(_ -> fn())
 
 
@@ -107,29 +118,29 @@ namespace Text/Regex/MatchEvaluator {
     /// Note - this function uses 0-indexing, the equivalent Java method `group(int group)` uses 1-indexing.
     ///
     pub def getCaptureAt(ix: Int32): MatchEvaluator[String] =
-        liftPrim(x -> Text/Regex/Internal/PrimMatcher.groupElementByIndex(x, ix+1))
+        liftPrim(x -> Text/Regex/Internal/PrimMatcher.groupElementAt(x, ix+1))
 
     pub def getCaptureNamed(label: String): MatchEvaluator[String] =
-        liftPrim(x -> Text/Regex/Internal/PrimMatcher.groupElementByName(x, label))
+        liftPrim(x -> Text/Regex/Internal/PrimMatcher.groupElementNamed(x, label))
 
     ///
     /// Note - this function uses 0-indexing, the equivalent Java method `group(int group)` uses 1-indexing.
     ///
     pub def getCaptureAtStart(ix: Int32): MatchEvaluator[Int32] =
-        liftPrim(x -> Text/Regex/Internal/PrimMatcher.groupStartByIndex(x, ix+1))
+        liftPrim(x -> Text/Regex/Internal/PrimMatcher.groupStartAt(x, ix+1))
 
     pub def getCaptureNamedStart(label: String): MatchEvaluator[Int32] =
-        liftPrim(x -> Text/Regex/Internal/PrimMatcher.groupStartByName(x, label))
+        liftPrim(x -> Text/Regex/Internal/PrimMatcher.groupStartNamed(x, label))
 
     ///
     /// Note - this function uses 0-indexing, the equivalent Java method `group(int group)`
     /// uses 1-indexing.
     ///
     pub def getCaptureAtEnd(ix: Int32): MatchEvaluator[Int32] =
-        liftPrim(x -> Text/Regex/Internal/PrimMatcher.groupEndByIndex(x, ix+1))
+        liftPrim(x -> Text/Regex/Internal/PrimMatcher.groupEndAt(x, ix+1))
 
     pub def getCaptureNamedEnd(label: String): MatchEvaluator[Int32] =
-        liftPrim(x -> Text/Regex/Internal/PrimMatcher.groupEndByName(x, label))
+        liftPrim(x -> Text/Regex/Internal/PrimMatcher.groupEndNamed(x, label))
 
     ///
     /// Note - this function uses 0-indexing, the equivalent Java method `group(int group)`
@@ -146,43 +157,43 @@ namespace Text/Regex/MatchEvaluator {
 
     pub def getInt8At(ix: Int32): MatchEvaluator[Int8] =
         let* str = getCaptureAt(ix);
-        liftOperation(_ -> Int8.fromString(str) |> Result.mapErr(Generic) as & Impure)
+        liftOption(fromString(str), "getInt8At(${ix})")
 
     pub def getInt8Named(label: String): MatchEvaluator[Int8] =
         let* str = getCaptureNamed(label);
-        liftOperation(_ -> Int8.fromString(str) |> Result.mapErr(Generic) as & Impure)
+        liftOption(fromString(str), "getInt8Named('${label}')")
 
     pub def getInt16At(ix: Int32): MatchEvaluator[Int16] =
         let* str = getCaptureAt(ix);
-        liftOperation(_ -> Int16.fromString(str) |> Result.mapErr(Generic) as & Impure)
+        liftOption(fromString(str), "getInt16At(${ix})")
 
     pub def getInt16Named(label: String): MatchEvaluator[Int16] =
         let* str = getCaptureNamed(label);
-        liftOperation(_ -> Int16.fromString(str) |> Result.mapErr(Generic) as & Impure)
+        liftOption(fromString(str), "getInt16Named('${label}')")
 
     pub def getInt32At(ix: Int32): MatchEvaluator[Int32] =
         let* str = getCaptureAt(ix);
-        liftOperation(_ -> Int32.fromString(str) |> Result.mapErr(Generic) as & Impure)
+        liftOption(fromString(str), "getInt32At(${ix})")
 
     pub def getInt32Named(label: String): MatchEvaluator[Int32] =
         let* str = getCaptureNamed(label);
-        liftOperation(_ -> Int32.fromString(str) |> Result.mapErr(Generic) as & Impure)
+        liftOption(fromString(str), "getInt32Named('${label}')")
 
     pub def getInt64At(ix: Int32): MatchEvaluator[Int64] =
         let* str = getCaptureAt(ix);
-        liftOperation(_ -> Int64.fromString(str) |> Result.mapErr(Generic) as & Impure)
+        liftOption(fromString(str), "getInt64At(${ix})")
 
     pub def getInt64Named(label: String): MatchEvaluator[Int64] =
         let* str = getCaptureNamed(label);
-        liftOperation(_ -> Int64.fromString(str) |> Result.mapErr(Generic) as & Impure)
+        liftOption(fromString(str), "getInt64Named('${label}')")
 
     pub def getBigIntAt(ix: Int32): MatchEvaluator[BigInt] =
         let* str = getCaptureAt(ix);
-        liftOperation(_ -> BigInt.fromString(str) |> Result.mapErr(Generic) as & Impure)
+        liftOption(fromString(str), "getBigIntAt(${ix})")
 
     pub def getBigIntNamed(label: String): MatchEvaluator[BigInt] =
         let* str = getCaptureNamed(label);
-        liftOperation(_ -> BigInt.fromString(str) |> Result.mapErr(Generic) as & Impure)
+        liftOption(fromString(str), "getBigIntNamed('${label}')")
 
     ///
     /// Applies the binary function `f` to the values in `o1` and `o2`.

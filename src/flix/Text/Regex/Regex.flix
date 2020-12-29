@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-use System.Error.{IllegalStateException};
-use Data.Stream;
-
-use Text/Regex.Pattern;
-use Text/Regex.Pattern.Pattern;
-use Text/Regex.MatchEvaluator;
-use Text/Regex.MatchEvaluator.{MatchEvaluator};
-use Text/Regex/Internal.PrimMatcher;
-
 namespace Text/Regex {
+
+    use Data.Stream;
+
+    use Text/Regex.Pattern;
+    use Text/Regex.Pattern.Pattern;
+    use Text/Regex.MatchEvaluator;
+    use Text/Regex.MatchEvaluator.{MatchEvaluator};
+    use Text/Regex/Internal.PrimMatcher;
+
 
     ///
     /// Returns `true` if the entire string `input` is matched by the pattern `patt`.
@@ -55,7 +55,7 @@ namespace Text/Regex {
         m1.lookingAt() as & Pure
 
 
-    def evalWithTest(test: PrimMatcher ~> Bool, input: String, patt: Pattern, eval: MatchEvaluator[a]): Result[a, System.Error] & Impure =
+    def evalWithTest(test: PrimMatcher ~> Bool, input: String, patt: Pattern, eval: MatchEvaluator[a]): Result[a, String] & Impure =
         use Text/Regex/Internal/PrimMatcher.{newPrimMatcher};
         let Pattern(p1) = patt;
         let m1 = newPrimMatcher(p1, input);
@@ -63,14 +63,14 @@ namespace Text/Regex {
             let MatchEvaluator(fn) = eval;
             m1.fn()
         } else
-            Err(IllegalStateException)
+            Err("evalWithTest")
 
 
     /// Whole input matches...
     /// The MatchEvaluator `eval` is potentially impure (e.g. it might create an array),
     /// so this function is impure.
     ///
-    pub def evalMatches(input: String, patt: Pattern, eval: MatchEvaluator[a]): Result[a, System.Error] & Impure =
+    pub def evalMatches(input: String, patt: Pattern, eval: MatchEvaluator[a]): Result[a, String] & Impure =
         use Text/Regex/Internal/PrimMatcher.{matches};
         evalWithTest(matches, input, patt, eval)
 
@@ -80,16 +80,16 @@ namespace Text/Regex {
     /// The MatchEvaluator `eval` is potentially impure (e.g. it might create an array),
     /// so this function is impure.
     ///
-    pub def evalContains(input: String, patt: Pattern, eval: MatchEvaluator[a]): Result[a, System.Error] & Impure =
+    pub def evalContains(input: String, patt: Pattern, eval: MatchEvaluator[a]): Result[a, String] & Impure =
         use Text/Regex/Internal/PrimMatcher.{find};
         evalWithTest(find, input, patt, eval)
 
     /// Input matches at least once (left to right)...
-    pub def evalStartsWith(input: String, patt: Pattern, eval: MatchEvaluator[a]): Result[a, System.Error] & Impure =
+    pub def evalStartsWith(input: String, patt: Pattern, eval: MatchEvaluator[a]): Result[a, String] & Impure =
         use Text/Regex/Internal/PrimMatcher.{lookingAt};
         evalWithTest(lookingAt, input, patt, eval)
 
-    def boundedWithTest(test: PrimMatcher ~> Bool, input: String, patt: Pattern, start: Int32, end: Int32): Result[String, System.Error] & Impure =
+    def boundedWithTest(test: PrimMatcher ~> Bool, input: String, patt: Pattern, start: Int32, end: Int32): Result[String, String] & Impure =
         use Result.flatMap;
         use Text/Regex/Internal/PrimMatcher.{newPrimMatcher, region, group};
         let Pattern(p1) = patt;
@@ -98,29 +98,29 @@ namespace Text/Regex {
         if (test(m1))
             m1.group()
         else
-            Err(IllegalStateException)
+            Err("boundedWithTest")
 
 
     /// Match input within region, match must start at start of region...
-    pub def boundedMatches(input: String, patt: Pattern, start: Int32, end: Int32): Result[String, System.Error] & Impure =
+    pub def boundedMatches(input: String, patt: Pattern, start: Int32, end: Int32): Result[String, String] & Impure =
         use Text/Regex/Internal/PrimMatcher.{matches};
         boundedWithTest(matches, input, patt, start, end)
 
     /// Match input within region, match must start at start of region...
-    pub def boundedContains(input: String, patt: Pattern, start: Int32, end: Int32): Result[String, System.Error] & Impure =
+    pub def boundedContains(input: String, patt: Pattern, start: Int32, end: Int32): Result[String, String] & Impure =
         use Text/Regex/Internal/PrimMatcher.{find};
         boundedWithTest(find, input, patt, start, end)
 
 
     /// Match input within region, match must start at start of region...
-    pub def boundedStartsWith(input: String, patt: Pattern, start: Int32, end: Int32): Result[String, System.Error] & Impure =
+    pub def boundedStartsWith(input: String, patt: Pattern, start: Int32, end: Int32): Result[String, String] & Impure =
         use Text/Regex/Internal/PrimMatcher.{lookingAt};
         boundedWithTest(lookingAt, input, patt, start, end)
 
 
 
     /// Whole input matches within region...
-    def evalBoundedWithTest(test: PrimMatcher ~> Bool, input: String, patt: Pattern, start: Int32, end: Int32, eval: MatchEvaluator[a]): Result[a, System.Error] & Impure =
+    def evalBoundedWithTest(test: PrimMatcher ~> Bool, input: String, patt: Pattern, start: Int32, end: Int32, eval: MatchEvaluator[a]): Result[a, String] & Impure =
         use Result.flatMap;
         use Text/Regex/Internal/PrimMatcher.{newPrimMatcher, region};
         let Pattern(p1) = patt;
@@ -130,21 +130,21 @@ namespace Text/Regex {
             let MatchEvaluator(fn) = eval;
             m1.fn()
         } else
-            Err(IllegalStateException)
+            Err("evalBoundedWithTest")
 
     /// Match input within region, match must start at start of region...
-    pub def evalBoundedMatches(input: String, patt: Pattern, start: Int32, end: Int32, eval: MatchEvaluator[a]): Result[a, System.Error] & Impure =
+    pub def evalBoundedMatches(input: String, patt: Pattern, start: Int32, end: Int32, eval: MatchEvaluator[a]): Result[a, String] & Impure =
         use Text/Regex/Internal/PrimMatcher.{matches};
         evalBoundedWithTest(matches, input, patt, start, end, eval)
 
     /// Match input within region, match must start at start of region...
-    pub def evalBoundedContains(input: String, patt: Pattern, start: Int32, end: Int32, eval: MatchEvaluator[a]): Result[a, System.Error] & Impure =
+    pub def evalBoundedContains(input: String, patt: Pattern, start: Int32, end: Int32, eval: MatchEvaluator[a]): Result[a, String] & Impure =
         use Text/Regex/Internal/PrimMatcher.{find};
         evalBoundedWithTest(find, input, patt, start, end, eval)
 
 
     /// Match input within region, match must start at start of region...
-    pub def evalBoundedStartsWith(input: String, patt: Pattern, start: Int32, end: Int32, eval: MatchEvaluator[a]): Result[a, System.Error] & Impure =
+    pub def evalBoundedStartsWith(input: String, patt: Pattern, start: Int32, end: Int32, eval: MatchEvaluator[a]): Result[a, String] & Impure =
         use Text/Regex/Internal/PrimMatcher.{lookingAt};
         evalBoundedWithTest(lookingAt, input, patt, start, end, eval)
 
@@ -219,14 +219,14 @@ namespace Text/Regex {
     ///
     /// Rewrite the string `input` by applying the function `f` to the substring produced by each match of the pattern `patt`.
     ///
-    pub def rewriteWith(input: String, patt: Pattern, eval: MatchEvaluator[String]): Result[String, System.Error] & Impure =
+    pub def rewriteWith(input: String, patt: Pattern, eval: MatchEvaluator[String]): Result[String, String] & Impure =
         use Text/Regex/Replacer.{execReplacer, evalRewriteAll!};
         execReplacer(evalRewriteAll!(eval), patt, input)
 
     ///
     /// Rewrite the string `input` by apply the function `f` to the substring produced by each match of the pattern `patt`.
     ///
-    pub def rewriteWithIndex(input: String, patt: Pattern, eval: Int32 -> MatchEvaluator[String]): Result[String, System.Error] & Impure =
+    pub def rewriteWithIndex(input: String, patt: Pattern, eval: Int32 -> MatchEvaluator[String]): Result[String, String] & Impure =
         use Text/Regex/Replacer.{execReplacer, evalRewriteAllWithIndex!};
         execReplacer(evalRewriteAllWithIndex!(eval), patt, input)
 
