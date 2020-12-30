@@ -746,7 +746,7 @@ namespace Data/Stream {
     /// Note - `sameElements` forces both streams, it is a so-called "terminal operation" and
     /// you will not be able to do anything else with the streams afterwards.
     ///
-    pub def sameElements(s1: Stream[a], s2: Stream[a]): Bool & Impure =
+    pub def sameElements[a: Eq](s1: Stream[a], s2: Stream[a]): Bool & Impure =
         let generate1 = getGenerator(s1);
         let generate2 = getGenerator(s2);
         let finalize1 = getFinalizer(s1);
@@ -762,7 +762,7 @@ namespace Data/Stream {
     ///
     /// Helper function for `sameElements`.
     ///
-    def sameElementsHelper(sf1: Unit ~> Step[a], sf2: Unit ~> Step[a]): Bool & Impure =
+    def sameElementsHelper[a: Eq](sf1: Unit ~> Step[a], sf2: Unit ~> Step[a]): Bool & Impure =
         match (sf1(), sf2()) {
             case (Yield(a), Yield(b))   => if (a != b) false else sameElementsHelper(sf1, sf2)
             case (Yield(a), Skip)       => sameElementsHelperGoRight(a, sf1, sf2)
@@ -781,7 +781,7 @@ namespace Data/Stream {
     /// Precondition: stream `sf1` (left) has yielded the value `x` but `sf2` (right) yielded a `Skip`.
     /// Go along sf2 (right) to produce a value, if same continue along both.
     ///
-    def sameElementsHelperGoRight(x: a, sf1: Unit ~> Step[a], sf2: Unit ~> Step[a]) : Bool & Impure =
+    def sameElementsHelperGoRight[a: Eq](x: a, sf1: Unit ~> Step[a], sf2: Unit ~> Step[a]) : Bool & Impure =
         match sf2() {
             case Yield(y)   => if (x != y) false else sameElementsHelper(sf1, sf2)
             case Done       => false
@@ -794,7 +794,7 @@ namespace Data/Stream {
     /// Precondition: stream `sf2` (right) has yielded the value `x` but `sf1` (left) yielded a `Skip`.
     /// Go along sf2 (left) to produce a value, if same continue along both.
     ///
-    def sameElementsHelperGoLeft(sf1: Unit ~> Step[a], y: a, sf2: Unit ~> Step[a]) : Bool & Impure =
+    def sameElementsHelperGoLeft[a: Eq](sf1: Unit ~> Step[a], y: a, sf2: Unit ~> Step[a]) : Bool & Impure =
         match sf1() {
             case Yield(x)   => if (x != y) false else sameElementsHelper(sf1, sf2)
             case Done       => true
