@@ -56,6 +56,26 @@ namespace System {
         case Generic(String)
     }
 
+    instance ToString[Error] {
+        def toString(x: Error): String = match x {
+            case ArrayIndexOutOfBoundsException     => "ArrayIndexOutOfBoundsException"
+            case Exception                          => "Exception"
+            case FileNotFoundException              => "FileNotFoundException"
+            case IllegalArgumentException           => "IllegalArgumentException"
+            case IllegalStateException              => "IllegalStateException"
+            case IndexOutOfBoundsException          => "IndexOutOfBoundsException"
+            case InputMismatchException             => "InputMismatchException"
+            case IOException                        => "IOException"
+            case NoSuchElementException             => "NoSuchElementException"
+            case NullPointerException               => "NullPointerException"
+            case PatternSyntaxException             => "PatternSyntaxException"
+            case RuntimeException                   => "RuntimeException"
+            case SecurityException                  => "SecurityException"
+            case UnsupportedOperationException      => "UnsupportedOperationException"
+            case Generic(s)                         => s
+        }
+    }
+
 }
 
 namespace System/Error {

@@ -47,6 +47,8 @@ namespace System {
 
 namespace System/Process {
 
+    use ToString.toString;
+
     type alias MarshalStringArray = ##flix.runtime.spt.sandbox.system.marshal.MarshalStringArray
 
     pub def newProcessBuilder (cmd: String, args: Array[String]): ProcessBuilder & Impure = 
@@ -61,7 +63,8 @@ namespace System/Process {
         import java.lang.ProcessBuilder.directory(##java.io.File);
         import new java.io.File(String) as newFile;
         let ProcessBuilder(x1) = x;
-        let f1 = System/FilePath.toString(path).newFile();
+        let s1 = toString(path);
+        let f1 = newFile(s1);
         x1.directory(f1);
         ()
 

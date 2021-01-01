@@ -24,9 +24,28 @@ namespace System {
     ///
     pub opaque type FilePath = ##java.nio.file.Path
 
+    instance ToString[FilePath] {
+        def toString(path: FilePath): String =
+            import java.nio.file.Path.toString();
+            let FilePath(path1) = path;
+            path1.toString() as & Pure
+    }
+
+    instance Eq[FilePath] {
+        def eq(x: FilePath, y: FilePath): Bool =
+            import java.nio.file.Path.equals(##java.lang.Object);
+            let FilePath(x1) = x;
+            let FilePath(y1) = y;
+            x1.equals(y1 as ##java.lang.Object) as & Pure
+
+        def neq(x: FilePath, y: FilePath): Bool = not (x == y)
+    }
+
 }
 
 namespace System/FilePath {
+
+    use ToString.toString;
 
     /// Note - current set of operations should be pure?
 
@@ -36,20 +55,6 @@ namespace System/FilePath {
     pub def new(s: String): FilePath =
         import flix.runtime.spt.sandbox.system.FilePathWrapper:get1(String) as get1;
         FilePath(get1(s)) as & Pure
-
-    ///
-    /// Returns `true` if `x` == `y`.
-    ///
-    pub def equals(x: FilePath, y: FilePath): Bool =
-        import java.nio.file.Path.equals(##java.lang.Object);
-        let FilePath(x1) = x;
-        let FilePath(y1) = y;
-        x1.equals(y1 as ##java.lang.Object) as & Pure
-
-    pub def toString(path: FilePath): String =
-        import java.nio.file.Path.toString();
-        let FilePath(path1) = path;
-        path1.toString() as & Pure
 
     pub def normalize(path: FilePath): FilePath =
         import java.nio.file.Path.normalize();
