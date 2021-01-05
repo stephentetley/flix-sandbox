@@ -42,9 +42,15 @@ instance ToString[Chain[a]] with [a : ToString] {
             StringBuilder.toString(sb)
         };
         fn() as & Pure
-
 }
 
+instance Eq[Chain[a]] with[a : Eq] {
+
+    def eq(xs: Chain[a], ys: Chain[a]): Bool = Chain.equals(xs, ys)
+
+    def neq(xs: Chain[a], ys: Chain[a]): Bool = not (xs == ys)
+
+}
 
 enum ViewLeft[t] {
     case NoneLeft
@@ -170,12 +176,12 @@ namespace Chain {
     ///
     /// Returns `true` if and only if `xs` contains the element `a`.
     ///
-    pub def memberOf(a: a, xs: Chain[a]): Bool = memberOfHelper(a, xs, x -> x)
+    pub def memberOf[a: Eq](a: a, xs: Chain[a]): Bool = memberOfHelper(a, xs, x -> x)
 
     ///
     /// Helper function for `memberOf`.
     ///
-    def memberOfHelper(a: a, xs: Chain[a], k: Bool -> Bool): Bool = match xs {
+    def memberOfHelper[a: Eq](a: a, xs: Chain[a], k: Bool -> Bool): Bool = match xs {
         case Empty => k(false)
         case One(x) => k(x == a)
         case Chain(ls, rs) => memberOfHelper(a, ls, ans -> if (ans) k(true) else memberOfHelper(a, rs, k))
@@ -186,12 +192,12 @@ namespace Chain {
     ///
     /// Returns `-1` if `a` does not exist in `xs`.
     ///
-    pub def indexOf(a: a, xs: Chain[a]): Int32 = indexOfHelper(a, 0, viewLeft(xs), x -> x)
+    pub def indexOf[a: Eq](a: a, xs: Chain[a]): Int32 = indexOfHelper(a, 0, viewLeft(xs), x -> x)
 
     ///
     /// Helper function for `indexOf`.
     ///
-    def indexOfHelper(a: a, ac: Int32, vx: ViewLeft[a], k: Int32 -> Int32): Int32 = match vx {
+    def indexOfHelper[a: Eq](a: a, ac: Int32, vx: ViewLeft[a], k: Int32 -> Int32): Int32 = match vx {
         case NoneLeft => k(-1)
         case SomeLeft(x, xs) => if (x == a) k(ac) else indexOfHelper(a, ac + 1, viewLeft(xs), k)
     }
@@ -604,7 +610,7 @@ namespace Chain {
     ///
     /// Returns the list `xs` as a set.
     ///
-    pub def toSet(xs: Chain[a]): Set[a] = foldRight(Set.insert, Set.empty(), xs)
+    pub def toSet[a: Order](xs: Chain[a]): Set[a] = foldRight(Set.insert, Set.empty(), xs)
 
 
     ///
@@ -613,7 +619,7 @@ namespace Chain {
     /// If `xs` contains multiple mappings with the same key, `toMap` does not
     /// make any guarantees about which mapping will be in the resulting map.
     ///
-    pub def toMap(xs: Chain[(a, b)]): Map[a, b] = foldRight((x, m) -> Map.insert(fst(x), snd(x), m), Map.empty(), xs)
+    pub def toMap[a: Order, b](xs: Chain[(a, b)]): Map[a, b] = foldRight((x, m) -> Map.insert(fst(x), snd(x), m), Map.empty(), xs)
 
 
     ///
@@ -641,21 +647,21 @@ namespace Chain {
     ///
     /// Returns `true` if and only if `xs` and `ys` and equal.
     ///
-    pub def __eq(xs: Chain[a], ys: Chain[a]): Bool = eqHelper(viewLeft(xs), viewLeft(ys), x -> x)
+    pub def equals[a: Eq](xs: Chain[a], ys: Chain[a]): Bool = equalsHelper(viewLeft(xs), viewLeft(ys), x -> x)
 
     ///
-    /// Helper function for `__eq`.
+    /// Helper function for `equals`.
     ///
     /// Note: Chains are considered equal if their (ordered) list of elements are equal.
     ///
     /// Because they may have different shapes due to construction we use a view to
     /// decide equality which imposes an order on the Chain.
     ///
-    def eqHelper(vx: ViewLeft[a], vy: ViewLeft[a], k: Bool -> Bool): Bool = match (vx, vy) {
+    def equalsHelper[a: Eq](vx: ViewLeft[a], vy: ViewLeft[a], k: Bool -> Bool): Bool = match (vx, vy) {
         case (NoneLeft, NoneLeft) => k(true)
         case (SomeLeft(x, xs), SomeLeft(y, ys)) =>
             if (x == y)
-                eqHelper(viewLeft(xs), viewLeft(ys), k)
+                equalsHelper(viewLeft(xs), viewLeft(ys), k)
             else
                 k(false)
         case (_, _) => k(false)

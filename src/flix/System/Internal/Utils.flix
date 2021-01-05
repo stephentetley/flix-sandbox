@@ -30,17 +30,17 @@ namespace System/Internal/Utils {
         case Some(a) => unfoldListWithIteratorHelper(next, xs -> cont(a :: xs))
     }
 
-    pub def unfoldMap(f: s -> Option[(k, v, s)] & e, st: s): Map[k,v] & e = unfoldMapHelper(f, st, m -> m)
+    pub def unfoldMap[s, e, v, k: Order](f: s -> Option[(k, v, s)] & e, st: s): Map[k,v] & e = unfoldMapHelper(f, st, m -> m)
 
-    pub def unfoldMapHelper(f: s -> Option[(k, v, s)] & e, st: s, cont: Map[k,v] -> Map[k,v]): Map[k,v] & e = match f(st) {
+    pub def unfoldMapHelper[s, e, v, k: Order](f: s -> Option[(k, v, s)] & e, st: s, cont: Map[k,v] -> Map[k,v]): Map[k,v] & e = match f(st) {
         case None => cont(Map.empty())
         case Some((k, v, ac1)) => unfoldMapHelper(f, ac1, m -> cont(Map.insert(k, v, m)))
     }
 
-    pub def unfoldMapWithIterator(next: () -> Option[(k, v)] & e): Map[k,v] & e =
+    pub def unfoldMapWithIterator[e, v, k: Order](next: () -> Option[(k, v)] & e): Map[k,v] & e =
         unfoldMapWithIteratorHelper(next, m -> m)
 
-    pub def unfoldMapWithIteratorHelper(next: () -> Option[(k, v)] & e, cont: Map[k,v] -> Map[k,v]): Map[k,v] & e =
+    pub def unfoldMapWithIteratorHelper[e, v, k: Order](next: () -> Option[(k, v)] & e, cont: Map[k,v] -> Map[k,v]): Map[k,v] & e =
         match next() {
             case None => cont(Map.empty())
             case Some((k, v)) => unfoldMapWithIteratorHelper(next, m -> cont(Map.insert(k, v, m)))
