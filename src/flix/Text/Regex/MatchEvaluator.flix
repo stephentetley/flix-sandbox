@@ -153,47 +153,47 @@ namespace Text/Regex/MatchEvaluator {
         lift2((x,y) -> (x,y), getCaptureNamedStart(label), getCaptureNamedEnd(label))
 
 
-
+    /// Note - type annos are a temporary fix while Flix's runtime cast error is resolved.
 
     pub def getInt8At(ix: Int32): MatchEvaluator[Int8] =
         let* str = getCaptureAt(ix);
-        liftOption(fromString(str), "getInt8At(${ix})")
+        liftOption(fromString(str): Option[Int8], "getInt8At(${ix})")
 
     pub def getInt8Named(label: String): MatchEvaluator[Int8] =
         let* str = getCaptureNamed(label);
-        liftOption(fromString(str), "getInt8Named('${label}')")
+        liftOption(fromString(str): Option[Int8], "getInt8Named('${label}')")
 
     pub def getInt16At(ix: Int32): MatchEvaluator[Int16] =
         let* str = getCaptureAt(ix);
-        liftOption(fromString(str), "getInt16At(${ix})")
+        liftOption(fromString(str): Option[Int16], "getInt16At(${ix})")
 
     pub def getInt16Named(label: String): MatchEvaluator[Int16] =
         let* str = getCaptureNamed(label);
-        liftOption(fromString(str), "getInt16Named('${label}')")
+        liftOption(fromString(str): Option[Int16], "getInt16Named('${label}')")
 
     pub def getInt32At(ix: Int32): MatchEvaluator[Int32] =
         let* str = getCaptureAt(ix);
-        liftOption(fromString(str), "getInt32At(${ix})")
+        liftOption(fromString(str): Option[Int32], "getInt32At(${ix})")
 
     pub def getInt32Named(label: String): MatchEvaluator[Int32] =
         let* str = getCaptureNamed(label);
-        liftOption(fromString(str), "getInt32Named('${label}')")
+        liftOption(fromString(str): Option[Int32], "getInt32Named('${label}')")
 
     pub def getInt64At(ix: Int32): MatchEvaluator[Int64] =
         let* str = getCaptureAt(ix);
-        liftOption(fromString(str), "getInt64At(${ix})")
+        liftOption(fromString(str): Option[Int64], "getInt64At(${ix})")
 
     pub def getInt64Named(label: String): MatchEvaluator[Int64] =
         let* str = getCaptureNamed(label);
-        liftOption(fromString(str), "getInt64Named('${label}')")
+        liftOption(fromString(str): Option[Int64], "getInt64Named('${label}')")
 
     pub def getBigIntAt(ix: Int32): MatchEvaluator[BigInt] =
         let* str = getCaptureAt(ix);
-        liftOption(fromString(str), "getBigIntAt(${ix})")
+        liftOption(fromString(str): Option[BigInt], "getBigIntAt(${ix})")
 
     pub def getBigIntNamed(label: String): MatchEvaluator[BigInt] =
         let* str = getCaptureNamed(label);
-        liftOption(fromString(str), "getBigIntNamed('${label}')")
+        liftOption(fromString(str): Option[BigInt], "getBigIntNamed('${label}')")
 
     ///
     /// Applies the binary function `f` to the values in `o1` and `o2`.
