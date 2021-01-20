@@ -589,6 +589,56 @@ namespace Chain {
         }
     }
 
+
+    ///
+    /// Returns a chain where the element at index `i` is `(a, b)` where
+    /// `a` is the element at index `i` in `xs` and `b` is the element at index `i` in `ys`.
+    ///
+    /// If either `xs` or `ys` becomes depleted, then no further elements are added to the resulting chain.
+    ///
+    pub def zip(xs: Chain[a], ys: Chain[b]): Chain[(a,b)] = zipHelper(xs, ys, ks -> ks)
+
+    ///
+    /// Helper function for `zip`.
+    ///
+    def zipHelper(xs: Chain[a], ys: Chain[b], k: Chain[(a,b)] -> Chain[(a,b)]): Chain[(a,b)] = match (viewLeft(xs), viewLeft(ys)) {
+        case (SomeLeft(x, rs), SomeLeft(y, qs)) => zipHelper(rs, qs, ks -> k(cons((x, y), ks)))
+        case _ => k(empty())
+    }
+
+    ///
+    /// Returns a chain where the element at index `i` is `f(a, b)` where
+    /// `a` is the element at index `i` in `xs` and `b` is the element at index `i` in `ys`.
+    ///
+    /// If either `xs` or `ys` becomes depleted, then no further elements are added to the resulting chain.
+    ///
+    pub def zipWith(f: (a, b) -> c & e, xs: Chain[a], ys: Chain[b]): Chain[c] & e = zipWithHelper(f, xs, ys, ks -> ks)
+
+    ///
+    /// Helper function for `zipWith`.
+    ///
+    def zipWithHelper(f: (a, b) -> c & e, xs: Chain[a], ys: Chain[b], k: Chain[c] -> Chain[c]): Chain[c] & e = match (viewLeft(xs), viewLeft(ys)) {
+        case (SomeLeft(x, rs), SomeLeft(y, qs)) => {
+            let a = f(x, y);
+            zipWithHelper(f, rs, qs, ks -> k(cons(a, ks)))
+        }
+        case _ => k(empty())
+    }
+
+    ///
+    /// Returns a pair of chains, the first containing all first components in `xs`
+    /// and the second containing all second components in `xs`.
+    ///
+    pub def unzip(xs: Chain[(a, b)]): (Chain[a], Chain[b]) = unzipHelper(xs, (ks1, ks2) -> (ks1, ks2))
+
+    ///
+    /// Helper function for `unzip`.
+    ///
+    def unzipHelper(xs: Chain[(a, b)], k: (Chain[a], Chain[b]) -> (Chain[a], Chain[b])): (Chain[a], Chain[b]) = match viewLeft(xs) {
+        case SomeLeft((x1, x2), rs) => unzipHelper(rs, (ks1, ks2) -> k(cons(x1, ks1), cons(x2, ks2)))
+        case NoneLeft => k(empty(), empty())
+    }
+
     ///
     /// Returns `xs` as a list.
     ///
