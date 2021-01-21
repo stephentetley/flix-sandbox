@@ -92,34 +92,20 @@ namespace Chain {
     ///
     /// Returns `None` if `xs` is empty.
     ///
-    pub def head(xs: Chain[a]): Option[a] = headHelper(xs, x -> x)
-
-    ///
-    /// Helper function for `head`.
-    ///
-    /// Precondition: `xs` has been properly formed with any concatenation using `append`.
-    /// This means there will be no internal `Empty` nodes.
-    ///
-    def headHelper(xs: Chain[a], k: Option[a] -> Option[a]): Option[a] = match xs {
-        case Empty => k(None)
-        case One(x) => k(Some(x))
-        case Chain(ls, _) => headHelper(ls, k)
+    pub def head(xs: Chain[a]): Option[a] = match viewLeft(xs) {
+        case SomeLeft(x, _) => Some(x)
+        case _ => None
     }
+
 
     ///
     /// Returns `Some(x)` if `x` is the last element of `xs`.
     ///
     /// Returns `None` if `xs` is empty.
     ///
-    pub def last(xs: Chain[a]): Option[a] = lastHelper(xs, x -> x)
-
-    ///
-    /// Helper function for `last`.
-    ///
-    def lastHelper(xs: Chain[a], k: Option[a] -> Option[a]): Option[a] = match xs {
-        case Empty => k(None)
-        case One(x) => k(Some(x))
-        case Chain(_, rs) => lastHelper(rs, k)
+    pub def last(xs: Chain[a]): Option[a] = match viewRight(xs) {
+        case SomeRight(_, x) => Some(x)
+        case _ => None
     }
 
     ///
@@ -176,15 +162,15 @@ namespace Chain {
     ///
     /// Returns `true` if and only if `xs` contains the element `a`.
     ///
-    pub def memberOf[a: Eq](a: a, xs: Chain[a]): Bool = memberOfHelper(a, xs, x -> x)
+    pub def memberOf[a: Eq](a: a, xs: Chain[a]): Bool = memberOfHelper(a, viewLeft(xs))
 
     ///
     /// Helper function for `memberOf`.
     ///
-    def memberOfHelper[a: Eq](a: a, xs: Chain[a], k: Bool -> Bool): Bool = match xs {
-        case Empty => k(false)
-        case One(x) => k(x == a)
-        case Chain(ls, rs) => memberOfHelper(a, ls, ans -> if (ans) k(true) else memberOfHelper(a, rs, k))
+    def memberOfHelper[a: Eq](a: a, vx: ViewLeft[a]): Bool = match vx {
+        case SomeLeft(x, _) if x == a => true
+        case SomeLeft(_, xs) => memberOfHelper(a, viewLeft(xs))
+        case NoneLeft => false
     }
 
     ///
@@ -192,14 +178,14 @@ namespace Chain {
     ///
     /// Returns `-1` if `a` does not exist in `xs`.
     ///
-    pub def indexOf[a: Eq](a: a, xs: Chain[a]): Int32 = indexOfHelper(a, 0, viewLeft(xs), x -> x)
+    pub def indexOf[a: Eq](a: a, xs: Chain[a]): Int32 = indexOfHelper(a, 0, viewLeft(xs))
 
     ///
     /// Helper function for `indexOf`.
     ///
-    def indexOfHelper[a: Eq](a: a, ac: Int32, vx: ViewLeft[a], k: Int32 -> Int32): Int32 = match vx {
-        case NoneLeft => k(-1)
-        case SomeLeft(x, xs) => if (x == a) k(ac) else indexOfHelper(a, ac + 1, viewLeft(xs), k)
+    def indexOfHelper[a: Eq](a: a, ac: Int32, vx: ViewLeft[a]): Int32 = match vx {
+        case NoneLeft => -1
+        case SomeLeft(x, xs) => if (x == a) ac else indexOfHelper(a, ac + 1, viewLeft(xs))
     }
 
     ///
@@ -234,13 +220,13 @@ namespace Chain {
     ///
     /// Returns `Nil` if `b >= e`.
     ///
-    pub def range(b: Int32, e: Int32): Chain[Int32] = rangeHelper(b, e, xs -> xs)
+    pub def range(b: Int32, e: Int32): Chain[Int32] = rangeHelper(b, e, Chain.empty())
 
     ///
     /// Helper function for `range`.
     ///
-    def rangeHelper(b: Int32, e: Int32, k: Chain[Int32] -> Chain[Int32]): Chain[Int32] =
-        if (b >= e) k(Empty) else rangeHelper(b + 1, e, xs -> k(cons(b,xs)))
+    def rangeHelper(b: Int32, e: Int32, ac: Chain[Int32]): Chain[Int32] =
+        if (b >= e) ac else rangeHelper(b + 1, e, snoc(ac, b))
 
     ///
     /// Returns a list with the element `a` repeated `n` times.
@@ -596,14 +582,14 @@ namespace Chain {
     ///
     /// If either `xs` or `ys` becomes depleted, then no further elements are added to the resulting chain.
     ///
-    pub def zip(xs: Chain[a], ys: Chain[b]): Chain[(a,b)] = zipHelper(xs, ys, ks -> ks)
+    pub def zip(xs: Chain[a], ys: Chain[b]): Chain[(a,b)] = zipHelper(xs, ys, Chain.empty())
 
     ///
     /// Helper function for `zip`.
     ///
-    def zipHelper(xs: Chain[a], ys: Chain[b], k: Chain[(a,b)] -> Chain[(a,b)]): Chain[(a,b)] = match (viewLeft(xs), viewLeft(ys)) {
-        case (SomeLeft(x, rs), SomeLeft(y, qs)) => zipHelper(rs, qs, ks -> k(cons((x, y), ks)))
-        case _ => k(empty())
+    def zipHelper(xs: Chain[a], ys: Chain[b], ac: Chain[(a,b)]): Chain[(a,b)] = match (viewLeft(xs), viewLeft(ys)) {
+        case (SomeLeft(x, rs), SomeLeft(y, qs)) => zipHelper(rs, qs, snoc(ac, (x, y)))
+        case _ => ac
     }
 
     ///
@@ -612,31 +598,31 @@ namespace Chain {
     ///
     /// If either `xs` or `ys` becomes depleted, then no further elements are added to the resulting chain.
     ///
-    pub def zipWith(f: (a, b) -> c & e, xs: Chain[a], ys: Chain[b]): Chain[c] & e = zipWithHelper(f, xs, ys, ks -> ks)
+    pub def zipWith(f: (a, b) -> c & e, xs: Chain[a], ys: Chain[b]): Chain[c] & e = zipWithHelper(f, xs, ys, Chain.empty())
 
     ///
     /// Helper function for `zipWith`.
     ///
-    def zipWithHelper(f: (a, b) -> c & e, xs: Chain[a], ys: Chain[b], k: Chain[c] -> Chain[c]): Chain[c] & e = match (viewLeft(xs), viewLeft(ys)) {
+    def zipWithHelper(f: (a, b) -> c & e, xs: Chain[a], ys: Chain[b], ac: Chain[c]): Chain[c] & e = match (viewLeft(xs), viewLeft(ys)) {
         case (SomeLeft(x, rs), SomeLeft(y, qs)) => {
             let a = f(x, y);
-            zipWithHelper(f, rs, qs, ks -> k(cons(a, ks)))
+            zipWithHelper(f, rs, qs, snoc(ac, a))
         }
-        case _ => k(empty())
+        case _ => ac
     }
 
     ///
     /// Returns a pair of chains, the first containing all first components in `xs`
     /// and the second containing all second components in `xs`.
     ///
-    pub def unzip(xs: Chain[(a, b)]): (Chain[a], Chain[b]) = unzipHelper(xs, (ks1, ks2) -> (ks1, ks2))
+    pub def unzip(xs: Chain[(a, b)]): (Chain[a], Chain[b]) = unzipHelper(xs, Chain.empty(), Chain.empty())
 
     ///
     /// Helper function for `unzip`.
     ///
-    def unzipHelper(xs: Chain[(a, b)], k: (Chain[a], Chain[b]) -> (Chain[a], Chain[b])): (Chain[a], Chain[b]) = match viewLeft(xs) {
-        case SomeLeft((x1, x2), rs) => unzipHelper(rs, (ks1, ks2) -> k(cons(x1, ks1), cons(x2, ks2)))
-        case NoneLeft => k(empty(), empty())
+    def unzipHelper(xs: Chain[(a, b)], ac1: Chain[a], ac2: Chain[b]): (Chain[a], Chain[b]) = match viewLeft(xs) {
+        case SomeLeft((x1, x2), rs) => unzipHelper(rs, snoc(ac1, x1), snoc(ac2, x2))
+        case NoneLeft => (ac1, ac2)
     }
 
     ///
@@ -697,7 +683,7 @@ namespace Chain {
     ///
     /// Returns `true` if and only if `xs` and `ys` and equal.
     ///
-    pub def equals[a: Eq](xs: Chain[a], ys: Chain[a]): Bool = equalsHelper(viewLeft(xs), viewLeft(ys), x -> x)
+    pub def equals[a: Eq](xs: Chain[a], ys: Chain[a]): Bool = equalsHelper(viewLeft(xs), viewLeft(ys))
 
     ///
     /// Helper function for `equals`.
@@ -707,14 +693,14 @@ namespace Chain {
     /// Because they may have different shapes due to construction we use a view to
     /// decide equality which imposes an order on the Chain.
     ///
-    def equalsHelper[a: Eq](vx: ViewLeft[a], vy: ViewLeft[a], k: Bool -> Bool): Bool = match (vx, vy) {
-        case (NoneLeft, NoneLeft) => k(true)
+    def equalsHelper[a: Eq](vx: ViewLeft[a], vy: ViewLeft[a]): Bool = match (vx, vy) {
+        case (NoneLeft, NoneLeft) => true
         case (SomeLeft(x, xs), SomeLeft(y, ys)) =>
             if (x == y)
-                equalsHelper(viewLeft(xs), viewLeft(ys), k)
+                equalsHelper(viewLeft(xs), viewLeft(ys))
             else
-                k(false)
-        case (_, _) => k(false)
+                false
+        case (_, _) => false
     }
 
 }
