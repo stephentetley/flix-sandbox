@@ -33,26 +33,27 @@ namespace System/Environment {
         case _:##java.lang.Exception => None
     }
 
-    pub def getEnvVars(): Option[Map[String, String]] & Impure = try {
+    pub def getEnvVars(): Option[Map[String, String]] & Impure =
         import new flix.runtime.spt.sandbox.system.marshal.UnmarshalEnvVars() as newIter;
         import flix.runtime.spt.sandbox.system.marshal.UnmarshalEnvVars.hasNext();
         import flix.runtime.spt.sandbox.system.marshal.UnmarshalEnvVars.next();
         import flix.runtime.spt.sandbox.system.marshal.TupleStringString.get0();
         import flix.runtime.spt.sandbox.system.marshal.TupleStringString.get1();
-        let iter = newIter();
-        let step = () ->
-            if (iter.hasNext() == false)
-                None
-            else {
-                let pss = iter.next();
-                let k = pss.get0();
-                let v = pss.get1();
-                Some(k, v)
-             };
-        Some(Map.unfoldWithIter(step))
-    } catch {
-        case _: ##java.lang.Exception => None
-    }
+        try {
+            let iter = newIter();
+            let step = () ->
+                if (iter.hasNext() == false)
+                    None
+                else {
+                    let pss = iter.next();
+                    let k = pss.get0();
+                    let v = pss.get1();
+                    Some(k, v)
+                 };
+            Some(Map.unfoldWithIter(step))
+        } catch {
+            case _: ##java.lang.Exception => None
+        }
 
 
     pub def getOsName(): String =

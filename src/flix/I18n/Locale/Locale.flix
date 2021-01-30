@@ -147,4 +147,58 @@ namespace I18n/Locale {
         let arr = getAvailableLocales();
         Array.map(Locale, arr)
 
+    pub def getPart1Alpha3IsoCountryCodes(): Option[Set[String]] & Impure =
+        import new flix.runtime.spt.sandbox.system.marshal.UnmarshalPart1Alpha3IsoCountryCodes() as newIter;
+        import flix.runtime.spt.sandbox.system.marshal.UnmarshalPart1Alpha3IsoCountryCodes.hasNext();
+        import flix.runtime.spt.sandbox.system.marshal.UnmarshalPart1Alpha3IsoCountryCodes.next();
+        try {
+            let iter = newIter();
+            let step = () ->
+                if (iter.hasNext() == false)
+                    None
+                else {
+                    let s1 = iter.next();
+                    Some(s1)
+                };
+            List.unfoldWithIter(step) |> List.toSet |> Some
+        } catch {
+            case _: ##java.lang.Exception => None
+        }
+
+    pub def getPart1Alpha2IsoCountryCodes(): Option[Set[String]] & Impure =
+        import new flix.runtime.spt.sandbox.system.marshal.UnmarshalPart1Alpha2IsoCountryCodes() as newIter;
+        import flix.runtime.spt.sandbox.system.marshal.UnmarshalPart1Alpha2IsoCountryCodes.hasNext();
+        import flix.runtime.spt.sandbox.system.marshal.UnmarshalPart1Alpha2IsoCountryCodes.next();
+        try {
+            let iter = newIter();
+            let step = () ->
+                if (iter.hasNext() == false)
+                    None
+                else {
+                    let s1 = iter.next();
+                    Some(s1)
+                };
+            List.unfoldWithIter(step) |> List.toSet |> Some
+        } catch {
+            case _: ##java.lang.Exception => None
+        }
+
+    pub def getPart3IsoCountryCodes(): Option[Set[String]] & Impure =
+        import new flix.runtime.spt.sandbox.system.marshal.UnmarshalPart3IsoCountryCodes() as newIter;
+        import flix.runtime.spt.sandbox.system.marshal.UnmarshalPart3IsoCountryCodes.hasNext();
+        import flix.runtime.spt.sandbox.system.marshal.UnmarshalPart3IsoCountryCodes.next();
+        try {
+            let iter = newIter();
+            let step = () ->
+                if (iter.hasNext() == false)
+                    None
+                else {
+                    let s1 = iter.next();
+                    Some(s1)
+                };
+            List.unfoldWithIter(step) |> List.toSet |> Some
+        } catch {
+            case _: ##java.lang.Exception => None
+        }
+
 }

@@ -43,7 +43,7 @@ public class FileWrapper {
         return Files.copy(source, target, LinkOption.NOFOLLOW_LINKS, StandardCopyOption.REPLACE_EXISTING);
     }
 
-    /// Stub function for `Files.writeString` as it is "varargs" in Java.
+    /// Stub function for `Files.writeString` as it is "varargs" in Java and uses the CharSequence interface.
     public static void writeString(Path path, Charset charset, String content) throws Exception {
         final CharSequence content2 = content;
         Files.writeString(path, content2, charset);
