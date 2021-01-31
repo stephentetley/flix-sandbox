@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-package flix.runtime.spt.sandbox.system.marshal;
+package flix.runtime.spt.sandbox.i18n.marshal;
 
 
 
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Set;
-import java.util.stream.Stream;
 
-public class UnmarshalPart1Alpha2IsoCountryCodes {
+public class UnmarshalPart1Alpha3IsoCountryCodes {
     private Iterator<String> iter;
 
-    public UnmarshalPart1Alpha2IsoCountryCodes() throws Exception {
-        Set<String> codes = Locale.getISOCountries(Locale.IsoCountryCode.PART1_ALPHA2);
+    public UnmarshalPart1Alpha3IsoCountryCodes() throws Exception {
+        Set<String> codes = Locale.getISOCountries(Locale.IsoCountryCode.PART1_ALPHA3);
         this.iter = codes.iterator();
     }
 

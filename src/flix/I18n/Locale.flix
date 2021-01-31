@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-use I18n.Locale;
-use I18n.Locale.{Locale};
+
 
 namespace I18n {
 
@@ -24,94 +23,110 @@ namespace I18n {
 
 namespace I18n/Locale {
 
+    use I18n.Locale;
+    use I18n.Locale.{Locale};
+
     pub def new(x: { language: String, country: String, variant: String }): Locale = 
         import new java.util.Locale(String, String, String) as newLocale;
         Locale(newLocale(x.language, x.country, x.variant)) as & Pure
 
-    pub def getDefault(): Locale = 
+    pub def getDefault(): Locale & Impure = 
         import java.util.Locale:getDefault();
-        Locale(getDefault()) as & Pure
+        Locale(getDefault())
+
+    pub enum Category {
+        case Display
+        case Format
+    }
+
+    pub def getDefaultWithCategory(x: Category): Locale & Impure = 
+        import flix.runtime.spt.sandbox.i18n.LocaleWrapper:getDefaultDISPLAY();
+        import flix.runtime.spt.sandbox.i18n.LocaleWrapper:getDefaultFORMAT();
+        match x { 
+            case Display => Locale(getDefaultDISPLAY())
+            case Format => Locale(getDefaultFORMAT())
+        }
 
 
     pub def canada(): Locale = 
-        import get java.util.Locale:CANADA as getCanada;
-        Locale(getCanada()) as & Pure
+        import get java.util.Locale:CANADA as getCANADA;
+        Locale(getCANADA()) as & Pure
 
     pub def canada_french(): Locale = 
-        import get java.util.Locale:CANADA_FRENCH as getCanadaFrench;
-        Locale(getCanadaFrench()) as & Pure
+        import get java.util.Locale:CANADA_FRENCH as getCANADA_FRENCH;
+        Locale(getCANADA_FRENCH()) as & Pure
 
     pub def china(): Locale = 
-        import get java.util.Locale:CHINA as getChina;
-        Locale(getChina()) as & Pure
+        import get java.util.Locale:CHINA as getCHINA;
+        Locale(getCHINA()) as & Pure
 
     pub def chinese(): Locale = 
-        import get java.util.Locale:CHINESE as getChinese;
-        Locale(getChinese()) as & Pure
+        import get java.util.Locale:CHINESE as getCHINESE;
+        Locale(getCHINESE()) as & Pure
 
     pub def english(): Locale = 
-        import get java.util.Locale:ENGLISH as getEnglish;
-        Locale(getEnglish()) as & Pure
+        import get java.util.Locale:ENGLISH as getENGLISH;
+        Locale(getENGLISH()) as & Pure
 
     pub def france(): Locale = 
         import get java.util.Locale:FRANCE as getFrance;
         Locale(getFrance()) as & Pure
     
     pub def french(): Locale = 
-        import get java.util.Locale:FRENCH as getFrench;
-        Locale(getFrench()) as & Pure
+        import get java.util.Locale:FRENCH as getFRENCH;
+        Locale(getFRENCH()) as & Pure
     
     pub def german(): Locale = 
-        import get java.util.Locale:GERMAN as getGerman;
-        Locale(getGerman()) as & Pure
+        import get java.util.Locale:GERMAN as getGERMAN;
+        Locale(getGERMAN()) as & Pure
  
     pub def germany(): Locale = 
-        import get java.util.Locale:GERMANY as getGermany;
-        Locale(getGermany()) as & Pure
+        import get java.util.Locale:GERMANY as getGERMANY;
+        Locale(getGERMANY()) as & Pure
  
     pub def italian(): Locale = 
-        import get java.util.Locale:ITALIAN as getItalian;
-        Locale(getItalian()) as & Pure
+        import get java.util.Locale:ITALIAN as getITALIAN;
+        Locale(getITALIAN()) as & Pure
  
     pub def italy(): Locale = 
-        import get java.util.Locale:ITALY as getItaly;
-        Locale(getItaly()) as & Pure
+        import get java.util.Locale:ITALY as getITALY;
+        Locale(getITALY()) as & Pure
  
     pub def japan(): Locale = 
-        import get java.util.Locale:JAPAN as getJapan;
-        Locale(getJapan()) as & Pure
+        import get java.util.Locale:JAPAN as getJAPAN;
+        Locale(getJAPAN()) as & Pure
     
     pub def japanese(): Locale = 
-        import get java.util.Locale:JAPANESE as getJapanese;
-        Locale(getJapanese()) as & Pure
+        import get java.util.Locale:JAPANESE as getJAPANESE;
+        Locale(getJAPANESE()) as & Pure
 
     pub def korea(): Locale = 
-        import get java.util.Locale:KOREA as getKorea;
-        Locale(getKorea()) as & Pure
+        import get java.util.Locale:KOREA as getKOREA;
+        Locale(getKOREA()) as & Pure
 
     pub def korean(): Locale = 
-        import get java.util.Locale:KOREAN as getKorean;
-        Locale(getKorean()) as & Pure
+        import get java.util.Locale:KOREAN as getKOREAN;
+        Locale(getKOREAN()) as & Pure
 
     pub def prc(): Locale = 
         import get java.util.Locale:PRC as getPRC;
         Locale(getPRC()) as & Pure
 
     pub def root(): Locale = 
-        import get java.util.Locale:ROOT as getRoot;
-        Locale(getRoot()) as & Pure
+        import get java.util.Locale:ROOT as getROOT;
+        Locale(getROOT()) as & Pure
 
     pub def simplified_chinese(): Locale = 
-        import get java.util.Locale:SIMPLIFIED_CHINESE as getSimplifiedChinese;
-        Locale(getSimplifiedChinese()) as & Pure
+        import get java.util.Locale:SIMPLIFIED_CHINESE as getSIMPLIFIED_CHINESE;
+        Locale(getSIMPLIFIED_CHINESE()) as & Pure
 
     pub def taiwan(): Locale = 
-        import get java.util.Locale:TAIWAN as getTaiwan;
-        Locale(getTaiwan()) as & Pure
+        import get java.util.Locale:TAIWAN as getTAIWAN;
+        Locale(getTAIWAN()) as & Pure
 
     pub def traditional_chinese(): Locale = 
-        import get java.util.Locale:TRADITIONAL_CHINESE as getTraditionalChinese;
-        Locale(getTraditionalChinese()) as & Pure
+        import get java.util.Locale:TRADITIONAL_CHINESE as getTRADITIONAL_CHINESE;
+        Locale(getTRADITIONAL_CHINESE()) as & Pure
 
     pub def uk(): Locale = 
         import get java.util.Locale:UK as getUK;
@@ -147,10 +162,22 @@ namespace I18n/Locale {
         let arr = getAvailableLocales();
         Array.map(Locale, arr)
 
-    pub def getPart1Alpha3IsoCountryCodes(): Option[Set[String]] & Impure =
-        import new flix.runtime.spt.sandbox.system.marshal.UnmarshalPart1Alpha3IsoCountryCodes() as newIter;
-        import flix.runtime.spt.sandbox.system.marshal.UnmarshalPart1Alpha3IsoCountryCodes.hasNext();
-        import flix.runtime.spt.sandbox.system.marshal.UnmarshalPart1Alpha3IsoCountryCodes.next();
+    pub enum IsoCountryCode { 
+        case Part1Alpha2
+        case Part1Alpha3
+        case Part3
+    }
+
+    pub def get3IsoCountryCodes(x: IsoCountryCode): Option[Set[String]] & Impure = match x {
+        case Part1Alpha2 => getPart1Alpha2IsoCountryCodes()
+        case Part1Alpha3 => getPart1Alpha3IsoCountryCodes()
+        case Part3 => getPart3IsoCountryCodes()
+    }
+
+    def getPart1Alpha3IsoCountryCodes(): Option[Set[String]] & Impure =
+        import new flix.runtime.spt.sandbox.i18n.marshal.UnmarshalPart1Alpha3IsoCountryCodes() as newIter;
+        import flix.runtime.spt.sandbox.i18n.marshal.UnmarshalPart1Alpha3IsoCountryCodes.hasNext();
+        import flix.runtime.spt.sandbox.i18n.marshal.UnmarshalPart1Alpha3IsoCountryCodes.next();
         try {
             let iter = newIter();
             let step = () ->
@@ -165,10 +192,10 @@ namespace I18n/Locale {
             case _: ##java.lang.Exception => None
         }
 
-    pub def getPart1Alpha2IsoCountryCodes(): Option[Set[String]] & Impure =
-        import new flix.runtime.spt.sandbox.system.marshal.UnmarshalPart1Alpha2IsoCountryCodes() as newIter;
-        import flix.runtime.spt.sandbox.system.marshal.UnmarshalPart1Alpha2IsoCountryCodes.hasNext();
-        import flix.runtime.spt.sandbox.system.marshal.UnmarshalPart1Alpha2IsoCountryCodes.next();
+    def getPart1Alpha2IsoCountryCodes(): Option[Set[String]] & Impure =
+        import new flix.runtime.spt.sandbox.i18n.marshal.UnmarshalPart1Alpha2IsoCountryCodes() as newIter;
+        import flix.runtime.spt.sandbox.i18n.marshal.UnmarshalPart1Alpha2IsoCountryCodes.hasNext();
+        import flix.runtime.spt.sandbox.i18n.marshal.UnmarshalPart1Alpha2IsoCountryCodes.next();
         try {
             let iter = newIter();
             let step = () ->
@@ -183,10 +210,10 @@ namespace I18n/Locale {
             case _: ##java.lang.Exception => None
         }
 
-    pub def getPart3IsoCountryCodes(): Option[Set[String]] & Impure =
-        import new flix.runtime.spt.sandbox.system.marshal.UnmarshalPart3IsoCountryCodes() as newIter;
-        import flix.runtime.spt.sandbox.system.marshal.UnmarshalPart3IsoCountryCodes.hasNext();
-        import flix.runtime.spt.sandbox.system.marshal.UnmarshalPart3IsoCountryCodes.next();
+    def getPart3IsoCountryCodes(): Option[Set[String]] & Impure =
+        import new flix.runtime.spt.sandbox.i18n.marshal.UnmarshalPart3IsoCountryCodes() as newIter;
+        import flix.runtime.spt.sandbox.i18n.marshal.UnmarshalPart3IsoCountryCodes.hasNext();
+        import flix.runtime.spt.sandbox.i18n.marshal.UnmarshalPart3IsoCountryCodes.next();
         try {
             let iter = newIter();
             let step = () ->
@@ -200,5 +227,8 @@ namespace I18n/Locale {
         } catch {
             case _: ##java.lang.Exception => None
         }
+
+
+
 
 }

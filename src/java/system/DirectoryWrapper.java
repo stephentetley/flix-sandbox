@@ -25,31 +25,31 @@ import java.nio.file.Path;
  */
 public class DirectoryWrapper {
 
-    // Stub function for `exists` as it is a "varags" method
+    // Wrapper function for `exists` as it is a "varags" method
     // with FollowLinks == true.
     public static boolean existsFollowLinks(Path path) throws Exception {
         return Files.exists(path);
     }
 
-    // Stub function for `isDirectory` as it is a "varags" method
+    // Wrapper function for `isDirectory` as it is a "varags" method
     // with FollowLinks == true.
     public static boolean isDirectoryFollowLinks(Path path) throws Exception {
         return Files.isDirectory(path);
     }
 
-    // Stub function for `isRegularFile` as it is a "varags" method
+    // Wrapper function for `isRegularFile` as it is a "varags" method
     // with FollowLinks == true.
     public static boolean isRegularFileFollowLinks(Path path) throws Exception {
         return Files.isRegularFile(path);
     }
 
-    // Stub function for `createDirectory` as it is a "varags" method
+    // Wrapper function for `createDirectory` as it is a "varags" method
     // with no FileAttributes.
     public static void createDirectory(Path path) throws Exception {
         Files.createDirectory(path);
     }
 
-    // Stub function for `createDirectories` as it is a "varags" method
+    // Wrapper function for `createDirectories` as it is a "varags" method
     // with no FileAttributes.
     public static void createDirectories(Path path) throws Exception {
         Files.createDirectories(path);

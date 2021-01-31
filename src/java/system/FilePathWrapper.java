@@ -26,7 +26,7 @@ import java.nio.file.Paths;
  */
 public class FilePathWrapper {
 
-    /// Sub function for `Paths.get` as it is "varargs" in Java.
+    /// Wrapper function for `Paths.get` as it is "varargs" in Java.
     public static Path get1(String path) {
         return Paths.get(path);
     }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package flix.runtime.spt.sandbox.system.marshal;
+package flix.runtime.spt.sandbox.i18n.marshal;
 
 
 
