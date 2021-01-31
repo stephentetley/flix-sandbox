@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Stephen Tetley
+ * Copyright 2021 Stephen Tetley
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ package flix.runtime.spt.sandbox.i18n.marshal;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Set;
-import java.util.stream.Stream;
 
 public class UnmarshalPart1Alpha2IsoCountryCodes {
     private Iterator<String> iter;

@@ -34,6 +34,17 @@ namespace I18n/Locale {
         import java.util.Locale:getDefault();
         Locale(getDefault())
 
+    pub def setDefault(x: Locale): Result[Unit, String] & Impure = 
+        import java.util.Locale:setDefault(##java.util.Locale);
+        try { 
+            let Locale(x1) = x;
+            setDefault(x1);
+            Ok()
+        } catch {
+            case _: ##java.lang.Exception => Err("setDefault failed")
+        }
+
+
     pub enum Category {
         case Display
         case Format
@@ -45,6 +56,20 @@ namespace I18n/Locale {
         match x { 
             case Display => Locale(getDefaultDISPLAY())
             case Format => Locale(getDefaultFORMAT())
+        }
+
+    pub def setDefaultWithCategory (category: Category, x: Locale): Result[Unit, String] & Impure = 
+        import flix.runtime.spt.sandbox.i18n.LocaleWrapper:setDefaultDISPLAY(##java.util.Locale);
+        import flix.runtime.spt.sandbox.i18n.LocaleWrapper:setDefaultFORMAT(##java.util.Locale);
+        try { 
+            let Locale(x1) = x;
+            match category { 
+                case Display => setDefaultDISPLAY(x1)
+                case Format => setDefaultFORMAT(x1)
+            };
+            Ok()
+        } catch {
+            case _: ##java.lang.Exception => Err("setDefault failed")
         }
 
 
@@ -140,23 +165,66 @@ namespace I18n/Locale {
     pub def getCountry(x: Locale): String = 
         import java.util.Locale.getCountry();
         let Locale(x1) = x;
-        x1.getCountry() as & Pure
+        getCountry(x1) as & Pure
 
     pub def getLanguage(x: Locale): String = 
         import java.util.Locale.getLanguage();
         let Locale(x1) = x;
-        x1.getLanguage() as & Pure
+        getLanguage(x1) as & Pure
+
+    pub def getScript(x: Locale): String = 
+        import java.util.Locale.getScript();
+        let Locale(x1) = x;
+        getScript(x1) as & Pure
+
+    pub def getISO3Country(x: Locale): Option[String] = 
+        import java.util.Locale.getISO3Country();
+        try {
+            let Locale(x1) = x;
+            Some(getISO3Country(x1) as & Pure)
+        } catch { 
+            case _: ##java.util.MissingResourceException => None
+        }
+
+    pub def getISO3Language(x: Locale): Option[String] = 
+        import java.util.Locale.getISO3Language();
+        try {
+            let Locale(x1) = x;
+            Some(getISO3Language(x1) as & Pure)
+        } catch { 
+            case _: ##java.util.MissingResourceException => None
+        }
+
+    pub def getDisplayLanguage(x: Locale): String = 
+        import java.util.Locale.getDisplayLanguage();
+        let Locale(x1) = x;
+        getDisplayLanguage(x1) as & Pure
+
+    pub def getDisplayLanguageInLocale(x: Locale, inLocale: Locale): String = 
+        import java.util.Locale.getDisplayLanguage(##java.util.Locale);
+        let Locale(x1) = x;
+        let Locale(inLocale1) = inLocale;
+        getDisplayLanguage(x1, inLocale1) as & Pure        
+
 
     pub def hasExtensions(x: Locale): Bool = 
         import java.util.Locale.hasExtensions();
         let Locale(x1) = x;
-        x1.hasExtensions() as & Pure
+        hasExtensions(x1) as & Pure
+
+    pub def stripExtensions(x: Locale): Locale = 
+        import java.util.Locale.stripExtensions();
+        let Locale(x1) = x;
+        Locale(stripExtensions(x1) as & Pure)
+
+
 
     pub def toString(x: Locale): String = 
         import java.util.Locale.toString();
         let Locale(x1) = x;
-        x1.toString() as & Pure
+        toString(x1) as & Pure
 
+    /// Must check this marshals okay...
     pub def getAvailableLocales(): Array[Locale] & Impure = 
         import java.util.Locale:getAvailableLocales();
         let arr = getAvailableLocales();
