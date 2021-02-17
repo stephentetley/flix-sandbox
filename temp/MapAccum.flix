@@ -14,6 +14,43 @@
  * limitations under the License.
  */
 
+namespace Validation {
+
+    pub def mapAccum(f: (s, t1) -> (s, t2) & ef, start: s, x: Validation[t1, e]): (s, Validation[t2, e]) & ef = match x {
+        case Success(a) => {
+            let (s1, b) = f(start, a);
+            (s1, Success(b))
+        }
+        case Failure(es) => (start, Failure(es)) as & ef
+    }
+
+}
+
+
+namespace Option {
+
+    pub def mapAccum(f: (s, a) -> (s, b) & ef, start: s, x: Option[a]): (s, Option[b]) & ef = match x {
+        case Some(a) => {
+            let (s1, b) = f(start, a);
+            (s1, Some(b))
+        }
+        case None => (start, None) as & ef
+    }
+
+}
+
+namespace Result {
+
+    pub def mapAccum(f: (s, a) -> (s, b) & ef, start: s, x: Result[a, e]): (s, Result[b, e]) & ef = match x {
+        case Ok(a) => {
+            let (s1, b) = f(start, a);
+            (s1, Ok(b))
+        }
+        case Err(e) => (start, Err(e)) as & ef
+    }
+
+}
+
 namespace Array {
 
     pub def mapAccumLeft(f: (s, a) -> (s, b) & ef, start: s, a: Array[a]): (s, Array[b]) & Impure =
