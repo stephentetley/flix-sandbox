@@ -81,11 +81,11 @@ namespace Test/FlixCheck {
 
     pub opaque type Gen[a] = (Int32, Random) ~> a
 
-    pub class Arbitrary[a] {
+    pub lawless class Arbitrary[a] {
         pub def arbitrary(): Gen[a]
     }
 
-    pub class Coarbitrary[a] {
+    pub lawless class Coarbitrary[a] {
         pub def coarbitrary(x: a, ma: Gen[b]): Gen[b]
     }
 
