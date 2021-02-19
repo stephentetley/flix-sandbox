@@ -19,6 +19,21 @@
 namespace I18n {
 
     pub opaque type Locale = ##java.util.Locale
+
+    instance ToString[Locale] {
+        def toString(x: Locale): String = I18n/Locale.toString(x)
+    }
+
+    instance Eq[Locale] {
+        def eq(x: Locale, y: Locale): Bool = I18n/Locale.equals(x, y)
+
+        def neq(x: Locale, y: Locale): Bool = not (x == y)
+    }
+
+    instance Hash[Locale] {
+        def hash(x: Locale): Int32 = I18n/Locale.hashCode(x)
+    }
+
 }
 
 namespace I18n/Locale {
@@ -26,7 +41,7 @@ namespace I18n/Locale {
     use I18n.Locale;
     use I18n.Locale.{Locale};
 
-    pub def new(x: { language: String, country: String, variant: String }): Locale = 
+    pub def new(x: {language: String, country: String, variant: String}): Locale =
         import new java.util.Locale(String, String, String) as newLocale;
         Locale(newLocale(x.language, x.country, x.variant)) as & Pure
 
@@ -72,6 +87,21 @@ namespace I18n/Locale {
             case _: ##java.lang.Exception => Err("setDefault failed")
         }
 
+    pub def equals(x: Locale, y: Locale): Bool =
+        import java.util.Locale.equals(##java.lang.Object);
+        let Locale(x1) = x;
+        let Locale(y1) = y;
+        x1.equals(y1 as ##java.lang.Object) as & Pure
+
+    pub def toString(x: Locale): String =
+        import java.util.Locale.toString();
+        let Locale(x1) = x;
+        toString(x1) as & Pure
+
+    pub def hashCode(x: Locale): Int32 =
+        import java.util.Locale.hashCode();
+        let Locale(x1) = x;
+        hashCode(x1) as & Pure
 
     pub def canada(): Locale = 
         import get java.util.Locale:CANADA as getCANADA;
@@ -217,12 +247,6 @@ namespace I18n/Locale {
         let Locale(x1) = x;
         Locale(stripExtensions(x1) as & Pure)
 
-
-
-    pub def toString(x: Locale): String = 
-        import java.util.Locale.toString();
-        let Locale(x1) = x;
-        toString(x1) as & Pure
 
     /// Must check this marshals okay...
     pub def getAvailableLocales(): Array[Locale] & Impure = 
