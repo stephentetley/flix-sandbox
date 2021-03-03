@@ -22,13 +22,13 @@ namespace TestPattern {
 /////////////////////////////////////////////////////////////////////////////
 
 @test
-def toString01(): Bool =
-    use Result.flatMap;
+def toString01(): Option[String] =
+    use Option.flatMap;
     let step = () -> {
         let* p1 = Text/Regex/Pattern.compile("\s+");
-        Ok(Text/Regex/Pattern.toString(p1))
+        Some(ToString.toString(p1))
     };
-    step() |> Result.isOk
+    step()
 
 /////////////////////////////////////////////////////////////////////////////
 // getPattern                                                              //
@@ -49,12 +49,12 @@ def getPattern01(): Bool =
 
 @test
 def getFlags01(): Bool =
-    use Result.flatMap;
+    use Option.flatMap;
     let step = () -> {
         let* p1 = Text/Regex/Pattern.compile("\s+");
-        Ok(Text/Regex/Pattern.getFlags(p1))
+        Some(Text/Regex/Pattern.getFlags(p1))
     };
-    step() == Ok(Nil)
+    step() == Some(Nil)
 
 @test
 def getFlags02(): Bool =
@@ -74,7 +74,7 @@ def getFlags03(): Bool =
         let* p1 = Text/Regex/Pattern.compileWithFlags("\s+", CanonEq ::  Multiline :: Nil);
         Ok(Text/Regex/Pattern.getFlags(p1))
     };
-    step() == Ok(CanonEq :: Multiline :: Nil) || step() == Ok(Multiline :: CanonEq :: Nil)
+    step() == Ok(CanonEq :: Multiline :: Nil) or step() == Ok(Multiline :: CanonEq :: Nil)
 
 
 /////////////////////////////////////////////////////////////////////////////

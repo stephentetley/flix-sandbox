@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-use Data/Transient.DList;
-
 namespace TestDList {
 
+use Data/Transient.DList;
 
 /////////////////////////////////////////////////////////////////////////////
 // empty                                                                   //
@@ -26,7 +25,7 @@ namespace TestDList {
 @test
 def empty01(): Bool =
     use Data/Transient/DList.{toList, empty};
-    let xs = empty();
+    let xs = empty(): DList[Int32];
     toList(xs) == Nil
 
 /////////////////////////////////////////////////////////////////////////////
@@ -52,7 +51,7 @@ def singleton02(): Bool =
 @test
 def concat01(): Bool =
     use Data/Transient/DList.{toList, concat};
-    let xs = concat(Nil);
+    let xs = concat(Nil): DList[Int32];
     toList(xs) == Nil
 
 @test

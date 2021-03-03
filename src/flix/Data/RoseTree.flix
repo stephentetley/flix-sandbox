@@ -68,18 +68,35 @@ namespace Data/RoseTree {
 
     pub def drawForest (x: RoseForest[String]): String = String.unlines(List.map(drawTree, x))
 
-    pub def flatten(x: RoseTree[a]): List[a] =
-        flattenHelper(x, identity)
+    pub def flatten(x: RoseTree[a]): List[a] = preorder(x)
 
-    def flattenHelper(x: RoseTree[a], k: List[a] -> List[a]): List[a] = match x {
-        case RoseTree(a, Nil) => k(a :: Nil)
-        case RoseTree(a, xs) => flattenForest(xs, vs -> k(a :: vs))
+    pub def preorder(x: RoseTree[a]): List[a] =
+        preorderHelper(x, identity) |> Chain.toList
+
+    def preorderHelper(x: RoseTree[a], k: Chain[a] -> Chain[a]): Chain[a] = match x {
+        case RoseTree(a, Nil) => k(Chain.singleton(a))
+        case RoseTree(a, xs) => preorderForest(xs, vs -> k(Chain.cons(a, vs)))
     }
 
-    def flattenForest(xs: RoseForest[a], k: List[a] -> List[a]): List[a] = match xs {
-        case Nil => k(Nil)
-        case x :: rs => flattenHelper(x, vs1 -> flattenForest(rs, vs2 -> k(List.append(vs1, vs2))))
+    def preorderForest(xs: RoseForest[a], k: Chain[a] -> Chain[a]): Chain[a] = match xs {
+        case Nil => k(Chain.empty())
+        case x :: rs => preorderHelper(x, vs1 -> preorderForest(rs, vs2 -> k(Chain.append(vs1, vs2))))
     }
+
+    pub def postorder(x: RoseTree[a]): List[a] =
+        postorderHelper(x, identity) |> Chain.toList
+
+
+    def postorderHelper(x: RoseTree[a], k: Chain[a] -> Chain[a]): Chain[a] = match x {
+        case RoseTree(a, Nil) => k(Chain.singleton(a))
+        case RoseTree(a, xs) => postorderForest(xs, vs -> k(Chain.snoc(vs, a)))
+    }
+
+    def postorderForest(xs: RoseForest[a], k: Chain[a] -> Chain[a]): Chain[a] = match xs {
+        case Nil => k(Chain.empty())
+        case x :: rs => postorderHelper(x, vs1 -> postorderForest(rs, vs2 -> k(Chain.append(vs1, vs2))))
+    }
+
 
     ///
     /// Tree catamorphism

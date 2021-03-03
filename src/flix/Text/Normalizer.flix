@@ -14,27 +14,44 @@
  * limitations under the License.
  */
 
-use Text.NormalizerForm;
-use Text.NormalizerForm.{Nfc, Nfd, Nfkc, Nfkd};
 
-namespace Text  {
+namespace Text {
 
-    ///
-    /// A day of the week.
-    ///
-    /// Days are reprepresented as an enum from Monday to Sunday.
     ///
     pub enum NormalizerForm {
-        case Nfc,
-        case Nfd,
-        case Nfkc,
+        case Nfc
+        case Nfd
+        case Nfkc
         case Nfkd
     }
 
+    instance ToString[NormalizerForm] {
+        def toString(x: NormalizerForm): String = match x {
+            case Nfc    => "Nfc"
+            case Nfd    => "Nfd"
+            case Nfkc   => "Nfkc"
+            case Nfkd   => "Nfkd"
+        }
+    }
+
+    instance Eq[NormalizerForm] {
+        def eq(x: NormalizerForm, y: NormalizerForm): Bool = match (x,y) {
+            case (Nfc, Nfc)     => true
+            case (Nfd, Nfd)     => true
+            case (Nfkc, Nfkc)   => true
+            case (Nfkd, Nfkd)   => true
+            case (_,_)          => false
+        }
+
+        def neq(x: NormalizerForm, y: NormalizerForm): Bool = not (x == y)
+    }
 }
 
 
 namespace Text/Normalizer {
+
+    use Text.NormalizerForm;
+    use Text.NormalizerForm.{Nfc, Nfd, Nfkc, Nfkd};
 
     pub def marshal(x: NormalizerForm): ##flix.runtime.spt.sandbox.text.NormalizerForm =
         import get flix.runtime.spt.sandbox.text.NormalizerForm:NFC        as getNFC;
@@ -54,11 +71,19 @@ namespace Text/Normalizer {
         import get flix.runtime.spt.sandbox.text.NormalizerForm:NFKC       as getNFKC;
         import get flix.runtime.spt.sandbox.text.NormalizerForm:NFKD       as getNFKD;
         match x {
-            case x1 if x1 == getNFC()   => Nfc
-            case x1 if x1 == getNFD()   => Nfd
-            case x1 if x1 == getNFKC()  => Nfkc
-            case x1 if x1 == getNFKD()  => Nfkd
+            case x1 if primEquals(x1, getNFC())     => Nfc
+            case x1 if primEquals(x1, getNFD())     => Nfd
+            case x1 if primEquals(x1, getNFKC())    => Nfkc
+            case x1 if primEquals(x1, getNFKD())    => Nfkd
         } as & Pure
+
+
+    def primEquals(x: ##flix.runtime.spt.sandbox.text.NormalizerForm, y: ##flix.runtime.spt.sandbox.text.NormalizerForm): Bool =
+        import java.lang.Object.equals(##java.lang.Object);
+        let x1 = x as ##java.lang.Object;
+        let y1 = y as ##java.lang.Object;
+        equals(x1, y1) as & Pure
+
 
     pub def normalize(src: String, form: NormalizerForm): String =
         import flix.runtime.spt.sandbox.text.NormalizerWrapper:normalize(String, ##flix.runtime.spt.sandbox.text.NormalizerForm);

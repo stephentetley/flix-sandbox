@@ -59,6 +59,26 @@ def flatten04(): Bool =
     flatten(t1) == "a1" :: "b2" :: "c3" :: "d2" :: Nil
 
 /////////////////////////////////////////////////////////////////////////////
+// preorder                                                                //
+/////////////////////////////////////////////////////////////////////////////
+
+@test
+def preorder01(): Bool =
+    use Data/RoseTree.{preorder};
+    let t1 = RoseTree(1, RoseTree(2, RoseTree(4, Nil) :: RoseTree(5, Nil) :: Nil) :: RoseTree(3, Nil) :: Nil);
+    preorder(t1) == 1 :: 2 :: 4 :: 5 :: 3 :: Nil
+
+/////////////////////////////////////////////////////////////////////////////
+// postorder                                                               //
+/////////////////////////////////////////////////////////////////////////////
+
+@test
+def postorder01(): Bool =
+    use Data/RoseTree.{postorder};
+    let t1 = RoseTree(1, RoseTree(2, RoseTree(4, Nil) :: RoseTree(5, Nil) :: Nil) :: RoseTree(3, Nil) :: Nil);
+    postorder(t1) == 4 :: 5 :: 2 :: 3 :: 1 :: Nil
+
+/////////////////////////////////////////////////////////////////////////////
 // foldRoseTree                                                            //
 /////////////////////////////////////////////////////////////////////////////
 

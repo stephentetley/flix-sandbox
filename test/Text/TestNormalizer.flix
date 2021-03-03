@@ -26,6 +26,7 @@ def normalize01(): Bool =
     use Text.NormalizerForm.{Nfd};
     use Text/Normalizer.{normalize};
     use String.{replaceMatches};
-    normalize("César", Nfd).replaceMatches("\p{M}", "") == "Cesar"
+    let s1 = normalize("César", Nfd);
+    replaceMatches(s1, "\p{M}", "") == "Cesar"
 
 }

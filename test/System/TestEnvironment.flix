@@ -24,7 +24,7 @@ namespace System/TestEnvironment {
 @test
 def getPathSeparator01(): Bool =
     let s = System/Environment.getPathSeparator();
-    s == ";" || s == ":"
+    s == ";" or s == ":"
 
 
 
