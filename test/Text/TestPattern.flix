@@ -36,12 +36,12 @@ def toString01(): Option[String] =
 
 @test
 def getPattern01(): Bool =
-    use Result.flatMap;
+    use Option.flatMap;
     let step = () -> {
         let* p1 = Text/Regex/Pattern.compile("\s+");
-        Ok(Text/Regex/Pattern.getPattern(p1))
+        Some(Text/Regex/Pattern.getPattern(p1))
     };
-    step() == Ok("\s+")
+    step() == Some("\s+")
 
 /////////////////////////////////////////////////////////////////////////////
 // getFlags                                                                //
@@ -58,23 +58,23 @@ def getFlags01(): Bool =
 
 @test
 def getFlags02(): Bool =
-    use Result.flatMap;
+    use Option.flatMap;
     use Text/Regex/Pattern.Flag.{CanonEq};
     let step = () -> {
         let* p1 = Text/Regex/Pattern.compileWithFlags("\s+", CanonEq :: Nil);
-        Ok(Text/Regex/Pattern.getFlags(p1))
+        Some(Text/Regex/Pattern.getFlags(p1))
     };
-    step() == Ok(CanonEq :: Nil)
+    step() == Some(CanonEq :: Nil)
 
 @test
 def getFlags03(): Bool =
-    use Result.flatMap;
+    use Option.flatMap;
     use Text/Regex/Pattern.Flag.{CanonEq, Multiline};
     let step = () -> {
         let* p1 = Text/Regex/Pattern.compileWithFlags("\s+", CanonEq ::  Multiline :: Nil);
-        Ok(Text/Regex/Pattern.getFlags(p1))
+        Some(Text/Regex/Pattern.getFlags(p1))
     };
-    step() == Ok(CanonEq :: Multiline :: Nil) or step() == Ok(Multiline :: CanonEq :: Nil)
+    step() == Some(CanonEq :: Multiline :: Nil) or step() == Some(Multiline :: CanonEq :: Nil)
 
 
 /////////////////////////////////////////////////////////////////////////////

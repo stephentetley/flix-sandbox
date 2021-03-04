@@ -23,53 +23,53 @@ namespace TestRegex {
 
 @test
 def matches01(): Bool =
-    use Result.flatMap;
+    use Option.flatMap;
     use Text/Regex.{matches};
     let step = () -> {
         let* p1 = Text/Regex/Pattern.compile(".*");
-        Ok("".matches(p1))
+        Some("".matches(p1))
     };
-    step() == Ok(true)
+    step() == Some(true)
 
 @test
 def matches02(): Bool =
-    use Result.flatMap;
+    use Option.flatMap;
     use Text/Regex.{matches};
     let step = () -> {
         let* p1 = Text/Regex/Pattern.compile(".*");
-        Ok("a".matches(p1))
+        Some(matches("a", p1))
     };
-    step() == Ok(true)
+    step() == Some(true)
 
 @test
 def matches03(): Bool =
-    use Result.flatMap;
+    use Option.flatMap;
     use Text/Regex.{matches};
     let step = () -> {
         let* p1 = Text/Regex/Pattern.compile(".+");
-        Ok("".matches(p1))
+        Some(matches("", p1))
     };
-    step() == Ok(false)
+    step() == Some(false)
 
 @test
 def matches04(): Bool =
-    use Result.flatMap;
+    use Option.flatMap;
     use Text/Regex.{matches};
     let step = () -> {
         let* p1 = Text/Regex/Pattern.compile("\d+");    // 1+ digits
-        Ok("aaa".matches(p1))
+        Some(matches("aaa", p1))
     };
-    step() == Ok(false)
+    step() == Some(false)
 
 @test
 def matches05(): Bool =
-    use Result.flatMap;
+    use Option.flatMap;
     use Text/Regex.{matches};
     let step = () -> {
         let* p1 = Text/Regex/Pattern.compile("\d+");
-        Ok("1234a".matches(p1))
+        Some(matches("1234a", p1))
     };
-    step() == Ok(false)
+    step() == Some(false)
 
 /////////////////////////////////////////////////////////////////////////////
 // contains                                                                //
@@ -77,33 +77,33 @@ def matches05(): Bool =
 
 @test
 def contains01(): Bool =
-    use Result.flatMap;
+    use Option.flatMap;
     use Text/Regex.{contains};
     let step = () -> {
         let* p1 = Text/Regex/Pattern.compile("\d+");
-        Ok("".contains(p1))
+        Some(contains("", p1))
     };
-    step() == Ok(false)
+    step() == Some(false)
 
 @test
 def contains02(): Bool =
-    use Result.flatMap;
+    use Option.flatMap;
     use Text/Regex.{contains};
     let step = () -> {
         let* p1 = Text/Regex/Pattern.compile("\d+");
-        Ok("123".contains(p1))
+        Some(contains("123", p1))
     };
-    step() == Ok(true)
+    step() == Some(true)
 
 @test
 def contains03(): Bool =
-    use Result.flatMap;
+    use Option.flatMap;
     use Text/Regex.{contains};
     let step = () -> {
         let* p1 = Text/Regex/Pattern.compile("\d+");
-        Ok("123abc".contains(p1))
+        Some(contains("123abc", p1))
     };
-    step() == Ok(true)
+    step() == Some(true)
 
 /////////////////////////////////////////////////////////////////////////////
 // startsWith                                                              //
@@ -111,33 +111,33 @@ def contains03(): Bool =
 
 @test
 def startsWith01(): Bool =
-    use Result.flatMap;
+    use Option.flatMap;
     use Text/Regex.{startsWith};
     let step = () -> {
         let* p1 = Text/Regex/Pattern.compile("\d+");
-        Ok("".startsWith(p1))
+        Some(startsWith("", p1))
     };
-    step() == Ok(false)
+    step() == Some(false)
 
 @test
 def startsWith02(): Bool =
-    use Result.flatMap;
+    use Option.flatMap;
     use Text/Regex.{startsWith};
     let step = () -> {
         let* p1 = Text/Regex/Pattern.compile("\d+");
-        Ok("123".startsWith(p1))
+        Some(startsWith("123", p1))
     };
-    step() == Ok(true)
+    step() == Some(true)
 
 @test
 def startsWith03(): Bool =
-    use Result.flatMap;
+    use Option.flatMap;
     use Text/Regex.{startsWith};
     let step = () -> {
         let* p1 = Text/Regex/Pattern.compile("\d+");
-        Ok("123abc".startsWith(p1))
+        Some(startsWith("123abc", p1))
     };
-    step() == Ok(true)
+    step() == Some(true)
 
 /////////////////////////////////////////////////////////////////////////////
 // evalMatches                                                             //
@@ -149,8 +149,8 @@ def evalMatches01(): Bool & Impure =
     use Text/Regex.{evalMatches};
     let eval = Text/Regex/MatchEvaluator.getCaptureNamed("num");
     let step = () -> {
-        let* p1 = Text/Regex/Pattern.compile("(?<num>\d+)");
-        "123".evalMatches(p1, eval)
+        let* p1 = Option.toOk(Text/Regex/Pattern.compile("(?<num>\d+)"), "Pattern.compile");
+        evalMatches("123", p1, eval)
     };
     step() == Ok("123")
 
@@ -162,10 +162,10 @@ def evalMatches01(): Bool & Impure =
 def evalContains01(): Bool & Impure =
     use Result.flatMap;
     use Text/Regex.{evalContains};
-    let eval = Text/Regex/MatchEvaluator.getCaptureNamed("num");
     let step = () -> {
-        let* p1 = Text/Regex/Pattern.compile("(?<num>\d+)");
-        "aa 123 bb".evalContains(p1, eval)
+        let* p1     = Option.toOk(Text/Regex/Pattern.compile("(?<num>\d+)"), "Pattern.compile");
+        let eval    = Text/Regex/MatchEvaluator.getCaptureNamed("num");
+        evalContains("aa 123 bb", p1, eval)
     };
     step() == Ok("123")
 
@@ -177,10 +177,10 @@ def evalContains01(): Bool & Impure =
 def evalStartsWith01(): Bool & Impure =
     use Result.flatMap;
     use Text/Regex.{evalStartsWith};
-    let eval = Text/Regex/MatchEvaluator.getCaptureNamed("num");
     let step = () -> {
-        let* p1 = Text/Regex/Pattern.compile("(?<num>\d+)");
-        "123 bb".evalStartsWith(p1, eval)
+        let* p1     = Option.toOk(Text/Regex/Pattern.compile("(?<num>\d+)"), "Pattern.compile");
+        let eval    = Text/Regex/MatchEvaluator.getCaptureNamed("num");
+        evalStartsWith("123 bb", p1, eval)
     };
     step() == Ok("123")
 
@@ -194,8 +194,8 @@ def results01(): Bool & Impure =
     use Text/Regex.{results};
     use Text/Regex/MatchEvaluator.{content};
     let step = () -> {
-        let* p1 = Text/Regex/Pattern.compile("\p{Alpha}+");
-        let strm = results("aa bb cc", p1, content());
+        let* p1     = Option.toOk(Text/Regex/Pattern.compile("\p{Alpha}+"), "Pattern.compile");
+        let strm    = results("aa bb cc", p1, content());
         Ok(strm)
     };
     Result.map(Data/Stream.toList, step()) == Ok("aa" :: "bb" :: "cc" :: Nil)
@@ -206,14 +206,14 @@ def results01(): Bool & Impure =
 
 @test
 def contentResults01(): Bool & Impure =
-    use Result.flatMap;
+    use Option.flatMap;
     use Text/Regex.{contentResults};
     let step = () -> {
-        let* p1 = Text/Regex/Pattern.compile("\p{Alpha}+");
-        let strm = contentResults("aa bb cc", p1);
-        Ok(strm)
+        let* p1     = Text/Regex/Pattern.compile("\p{Alpha}+");
+        let strm    = contentResults("aa bb cc", p1);
+        Some(strm)
     };
-    Result.map(Data/Stream.toList, step()) == Ok("aa" :: "bb" :: "cc" :: Nil)
+    Option.map(Data/Stream.toList, step()) == Some("aa" :: "bb" :: "cc" :: Nil)
 
 /////////////////////////////////////////////////////////////////////////////
 // rangeResults                                                            //
@@ -224,8 +224,8 @@ def rangeResults01(): Bool & Impure =
     use Result.flatMap;
     use Text/Regex.{rangeResults};
     let step = () -> {
-        let* p1 = Text/Regex/Pattern.compile("\p{Alpha}+");
-        let strm = rangeResults("aa bb cc", p1);
+        let* p1     = Option.toOk(Text/Regex/Pattern.compile("\p{Alpha}+"), "Pattern.compile");
+        let strm    = rangeResults("aa bb cc", p1);
         Ok(strm)
     };
     Result.map(Data/Stream.toList, step()) == Ok((0,2) :: (3,5) :: (6,8) :: Nil)

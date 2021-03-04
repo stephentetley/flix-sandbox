@@ -34,7 +34,7 @@ namespace Text/Regex {
         use Text/Regex/Internal/PrimMatcher.{newPrimMatcher, matches};
         let Pattern(p1) = patt;
         let m1 = newPrimMatcher(p1, input) as & Pure;
-        m1.matches() as & Pure
+        matches(m1) as & Pure
 
     ///
     /// Returns `true` if the string `input` is matched by the regular expression pattern `patt` at any point.
@@ -43,7 +43,7 @@ namespace Text/Regex {
         use Text/Regex/Internal/PrimMatcher.{newPrimMatcher, find};
         let Pattern(p1) = patt;
         let m1 = newPrimMatcher(p1, input) as & Pure;
-        m1.find() as & Pure
+        find(m1) as & Pure
 
     ///
     /// Returns `true` if the string `input` starts the regular expression pattern `patt`.
@@ -52,16 +52,17 @@ namespace Text/Regex {
         use Text/Regex/Internal/PrimMatcher.{newPrimMatcher, lookingAt};
         let Pattern(p1) = patt;
         let m1 = newPrimMatcher(p1, input) as & Pure;
-        m1.lookingAt() as & Pure
+        lookingAt(m1) as & Pure
 
-
+    /// Design note - if a function uses a MatchEvaluator it should return `Result[a, String]` rather than `Option[a]`
+    /// as MatchEvaluator has user supplied error messages.
     def evalWithTest(test: PrimMatcher ~> Bool, input: String, patt: Pattern, eval: MatchEvaluator[a]): Result[a, String] & Impure =
         use Text/Regex/Internal/PrimMatcher.{newPrimMatcher};
         let Pattern(p1) = patt;
         let m1 = newPrimMatcher(p1, input);
         if (test(m1)) {
             let MatchEvaluator(fn) = eval;
-            m1.fn()
+            fn(m1)
         } else
             Err("evalWithTest")
 

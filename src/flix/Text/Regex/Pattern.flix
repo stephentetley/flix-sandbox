@@ -55,6 +55,38 @@ namespace Text/Regex/Pattern {
         case UnixLines
     }
 
+    instance ToString[Flag] {
+        def toString(x: Flag): String = match x {
+            case CanonEq => "CanonEq"
+            case CaseInsenstive => "CaseInsenstive"
+            case Comments => "Comments"
+            case Dotall => "Dotall"
+            case Literal => "Literal"
+            case Multiline => "Multiline"
+            case UnicodeCase => "UnicodeCase"
+            case UnicodeCharacterClass => "UnicodeCharacterClass"
+            case UnixLines => "UnixLines"
+        }
+    }
+
+    instance Eq[Flag] {
+
+        def eq(x: Flag, y: Flag): Bool = match (x, y) {
+            case (CanonEq, CanonEq) => true
+            case (CaseInsenstive, CaseInsenstive) => true
+            case (Comments, Comments) => true
+            case (Dotall, Dotall) => true
+            case (Literal, Literal) => true
+            case (Multiline, Multiline) => true
+            case (UnicodeCase, UnicodeCase) => true
+            case (UnicodeCharacterClass, UnicodeCharacterClass) => true
+            case (UnixLines, UnixLines) => true
+            case (_, _) => false
+        }
+
+        def neq(x: Flag, y: Flag): Bool = not (x == y)
+    }
+
     def toInt(flag: Flag): Int32 =
         import get java.util.regex.Pattern:CANON_EQ as get_CANON_EQ;
         import get java.util.regex.Pattern:CASE_INSENSITIVE as get_CASE_INSENSITIVE;

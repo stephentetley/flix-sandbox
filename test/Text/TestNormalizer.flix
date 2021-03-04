@@ -27,6 +27,7 @@ def normalize01(): Bool =
     use Text/Normalizer.{normalize};
     use String.{replaceMatches};
     let s1 = normalize("César", Nfd);
-    replaceMatches(s1, "\p{M}", "") == "Cesar"
+    // Remove combining marks...
+    replaceMatches("\p{M}", "", s1) == "Cesar"
 
 }

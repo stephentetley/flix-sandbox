@@ -26,8 +26,8 @@ class SandboxSuite extends Suites(
   // Text
   new FlixTest("Text/TestMatcher", "main/test/spt/sandbox/Text/TestMatcher.flix")(Options.TestWithLibrary),
   new FlixTest("Text/TestMatchEvaluator", "main/test/spt/sandbox/Text/TestMatchEvaluator.flix")(Options.TestWithLibrary),
-  // new FlixTest("Text/TestPattern", "main/test/spt/sandbox/Text/TestPattern.flix")(Options.TestWithLibrary),
-  // new FlixTest("Text/TestRegex", "main/test/spt/sandbox/Text/TestRegex.flix")(Options.TestWithLibrary),
+  new FlixTest("Text/TestPattern", "main/test/spt/sandbox/Text/TestPattern.flix")(Options.TestWithLibrary),
+  new FlixTest("Text/TestRegex", "main/test/spt/sandbox/Text/TestRegex.flix")(Options.TestWithLibrary),
   new FlixTest("Text/TestNormalizer", "main/test/spt/sandbox/Text/TestNormalizer.flix")(Options.TestWithLibrary),
   // System
   new FlixTest("System/TestEnvironment", "main/test/spt/sandbox/System/TestEnvironment.flix")(Options.TestWithLibrary),
