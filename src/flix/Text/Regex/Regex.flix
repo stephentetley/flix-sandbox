@@ -90,31 +90,32 @@ namespace Text/Regex {
         use Text/Regex/Internal/PrimMatcher.{lookingAt};
         evalWithTest(lookingAt, input, patt, eval)
 
-    def boundedWithTest(test: PrimMatcher ~> Bool, input: String, patt: Pattern, start: Int32, end: Int32): Result[String, String] & Impure =
-        use Result.flatMap;
+    def boundedWithTest(test: PrimMatcher ~> Bool, input: String, patt: Pattern, start: Int32, end: Int32): Option[String] & Impure =
+        use Option.flatMap;
         use Text/Regex/Internal/PrimMatcher.{newPrimMatcher, region, group};
         let Pattern(p1) = patt;
         let m1 = newPrimMatcher(p1, input);
-        let* _ = m1.region(start, end);
+        let* _ = region(m1, start, end);
         if (test(m1))
-            m1.group()
+            group(m1)
         else
-            Err("boundedWithTest")
+            None
 
-
+    /// TODO - should this be pure (yes), return a Bool (?)...
+    /// Need to investigate why they were written this way, before changing them.
     /// Match input within region, match must start at start of region...
-    pub def boundedMatches(input: String, patt: Pattern, start: Int32, end: Int32): Result[String, String] & Impure =
+    pub def boundedMatches(input: String, patt: Pattern, start: Int32, end: Int32): Option[String] & Impure =
         use Text/Regex/Internal/PrimMatcher.{matches};
         boundedWithTest(matches, input, patt, start, end)
 
     /// Match input within region, match must start at start of region...
-    pub def boundedContains(input: String, patt: Pattern, start: Int32, end: Int32): Result[String, String] & Impure =
+    pub def boundedContains(input: String, patt: Pattern, start: Int32, end: Int32): Option[String] & Impure =
         use Text/Regex/Internal/PrimMatcher.{find};
         boundedWithTest(find, input, patt, start, end)
 
 
     /// Match input within region, match must start at start of region...
-    pub def boundedStartsWith(input: String, patt: Pattern, start: Int32, end: Int32): Result[String, String] & Impure =
+    pub def boundedStartsWith(input: String, patt: Pattern, start: Int32, end: Int32): Option[String] & Impure =
         use Text/Regex/Internal/PrimMatcher.{lookingAt};
         boundedWithTest(lookingAt, input, patt, start, end)
 
@@ -126,12 +127,12 @@ namespace Text/Regex {
         use Text/Regex/Internal/PrimMatcher.{newPrimMatcher, region};
         let Pattern(p1) = patt;
         let m1 = newPrimMatcher(p1, input);
-        let* _ = m1.region(start, end);
+        let* _ = Option.toOk(region(m1, start, end), "evalBoundedWithTest - region");
         if (test(m1)) {
             let MatchEvaluator(fn) = eval;
-            m1.fn()
+            fn(m1)
         } else
-            Err("evalBoundedWithTest")
+            Err("evalBoundedWithTest - test")
 
     /// Match input within region, match must start at start of region...
     pub def evalBoundedMatches(input: String, patt: Pattern, start: Int32, end: Int32, eval: MatchEvaluator[a]): Result[a, String] & Impure =
@@ -157,7 +158,7 @@ namespace Text/Regex {
         import java.util.regex.Pattern.split(##java.lang.CharSequence);
         let Pattern(p1) = patt;
         let cs1 = input as ##java.lang.CharSequence;
-        p1.split(cs1)
+        split(p1, cs1)
 
     ///
     /// Splits the string `s` around matches of the pattern `p`.
@@ -206,7 +207,7 @@ namespace Text/Regex {
         use Text/Regex/Internal/PrimMatcher.{newPrimMatcher, replaceAll};
         let Pattern(p1) = patt;
         let m1 = newPrimMatcher(p1, input) as & Pure;
-        m1.replaceAll(rep) as & Pure
+        replaceAll(m1, rep) as & Pure
 
     ///
     /// Returns `input` with the first match of the regular expression `patt` replaced by the string `rep`.
@@ -215,7 +216,7 @@ namespace Text/Regex {
         use Text/Regex/Internal/PrimMatcher.{newPrimMatcher, replaceFirst};
         let Pattern(p1) = patt;
         let m1 = newPrimMatcher(p1, input) as & Pure;
-        m1.replaceFirst(rep) as & Pure
+        replaceFirst(m1, rep) as & Pure
 
     ///
     /// Rewrite the string `input` by applying the function `f` to the

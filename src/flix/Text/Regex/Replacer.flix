@@ -116,6 +116,9 @@ namespace Text/Regex/Replacer {
     def liftPrim(fn : PrimMatcher ~> Result[a, String]): Replacer[a] =
         Replacer((_, m, n) -> Result.map(x -> (x, n), fn(m)))
 
+    def liftOptionPrim(fn : PrimMatcher ~> Option[a], errMsg: String): Replacer[a] =
+        Replacer((_, m, n) -> Result.map(x -> (x, n), Option.toOk(fn(m), errMsg)))
+
     def liftWriterPrim(fn : (PrimMatcher, StringBuilder) ~> Result[a, String]): Replacer[a] =
         Replacer((sb, m, n) -> Result.map(x -> (x, n), fn(m, sb)))
 
@@ -144,7 +147,7 @@ namespace Text/Regex/Replacer {
         return(bfound)
 
     pub def content(): Replacer[String] =
-        liftPrim(Text/Regex/Internal/PrimMatcher.group)
+        liftOptionPrim(Text/Regex/Internal/PrimMatcher.group, "content")
 
     pub def evaluate(eval: MatchEvaluator[a]): Replacer[a] =
         let MatchEvaluator(fn) = eval;
@@ -178,7 +181,7 @@ namespace Text/Regex/Replacer {
     pub def done(): Replacer[Bool] = ifThenElse(content(), _ -> return(false), return(true))
 
     pub def setRegion!(start: Int32, end: Int32): Replacer[Unit] =
-        liftPrim(x -> Text/Regex/Internal/PrimMatcher.region(x, start, end))
+        liftOptionPrim(x -> Text/Regex/Internal/PrimMatcher.region(x, start, end), "setRegion!")
 
     pub def setPattern!(patt: Pattern): Replacer[Unit] =
         let Pattern(p1) = patt;
@@ -319,9 +322,9 @@ namespace Text/Regex/Replacer {
             let* s = evaluate(eval);
             let* _ = appendReplacement!(s);
             evalRewriteCountHelper!(ntimes, eval, i + 1)
-        } else
+        } else {
             appendTail!()
-
+        }
 
 }        
 

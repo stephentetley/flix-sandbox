@@ -96,6 +96,9 @@ namespace Text/Regex/Matcher {
 
     pub def flatMap(k: a -> Matcher[b], x: Matcher[a]): Matcher[b] = bind(x, k)
 
+    def liftOptionPrim(fn : PrimMatcher ~> Option[a], errMsg: String): Matcher[a] =
+        Matcher(r -> Option.toOk(fn(r), errMsg))
+
     def liftPrim(fn : PrimMatcher ~> Result[a, String]): Matcher[a] =
         Matcher(r -> fn(r))
 
@@ -114,7 +117,7 @@ namespace Text/Regex/Matcher {
         liftPrim(x -> Ok(Text/Regex/Internal/PrimMatcher.findFrom(x, start)))
 
     pub def content(): Matcher[String] =
-        liftPrim(Text/Regex/Internal/PrimMatcher.group)
+        liftOptionPrim(Text/Regex/Internal/PrimMatcher.group, "content")
 
     pub def evaluate(eval: MatchEvaluator[a]): Matcher[a] =
         let MatchEvaluator(fn) = eval;
@@ -145,7 +148,7 @@ namespace Text/Regex/Matcher {
         liftPrim(x -> Ok(Text/Regex/Internal/PrimMatcher.resetInput(x, input)))
 
     pub def setRegion!(start: Int32, end: Int32): Matcher[Unit] =
-        liftPrim(x -> Text/Regex/Internal/PrimMatcher.region(x, start, end))
+        liftOptionPrim(x -> Text/Regex/Internal/PrimMatcher.region(x, start, end), "setRegion!")
 
     pub def setPattern!(patt: Pattern): Matcher[Unit] =
         let Pattern(p1) = patt;

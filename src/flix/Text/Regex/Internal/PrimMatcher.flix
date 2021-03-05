@@ -43,96 +43,96 @@ namespace Text/Regex/Internal/PrimMatcher {
     pub def newPrimMatcher(patt: ##java.util.regex.Pattern, input: String): PrimMatcher & Impure =
         import java.util.regex.Pattern.matcher(##java.lang.CharSequence);
         let cs1 = input as ##java.lang.CharSequence;
-        PrimMatcher(patt.matcher(cs1))
+        PrimMatcher(matcher(patt, cs1))
 
     pub def matches(x: PrimMatcher): Bool & Impure =
         import java.util.regex.Matcher.matches();
         let PrimMatcher(x1) = x;
-        x1.matches()
+        matches(x1)
 
     pub def lookingAt(x: PrimMatcher): Bool & Impure =
         import java.util.regex.Matcher.lookingAt();
         let PrimMatcher(x1) = x;
-        x1.lookingAt()
+        lookingAt(x1)
 
     pub def find(x: PrimMatcher): Bool & Impure =
         import java.util.regex.Matcher.find();
         let PrimMatcher(x1) = x;
-        x1.find()
+        find(x1)
 
     pub def findFrom(x: PrimMatcher, start: Int32): Bool & Impure =
         import java.util.regex.Matcher.find(Int32);
         let PrimMatcher(x1) = x;
-        x1.find(start)
+        find(x1, start)
 
 
     /// No exception.
     pub def replaceAll(x: PrimMatcher, rep: String): String & Impure =
         import java.util.regex.Matcher.replaceAll(String);
         let PrimMatcher(x1) = x;
-        x1.replaceAll(rep)
+        replaceAll(x1, rep)
 
     /// No exception.
     pub def replaceFirst(x: PrimMatcher, rep: String): String & Impure =
         import java.util.regex.Matcher.replaceFirst(String);
         let PrimMatcher(x1) = x;
-        x1.replaceFirst(rep)
+        replaceFirst(x1, rep)
 
     pub def reset(x: PrimMatcher): Unit & Impure =
         import java.util.regex.Matcher.reset();
         let PrimMatcher(x1) = x;
-        x1.reset();
+        reset(x1);
         ()
 
     pub def resetInput(x: PrimMatcher, input: String): Unit & Impure =
         import java.util.regex.Matcher.reset(##java.lang.CharSequence);
         let PrimMatcher(x1) = x;
         let cs = input as ##java.lang.CharSequence;
-        x1.reset(cs);
+        reset(x1, cs);
         ()
 
     pub def usePattern(x: PrimMatcher, patt: ##java.util.regex.Pattern): Unit & Impure =
         import java.util.regex.Matcher.usePattern(##java.util.regex.Pattern);
         let PrimMatcher(x1) = x;
-        x1.usePattern(patt);
+        usePattern(x1, patt);
         ()
 
-    pub def region(x: PrimMatcher, start: Int32, end: Int32): Result[Unit, String] & Impure =
+    pub def region(x: PrimMatcher, start: Int32, end: Int32): Option[Unit] & Impure =
         import java.util.regex.Matcher.region(Int32, Int32);
         try {
             let PrimMatcher(x1) = x;
-            x1.region(start, end);
-            Ok()
+            region(x1, start, end);
+            Some()
         } catch {
-            case _: ##java.lang.Exception => Err("region")
+            case _: ##java.lang.Exception => None
         }
 
-    pub def start(x: PrimMatcher): Result[Int32, String] & Impure =
+    pub def start(x: PrimMatcher): Option[Int32] & Impure =
         import java.util.regex.Matcher.start();
         try {
             let PrimMatcher(x1) = x;
-            Ok(x1.start())
+            Some(start(x1))
         } catch {
-            case _: ##java.lang.Exception => Err("start")
+            case _: ##java.lang.Exception => None
         }
 
-    pub def end(x: PrimMatcher): Result[Int32, String] & Impure =
+    pub def end(x: PrimMatcher): Option[Int32] & Impure =
         import java.util.regex.Matcher.end();
         try {
             let PrimMatcher(x1) = x;
-            Ok(x1.end())
+            Some(end(x1))
         } catch {
-            case _: ##java.lang.Exception => Err("end")
+            case _: ##java.lang.Exception => None
         }
 
     ///
-    pub def group(x: PrimMatcher): Result[String, String] & Impure =
+    pub def group(x: PrimMatcher): Option[String] & Impure =
         import java.util.regex.Matcher.group();
         try { 
-            let PrimMatcher(m1) = x;
-            Ok(m1.group())
+            let PrimMatcher(x1) = x;
+            Some(group(x1))
         } catch {
-            case _: ##java.lang.Exception => Err("group")
+            case _: ##java.lang.Exception => None
         }
 
 
@@ -144,15 +144,15 @@ namespace Text/Regex/Internal/PrimMatcher {
     ///
     pub def groupCount(x: PrimMatcher): Int32 & Impure =
         import java.util.regex.Matcher.groupCount();
-        let PrimMatcher(m1) = x;
-        m1.groupCount()
+        let PrimMatcher(x1) = x;
+        groupCount(x1)
 
     /// This follows the Java convention where index 0 matches everything.
     pub def groupElementAt(x: PrimMatcher, ix: Int32): Result[String, String] & Impure =
         import java.util.regex.Matcher.group(Int32);
         try {
-            let PrimMatcher(m1) = x;
-            Ok(m1.group(ix))
+            let PrimMatcher(x1) = x;
+            Ok(group(x1, ix))
         } catch {
             case _: ##java.lang.Exception => Err("groupElementAt")
         }
@@ -160,8 +160,8 @@ namespace Text/Regex/Internal/PrimMatcher {
     pub def groupElementNamed(x: PrimMatcher, label: String): Result[String, String] & Impure =
         import java.util.regex.Matcher.group(String);
         try {
-            let PrimMatcher(m1) = x;
-            Ok(m1.group(label))
+            let PrimMatcher(x1) = x;
+            Ok(group(x1, label))
         } catch {
             case _: ##java.lang.Exception => Err("groupElementNamed")
         }

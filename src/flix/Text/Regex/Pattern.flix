@@ -177,7 +177,7 @@ namespace Text/Regex/Pattern {
 
     pub def quote(s: String): String =
         import java.util.regex.Pattern:quote(String);
-        s.quote() as & Pure
+        quote(s) as & Pure
 
 
 
@@ -188,17 +188,15 @@ namespace Text/Regex/Pattern {
     pub def getPattern(patt: Pattern): String =
         import java.util.regex.Pattern.pattern();
         let Pattern(p1) = patt;
-        p1.pattern() as & Pure
+        pattern(p1) as & Pure
 
     ///
     /// Return the flags used to build this pattern.
     ///
-    /// TODO flags should probably be a Set...
-    ///
     pub def getFlags(patt: Pattern): List[Flag] =
         import java.util.regex.Pattern.flags();
         let Pattern(p1) = patt;
-        let i = p1.flags() as & Pure;
+        let i = flags(p1) as & Pure;
         listFlags(i)
 
 

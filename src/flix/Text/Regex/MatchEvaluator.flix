@@ -47,6 +47,12 @@ namespace Text/Regex/MatchEvaluator {
     pub def throwError(msg: String): MatchEvaluator[b] = 
         MatchEvaluator(_ -> Err(msg) as & Impure)
 
+    pub def swapError(mx: MatchEvaluator[a], msg: String): MatchEvaluator[a] =
+        MatchEvaluator(r -> match apply1(mx, r) {
+            case Ok(a) => Ok(a)
+            case Err(_) => Err(msg)
+        })
+
     pub def map(f: a -> b & ef, x: MatchEvaluator[a]): MatchEvaluator[b] =
         MatchEvaluator(r -> 
             match apply1(x, r) {
@@ -84,6 +90,9 @@ namespace Text/Regex/MatchEvaluator {
     def liftPrim(fn : PrimMatcher ~> Result[a, String]): MatchEvaluator[a] =
         MatchEvaluator(r -> fn(r))
 
+    def liftOptionPrim(fn : PrimMatcher ~> Option[a], errMsg: String): MatchEvaluator[a] =
+        MatchEvaluator(r -> Option.toOk(fn(r), errMsg))
+
     pub def liftOption(x: Option[a], errMsg: String): MatchEvaluator[a] = match x { 
         case Some(x1) => return(x1)
         case None => throwError(errMsg)
@@ -97,16 +106,18 @@ namespace Text/Regex/MatchEvaluator {
         MatchEvaluator(_ -> fn())
 
 
-    pub def content(): MatchEvaluator[String] = liftPrim(Text/Regex/Internal/PrimMatcher.group)
+    pub def content(): MatchEvaluator[String] = liftOptionPrim(Text/Regex/Internal/PrimMatcher.group, "content")
 
+    /// TODO - is this worthwhile?
     pub def transformContent(f: String -> String): MatchEvaluator[String] = map(f, content())
 
 
-    pub def getStart(): MatchEvaluator[Int32] = liftPrim(Text/Regex/Internal/PrimMatcher.start)
+    pub def getStart(): MatchEvaluator[Int32] = liftOptionPrim(Text/Regex/Internal/PrimMatcher.start, "getStart")
 
-    pub def getEnd(): MatchEvaluator[Int32] = liftPrim(Text/Regex/Internal/PrimMatcher.end)
+    pub def getEnd(): MatchEvaluator[Int32] = liftOptionPrim(Text/Regex/Internal/PrimMatcher.end, "getEnd")
 
-    pub def getLength(): MatchEvaluator[Int32] = lift2((x,y) -> y - x, getStart(), getEnd())
+    pub def getLength(): MatchEvaluator[Int32] =
+        lift2((x,y) -> y - x, getStart(), getEnd()) `swapError` "getLength"
 
     ///
     ///
