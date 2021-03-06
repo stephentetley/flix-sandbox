@@ -148,72 +148,72 @@ namespace Text/Regex/Internal/PrimMatcher {
         groupCount(x1)
 
     /// This follows the Java convention where index 0 matches everything.
-    pub def groupElementAt(x: PrimMatcher, ix: Int32): Result[String, String] & Impure =
+    pub def groupElementAt(x: PrimMatcher, ix: Int32): Option[String] & Impure =
         import java.util.regex.Matcher.group(Int32);
         try {
             let PrimMatcher(x1) = x;
-            Ok(group(x1, ix))
+            Some(group(x1, ix))
         } catch {
-            case _: ##java.lang.Exception => Err("groupElementAt")
+            case _: ##java.lang.Exception => None
         }
 
-    pub def groupElementNamed(x: PrimMatcher, label: String): Result[String, String] & Impure =
+    pub def groupElementNamed(x: PrimMatcher, label: String): Option[String] & Impure =
         import java.util.regex.Matcher.group(String);
         try {
             let PrimMatcher(x1) = x;
-            Ok(group(x1, label))
+            Some(group(x1, label))
         } catch {
-            case _: ##java.lang.Exception => Err("groupElementNamed")
+            case _: ##java.lang.Exception => None
         }
 
     /// This follows the Java convention where index 0 matches everything.
-    pub def groupStartAt(x: PrimMatcher, ix: Int32): Result[Int32, String] & Impure =
+    pub def groupStartAt(x: PrimMatcher, ix: Int32): Option[Int32] & Impure =
         import java.util.regex.Matcher.start(Int32);
         try {
-            let PrimMatcher(m1) = x;
-            Ok(m1.start(ix))
+            let PrimMatcher(x1) = x;
+            Some(start(x1, ix))
         } catch {
-            case _: ##java.lang.Exception => Err("groupStartAt")
+            case _: ##java.lang.Exception => None
         }
 
-    pub def groupStartNamed(x: PrimMatcher, label: String): Result[Int32, String] & Impure =
+    pub def groupStartNamed(x: PrimMatcher, label: String): Option[Int32] & Impure =
         import java.util.regex.Matcher.start(String);
         try {
-            let PrimMatcher(m1) = x;
-            Ok(m1.start(label))
+            let PrimMatcher(x1) = x;
+            Some(start(x1, label))
         } catch {
-            case _: ##java.lang.Exception => Err("groupStartNamed")
+            case _: ##java.lang.Exception => None
         }
 
     /// This follows the Java convention where index 0 matches everything.
-    pub def groupEndAt(x: PrimMatcher, ix: Int32): Result[Int32, String] & Impure =
+    pub def groupEndAt(x: PrimMatcher, ix: Int32): Option[Int32] & Impure =
         import java.util.regex.Matcher.end(Int32);
         try {
-            let PrimMatcher(m1) = x;
-            Ok(m1.end(ix))
+            let PrimMatcher(x1) = x;
+            Some(end(x1, ix))
         } catch {
-            case _: ##java.lang.Exception => Err("groupEndAt")
+            case _: ##java.lang.Exception => None
         }
 
-    pub def groupEndNamed(x: PrimMatcher, label: String): Result[Int32, String] & Impure =
+    pub def groupEndNamed(x: PrimMatcher, label: String): Option[Int32] & Impure =
         import java.util.regex.Matcher.end(String);
         try {
-            let PrimMatcher(m1) = x;
-            Ok(m1.end(label))
+            let PrimMatcher(x1) = x;
+            Some(end(x1, label))
         } catch {
-            case _: ##java.lang.Exception => Err("groupEndNamed")
+            case _: ##java.lang.Exception => None
         }
 
     /// 
-    pub def appendReplacement(x: PrimMatcher, sb: StringBuilder, rep: String): Result[Unit, String] & Impure =
+    pub def appendReplacement(x: PrimMatcher, sb: StringBuilder, rep: String): Option[Unit] & Impure =
         import java.util.regex.Matcher.appendReplacement(##java.lang.StringBuilder, String);    
         try {
             let PrimMatcher(x1) = x;
             let StringBuilder(sb1) = sb;
-            let _ = x1.appendReplacement(sb1, rep);
-            Ok()
+            let _ = appendReplacement(x1, sb1, rep);
+            Some()
         } catch { 
-            case _: ##java.lang.Exception => Err("appendReplacement")
+            case _: ##java.lang.Exception => None
         }
 
     /// No exceptions.

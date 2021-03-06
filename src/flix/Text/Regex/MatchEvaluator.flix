@@ -87,9 +87,6 @@ namespace Text/Regex/MatchEvaluator {
 
 
 
-    def liftPrim(fn : PrimMatcher ~> Result[a, String]): MatchEvaluator[a] =
-        MatchEvaluator(r -> fn(r))
-
     def liftOptionPrim(fn : PrimMatcher ~> Option[a], errMsg: String): MatchEvaluator[a] =
         MatchEvaluator(r -> Option.toOk(fn(r), errMsg))
 
@@ -122,43 +119,43 @@ namespace Text/Regex/MatchEvaluator {
     ///
     ///
     pub def getRange(): MatchEvaluator[(Int32, Int32)] =
-        lift2((x,y) -> (x,y), getStart(), getEnd())
+        lift2((x,y) -> (x,y), getStart(), getEnd()) `swapError` "getRange"
 
 
     ///
     /// Note - this function uses 0-indexing, the equivalent Java method `group(int group)` uses 1-indexing.
     ///
     pub def getCaptureAt(ix: Int32): MatchEvaluator[String] =
-        liftPrim(x -> Text/Regex/Internal/PrimMatcher.groupElementAt(x, ix+1))
+        liftOptionPrim(x -> Text/Regex/Internal/PrimMatcher.groupElementAt(x, ix+1), "getCaptureAt")
 
     pub def getCaptureNamed(label: String): MatchEvaluator[String] =
-        liftPrim(x -> Text/Regex/Internal/PrimMatcher.groupElementNamed(x, label))
+        liftOptionPrim(x -> Text/Regex/Internal/PrimMatcher.groupElementNamed(x, label), "getCaptureNamed")
 
     ///
     /// Note - this function uses 0-indexing, the equivalent Java method `group(int group)` uses 1-indexing.
     ///
     pub def getCaptureAtStart(ix: Int32): MatchEvaluator[Int32] =
-        liftPrim(x -> Text/Regex/Internal/PrimMatcher.groupStartAt(x, ix+1))
+        liftOptionPrim(x -> Text/Regex/Internal/PrimMatcher.groupStartAt(x, ix+1), "getCaptureAtStart")
 
     pub def getCaptureNamedStart(label: String): MatchEvaluator[Int32] =
-        liftPrim(x -> Text/Regex/Internal/PrimMatcher.groupStartNamed(x, label))
+        liftOptionPrim(x -> Text/Regex/Internal/PrimMatcher.groupStartNamed(x, label), "getCaptureNamedStart")
 
     ///
     /// Note - this function uses 0-indexing, the equivalent Java method `group(int group)`
     /// uses 1-indexing.
     ///
     pub def getCaptureAtEnd(ix: Int32): MatchEvaluator[Int32] =
-        liftPrim(x -> Text/Regex/Internal/PrimMatcher.groupEndAt(x, ix+1))
+        liftOptionPrim(x -> Text/Regex/Internal/PrimMatcher.groupEndAt(x, ix+1), "getCaptureAtEnd")
 
     pub def getCaptureNamedEnd(label: String): MatchEvaluator[Int32] =
-        liftPrim(x -> Text/Regex/Internal/PrimMatcher.groupEndNamed(x, label))
+        liftOptionPrim(x -> Text/Regex/Internal/PrimMatcher.groupEndNamed(x, label), "getCaptureNamedEnd")
 
     ///
     /// Note - this function uses 0-indexing, the equivalent Java method `group(int group)`
     /// uses 1-indexing.
     ///
     pub def getCaptureAtRange(ix: Int32): MatchEvaluator[(Int32, Int32)] =
-        lift2((x,y) -> (x,y), getCaptureAtStart(ix), getCaptureAtEnd(ix))
+        lift2((x,y) -> (x,y), getCaptureAtStart(ix), getCaptureAtEnd(ix)) `swapError` "getCaptureAtRange"
 
     pub def getCaptureNamedRange(label: String): MatchEvaluator[(Int32, Int32)] =
         lift2((x,y) -> (x,y), getCaptureNamedStart(label), getCaptureNamedEnd(label))

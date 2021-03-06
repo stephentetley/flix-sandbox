@@ -122,13 +122,16 @@ namespace Text/Regex/Replacer {
     def liftWriterPrim(fn : (PrimMatcher, StringBuilder) ~> Result[a, String]): Replacer[a] =
         Replacer((sb, m, n) -> Result.map(x -> (x, n), fn(m, sb)))
 
+    def liftWriterOptionPrim(fn : (PrimMatcher, StringBuilder) ~> Option[a], errMsg: String): Replacer[a] =
+        Replacer((sb, m, n) -> Result.map(x -> (x, n), Option.toOk(fn(m, sb), errMsg)))
+
     pub def appendTail!(): Replacer[Unit] =
         use Text/Regex/Internal/PrimMatcher.{appendTail};
         liftWriterPrim((m,sb) -> Ok(appendTail(m, sb)))
 
     pub def appendReplacement!(replacement: String): Replacer[Unit] =
         use Text/Regex/Internal/PrimMatcher.{appendReplacement};
-        liftWriterPrim((m,sb) -> appendReplacement(m, sb, replacement))
+        liftWriterOptionPrim((m,sb) -> appendReplacement(m, sb, replacement), "appendReplacement!")
 
     pub def getIndex(): Replacer[Int32] =
         Replacer((_, _, n) -> Ok((n, n)) as & Impure)
