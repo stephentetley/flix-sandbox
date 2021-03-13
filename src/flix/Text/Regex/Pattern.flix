@@ -29,7 +29,7 @@ namespace Text/Regex {
         ///
         /// Return the string representation of the Pattern `patt`.
         ///
-        def toString(patt: Pattern): String =
+        pub def toString(patt: Pattern): String =
             import java.util.regex.Pattern.toString();
             let Pattern(p1) = patt;
             p1.toString() as & Pure
@@ -56,7 +56,7 @@ namespace Text/Regex/Pattern {
     }
 
     instance ToString[Flag] {
-        def toString(x: Flag): String = match x {
+        pub def toString(x: Flag): String = match x {
             case CanonEq => "CanonEq"
             case CaseInsenstive => "CaseInsenstive"
             case Comments => "Comments"
@@ -70,8 +70,7 @@ namespace Text/Regex/Pattern {
     }
 
     instance Eq[Flag] {
-
-        def eq(x: Flag, y: Flag): Bool = match (x, y) {
+        pub def eq(x: Flag, y: Flag): Bool = match (x, y) {
             case (CanonEq, CanonEq) => true
             case (CaseInsenstive, CaseInsenstive) => true
             case (Comments, Comments) => true
@@ -84,7 +83,7 @@ namespace Text/Regex/Pattern {
             case (_, _) => false
         }
 
-        def neq(x: Flag, y: Flag): Bool = not (x == y)
+        pub def neq(x: Flag, y: Flag): Bool = not (x == y)
     }
 
     def toInt(flag: Flag): Int32 =

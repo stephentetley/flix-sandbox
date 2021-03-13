@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-use System.FilePath;
-use System.FilePath.{FilePath};
 
 namespace System {
 
@@ -25,20 +23,20 @@ namespace System {
     pub opaque type FilePath = ##java.nio.file.Path
 
     instance ToString[FilePath] {
-        def toString(path: FilePath): String =
+        pub def toString(path: FilePath): String =
             import java.nio.file.Path.toString();
             let FilePath(path1) = path;
             path1.toString() as & Pure
     }
 
     instance Eq[FilePath] {
-        def eq(x: FilePath, y: FilePath): Bool =
+        pub def eq(x: FilePath, y: FilePath): Bool =
             import java.nio.file.Path.equals(##java.lang.Object);
             let FilePath(x1) = x;
             let FilePath(y1) = y;
             x1.equals(y1 as ##java.lang.Object) as & Pure
 
-        def neq(x: FilePath, y: FilePath): Bool = not (x == y)
+        pub def neq(x: FilePath, y: FilePath): Bool = not (x == y)
     }
 
 }
@@ -46,6 +44,9 @@ namespace System {
 namespace System/FilePath {
 
     use ToString.toString;
+
+    use System.FilePath;
+    use System.FilePath.{FilePath};
 
     /// Note - current set of operations should be pure?
 

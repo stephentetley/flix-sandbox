@@ -26,7 +26,7 @@ namespace Text {
     }
 
     instance ToString[NormalizerForm] {
-        def toString(x: NormalizerForm): String = match x {
+        pub def toString(x: NormalizerForm): String = match x {
             case Nfc    => "Nfc"
             case Nfd    => "Nfd"
             case Nfkc   => "Nfkc"
@@ -35,7 +35,7 @@ namespace Text {
     }
 
     instance Eq[NormalizerForm] {
-        def eq(x: NormalizerForm, y: NormalizerForm): Bool = match (x,y) {
+        pub def eq(x: NormalizerForm, y: NormalizerForm): Bool = match (x,y) {
             case (Nfc, Nfc)     => true
             case (Nfd, Nfd)     => true
             case (Nfkc, Nfkc)   => true
@@ -43,7 +43,7 @@ namespace Text {
             case (_,_)          => false
         }
 
-        def neq(x: NormalizerForm, y: NormalizerForm): Bool = not (x == y)
+        pub def neq(x: NormalizerForm, y: NormalizerForm): Bool = not (x == y)
     }
 }
 

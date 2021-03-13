@@ -21,17 +21,16 @@ namespace I18n {
     pub opaque type Locale = ##java.util.Locale
 
     instance ToString[Locale] {
-        def toString(x: Locale): String = I18n/Locale.toString(x)
+        pub def toString(x: Locale): String = I18n/Locale.toString(x)
     }
 
     instance Eq[Locale] {
-        def eq(x: Locale, y: Locale): Bool = I18n/Locale.equals(x, y)
-
-        def neq(x: Locale, y: Locale): Bool = not (x == y)
+        pub def eq(x: Locale, y: Locale): Bool = I18n/Locale.equals(x, y)
+        pub def neq(x: Locale, y: Locale): Bool = not (x == y)
     }
 
     instance Hash[Locale] {
-        def hash(x: Locale): Int32 = I18n/Locale.hashCode(x)
+        pub def hash(x: Locale): Int32 = I18n/Locale.hashCode(x)
     }
 
 }

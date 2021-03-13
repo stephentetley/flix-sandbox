@@ -22,7 +22,7 @@ namespace Text  {
     pub opaque type Charset = ##java.nio.charset.Charset
 
     instance ToString[Charset] {
-        def toString(cs: Charset): String =
+        pub def toString(cs: Charset): String =
             import java.nio.charset.Charset.toString() as toS;
             let Charset(cs1) = cs;
             toS(cs1) as & Pure

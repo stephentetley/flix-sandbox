@@ -28,7 +28,7 @@ enum Chain[t] {
 }
 
 instance ToString[Chain[a]] with [a : ToString] {
-    def toString(xs: Chain[a]): String =
+    pub def toString(xs: Chain[a]): String =
         let fn = () -> {
             let sb = StringBuilder.new();
             StringBuilder.appendString!(sb, "Chain#{");
@@ -45,11 +45,13 @@ instance ToString[Chain[a]] with [a : ToString] {
 }
 
 instance Eq[Chain[a]] with[a : Eq] {
+    pub def eq(xs: Chain[a], ys: Chain[a]): Bool = Chain.equals(xs, ys)
+    pub def neq(xs: Chain[a], ys: Chain[a]): Bool = not (xs == ys)
+}
 
-    def eq(xs: Chain[a], ys: Chain[a]): Bool = Chain.equals(xs, ys)
-
-    def neq(xs: Chain[a], ys: Chain[a]): Bool = not (xs == ys)
-
+instance Monoid[Chain[a]] {
+    pub def empty(): Chain[a] = Chain.empty()
+    pub def combine(xs: Chain[a], ys: Chain[a]): Chain[a] = Chain.append(xs, ys)
 }
 
 enum ViewLeft[t] {

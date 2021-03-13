@@ -57,7 +57,7 @@ namespace System {
     }
 
     instance ToString[Error] {
-        def toString(x: Error): String = match x {
+        pub def toString(x: Error): String = match x {
             case ArrayIndexOutOfBoundsException     => "ArrayIndexOutOfBoundsException"
             case Exception                          => "Exception"
             case FileNotFoundException              => "FileNotFoundException"

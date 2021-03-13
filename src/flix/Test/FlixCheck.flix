@@ -90,13 +90,13 @@ namespace Test/FlixCheck {
     }
 
     instance Arbitrary[Bool] {
-        def arbitrary(): Gen[Bool] =
+        pub def arbitrary(): Gen[Bool] =
             let* arr = liftAction(_ -> [true, false]);
             elements(arr)
     }
 
     instance Coarbitrary[Bool] {
-        def coarbitrary(b: Bool, ma: Gen[b]): Gen[b] = variant(if (b) 0 else 1, ma)
+        pub def coarbitrary(b: Bool, ma: Gen[b]): Gen[b] = variant(if (b) 0 else 1, ma)
     }
 
     pub def run(x: Gen[a], bounds: Int32): a & Impure = 
