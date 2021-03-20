@@ -25,6 +25,8 @@ namespace Text/Regex {
     ///
     pub opaque type MatchEvaluator[a] = PrimMatcher ~> Result[a, String]
 
+    /// TODO - can we make this effect polymorphic?
+
 }
 
 namespace Text/Regex/MatchEvaluator {
@@ -106,7 +108,7 @@ namespace Text/Regex/MatchEvaluator {
     pub def content(): MatchEvaluator[String] = liftOptionPrim(Text/Regex/Internal/PrimMatcher.group, "content")
 
     /// TODO - is this worthwhile?
-    pub def transformContent(f: String -> String): MatchEvaluator[String] = map(f, content())
+    pub def transformContent(f: String -> a): MatchEvaluator[a] = map(f, content())
 
 
     pub def getStart(): MatchEvaluator[Int32] = liftOptionPrim(Text/Regex/Internal/PrimMatcher.start, "getStart")

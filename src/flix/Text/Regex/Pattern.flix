@@ -82,8 +82,6 @@ namespace Text/Regex/Pattern {
             case (UnixLines, UnixLines) => true
             case (_, _) => false
         }
-
-        pub def neq(x: Flag, y: Flag): Bool = not (x == y)
     }
 
     def toInt(flag: Flag): Int32 =

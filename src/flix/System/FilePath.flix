@@ -35,8 +35,6 @@ namespace System {
             let FilePath(x1) = x;
             let FilePath(y1) = y;
             x1.equals(y1 as ##java.lang.Object) as & Pure
-
-        pub def neq(x: FilePath, y: FilePath): Bool = not (x == y)
     }
 
 }

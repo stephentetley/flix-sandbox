@@ -42,8 +42,6 @@ namespace Text {
             case (Nfkd, Nfkd)   => true
             case (_,_)          => false
         }
-
-        pub def neq(x: NormalizerForm, y: NormalizerForm): Bool = not (x == y)
     }
 }
 

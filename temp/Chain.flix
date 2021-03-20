@@ -46,7 +46,6 @@ instance ToString[Chain[a]] with [a : ToString] {
 
 instance Eq[Chain[a]] with[a : Eq] {
     pub def eq(xs: Chain[a], ys: Chain[a]): Bool = Chain.equals(xs, ys)
-    pub def neq(xs: Chain[a], ys: Chain[a]): Bool = not (xs == ys)
 }
 
 instance Monoid[Chain[a]] {

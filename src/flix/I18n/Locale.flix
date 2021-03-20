@@ -26,7 +26,6 @@ namespace I18n {
 
     instance Eq[Locale] {
         pub def eq(x: Locale, y: Locale): Bool = I18n/Locale.equals(x, y)
-        pub def neq(x: Locale, y: Locale): Bool = not (x == y)
     }
 
     instance Hash[Locale] {
