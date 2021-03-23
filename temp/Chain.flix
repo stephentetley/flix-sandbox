@@ -27,7 +27,7 @@ enum Chain[t] {
     case Chain(Chain[t], Chain[t])
 }
 
-instance ToString[Chain[a]] with [a : ToString] {
+instance ToString[Chain[a]] with ToString[a] {
     pub def toString(xs: Chain[a]): String =
         let fn = () -> {
             let sb = StringBuilder.new();
@@ -44,7 +44,7 @@ instance ToString[Chain[a]] with [a : ToString] {
         fn() as & Pure
 }
 
-instance Eq[Chain[a]] with[a : Eq] {
+instance Eq[Chain[a]] with Eq[a] {
     pub def eq(xs: Chain[a], ys: Chain[a]): Bool = Chain.equals(xs, ys)
 }
 
