@@ -180,7 +180,7 @@ namespace Text/Regex {
               hasNext = () -> find(m1)
             , next = () -> match fn1(m1) {
                     case Ok(a) => a
-                    case Err(_) => panic("Regex.results - impossible")
+                    case Err(_) => unreachable!()
                 }
             , finalize = () -> () as & Impure
         };

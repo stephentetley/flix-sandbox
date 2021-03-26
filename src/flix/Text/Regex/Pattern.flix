@@ -168,7 +168,7 @@ namespace Text/Regex/Pattern {
         try {
             Pattern(compile("^\b$")) as & Pure
         } catch {
-            case _: ##java.util.regex.PatternSyntaxException => panic("Pattern.unmatchable - impossible")
+            case _: ##java.util.regex.PatternSyntaxException => unreachable!()
         }
 
 
