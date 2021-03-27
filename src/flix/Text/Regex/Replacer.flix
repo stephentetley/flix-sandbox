@@ -199,7 +199,7 @@ namespace Text/Regex/Replacer {
         }
 
     pub def count(n: Int32, rep: Replacer[a]): Replacer[List[a]] =
-        use Data/Transient/DList.{empty, snoc, toList};
+        use Chain.{empty, snoc, toList};
         map(toList, countWith((x, xs) -> snoc(xs, x), empty(), n, rep))
 
 
