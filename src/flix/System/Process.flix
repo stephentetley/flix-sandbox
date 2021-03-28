@@ -14,29 +14,6 @@
  * limitations under the License.
  */
 
-use System.Error.{ArrayIndexOutOfBoundsException,
-        Exception,
-        IllegalArgumentException,
-        IllegalStateException,
-        IndexOutOfBoundsException,
-        InputMismatchException,
-        IOException,
-        NoSuchElementException,
-        NullPointerException,
-        PatternSyntaxException,
-        RuntimeException,
-        SecurityException,
-        UnsupportedOperationException,
-        Generic};
-
-use Text.Charset.{Charset};
-
-use System.Process;
-use System.Process.{Process};
-use System.FilePath.{FilePath};
-use System.ProcessBuilder;
-use System.ProcessBuilder.{ProcessBuilder};
-
 
 namespace System {
     pub opaque type ProcessBuilder = ##java.lang.ProcessBuilder
@@ -47,7 +24,13 @@ namespace System {
 
 namespace System/Process {
 
-    use ToString.toString;
+    use Text.Charset.{Charset};
+
+    use System.Process;
+    use System.Process.{Process};
+    use System.FilePath.{FilePath};
+    use System.ProcessBuilder;
+    use System.ProcessBuilder.{ProcessBuilder};
 
     type alias MarshalStringArray = ##flix.runtime.spt.sandbox.system.marshal.MarshalStringArray
 
@@ -63,9 +46,9 @@ namespace System/Process {
         import java.lang.ProcessBuilder.directory(##java.io.File);
         import new java.io.File(String) as newFile;
         let ProcessBuilder(x1) = x;
-        let s1 = toString(path);
-        let f1 = newFile(s1);
-        x1.directory(f1);
+        let name = ToString.toString(path);
+        let f1 = newFile(name);
+        directory(x1, f1);
         ()
 
     pub def getDirectory(x: ProcessBuilder): System.FilePath & Impure =
@@ -78,37 +61,29 @@ namespace System/Process {
 
 
 
-    pub def start(x: ProcessBuilder): Result[Process, System.Error] & Impure = 
+    pub def start(x: ProcessBuilder): Result[Process, String] & Impure =
         import java.lang.ProcessBuilder.start();
         try {
             let ProcessBuilder(x1) = x;
             let proc = x1.start();
             Ok(Process(proc))
-        } catch { 
-            case _: ##java.lang.NullPointerException            => Err(NullPointerException)
-            case _: ##java.lang.IndexOutOfBoundsException       => Err(IndexOutOfBoundsException)
-            case _: ##java.lang.SecurityException               => Err(SecurityException)
-            case _: ##java.lang.UnsupportedOperationException   => Err(UnsupportedOperationException)
-            case _: ##java.io.IOException                       => Err(IOException)
+        } catch {
+            case _: ##java.io.IOException => Err("start")
         }
             
         
 
-    pub def waitFor(x: Process): Result[Int32, System.Error] & Impure = 
+    pub def waitFor(x: Process): Result[Int32, String] & Impure =
         import java.lang.Process.waitFor();
         try {
             let Process(x1) = x;
             let retcode = x1.waitFor();
             Ok(retcode)
-        } catch { 
-            case _: ##java.lang.NullPointerException            => Err(NullPointerException)
-            case _: ##java.lang.IndexOutOfBoundsException       => Err(IndexOutOfBoundsException)
-            case _: ##java.lang.SecurityException               => Err(SecurityException)
-            case _: ##java.lang.UnsupportedOperationException   => Err(UnsupportedOperationException)
-            case _: ##java.io.IOException                       => Err(IOException)
+        } catch {
+            case _: ##java.io.IOException => Err("waitFor")
         }
 
-    pub def getInput(x:Process, cs: Text.Charset): Result[String, System.Error] & Impure = 
+    pub def getInput(x:Process, cs: Text.Charset): Result[String, String] & Impure =
         import flix.runtime.spt.sandbox.system.ProcessWrapper:getInput(##java.lang.Process, ##java.nio.charset.Charset);
         try {
             let Process(x1) = x;
@@ -116,10 +91,10 @@ namespace System/Process {
             let str = getInput(x1, cs1);
             Ok(str)
         } catch {
-            case _: ##java.lang.Exception => Err(Exception)
+            case _: ##java.lang.Exception => Err("getInput")
         }
 
-    pub def getError(x:Process, cs: Text.Charset): Result[String, System.Error] & Impure =
+    pub def getError(x:Process, cs: Text.Charset): Result[String, String] & Impure =
         import flix.runtime.spt.sandbox.system.ProcessWrapper:getError(##java.lang.Process, ##java.nio.charset.Charset);
         try {
             let Process(x1) = x;
@@ -127,7 +102,7 @@ namespace System/Process {
             let str = getError(x1, cs1);
             Ok(str)
         } catch {
-            case _: ##java.lang.Exception => Err(Exception)
+            case _: ##java.lang.Exception => Err("getError")
         }
 
 }

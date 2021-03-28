@@ -14,34 +14,34 @@
  * limitations under the License.
  */
 
-use System.Error.{FileNotFoundException, IOException, Generic};
-use System.FilePath;
-use System.FilePath.{FilePath};
-use Text.Charset.{Charset};
 
 namespace System/File {
 
-    pub def exists(path: FilePath): Result[Bool, System.Error] & Impure =
+    use System.FilePath;
+    use System.FilePath.{FilePath};
+    use Text.Charset.{Charset};
+
+    pub def exists(path: FilePath): Result[Bool, String] & Impure =
         try {
             import flix.runtime.spt.sandbox.system.FileWrapper:exists(##java.nio.file.Path);
             let FilePath(path1) = path;
             Ok(exists(path1))
         } catch {
-            case _: ##java.lang.SecurityException => Err(IOException)
+            case _: ##java.lang.SecurityException => Err("exists")
         }
 
 
-    pub def delete(path: FilePath): Result[Unit, System.Error] & Impure =
+    pub def delete(path: FilePath): Result[Unit, String] & Impure =
         try {
             import java.nio.file.Files:delete(##java.nio.file.Path);
             let FilePath(path1) = path;
             delete(path1);
             Ok()
         } catch {
-            case _: ##java.lang.Exception => Err(IOException)
+            case _: ##java.lang.Exception => Err("delete")
         }
 
-    pub def copy(source: FilePath, target: FilePath): Result[Unit, System.Error] & Impure =
+    pub def copy(source: FilePath, target: FilePath): Result[Unit, String] & Impure =
         try {
             import flix.runtime.spt.sandbox.system.FileWrapper:copy(##java.nio.file.Path, ##java.nio.file.Path);
             let FilePath(source1) = source;
@@ -49,22 +49,22 @@ namespace System/File {
             let _ = copy(source1, target1);
             Ok()
         } catch {
-            case _: ##java.lang.Exception => Err(IOException)
+            case _: ##java.lang.Exception => Err("copy")
         }
 
 
-    pub def deleteIfExists(path: FilePath): Result[Unit, System.Error] & Impure =
+    pub def deleteIfExists(path: FilePath): Result[Unit, String] & Impure =
         try {
             import java.nio.file.Files:deleteIfExists(##java.nio.file.Path);
             let FilePath(path1) = path;
             deleteIfExists(path1);
             Ok()
         } catch {
-            case _: ##java.lang.Exception => Err(IOException)
+            case _: ##java.lang.Exception => Err("deleteIfExists")
         }
 
     /// TODO - test exception
-    pub def readFile(path: FilePath, cs: Text.Charset): Result[String, System.Error] & Impure =
+    pub def readFile(path: FilePath, cs: Text.Charset): Result[String, String] & Impure =
         try {
             import java.nio.file.Files:readString(##java.nio.file.Path, ##java.nio.charset.Charset);
             let FilePath(path1) = path;
@@ -72,12 +72,10 @@ namespace System/File {
             Ok(readString(path1, cs1))
         }
         catch {
-            case _: ##java.io.FileNotFoundException => Err(FileNotFoundException)
-            case _: ##java.io.IOException => Err(IOException)
-            case _: ##java.lang.Exception => Err(Generic("Exception"))
+            case _: ##java.lang.Exception => Err("readFile")
         }
 
-    pub def readFileWithBOM(path: FilePath, cs: Text.Charset): Result[String, System.Error] & Impure =
+    pub def readFileWithBOM(path: FilePath, cs: Text.Charset): Result[String, String] & Impure =
         try {
             import flix.runtime.spt.sandbox.system.FileWrapper:readFileWithBOM(##java.nio.file.Path,
                                                                                ##java.nio.charset.Charset) as readWithBOM;
@@ -86,15 +84,13 @@ namespace System/File {
             Ok(readWithBOM(path1, cs1))
         }
         catch {
-            case _: ##java.io.FileNotFoundException => Err(FileNotFoundException)
-            case _: ##java.io.IOException => Err(IOException)
-            case _: ##java.lang.Exception => Err(Generic("Exception"))
+            case _: ##java.lang.Exception => Err("readFileWithBOM")
         }
 
 
 
 
-    pub def writeFile(path: FilePath, cs: Text.Charset, content: String): Result[Unit, System.Error] & Impure =
+    pub def writeFile(path: FilePath, cs: Text.Charset, content: String): Result[Unit, String] & Impure =
         try {
             import flix.runtime.spt.sandbox.system.FileWrapper:writeString(##java.nio.file.Path, ##java.nio.charset.Charset, String);
             let FilePath(path1) = path;
@@ -103,7 +99,6 @@ namespace System/File {
             Ok()
         }
         catch {
-            case _: ##java.io.IOException => Err(IOException)
-            case _: ##java.lang.Exception => Err(Generic("Exception"))
+            case _: ##java.lang.Exception => Err("writeFile")
         }
 }

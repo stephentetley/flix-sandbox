@@ -18,7 +18,6 @@
 namespace System/Directory {
 
 
-    use System.Error.{Generic};
     use System.FilePath;
     use System.FilePath.{FilePath};
 
@@ -53,7 +52,7 @@ namespace System/Directory {
     }
 
     /// All levels - recursive
-    /// TODO - return a Stream
+    /// TODO - return a Cursor
     pub def contentsAll(path: FilePath, followLinks: Bool): Option[List[FilePath]] & Impure = try {
         import new flix.runtime.spt.sandbox.system.marshal.UnmarshalFilesWalk(##java.nio.file.Path, Bool) as newIter;
         import flix.runtime.spt.sandbox.system.marshal.UnmarshalFilesWalk.hasNext();
