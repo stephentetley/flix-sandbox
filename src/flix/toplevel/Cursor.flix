@@ -1055,4 +1055,28 @@ namespace Cursor {
 
     /// Don't provide `maximum`, `sum` etc. as they are terminal functions.
 
+    ///
+    /// Note this function is useful, but adding it means we are getting a very adhoc API...
+    ///
+    pub def resultFold(f: (b, a) -> b & ef, ac: b, s: Cursor[Result[a, e]]): Result[b, e] & Impure =
+        let generate1 = getGenerator(s);
+        let finalize1 = getFinalizer(s);
+        let sf = generate1();
+        let ans = resultFoldHelper(f, sf, ac);
+        finalize1();
+        ans
+
+
+    ///
+    /// Helper function for `resultFold`.
+    ///
+    def resultFoldHelper(f: (b, a) -> b & ef, sf : Unit ~> Step[Result[a, e]], ac: b): Result[b, e] & Impure =
+        match sf() {
+            case Done => Ok(ac)
+            case Skip => resultFoldHelper(f, sf, ac)
+            case Yield(Ok(a)) => resultFoldHelper(f, sf, f(ac, a) as & Impure)
+            case Yield(Err(e)) => Err(e)
+        }
+
+
 }
