@@ -64,19 +64,27 @@ namespace Cursor {
         };
         Cursor({ generate = gen, finalize = _ -> () as & Impure })
 
-    ///
-    /// Helper function to extract finalizer.
-    ///
-    def getFinalizer(s: Cursor[a]): Unit -> Unit & Impure =
-        let Cursor(body) = s;
-        body.finalize
 
     ///
     /// Helper function to extract generator.
     ///
-    def getGenerator(s: Cursor[a]): Unit -> (Unit ~> Step[a]) & Impure =
+    /// Not a "general function", this is exposed for library writers to write
+    /// their own terminal functions.
+    ///
+    pub def getGenerator(s: Cursor[a]): Unit -> (Unit ~> Step[a]) & Impure =
         let Cursor(body) = s;
         body.generate
+
+    ///
+    /// Helper function to extract finalizer.
+    ///
+    /// Not a "general function", this is exposed for library writers to write
+    /// their own terminal functions.
+    ///
+    pub def getFinalizer(s: Cursor[a]): Unit -> Unit & Impure =
+        let Cursor(body) = s;
+        body.finalize
+
 
     ///
     /// Truncate a stream but keep its finalizer.
