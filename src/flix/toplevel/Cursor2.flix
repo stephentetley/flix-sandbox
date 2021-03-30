@@ -23,7 +23,38 @@
 /// depletes it. Due to depletion many common List / replayable-Stream
 /// functions cannot be implemented, or have to be implemented as so called
 /// "terminal functions" which exhaust the input and stop any further processing.
-
+///
+/// WARNING - after testing, the outer generator / inner iterator style of the
+/// current implementation doesn't seem appropriate for a cursor that is
+/// usually expected to be used for e.g. streaming files.
+/// Functions like `head` illustrate the problem - suppose you generated a
+/// stream of time values with the code:
+///
+/// > let s1 = Cursor2.unfoldWithIter(_ -> Some(Time/LocalTime.now()))
+///
+/// > let h1 = Cursor2.head(s1)
+/// > let h2 = Cursor2.head(s1)
+/// > h1 != h2
+///
+/// h1 and h2 have different times - in simple terms s1 is regenerating
+/// the stream each time head is called, whereas you might expect the stream to
+/// generate the head once at construction time then suspend the stream until it
+/// is "moved next".
+///
+/// With a pure generating function like `range` although the stream is regenerated
+/// it looks the same because the generating function is pure and will generate an
+/// identical stream.
+///
+/// > let s1 = Cursor2.range(1, 10)
+///
+/// > let h1 = Cursor2.head(s1)
+/// > let h2 = Cursor2.head(s1)
+/// > h1 == h2
+///
+/// As the use-case for for Cursor is IO where we will be opening file handles etc.
+/// we really need a clearer and simpler idea of when we are creating resources so we
+/// can be sure to finalize them.
+///
 pub opaque type Cursor2[e, a] =
     { generate: Unit ~> (Unit ~> Cursor2/Internal.Step2[e, a])
     , finalize: Unit ~> Unit
@@ -476,6 +507,7 @@ namespace Cursor2 {
     /// If the stream is productive return `Some(a)` where `a` is the first element
     /// of `s`.
     ///
+
     /// If the stream is exhausted or in the failed state return `None`.
     ///
     pub def head(s: Cursor2[e, a]): Option[a] & Impure =
