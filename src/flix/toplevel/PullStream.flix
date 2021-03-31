@@ -776,7 +776,7 @@ namespace PullStream {
     ///
     /// Returns `true` if streams `s1` and `s1` have the same elements, i.e. are equivalent.
     ///
-    pub def sameElements[a: Eq](s1: PullStream[a], s2: PullStream[a]): Bool & Impure =
+    pub def sameElements[a](s1: PullStream[a], s2: PullStream[a]): Bool & Impure with Eq[a] =
         let generate1 = getGenerator(s1);
         let generate2 = getGenerator(s2);
         let reset1 = getResetter(s1);
@@ -792,7 +792,7 @@ namespace PullStream {
     ///
     /// Helper function for `sameElements`.
     ///
-    def sameElementsHelper[a: Eq](sf1: Unit ~> Step[a], sf2: Unit ~> Step[a]): Bool & Impure =
+    def sameElementsHelper[a](sf1: Unit ~> Step[a], sf2: Unit ~> Step[a]): Bool & Impure with Eq[a] =
         match (sf1(), sf2()) {
             case (Yield(a), Yield(b))   => if (a != b) false else sameElementsHelper(sf1, sf2)
             case (Yield(a), Skip)       => sameElementsHelperGoRight(a, sf1, sf2)
@@ -811,7 +811,7 @@ namespace PullStream {
     /// Precondition: stream `sf1` (left) has yielded the value `x` but `sf2` (right) yielded a `Skip`.
     /// Go along sf2 (right) to produce a value, if same continue along both.
     ///
-    def sameElementsHelperGoRight[a: Eq](x: a, sf1: Unit ~> Step[a], sf2: Unit ~> Step[a]) : Bool & Impure =
+    def sameElementsHelperGoRight[a](x: a, sf1: Unit ~> Step[a], sf2: Unit ~> Step[a]) : Bool & Impure with Eq[a] =
         match sf2() {
             case Yield(y)   => if (x != y) false else sameElementsHelper(sf1, sf2)
             case Done       => false
@@ -824,7 +824,7 @@ namespace PullStream {
     /// Precondition: stream `sf2` (right) has yielded the value `x` but `sf1` (left) yielded a `Skip`.
     /// Go along sf2 (left) to produce a value, if same continue along both.
     ///
-    def sameElementsHelperGoLeft[a: Eq](sf1: Unit ~> Step[a], y: a, sf2: Unit ~> Step[a]) : Bool & Impure =
+    def sameElementsHelperGoLeft[a](sf1: Unit ~> Step[a], y: a, sf2: Unit ~> Step[a]) : Bool & Impure with Eq[a] =
         match sf1() {
             case Yield(x)   => if (x != y) false else sameElementsHelper(sf1, sf2)
             case Done       => true
@@ -1086,7 +1086,7 @@ namespace PullStream {
     ///
     /// `s` must be finite.
     ///
-    pub def maximum[a: Order](s: PullStream[a]): Option[a] & Impure =
+    pub def maximum[a](s: PullStream[a]): Option[a] & Impure with Order[a] =
         use Option.{flatMap};
         let* (x1, s1)   = view(s);
         let max         = fold((a, x) -> Order.max(a, x), x1, s1);

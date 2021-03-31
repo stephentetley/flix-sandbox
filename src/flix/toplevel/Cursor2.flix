@@ -846,7 +846,7 @@ namespace Cursor2 {
     /// 
     /// Note this is a "terminal function" and will exhaust both Cursors.
     ///
-    pub def sameElements[a: Eq, e](s1: Cursor2[e, a], s2: Cursor2[e, a]): Bool & Impure =
+    pub def sameElements[a, e](s1: Cursor2[e, a], s2: Cursor2[e, a]): Bool & Impure with Eq[a] =
         let generate1 = getGenerator(s1);
         let generate2 = getGenerator(s2);
         let finalize1 = getFinalizer(s1);
@@ -862,7 +862,7 @@ namespace Cursor2 {
     ///
     /// Helper function for `sameElements`.
     ///
-    def sameElementsHelper[a: Eq, e](sf1: Unit ~> Step2[e, a], sf2: Unit ~> Step2[e, a]): Bool & Impure =
+    def sameElementsHelper[a, e](sf1: Unit ~> Step2[e, a], sf2: Unit ~> Step2[e, a]): Bool & Impure with Eq[a] =
         match (sf1(), sf2()) {
             case (Yield(a), Yield(b))   => if (a != b) false else sameElementsHelper(sf1, sf2)
             case (Yield(a), Skip)       => sameElementsHelperGoRight(a, sf1, sf2)
@@ -883,7 +883,9 @@ namespace Cursor2 {
     /// Precondition: stream `sf1` (left) has yielded the value `x` but `sf2` (right) yielded a `Skip`.
     /// Go along sf2 (right) to produce a value, if same continue along both.
     ///
-    def sameElementsHelperGoRight[a: Eq, e](x: a, sf1: Unit ~> Step2[e, a], sf2: Unit ~> Step2[e, a]) : Bool & Impure =
+    def sameElementsHelperGoRight[a, e](x: a,
+                                        sf1: Unit ~> Step2[e, a],
+                                        sf2: Unit ~> Step2[e, a]) : Bool & Impure with Eq[a] =
         match sf2() {
             case Yield(y)   => if (x != y) false else sameElementsHelper(sf1, sf2)
             case Done       => false
@@ -897,7 +899,9 @@ namespace Cursor2 {
     /// Precondition: stream `sf2` (right) has yielded the value `x` but `sf1` (left) yielded a `Skip`.
     /// Go along sf2 (left) to produce a value, if same continue along both.
     ///
-    def sameElementsHelperGoLeft[a: Eq, e](sf1: Unit ~> Step2[e, a], y: a, sf2: Unit ~> Step2[e, a]) : Bool & Impure =
+    def sameElementsHelperGoLeft[a, e](sf1: Unit ~> Step2[e, a],
+                                        y: a,
+                                        sf2: Unit ~> Step2[e, a]) : Bool & Impure with Eq[a] =
         match sf1() {
             case Yield(x)   => if (x != y) false else sameElementsHelper(sf1, sf2)
             case Done       => true

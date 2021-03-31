@@ -23,7 +23,11 @@
 /// depletes it. Due to depletion many common List / replayable-Stream
 /// functions cannot be implemented, or have to be implemented as so called
 /// "terminal functions" which exhaust the input and stop any further processing.
-
+///
+/// Implementation note - the generate function is an imperative thunk inside an
+/// imperative thunk. This lets us set up initial state in the outer thunk and
+/// iteratively update the state in the inner thunk.
+///
 pub opaque type Cursor[a] =
     { generate: Unit ~> (Unit ~> Cursor/Internal.Step[a])
     , finalize: Unit ~> Unit
@@ -37,8 +41,8 @@ namespace Cursor/Internal {
     /// necessarily produce a value at each step.
     ///
     pub enum Step[a] {
-        case Done,
-        case Skip,
+        case Done
+        case Skip
         case Yield(a)
     }
 
@@ -55,6 +59,7 @@ namespace Cursor {
     ///
     pub def empty(): Cursor[a] =
         let gen = () -> {
+            /// Perform a redundant imperative action to get past the typechecker.
             let dummy = ref 0;
             let next = () -> {
                 dummy := 1;
@@ -62,26 +67,26 @@ namespace Cursor {
             };
             next
         };
-        Cursor({ generate = gen, finalize = _ -> () as & Impure })
+        Cursor({generate = gen, finalize = _ -> () as & Impure})
 
 
     ///
-    /// Helper function to extract generator.
+    /// Extract the generator function from a Cusror.
     ///
-    /// Not a "general function", this is exposed for library writers to write
-    /// their own terminal functions.
+    /// Note this is not  a "general function", it is exposed so library writers
+    /// can write their own terminal functions.
     ///
-    pub def getGenerator(s: Cursor[a]): Unit -> (Unit ~> Step[a]) & Impure =
+    pub def getGenerator(s: Cursor[a]): Unit ~> (Unit ~> Step[a]) =
         let Cursor(body) = s;
         body.generate
 
     ///
-    /// Helper function to extract finalizer.
+    /// Extract the finalizer function from a Cusror.
     ///
-    /// Not a "general function", this is exposed for library writers to write
-    /// their own terminal functions.
+    /// Note this is not  a "general function", it is exposed so library writers
+    /// can write their own terminal functions.
     ///
-    pub def getFinalizer(s: Cursor[a]): Unit -> Unit & Impure =
+    pub def getFinalizer(s: Cursor[a]): Unit ~> Unit =
         let Cursor(body) = s;
         body.finalize
 
@@ -105,18 +110,18 @@ namespace Cursor {
     ///
     pub def return(x: a): Cursor[a] =
         let gen = () -> {
-            let n = ref 0;
+            let called = ref false;
             let next = () -> {
-                if (deref n >= 0)
+                if (deref called)
                     Done
                 else {
-                    n := 1 + deref n;
+                    called := true;
                     Yield(x)
                 }
             };
             next
         };
-        Cursor({ generate = gen, finalize = _ -> () as & Impure })
+        Cursor({generate = gen, finalize = _ -> () as & Impure})
 
     ///
     /// Returns the stream produced by applying the mapping function produced by Cursor `sf` to the elements
@@ -784,7 +789,7 @@ namespace Cursor {
     ///
     /// Returns `true` if streams `s1` and `s1` have the same elements, i.e. are equivalent.
     ///
-    pub def sameElements[a: Eq](s1: Cursor[a], s2: Cursor[a]): Bool & Impure =
+    pub def sameElements[a](s1: Cursor[a], s2: Cursor[a]): Bool & Impure with Eq[a] =
         let generate1 = getGenerator(s1);
         let generate2 = getGenerator(s2);
         let finalize1 = getFinalizer(s1);
@@ -800,7 +805,7 @@ namespace Cursor {
     ///
     /// Helper function for `sameElements`.
     ///
-    def sameElementsHelper[a: Eq](sf1: Unit ~> Step[a], sf2: Unit ~> Step[a]): Bool & Impure =
+    def sameElementsHelper[a](sf1: Unit ~> Step[a], sf2: Unit ~> Step[a]): Bool & Impure with Eq[a] =
         match (sf1(), sf2()) {
             case (Yield(a), Yield(b))   => if (a != b) false else sameElementsHelper(sf1, sf2)
             case (Yield(a), Skip)       => sameElementsHelperGoRight(a, sf1, sf2)
@@ -819,7 +824,7 @@ namespace Cursor {
     /// Precondition: stream `sf1` (left) has yielded the value `x` but `sf2` (right) yielded a `Skip`.
     /// Go along sf2 (right) to produce a value, if same continue along both.
     ///
-    def sameElementsHelperGoRight[a: Eq](x: a, sf1: Unit ~> Step[a], sf2: Unit ~> Step[a]) : Bool & Impure =
+    def sameElementsHelperGoRight[a](x: a, sf1: Unit ~> Step[a], sf2: Unit ~> Step[a]) : Bool & Impure with Eq[a] =
         match sf2() {
             case Yield(y)   => if (x != y) false else sameElementsHelper(sf1, sf2)
             case Done       => false
@@ -832,7 +837,7 @@ namespace Cursor {
     /// Precondition: stream `sf2` (right) has yielded the value `x` but `sf1` (left) yielded a `Skip`.
     /// Go along sf2 (left) to produce a value, if same continue along both.
     ///
-    def sameElementsHelperGoLeft[a: Eq](sf1: Unit ~> Step[a], y: a, sf2: Unit ~> Step[a]) : Bool & Impure =
+    def sameElementsHelperGoLeft[a](sf1: Unit ~> Step[a], y: a, sf2: Unit ~> Step[a]) : Bool & Impure with Eq[a] =
         match sf1() {
             case Yield(x)   => if (x != y) false else sameElementsHelper(sf1, sf2)
             case Done       => true
