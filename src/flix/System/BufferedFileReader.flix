@@ -42,6 +42,19 @@ namespace System/BufferedFileReader {
             case _: ##java.lang.Exception => Err("BufferedFileReader:new")
         }
 
+    ///
+    /// Read a single Char as an Int32.
+    /// Returns -1 if the end of the stream has been reached.
+    ///
+    pub def read(x: BufferedFileReader): Result[Int32, String] & Impure =
+        import java.io.BufferedReader.read();
+        try {
+            let BufferedFileReader(x1) = x;
+            Ok(read(x1))
+        }
+        catch {
+            case _: ##java.lang.Exception => Err("read")
+        }
 
     pub def readLine(x: BufferedFileReader): Result[String, String] & Impure =
         import java.io.BufferedReader.readLine();

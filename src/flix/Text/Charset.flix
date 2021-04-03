@@ -28,12 +28,48 @@ namespace Text  {
             toS(cs1) as & Pure
     }
 
+    instance Eq[Charset] {
+        pub def eq(x: Charset, y: Charset): Bool = Text/Charset.equals(x, y)
+    }
+
+    instance Hash[Charset] {
+        pub def hash(x: Charset): Int = Text/Charset.hashCode(x)
+    }
+
+    instance Order[Charset] {
+        pub def compare(x: Charset, y: Charset): Comparison = match Text/Charset.compareTo(x,y) {
+            case n if n < 0 => LessThan
+            case n if n == 0 => EqualTo
+            case _ => GreaterThan
+        }
+    }
 }
 
 namespace Text/Charset {
 
     use Text.Charset;
     use Text.Charset.{Charset};
+
+    pub def forName(name: String): Option[Charset] =
+        import java.nio.charset.Charset:forName(String);
+        try {
+            Some(Charset(forName(name))) as & Pure
+        } catch {
+            case _: ##java.lang.Exception => None
+        }
+
+    pub def defaultCharset(): Charset & Impure =
+        import java.nio.charset.Charset:defaultCharset();
+        Charset(defaultCharset())
+
+
+    pub def isSupported(name: String): Bool =
+        import java.nio.charset.Charset:isSupported(String);
+        try {
+            isSupported(name) as & Pure
+        } catch {
+            case _: ##java.lang.Exception => false
+        }
 
     pub def iso_8859_1(): Charset = 
         import get java.nio.charset.StandardCharsets:ISO_8859_1 as get_iso_8859_1;
@@ -59,5 +95,43 @@ namespace Text/Charset {
         import get java.nio.charset.StandardCharsets:UTF_8 as get_utf_8;
         Charset(get_utf_8()) as & Pure
 
+    pub def equals(x: Charset, y: Charset): Bool =
+        import java.nio.charset.Charset.equals(##java.lang.Object);
+        let Charset(x1) = x;
+        let Charset(y1) = y;
+        equals(x1, y1 as ##java.lang.Object) as & Pure
+
+    pub def hashCode(cs: Charset): Int32 =
+        import java.nio.charset.Charset.hashCode();
+        let Charset(cs1) = cs;
+        hashCode(cs1) as & Pure
+
+    pub def compareTo(x: Charset, y: Charset): Int32 =
+        import java.nio.charset.Charset.compareTo(##java.nio.charset.Charset);
+        let Charset(x1) = x;
+        let Charset(y1) = y;
+        compareTo(x1, y1) as & Pure
+
+    pub def name(cs: Charset): String =
+        import java.nio.charset.Charset.name();
+        let Charset(cs1) = cs;
+        name(cs1) as & Pure
+
+    pub def displayName(cs: Charset): String =
+        import java.nio.charset.Charset.displayName();
+        let Charset(cs1) = cs;
+        displayName(cs1) as & Pure
+
+    pub def displayNameWithLocale(cs: Charset, locale: I18n.Locale): String =
+        use I18n.Locale.{Locale};
+        import java.nio.charset.Charset.displayName(##java.util.Locale);
+        let Charset(cs1) = cs;
+        let Locale(locale1) = locale;
+        displayName(cs1, locale1) as & Pure
+
+    pub def isRegistered(cs: Charset): Bool =
+        import java.nio.charset.Charset.isRegistered();
+        let Charset(cs1) = cs;
+        isRegistered(cs1) as & Pure
 
 }
