@@ -49,10 +49,15 @@ public class FileWrapper {
         Files.writeString(path, content2, charset);
     }
 
-    public static String readFileWithBOM(Path path, Charset charset) throws Exception {
+    /// Reads the File with the Charset identified by the BOM
+    public static String readFileWithBOM(Path path) throws Exception {
         File file = path.toFile();
         FileInputStream instream = new FileInputStream(file);
-        Reader reader = new InputStreamReader(new BOMInputStream(instream, false), charset);
+        BOMInputStream bomInstream = new BOMInputStream(instream, false);
+        String csname = bomInstream.getBOMCharsetName();
+        if (csname == null) csname = "UTF-16";
+        Charset charset = Charset.forName(csname);
+        Reader reader = new InputStreamReader(bomInstream, charset);
         String answer = IOUtils.toString(reader);
         reader.close();
         return answer;

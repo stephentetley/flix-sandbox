@@ -22,8 +22,8 @@ namespace System/File {
     use Text.Charset.{Charset};
 
     pub def exists(path: FilePath): Result[Bool, String] & Impure =
+        import flix.runtime.spt.sandbox.system.FileWrapper:exists(##java.nio.file.Path);
         try {
-            import flix.runtime.spt.sandbox.system.FileWrapper:exists(##java.nio.file.Path);
             let FilePath(path1) = path;
             Ok(exists(path1))
         } catch {
@@ -32,8 +32,8 @@ namespace System/File {
 
 
     pub def delete(path: FilePath): Result[Unit, String] & Impure =
+        import java.nio.file.Files:delete(##java.nio.file.Path);
         try {
-            import java.nio.file.Files:delete(##java.nio.file.Path);
             let FilePath(path1) = path;
             delete(path1);
             Ok()
@@ -42,8 +42,8 @@ namespace System/File {
         }
 
     pub def copy(source: FilePath, target: FilePath): Result[Unit, String] & Impure =
+        import flix.runtime.spt.sandbox.system.FileWrapper:copy(##java.nio.file.Path, ##java.nio.file.Path);
         try {
-            import flix.runtime.spt.sandbox.system.FileWrapper:copy(##java.nio.file.Path, ##java.nio.file.Path);
             let FilePath(source1) = source;
             let FilePath(target1) = target;
             let _ = copy(source1, target1);
@@ -54,8 +54,8 @@ namespace System/File {
 
 
     pub def deleteIfExists(path: FilePath): Result[Unit, String] & Impure =
+        import java.nio.file.Files:deleteIfExists(##java.nio.file.Path);
         try {
-            import java.nio.file.Files:deleteIfExists(##java.nio.file.Path);
             let FilePath(path1) = path;
             deleteIfExists(path1);
             Ok()
@@ -65,8 +65,8 @@ namespace System/File {
 
     /// TODO - test exception
     pub def readFile(path: FilePath, cs: Text.Charset): Result[String, String] & Impure =
+        import java.nio.file.Files:readString(##java.nio.file.Path, ##java.nio.charset.Charset);
         try {
-            import java.nio.file.Files:readString(##java.nio.file.Path, ##java.nio.charset.Charset);
             let FilePath(path1) = path;
             let Charset(cs1) = cs;
             Ok(readString(path1, cs1))
@@ -75,13 +75,12 @@ namespace System/File {
             case _: ##java.lang.Exception => Err("readFile")
         }
 
-    pub def readFileWithBOM(path: FilePath, cs: Text.Charset): Result[String, String] & Impure =
+    /// Reads the File with the Charset identified by the BOM
+    pub def readFileWithBOM(path: FilePath): Result[String, String] & Impure =
+        import flix.runtime.spt.sandbox.system.FileWrapper:readFileWithBOM(##java.nio.file.Path);
         try {
-            import flix.runtime.spt.sandbox.system.FileWrapper:readFileWithBOM(##java.nio.file.Path,
-                                                                               ##java.nio.charset.Charset) as readWithBOM;
             let FilePath(path1) = path;
-            let Charset(cs1) = cs;
-            Ok(readWithBOM(path1, cs1))
+            Ok(readFileWithBOM(path1))
         }
         catch {
             case _: ##java.lang.Exception => Err("readFileWithBOM")
@@ -91,8 +90,8 @@ namespace System/File {
 
 
     pub def writeFile(path: FilePath, cs: Text.Charset, content: String): Result[Unit, String] & Impure =
+        import flix.runtime.spt.sandbox.system.FileWrapper:writeString(##java.nio.file.Path, ##java.nio.charset.Charset, String);
         try {
-            import flix.runtime.spt.sandbox.system.FileWrapper:writeString(##java.nio.file.Path, ##java.nio.charset.Charset, String);
             let FilePath(path1) = path;
             let Charset(cs1) = cs;
             writeString(path1, cs1, content);
