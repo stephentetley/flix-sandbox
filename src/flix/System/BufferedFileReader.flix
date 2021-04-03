@@ -56,6 +56,12 @@ namespace System/BufferedFileReader {
             case _: ##java.lang.Exception => Err("read")
         }
 
+    pub def readChar(x: BufferedFileReader): Result[Char, String] & Impure =
+        match read(x) {
+            case Ok(i) if i >= 0 => Ok(Char.fromInt32(i))
+            case _ => Err("readChar")
+        }
+
     pub def readLine(x: BufferedFileReader): Result[String, String] & Impure =
         import java.io.BufferedReader.readLine();
         try {

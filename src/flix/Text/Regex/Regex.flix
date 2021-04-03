@@ -169,17 +169,14 @@ namespace Text/Regex {
     ///
     /// Stream with a Cursor...
     ///
-    pub def results(input: String, patt: Pattern, eval: MatchEvaluator[a]): Cursor[a] & Impure =
+    pub def results(input: String, patt: Pattern, eval: MatchEvaluator[a]): Cursor[String, a] & Impure =
         use Text/Regex/Internal/PrimMatcher.{newPrimMatcher, find};
         let Pattern(p1) = patt;
         let MatchEvaluator(fn1) = eval;
         let m1 = newPrimMatcher(p1, input);
-        let cursorIter: Cursor.CursorAlg[a] =  {
+        let cursorIter: CursorAlg[String, a] =  {
               hasNext = () -> find(m1)
-            , next = () -> match fn1(m1) {
-                    case Ok(a) => a
-                    case Err(_) => unreachable!()
-                }
+            , next = () -> fn1(m1)
             , finalize = () -> () as & Impure
         };
         Cursor.makeCursor(cursorIter)
@@ -187,14 +184,14 @@ namespace Text/Regex {
     ///
     /// Stream...
     ///
-    pub def contentResults(input: String, patt: Pattern): Cursor[String] & Impure =
+    pub def contentResults(input: String, patt: Pattern): Cursor[String, String] & Impure =
         use Text/Regex/MatchEvaluator.{content};
         results(input, patt, content())
 
     ///
     /// Stream...
     ///
-    pub def rangeResults(input: String, patt: Pattern): Cursor[(Int32, Int32)] & Impure =
+    pub def rangeResults(input: String, patt: Pattern): Cursor[String, (Int32, Int32)] & Impure =
         use Text/Regex/MatchEvaluator.{getRange};
         results(input, patt, getRange())
 
