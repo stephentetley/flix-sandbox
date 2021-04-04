@@ -42,6 +42,16 @@ namespace System/BufferedFileReader {
             case _: ##java.lang.Exception => Err("BufferedFileReader:new")
         }
 
+    pub def newUsingBOM(path: System.FilePath): Result[BufferedFileReader, String] & Impure =
+        import flix.runtime.spt.sandbox.system.BufferedFileReaderWrapper:createWithBOM(##java.nio.file.Path);
+        try {
+            let FilePath(path1) = path;
+            Ok(BufferedFileReader(createWithBOM(path1)))
+        }
+        catch {
+            case _: ##java.lang.Exception => Err("BufferedFileReader:newUsingBOM")
+        }
+
     ///
     /// Read a single Char as an Int32.
     /// Returns -1 if the end of the stream has been reached.
@@ -82,7 +92,22 @@ namespace System/BufferedFileReader {
             case _: ##java.lang.Exception => Err("close")
         }
 
-
+    ///
+    /// Closes the BufferedReader when done.
+    ///
+    pub def lines(x: BufferedFileReader): Cursor[String, String] & Impure =
+        import new flix.runtime.spt.sandbox.system.BufferedReaderLinesCursor(##java.io.BufferedReader) as newLinesCursor;
+        import flix.runtime.spt.sandbox.system.BufferedReaderLinesCursor.hasNext() as ffiHasNext;
+        import flix.runtime.spt.sandbox.system.BufferedReaderLinesCursor.next() as ffiNext;
+        import flix.runtime.spt.sandbox.system.BufferedReaderLinesCursor.close() as ffiClose;
+        let BufferedFileReader(x1) = x;
+        let iter = newLinesCursor(x1);
+        let cursorIter =  {
+              hasNext = () -> ffiHasNext(iter)
+            , next = Cursor.guardThunk(_ -> ffiNext(iter), "next failed")
+            , finalize = () -> ffiClose(iter)
+        };
+        Cursor.makeCursor(cursorIter)
 
 
 }
