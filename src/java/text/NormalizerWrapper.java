@@ -4,8 +4,9 @@ import java.text.Normalizer;
 
 public class NormalizerWrapper {
 
-    /// Sub function for `Paths.get` as it is "varargs" in Java.
-    public static String normalize(String src, NormalizerForm form) {
+    /// Use our own `NormalizerFormEnum` because Java's `Normalizer.Form` is
+    /// and inner class (enum) and is not accessible to Flix.
+    public static String normalize(String src, NormalizerFormEnum form) {
 
         switch(form) {
             case NFC:

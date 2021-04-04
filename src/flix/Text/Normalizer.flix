@@ -51,11 +51,11 @@ namespace Text/Normalizer {
     use Text.NormalizerForm;
     use Text.NormalizerForm.{Nfc, Nfd, Nfkc, Nfkd};
 
-    pub def marshal(x: NormalizerForm): ##flix.runtime.spt.sandbox.text.NormalizerForm =
-        import get flix.runtime.spt.sandbox.text.NormalizerForm:NFC        as getNFC;
-        import get flix.runtime.spt.sandbox.text.NormalizerForm:NFD        as getNFD;
-        import get flix.runtime.spt.sandbox.text.NormalizerForm:NFKC       as getNFKC;
-        import get flix.runtime.spt.sandbox.text.NormalizerForm:NFKD       as getNFKD;
+    pub def marshal(x: NormalizerForm): ##flix.runtime.spt.sandbox.text.NormalizerFormEnum =
+        import get flix.runtime.spt.sandbox.text.NormalizerFormEnum:NFC        as getNFC;
+        import get flix.runtime.spt.sandbox.text.NormalizerFormEnum:NFD        as getNFD;
+        import get flix.runtime.spt.sandbox.text.NormalizerFormEnum:NFKC       as getNFKC;
+        import get flix.runtime.spt.sandbox.text.NormalizerFormEnum:NFKD       as getNFKD;
         match x {
             case Nfc    => getNFC()
             case Nfd    => getNFD()
@@ -63,11 +63,11 @@ namespace Text/Normalizer {
             case Nfkd   => getNFKD()
         } as & Pure
 
-    pub def unmarshal(x: ##flix.runtime.spt.sandbox.text.NormalizerForm): NormalizerForm =
-        import get flix.runtime.spt.sandbox.text.NormalizerForm:NFC        as getNFC;
-        import get flix.runtime.spt.sandbox.text.NormalizerForm:NFD        as getNFD;
-        import get flix.runtime.spt.sandbox.text.NormalizerForm:NFKC       as getNFKC;
-        import get flix.runtime.spt.sandbox.text.NormalizerForm:NFKD       as getNFKD;
+    pub def unmarshal(x: ##flix.runtime.spt.sandbox.text.NormalizerFormEnum): NormalizerForm =
+        import get flix.runtime.spt.sandbox.text.NormalizerFormEnum:NFC        as getNFC;
+        import get flix.runtime.spt.sandbox.text.NormalizerFormEnum:NFD        as getNFD;
+        import get flix.runtime.spt.sandbox.text.NormalizerFormEnum:NFKC       as getNFKC;
+        import get flix.runtime.spt.sandbox.text.NormalizerFormEnum:NFKD       as getNFKD;
         match x {
             case x1 if primEquals(x1, getNFC())     => Nfc
             case x1 if primEquals(x1, getNFD())     => Nfd
@@ -76,7 +76,7 @@ namespace Text/Normalizer {
         } as & Pure
 
 
-    def primEquals(x: ##flix.runtime.spt.sandbox.text.NormalizerForm, y: ##flix.runtime.spt.sandbox.text.NormalizerForm): Bool =
+    def primEquals(x: ##flix.runtime.spt.sandbox.text.NormalizerFormEnum, y: ##flix.runtime.spt.sandbox.text.NormalizerFormEnum): Bool =
         import java.lang.Object.equals(##java.lang.Object);
         let x1 = x as ##java.lang.Object;
         let y1 = y as ##java.lang.Object;
@@ -84,7 +84,7 @@ namespace Text/Normalizer {
 
 
     pub def normalize(src: String, form: NormalizerForm): String =
-        import flix.runtime.spt.sandbox.text.NormalizerWrapper:normalize(String, ##flix.runtime.spt.sandbox.text.NormalizerForm);
+        import flix.runtime.spt.sandbox.text.NormalizerWrapper:normalize(String, ##flix.runtime.spt.sandbox.text.NormalizerFormEnum);
         try {
             normalize(src, marshal(form)) as & Pure
         } catch {
