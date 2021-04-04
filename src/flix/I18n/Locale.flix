@@ -269,25 +269,60 @@ namespace I18n/Locale {
         } as & Pure
 
 
-    pub def getIsoCountryCodes(icc: IsoCountryCode): Set[String] & Impure =
-        import flix.runtime.spt.sandbox.i18n.LocaleStringCursor:createGetISOCountriesCursor(##flix.runtime.spt.sandbox.i18n.IsoCountryCodeEnum) as newCursor;
+    /// Cursors differ only on the create function and what they are marshalled to, so make making them common...
+    def makeLocaleStringCursor(stringCursor: ##flix.runtime.spt.sandbox.i18n.LocaleStringCursor, failMsg: String): Cursor[String, String] =
         import flix.runtime.spt.sandbox.i18n.LocaleStringCursor.hasNext() as ffiHasNext;
         import flix.runtime.spt.sandbox.i18n.LocaleStringCursor.next() as ffiNext;
         try {
-            let icc1 = marshal(icc);
-            let iter = newCursor(icc1);
             let cursorAlg: CursorAlg[String, String] =  {
-                  hasNext = () -> ffiHasNext(iter)
-                , next = Cursor.guardThunk(_ -> ffiNext(iter), "next failed")
+                  hasNext = () -> ffiHasNext(stringCursor)
+                , next = Cursor.guardThunk(_ -> ffiNext(stringCursor), "next failed")
                 , finalize = () -> () as & Impure
             };
             Cursor.makeCursor(cursorAlg)
-                |> Cursor.toSet
-                |> flip(Result.getWithDefault, Set#{})
         } catch {
-            case _: ##java.lang.Exception => Set#{}
+            case _: ##java.lang.Exception => Cursor.failure(failMsg)
         }
 
+    pub def getIsoCountryCodes(): List[String] & Impure =
+        import flix.runtime.spt.sandbox.i18n.LocaleStringCursor:createGetISOCountriesCursor() as newCursor;
+        let iter = newCursor();
+        makeLocaleStringCursor(iter, "getIsoCountryCodes failed")
+            |> Cursor.toList
+            |> flip(Result.getWithDefault, Nil)
 
+
+    pub def getIsoCountryCodesWithIsoCountryCode(icc: IsoCountryCode): Set[String] & Impure =
+        import flix.runtime.spt.sandbox.i18n.LocaleStringCursor:createGetISOCountriesWithICCCursor(##flix.runtime.spt.sandbox.i18n.IsoCountryCodeEnum) as newCursor;
+        let icc1 = marshal(icc);
+        let iter = newCursor(icc1);
+        makeLocaleStringCursor(iter, "getIsoCountryCodesWithIsoCountryCode failed")
+            |> Cursor.toSet
+            |> flip(Result.getWithDefault, Set#{})
+
+    pub def getIsoLanguages(): List[String] & Impure =
+        import flix.runtime.spt.sandbox.i18n.LocaleStringCursor:createGetISOLanguagesCursor() as newCursor;
+        let iter = newCursor();
+        makeLocaleStringCursor(iter, "getIsoLanguages failed")
+            |> Cursor.toList
+            |> flip(Result.getWithDefault, Nil)
+
+
+    pub def getUnicodeLocaleAttributes(locale: Locale): Set[String] & Impure =
+        import flix.runtime.spt.sandbox.i18n.LocaleStringCursor:createGetUnicodeLocaleAttributesCursor(##java.util.Locale) as newCursor;
+        let Locale(locale1) = locale;
+        let iter = newCursor(locale1);
+        makeLocaleStringCursor(iter, "getUnicodeLocaleAttributes failed")
+            |> Cursor.toSet
+            |> flip(Result.getWithDefault, Set#{})
+
+
+    pub def getUnicodeLocaleKeys(locale: Locale): Set[String] & Impure =
+        import flix.runtime.spt.sandbox.i18n.LocaleStringCursor:createGetUnicodeLocaleKeysCursor(##java.util.Locale) as newCursor;
+        let Locale(locale1) = locale;
+        let iter = newCursor(locale1);
+        makeLocaleStringCursor(iter, "getUnicodeLocaleKeys failed")
+            |> Cursor.toSet
+            |> flip(Result.getWithDefault, Set#{})
 
 }
