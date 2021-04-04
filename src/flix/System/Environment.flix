@@ -34,24 +34,28 @@ namespace System/Environment {
     }
 
     pub def getEnvVars(): Option[Map[String, String]] & Impure =
-        import new flix.runtime.spt.sandbox.system.marshal.UnmarshalEnvVars() as newIter;
-        import flix.runtime.spt.sandbox.system.marshal.UnmarshalEnvVars.hasNext();
-        import flix.runtime.spt.sandbox.system.marshal.UnmarshalEnvVars.next();
+        import new flix.runtime.spt.sandbox.system.GetEnvCursor() as newCursor;
+        import flix.runtime.spt.sandbox.system.GetEnvCursor.hasNext() as ffiHasNext;
+        import flix.runtime.spt.sandbox.system.GetEnvCursor.next() as ffiNext;
         import flix.runtime.spt.sandbox.system.marshal.TupleStringString.get0();
         import flix.runtime.spt.sandbox.system.marshal.TupleStringString.get1();
         try {
-            let iter = newIter();
-            let step = () ->
-                if (iter.hasNext() == false)
-                    None
-                else {
-                    let pss = iter.next();
-                    let k = pss.get0();
-                    let v = pss.get1();
-                    Some(k, v)
-                 };
-            Some(Map.unfoldWithIter(step))
-        } catch {
+            let iter = newCursor();
+            let nextF = Cursor.guardThunk(_ -> {
+                let tss = ffiNext(iter);
+                let k = get0(tss);
+                let v = get1(tss);
+                (k, v)
+            }, "next failed");
+            let cursorAlg =  {
+                  hasNext = () -> ffiHasNext(iter)
+                , next = nextF
+                , finalize = () -> () as & Impure
+            };
+            Cursor.makeCursor(cursorAlg)
+                |> Cursor.toMap
+                |> Result.toOption
+         } catch {
             case _: ##java.lang.Exception => None
         }
 

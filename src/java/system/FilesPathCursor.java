@@ -23,7 +23,7 @@ import java.util.Iterator;
 import java.util.stream.Stream;
 
 public class FilesPathCursor {
-    
+
     private Iterator<Path> iter;
 
     protected FilesPathCursor(Iterator<Path> iter1) {

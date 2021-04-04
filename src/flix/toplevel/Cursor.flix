@@ -267,5 +267,53 @@ namespace Cursor {
             }
         }
 
+    pub def head!(src: Cursor[e, a]): Option[a] & Impure =
+        if (hasNext(src)) {
+            match next!(src) {
+                case Ok(a) => Some(a)
+                case Err(_) => None
+            }
+        } else None as & Impure
+
+
+    pub def drop!(n: Int32, src: Cursor[e, a]): Result[Unit, e] & Impure =
+        if (n <= 0)
+            Ok() as & Impure
+        else {
+            head!(src);
+            drop!(n - 1, src)
+        }
+
+    pub def take(n: Int32, src: Cursor[e, a]): Cursor[e, a] & Impure =
+        let Cursor(src1) = src;
+        let rx = ref 0;
+        let hasNext0 = src1.hasNext;
+        let hasNext1 = () -> {
+            let ix = deref rx;
+            if (ix >= n)
+                false
+            else {
+                rx := ix + 1;
+                hasNext0()
+            }
+        };
+        Cursor({hasNext = hasNext1 | src1})
+
+    pub def drop(n: Int32, src: Cursor[e, a]): Cursor[e, a] & Impure =
+        let Cursor(src1) = src;
+        let rx = ref 0;
+        let next0 = src1.next;
+        let next1 = () -> {
+            match next0() {
+                case Ans(a1) => {
+                    let ix = deref rx;
+                    rx := ix + 1;
+                    if (ix < n) Skip else Ans(a1)
+                }
+                case Skip => Skip
+                case Failed(e) => Failed(e)
+            }
+        };
+        Cursor({next = next1 | src1})
 
 }

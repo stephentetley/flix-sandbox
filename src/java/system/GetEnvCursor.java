@@ -14,16 +14,18 @@
  * limitations under the License.
  */
 
-package flix.runtime.spt.sandbox.system.marshal;
+package flix.runtime.spt.sandbox.system;
 
+
+import flix.runtime.spt.sandbox.system.marshal.TupleStringString;
 
 import java.util.Iterator;
 import java.util.Map;
 
-public class UnmarshalEnvVars {
+public class GetEnvCursor {
     private Iterator<Map.Entry<String, String>> iter;
 
-    public UnmarshalEnvVars() throws Exception {
+    public GetEnvCursor() throws Exception {
         Map<String, String> env = System.getenv();
         this.iter = env.entrySet().iterator();
     }
@@ -36,4 +38,5 @@ public class UnmarshalEnvVars {
         Map.Entry<String,String> item = this.iter.next();
         return new TupleStringString(item.getKey(), item.getValue());
     }
+
 }
