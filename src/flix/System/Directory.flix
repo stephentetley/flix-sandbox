@@ -31,45 +31,41 @@ namespace System/Directory {
             |> System/FilePath.normalize
             |> System/FilePath.toAbsolutePath
 
-    /// One level - not recursive
-    /// TODO - return a Stream
-    pub def contents(path: FilePath): Option[List[FilePath]] & Impure = try {
-        import new flix.runtime.spt.sandbox.system.marshal.UnmarshalFilesList(##java.nio.file.Path) as newIter;
-        import flix.runtime.spt.sandbox.system.marshal.UnmarshalFilesList.hasNext();
-        import flix.runtime.spt.sandbox.system.marshal.UnmarshalFilesList.next();
-        let FilePath(p1) = path;
-        let iter = newIter(p1);
-        let step = () ->
-            if (iter.hasNext() == false)
-                None
-            else {
-                let x1 = iter.next();
-                Some(FilePath(x1))
-             };
-        Some(List.unfoldWithIter(step))
-    } catch {
-        case _: ##java.lang.Exception => None
-    }
+    /// One level - not recursive, returns a Cursor
+    pub def contents(path: FilePath): Cursor[String, FilePath] & Impure =
+        import flix.runtime.spt.sandbox.system.FilesPathCursor:createFilesListCursor(##java.nio.file.Path) as newCursor;
+        import flix.runtime.spt.sandbox.system.FilesPathCursor.hasNext() as ffiHasNext;
+        import flix.runtime.spt.sandbox.system.FilesPathCursor.next() as ffiNext;
+        try {
+            let FilePath(path1) = path;
+            let iter = newCursor(path1);
+            let cursorAlg =  {
+                  hasNext = () -> ffiHasNext(iter)
+                , next = Cursor.guardThunk(_ -> FilePath(ffiNext(iter)), "next failed")
+                , finalize = () -> () as & Impure
+            };
+            Cursor.makeCursor(cursorAlg)
+        } catch {
+            case _: ##java.lang.Exception => Cursor.failure("Directory.contents")
+        }
 
-    /// All levels - recursive
-    /// TODO - return a Cursor
-    pub def contentsAll(path: FilePath, followLinks: Bool): Option[List[FilePath]] & Impure = try {
-        import new flix.runtime.spt.sandbox.system.marshal.UnmarshalFilesWalk(##java.nio.file.Path, Bool) as newIter;
-        import flix.runtime.spt.sandbox.system.marshal.UnmarshalFilesWalk.hasNext();
-        import flix.runtime.spt.sandbox.system.marshal.UnmarshalFilesWalk.next();
-        let FilePath(p1) = path;
-        let iter = newIter(p1, followLinks);
-        let step = () ->
-            if (iter.hasNext() == false)
-                None
-            else {
-                let x1 = iter.next();
-                Some(FilePath(x1))
-             };
-        Some(List.unfoldWithIter(step))
-    } catch {
-        case _: ##java.lang.Exception => None
-    }
+    /// All levels - recursive, uses a Cursor
+    pub def contentsAll(path: FilePath, followLinks: Bool): Cursor[String, FilePath] & Impure =
+        import flix.runtime.spt.sandbox.system.FilesPathCursor:createFilesWalkCursor(##java.nio.file.Path, Bool) as newCursor;
+        import flix.runtime.spt.sandbox.system.FilesPathCursor.hasNext() as ffiHasNext;
+        import flix.runtime.spt.sandbox.system.FilesPathCursor.next() as ffiNext;
+        try {
+            let FilePath(path1) = path;
+            let iter = newCursor(path1, followLinks);
+            let cursorAlg =  {
+                  hasNext = () -> ffiHasNext(iter)
+                , next = Cursor.guardThunk(_ -> FilePath(ffiNext(iter)), "next failed")
+                , finalize = () -> () as & Impure
+            };
+            Cursor.makeCursor(cursorAlg)
+        } catch {
+            case _: ##java.lang.Exception => Cursor.failure("Directory.contentsAll")
+        }
 
     pub def doesPathExist(path: FilePath): Bool & Impure =
         import flix.runtime.spt.sandbox.system.DirectoryWrapper:existsFollowLinks(##java.nio.file.Path);
