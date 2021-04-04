@@ -14,30 +14,27 @@
  * limitations under the License.
  */
 
-package flix.runtime.spt.sandbox.text;
+package flix.runtime.spt.sandbox.i18n;
 
-/// Provide our own enum rather because Normalizer.Form is an inner class
+/// Provide our own enum rather because Locale.IsoCountryCode is an inner class
 
-import java.text.Normalizer;
 
-public enum NormalizerFormEnum {
-    FLIX_NFC,
-    FLIX_NFD,
-    FLIX_NFKC,
-    FLIX_NFKD;
+import java.util.Locale;
 
-    public static Normalizer.Form convertToInner(NormalizerFormEnum form) {
+public enum IsoCountryCodeEnum {
+    FLIX_PART1_ALPHA2,
+    FLIX_PART1_ALPHA3,
+    FLIX_PART3;
+
+    public static Locale.IsoCountryCode convertToInner(IsoCountryCodeEnum form) {
         switch(form) {
-            case FLIX_NFC:
-                return Normalizer.Form.NFC;
-            case FLIX_NFD:
-                return Normalizer.Form.NFD;
-            case FLIX_NFKC:
-                return Normalizer.Form.NFKC;
+            case FLIX_PART1_ALPHA2:
+                return Locale.IsoCountryCode.PART1_ALPHA2;
+            case FLIX_PART1_ALPHA3:
+                return Locale.IsoCountryCode.PART1_ALPHA3;
             default:
-                return Normalizer.Form.NFKD;
+                return Locale.IsoCountryCode.PART3;
         }
     }
 
 }
-

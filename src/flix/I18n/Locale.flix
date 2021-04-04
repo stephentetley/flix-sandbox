@@ -258,66 +258,35 @@ namespace I18n/Locale {
         case Part3
     }
 
-    pub def get3IsoCountryCodes(x: IsoCountryCode): Option[Set[String]] & Impure = match x {
-        case Part1Alpha2 => getPart1Alpha2IsoCountryCodes()
-        case Part1Alpha3 => getPart1Alpha3IsoCountryCodes()
-        case Part3 => getPart3IsoCountryCodes()
-    }
+    pub def marshal(x: IsoCountryCode): ##flix.runtime.spt.sandbox.i18n.IsoCountryCodeEnum =
+        import get flix.runtime.spt.sandbox.i18n.IsoCountryCodeEnum:FLIX_PART1_ALPHA2   as getFLIX_PART1_ALPHA2;
+        import get flix.runtime.spt.sandbox.i18n.IsoCountryCodeEnum:FLIX_PART1_ALPHA3   as getFLIX_PART1_ALPHA3;
+        import get flix.runtime.spt.sandbox.i18n.IsoCountryCodeEnum:FLIX_PART3          as getFLIX_PART3;
+        match x {
+            case Part1Alpha2    => getFLIX_PART1_ALPHA2()
+            case Part1Alpha3    => getFLIX_PART1_ALPHA3()
+            case Part3          => getFLIX_PART3()
+        } as & Pure
 
-    def getPart1Alpha3IsoCountryCodes(): Option[Set[String]] & Impure =
-        import new flix.runtime.spt.sandbox.i18n.marshal.UnmarshalPart1Alpha3IsoCountryCodes() as newIter;
-        import flix.runtime.spt.sandbox.i18n.marshal.UnmarshalPart1Alpha3IsoCountryCodes.hasNext();
-        import flix.runtime.spt.sandbox.i18n.marshal.UnmarshalPart1Alpha3IsoCountryCodes.next();
+
+    pub def getIsoCountryCodes(icc: IsoCountryCode): Set[String] & Impure =
+        import flix.runtime.spt.sandbox.i18n.LocaleStringCursor:createGetISOCountriesCursor(##flix.runtime.spt.sandbox.i18n.IsoCountryCodeEnum) as newCursor;
+        import flix.runtime.spt.sandbox.i18n.LocaleStringCursor.hasNext() as ffiHasNext;
+        import flix.runtime.spt.sandbox.i18n.LocaleStringCursor.next() as ffiNext;
         try {
-            let iter = newIter();
-            let step = () ->
-                if (iter.hasNext() == false)
-                    None
-                else {
-                    let s1 = iter.next();
-                    Some(s1)
-                };
-            List.unfoldWithIter(step) |> List.toSet |> Some
+            let icc1 = marshal(icc);
+            let iter = newCursor(icc1);
+            let cursorAlg: CursorAlg[String, String] =  {
+                  hasNext = () -> ffiHasNext(iter)
+                , next = Cursor.guardThunk(_ -> ffiNext(iter), "next failed")
+                , finalize = () -> () as & Impure
+            };
+            Cursor.makeCursor(cursorAlg)
+                |> Cursor.toSet
+                |> flip(Result.getWithDefault, Set#{})
         } catch {
-            case _: ##java.lang.Exception => None
+            case _: ##java.lang.Exception => Set#{}
         }
-
-    def getPart1Alpha2IsoCountryCodes(): Option[Set[String]] & Impure =
-        import new flix.runtime.spt.sandbox.i18n.marshal.UnmarshalPart1Alpha2IsoCountryCodes() as newIter;
-        import flix.runtime.spt.sandbox.i18n.marshal.UnmarshalPart1Alpha2IsoCountryCodes.hasNext();
-        import flix.runtime.spt.sandbox.i18n.marshal.UnmarshalPart1Alpha2IsoCountryCodes.next();
-        try {
-            let iter = newIter();
-            let step = () ->
-                if (iter.hasNext() == false)
-                    None
-                else {
-                    let s1 = iter.next();
-                    Some(s1)
-                };
-            List.unfoldWithIter(step) |> List.toSet |> Some
-        } catch {
-            case _: ##java.lang.Exception => None
-        }
-
-    def getPart3IsoCountryCodes(): Option[Set[String]] & Impure =
-        import new flix.runtime.spt.sandbox.i18n.marshal.UnmarshalPart3IsoCountryCodes() as newIter;
-        import flix.runtime.spt.sandbox.i18n.marshal.UnmarshalPart3IsoCountryCodes.hasNext();
-        import flix.runtime.spt.sandbox.i18n.marshal.UnmarshalPart3IsoCountryCodes.next();
-        try {
-            let iter = newIter();
-            let step = () ->
-                if (iter.hasNext() == false)
-                    None
-                else {
-                    let s1 = iter.next();
-                    Some(s1)
-                };
-            List.unfoldWithIter(step) |> List.toSet |> Some
-        } catch {
-            case _: ##java.lang.Exception => None
-        }
-
 
 
 

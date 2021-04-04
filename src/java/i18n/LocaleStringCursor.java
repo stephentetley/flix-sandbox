@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package flix.runtime.spt.sandbox.i18n.marshal;
+package flix.runtime.spt.sandbox.i18n;
 
 
 
@@ -22,12 +22,16 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.Set;
 
-public class UnmarshalPart1Alpha2IsoCountryCodes {
+public class LocaleStringCursor {
     private Iterator<String> iter;
 
-    public UnmarshalPart1Alpha2IsoCountryCodes() throws Exception {
-        Set<String> codes = Locale.getISOCountries(Locale.IsoCountryCode.PART1_ALPHA2);
-        this.iter = codes.iterator();
+    protected LocaleStringCursor(Iterator<String> iter1) {
+        iter = iter1;
+    }
+
+    public static LocaleStringCursor createGetISOCountriesCursor(IsoCountryCodeEnum icc) throws Exception {
+        Set<String> codes = Locale.getISOCountries(IsoCountryCodeEnum.convertToInner(icc));
+        return new LocaleStringCursor(codes.iterator());
     }
 
     public boolean hasNext() {

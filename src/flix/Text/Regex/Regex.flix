@@ -174,12 +174,12 @@ namespace Text/Regex {
         let Pattern(p1) = patt;
         let MatchEvaluator(fn1) = eval;
         let m1 = newPrimMatcher(p1, input);
-        let cursorIter: CursorAlg[String, a] =  {
+        let cursorAlg: CursorAlg[String, a] =  {
               hasNext = () -> find(m1)
             , next = () -> fn1(m1)
             , finalize = () -> () as & Impure
         };
-        Cursor.makeCursor(cursorIter)
+        Cursor.makeCursor(cursorAlg)
 
     ///
     /// Stream...

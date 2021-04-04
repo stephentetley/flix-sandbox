@@ -52,27 +52,27 @@ namespace Text/Normalizer {
     use Text.NormalizerForm.{Nfc, Nfd, Nfkc, Nfkd};
 
     pub def marshal(x: NormalizerForm): ##flix.runtime.spt.sandbox.text.NormalizerFormEnum =
-        import get flix.runtime.spt.sandbox.text.NormalizerFormEnum:NFC        as getNFC;
-        import get flix.runtime.spt.sandbox.text.NormalizerFormEnum:NFD        as getNFD;
-        import get flix.runtime.spt.sandbox.text.NormalizerFormEnum:NFKC       as getNFKC;
-        import get flix.runtime.spt.sandbox.text.NormalizerFormEnum:NFKD       as getNFKD;
+        import get flix.runtime.spt.sandbox.text.NormalizerFormEnum:FLIX_NFC    as getFLIX_NFC;
+        import get flix.runtime.spt.sandbox.text.NormalizerFormEnum:FLIX_NFD    as getFLIX_NFD;
+        import get flix.runtime.spt.sandbox.text.NormalizerFormEnum:FLIX_NFKC   as getFLIX_NFKC;
+        import get flix.runtime.spt.sandbox.text.NormalizerFormEnum:FLIX_NFKD   as getFLIX_NFKD;
         match x {
-            case Nfc    => getNFC()
-            case Nfd    => getNFD()
-            case Nfkc   => getNFKC()
-            case Nfkd   => getNFKD()
+            case Nfc    => getFLIX_NFC()
+            case Nfd    => getFLIX_NFD()
+            case Nfkc   => getFLIX_NFKC()
+            case Nfkd   => getFLIX_NFKD()
         } as & Pure
 
     pub def unmarshal(x: ##flix.runtime.spt.sandbox.text.NormalizerFormEnum): NormalizerForm =
-        import get flix.runtime.spt.sandbox.text.NormalizerFormEnum:NFC        as getNFC;
-        import get flix.runtime.spt.sandbox.text.NormalizerFormEnum:NFD        as getNFD;
-        import get flix.runtime.spt.sandbox.text.NormalizerFormEnum:NFKC       as getNFKC;
-        import get flix.runtime.spt.sandbox.text.NormalizerFormEnum:NFKD       as getNFKD;
+        import get flix.runtime.spt.sandbox.text.NormalizerFormEnum:FLIX_NFC    as getFLIX_NFC;
+        import get flix.runtime.spt.sandbox.text.NormalizerFormEnum:FLIX_NFD    as getFLIX_NFD;
+        import get flix.runtime.spt.sandbox.text.NormalizerFormEnum:FLIX_NFKC   as getFLIX_NFKC;
+        import get flix.runtime.spt.sandbox.text.NormalizerFormEnum:FLIX_NFKD   as getFLIX_NFKD;
         match x {
-            case x1 if primEquals(x1, getNFC())     => Nfc
-            case x1 if primEquals(x1, getNFD())     => Nfd
-            case x1 if primEquals(x1, getNFKC())    => Nfkc
-            case x1 if primEquals(x1, getNFKD())    => Nfkd
+            case x1 if primEquals(x1, getFLIX_NFC())    => Nfc
+            case x1 if primEquals(x1, getFLIX_NFD())    => Nfd
+            case x1 if primEquals(x1, getFLIX_NFKC())   => Nfkc
+            case x1 if primEquals(x1, getFLIX_NFKD())   => Nfkd
         } as & Pure
 
 
