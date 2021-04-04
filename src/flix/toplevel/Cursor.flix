@@ -194,6 +194,13 @@ namespace Cursor {
             }
         }
 
+    pub def toSet[a, e](src: Cursor[e, a]): Result[Set[a], e] & Impure with Order[a] =
+        fold((s, x) -> Set.insert(x, s), Set#{}, src)
+
+    pub def toMap[a, b, e](src: Cursor[e, (a, b)]): Result[Map[a, b], e] & Impure with Order[a] =
+        fold((s, x) -> {let (k,v) = x; Map.insert(k, v, s)}, Map#{}, src)
+
+
     pub def foldResult(f: (b, a) -> Result[b, e] & ef, ac: b, xs: Cursor[e, a]): Result[b, e] & Impure =
         let Cursor(xs1) = xs;
         foldResultHelper(f, ac, xs1)
