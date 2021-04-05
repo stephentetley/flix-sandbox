@@ -45,7 +45,7 @@ namespace Text/NumberFormatter {
     ///
     /// Helper function for `parseFloat64`.
     ///
-    pub def parseFloat64Helper(s: String): Result[Float64, String] & Impure = try {
+    def parseFloat64Helper(s: String): Result[Float64, String] & Impure = try {
         import new java.text.DecimalFormat() as newDecimalFormat;
         import java.lang.String.strip();
         import java.text.NumberFormat.parse(String);

@@ -246,7 +246,21 @@ namespace I18n/Locale {
         Locale(stripExtensions(x1) as & Pure)
 
 
-    /// Must check this marshals okay...
+    pub def toLanguageTag(x: Locale): String =
+        import java.util.Locale.toLanguageTag();
+        let Locale(x1) = x;
+        toLanguageTag(x1) as & Pure
+
+    pub def forLanguageTag(tag: String): Option[Locale] =
+        import java.util.Locale:forLanguageTag(String);
+        match forLanguageTag(tag) {
+            case s if Object.isNull(s) => None
+            case s => Some(Locale(s))
+        } as & Pure
+
+
+
+    /// This marshals okay...
     pub def getAvailableLocales(): Array[Locale] & Impure = 
         import java.util.Locale:getAvailableLocales();
         let arr = getAvailableLocales();
@@ -284,7 +298,7 @@ namespace I18n/Locale {
             case _: ##java.lang.Exception => Cursor.failure(failMsg)
         }
 
-    pub def getIsoCountryCodes(): List[String] & Impure =
+    pub def getIsoCountries(): List[String] & Impure =
         import flix.runtime.spt.sandbox.i18n.LocaleStringCursor:createGetISOCountriesCursor() as newCursor;
         let iter = newCursor();
         makeLocaleStringCursor(iter, "getIsoCountryCodes failed")
@@ -292,7 +306,7 @@ namespace I18n/Locale {
             |> flip(Result.getWithDefault, Nil)
 
 
-    pub def getIsoCountryCodesWithIsoCountryCode(icc: IsoCountryCode): Set[String] & Impure =
+    pub def getIsoCountriesWithIsoCountryCode(icc: IsoCountryCode): Set[String] & Impure =
         import flix.runtime.spt.sandbox.i18n.LocaleStringCursor:createGetISOCountriesWithICCCursor(##flix.runtime.spt.sandbox.i18n.IsoCountryCodeEnum) as newCursor;
         let icc1 = marshal(icc);
         let iter = newCursor(icc1);

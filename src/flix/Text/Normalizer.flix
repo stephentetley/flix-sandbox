@@ -90,4 +90,13 @@ namespace Text/Normalizer {
         } catch {
             case _:##java.lang.Exception => ""
         }
+
+    pub def isNormalized(src: String, form: NormalizerForm): Bool =
+        import flix.runtime.spt.sandbox.text.NormalizerWrapper:isNormalized(String, ##flix.runtime.spt.sandbox.text.NormalizerFormEnum);
+        try {
+            isNormalized(src, marshal(form)) as & Pure
+        } catch {
+            case _:##java.lang.Exception => false
+        }
+
 }
