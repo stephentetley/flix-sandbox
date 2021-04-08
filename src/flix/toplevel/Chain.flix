@@ -163,12 +163,12 @@ namespace Chain {
     ///
     /// Returns `true` if and only if `xs` contains the element `a`.
     ///
-    pub def memberOf[a](a: a, xs: Chain[a]): Bool with Eq[a] = memberOfHelper(a, viewLeft(xs))
+    pub def memberOf(a: a, xs: Chain[a]): Bool with Eq[a] = memberOfHelper(a, viewLeft(xs))
 
     ///
     /// Helper function for `memberOf`.
     ///
-    def memberOfHelper[a](a: a, vx: ViewLeft[a]): Bool with Eq[a] = match vx {
+    def memberOfHelper(a: a, vx: ViewLeft[a]): Bool with Eq[a] = match vx {
         case SomeLeft(x, _) if x == a => true
         case SomeLeft(_, xs) => memberOfHelper(a, viewLeft(xs))
         case NoneLeft => false
@@ -179,12 +179,12 @@ namespace Chain {
     ///
     /// Returns `-1` if `a` does not exist in `xs`.
     ///
-    pub def indexOf[a](a: a, xs: Chain[a]): Int32 with Eq[a] = indexOfHelper(a, 0, viewLeft(xs))
+    pub def indexOf(a: a, xs: Chain[a]): Int32 with Eq[a] = indexOfHelper(a, 0, viewLeft(xs))
 
     ///
     /// Helper function for `indexOf`.
     ///
-    def indexOfHelper[a](a: a, ac: Int32, vx: ViewLeft[a]): Int32 with Eq[a] = match vx {
+    def indexOfHelper(a: a, ac: Int32, vx: ViewLeft[a]): Int32 with Eq[a] = match vx {
         case NoneLeft => -1
         case SomeLeft(x, xs) => if (x == a) ac else indexOfHelper(a, ac + 1, viewLeft(xs))
     }
@@ -647,7 +647,7 @@ namespace Chain {
     ///
     /// Returns the list `xs` as a set.
     ///
-    pub def toSet[a](xs: Chain[a]): Set[a] with Order[a] = foldRight(Set.insert, Set.empty(), xs)
+    pub def toSet(xs: Chain[a]): Set[a] with Order[a] = foldRight(Set.insert, Set.empty(), xs)
 
 
     ///
@@ -656,7 +656,7 @@ namespace Chain {
     /// If `xs` contains multiple mappings with the same key, `toMap` does not
     /// make any guarantees about which mapping will be in the resulting map.
     ///
-    pub def toMap[a, b](xs: Chain[(a, b)]): Map[a, b] with Order[a] = foldRight((x, m) -> Map.insert(fst(x), snd(x), m), Map.empty(), xs)
+    pub def toMap(xs: Chain[(a, b)]): Map[a, b] with Order[a] = foldRight((x, m) -> Map.insert(fst(x), snd(x), m), Map.empty(), xs)
 
 
     ///
@@ -684,7 +684,7 @@ namespace Chain {
     ///
     /// Returns `true` if and only if `xs` and `ys` and equal.
     ///
-    pub def equals[a](xs: Chain[a], ys: Chain[a]): Bool with Eq[a] = equalsHelper(viewLeft(xs), viewLeft(ys))
+    pub def equals(xs: Chain[a], ys: Chain[a]): Bool with Eq[a] = equalsHelper(viewLeft(xs), viewLeft(ys))
 
     ///
     /// Helper function for `equals`.
@@ -694,7 +694,7 @@ namespace Chain {
     /// Because they may have different shapes due to construction we use a view to
     /// decide equality which imposes an order on the Chain.
     ///
-    def equalsHelper[a](vx: ViewLeft[a], vy: ViewLeft[a]): Bool with Eq[a] = match (vx, vy) {
+    def equalsHelper(vx: ViewLeft[a], vy: ViewLeft[a]): Bool with Eq[a] = match (vx, vy) {
         case (NoneLeft, NoneLeft) => true
         case (SomeLeft(x, xs), SomeLeft(y, ys)) =>
             if (x == y)

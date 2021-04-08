@@ -109,7 +109,7 @@ namespace Text/Collator {
         } as & Pure
 
     /// Warning - I am not sure each enum has a distinct int value in Java land...
-    def unmarshallCollatorStrength(i: Int32): CollatorStrength=
+    def unmarshallCollatorStrength(i: Int32): CollatorStrength =
         import get java.text.Collator:IDENTICAL as getIDENTICAL;
         import get java.text.Collator:PRIMARY as getPRIMARY;
         import get java.text.Collator:SECONDARY as getSECONDARY;
@@ -175,7 +175,5 @@ namespace Text/Collator {
         let Collator(x1) = x;
         let strength1 = marshallCollatorStrength(strength);
         setStrength(x1, strength1)
-
-
 
 }
