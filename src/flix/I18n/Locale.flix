@@ -302,7 +302,7 @@ namespace I18n/Locale {
         import flix.runtime.spt.sandbox.i18n.LocaleStringCursor:createGetISOCountriesCursor() as newCursor;
         let iter = newCursor();
         makeLocaleStringCursor(iter, "getIsoCountryCodes failed")
-            |> Cursor.toList
+            |> Cursor.toList!
             |> flip(Result.getWithDefault, Nil)
 
 
@@ -311,14 +311,14 @@ namespace I18n/Locale {
         let icc1 = marshal(icc);
         let iter = newCursor(icc1);
         makeLocaleStringCursor(iter, "getIsoCountryCodesWithIsoCountryCode failed")
-            |> Cursor.toSet
+            |> Cursor.toSet!
             |> flip(Result.getWithDefault, Set#{})
 
     pub def getIsoLanguages(): List[String] & Impure =
         import flix.runtime.spt.sandbox.i18n.LocaleStringCursor:createGetISOLanguagesCursor() as newCursor;
         let iter = newCursor();
         makeLocaleStringCursor(iter, "getIsoLanguages failed")
-            |> Cursor.toList
+            |> Cursor.toList!
             |> flip(Result.getWithDefault, Nil)
 
 
@@ -327,7 +327,7 @@ namespace I18n/Locale {
         let Locale(locale1) = locale;
         let iter = newCursor(locale1);
         makeLocaleStringCursor(iter, "getUnicodeLocaleAttributes failed")
-            |> Cursor.toSet
+            |> Cursor.toSet!
             |> flip(Result.getWithDefault, Set#{})
 
 
@@ -336,7 +336,7 @@ namespace I18n/Locale {
         let Locale(locale1) = locale;
         let iter = newCursor(locale1);
         makeLocaleStringCursor(iter, "getUnicodeLocaleKeys failed")
-            |> Cursor.toSet
+            |> Cursor.toSet!
             |> flip(Result.getWithDefault, Set#{})
 
 }

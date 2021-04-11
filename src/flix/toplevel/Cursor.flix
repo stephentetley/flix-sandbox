@@ -49,7 +49,7 @@ namespace Cursor {
                , next = () -> Failed(err) as & Impure
                , finalize = () -> () as & Impure})
 
-    pub def fold(f: (b, a) -> b & ef, ac: b, xs: Cursor[e, a]): Result[b, e] & Impure =
+    pub def fold!(f: (b, a) -> b & ef, ac: b, xs: Cursor[e, a]): Result[b, e] & Impure =
         let Cursor(xs1) = xs;
         foldHelper(f, ac, xs1)
 
@@ -118,7 +118,7 @@ namespace Cursor {
     }
 
 
-    pub def foreach(f: a ~> Unit, xs: Cursor[e, a]): Result[Unit, e] & Impure =
+    pub def foreach!(f: a ~> Unit, xs: Cursor[e, a]): Result[Unit, e] & Impure =
         let Cursor(xs1) = xs;
         foreachHelper(f, xs1)
 
@@ -166,7 +166,7 @@ namespace Cursor {
         let finalize = xs1.finalize;
         finalize()
 
-    pub def toList(src: Cursor[e, a]): Result[List[a], e] & Impure =
+    pub def toList!(src: Cursor[e, a]): Result[List[a], e] & Impure =
         let Cursor(src1) = src;
         toListHelper(src1, e -> Err(e), ks -> Ok(ks))
 
@@ -194,14 +194,14 @@ namespace Cursor {
             }
         }
 
-    pub def toSet(src: Cursor[e, a]): Result[Set[a], e] & Impure with Order[a] =
-        fold((s, x) -> Set.insert(x, s), Set#{}, src)
+    pub def toSet!(src: Cursor[e, a]): Result[Set[a], e] & Impure with Order[a] =
+        fold!((s, x) -> Set.insert(x, s), Set#{}, src)
 
-    pub def toMap(src: Cursor[e, (a, b)]): Result[Map[a, b], e] & Impure with Order[a] =
-        fold((s, x) -> {let (k,v) = x; Map.insert(k, v, s)}, Map#{}, src)
+    pub def toMap!(src: Cursor[e, (a, b)]): Result[Map[a, b], e] & Impure with Order[a] =
+        fold!((s, x) -> {let (k,v) = x; Map.insert(k, v, s)}, Map#{}, src)
 
 
-    pub def foldResult(f: (b, a) -> Result[b, e] & ef, ac: b, xs: Cursor[e, a]): Result[b, e] & Impure =
+    pub def foldResult!(f: (b, a) -> Result[b, e] & ef, ac: b, xs: Cursor[e, a]): Result[b, e] & Impure =
         let Cursor(xs1) = xs;
         foldResultHelper(f, ac, xs1)
 
@@ -234,7 +234,7 @@ namespace Cursor {
             }
         }
 
-    pub def foreachResult(f: a ~> Result[b, e], xs: Cursor[e, a]): Result[Unit, e] & Impure =
+    pub def foreachResult!(f: a ~> Result[b, e], xs: Cursor[e, a]): Result[Unit, e] & Impure =
         let Cursor(xs1) = xs;
         foreachResultHelper(f, xs1)
 

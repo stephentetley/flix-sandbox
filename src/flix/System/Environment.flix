@@ -53,7 +53,7 @@ namespace System/Environment {
                 , finalize = () -> () as & Impure
             };
             Cursor.makeCursor(cursorAlg)
-                |> Cursor.toMap
+                |> Cursor.toMap!
                 |> Result.toOption
          } catch {
             case _: ##java.lang.Exception => None
