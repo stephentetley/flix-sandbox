@@ -53,6 +53,16 @@ instance Monoid[Chain[a]] {
     pub def combine(xs: Chain[a], ys: Chain[a]): Chain[a] = Chain.append(xs, ys)
 }
 
+instance Functor[Chain] {
+    pub def map(f: a -> b & e, xs: Chain[a]): Chain[b] & e = Chain.map(f, xs)
+}
+
+instance Foldable[Chain] {
+    pub def foldLeft(f: (b, a) -> b & e, s: b, xs: Chain[a]): b & e = Chain.foldLeft(f, s, xs)
+    pub def foldRight(f: (a, b) -> b & e, s: b, xs: Chain[a]): b & e = Chain.foldRight(f, s, xs)
+}
+
+
 enum ViewLeft[t] {
     case NoneLeft
     case SomeLeft(t, Chain[t])
@@ -287,13 +297,13 @@ namespace Chain {
     ///
     /// That is, the result is of the form: `f(x1) :: f(x2) :: ...`.
     ///
-    pub def map(f: a -> b, xs: Chain[a]): Chain[b] =
+    pub def map(f: a -> b & ef, xs: Chain[a]): Chain[b] & ef =
         mapHelper(f, xs, Empty)
 
     ///
     /// Helper function for `map`.
     ///
-    def mapHelper(f: a -> b, xs: Chain[a], ac: Chain[b]): Chain[b] = match viewLeft(xs) {
+    def mapHelper(f: a -> b & ef, xs: Chain[a], ac: Chain[b]): Chain[b] & ef = match viewLeft(xs) {
         case NoneLeft => ac
         case SomeLeft(a, rs) => mapHelper(f, rs, snoc(ac, f(a)))
     }
