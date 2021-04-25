@@ -20,6 +20,9 @@ import ca.uwaterloo.flix.util.{FlixTest, Options}
 import org.scalatest.Suites
 
 class SandboxSuite extends Suites(
+
+  new FlixTest("Chain", "main/test/spt/sandbox/TestChain.flix")(Options.TestWithLibrary),
+
   // Data
   new FlixTest("Data/TestDList", "main/test/spt/sandbox/Data/TestDList.flix")(Options.TestWithLibrary),
   new FlixTest("Data/TestRoseTree", "main/test/spt/sandbox/Data/TestRoseTree.flix")(Options.TestWithLibrary),

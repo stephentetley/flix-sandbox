@@ -195,10 +195,11 @@ def results01(): Bool & Impure =
     use Text/Regex/MatchEvaluator.{content};
     let step = () -> {
         let* p1     = Option.toOk(Text/Regex/Pattern.compile("\p{Alpha}+"), "Pattern.compile");
-        let strm    = results("aa bb cc", p1, content());
-        Ok(strm)
+        let cursor  = results("aa bb cc", p1, content());
+        let* xs     = Cursor.toList!(cursor);
+        Ok(xs)
     };
-    Result.map(Data/Stream.toList, step()) == Ok("aa" :: "bb" :: "cc" :: Nil)
+    step() == Ok("aa" :: "bb" :: "cc" :: Nil)
 
 /////////////////////////////////////////////////////////////////////////////
 // contentResults                                                          //
@@ -206,14 +207,15 @@ def results01(): Bool & Impure =
 
 @test
 def contentResults01(): Bool & Impure =
-    use Option.flatMap;
+    use Result.flatMap;
     use Text/Regex.{contentResults};
     let step = () -> {
-        let* p1     = Text/Regex/Pattern.compile("\p{Alpha}+");
-        let strm    = contentResults("aa bb cc", p1);
-        Some(strm)
+        let* p1     = Option.toOk(Text/Regex/Pattern.compile("\p{Alpha}+"), "Pattern.compile");
+        let cursor  = contentResults("aa bb cc", p1);
+        let* xs     = Cursor.toList!(cursor);
+        Ok(xs)
     };
-    Option.map(Data/Stream.toList, step()) == Some("aa" :: "bb" :: "cc" :: Nil)
+    step() == Ok("aa" :: "bb" :: "cc" :: Nil)
 
 /////////////////////////////////////////////////////////////////////////////
 // rangeResults                                                            //
@@ -225,8 +227,10 @@ def rangeResults01(): Bool & Impure =
     use Text/Regex.{rangeResults};
     let step = () -> {
         let* p1     = Option.toOk(Text/Regex/Pattern.compile("\p{Alpha}+"), "Pattern.compile");
-        let strm    = rangeResults("aa bb cc", p1);
-        Ok(strm)
+        let cursor  = rangeResults("aa bb cc", p1);
+        let* xs     = Cursor.toList!(cursor);
+        Ok(xs)
     };
-    Result.map(Data/Stream.toList, step()) == Ok((0,2) :: (3,5) :: (6,8) :: Nil)
+    step() == Ok((0,2) :: (3,5) :: (6,8) :: Nil)
+
 }

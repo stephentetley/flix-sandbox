@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Stephen Tetley
+ * Copyright 2021 Stephen Tetley
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,17 @@
  * limitations under the License.
  */
 
-use Data/Transient.{JoinList};
-
-namespace TestJoinList {
+namespace TestChain {
 
 
-/////////////////////////////////////////////////////////////////////////////
-// empty                                                                   //
-/////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////
+    // empty                                                                   //
+    /////////////////////////////////////////////////////////////////////////////
 
-@test
-def empty01(): Bool =
-    use Data/Transient/JoinList.{toList, empty};
-    let xs = empty();
-    toList(xs) == Nil
+    @test
+    def empty01(): Bool =
+        let xs: Chain[Int32] = Chain.empty();
+        Chain.toList(xs) == Nil
 
 /////////////////////////////////////////////////////////////////////////////
 // singleton                                                               //
@@ -35,43 +32,39 @@ def empty01(): Bool =
 
 @test
 def singleton01(): Bool =
-    use Data/Transient/JoinList.{toList, singleton};
+    use Chain.{toList, singleton};
     let xs = singleton(1);
     toList(xs) == 1 :: Nil
 
 @test
 def singleton02(): Bool =
-    use Data/Transient/JoinList.{toList, singleton};
-    let xs: JoinList[Option[Int32]] = singleton(None);
+    use Chain.{toList, singleton};
+    let xs: Chain[Option[Int32]] = singleton(None);
     toList(xs) == None :: Nil
 
 /////////////////////////////////////////////////////////////////////////////
-// concat                                                                  //
+// flatten                                                                  //
 /////////////////////////////////////////////////////////////////////////////
 
 @test
-def concat01(): Bool =
-    use Data/Transient/JoinList.{toList, concat};
-    let xs = concat(Nil);
-    toList(xs) == Nil
+def flatten01(): Bool =
+    let xs: Chain[Chain[Int32]] = Chain.flatten(Chain.empty());
+    Chain.toList(xs) == Nil
 
 @test
-def concat02(): Bool =
-    use Data/Transient/JoinList.{toList, concat, singleton};
-    let xs = concat(singleton(1) :: Nil);
-    toList(xs) == 1 :: Nil
+def flatten02(): Bool =
+    let xs = Chain.flatten(Chain.singleton(Chain.singleton(1)));
+    Chain.toList(xs) == 1 :: Nil
 
 @test
-def concat03(): Bool =
-    use Data/Transient/JoinList.{toList, concat, singleton};
-    let xs = concat(singleton(1) :: singleton(2) :: Nil);
-    toList(xs) == 1 :: 2 :: Nil
+def flatten03(): Bool =
+    let xs = Chain.flatten(Chain.fromList(Chain.singleton(1) :: Chain.singleton(2) :: Nil));
+    Chain.toList(xs) == 1 :: 2 :: Nil
 
 @test
-def concat04(): Bool =
-    use Data/Transient/JoinList.{toList, concat, singleton, fromList};
-    let xs = concat(fromList(1 :: 2 :: Nil) :: singleton(3) :: Nil);
-    toList(xs) == 1 :: 2 :: 3 :: Nil
+def flatten04(): Bool =
+    let xs = Chain.flatten(Chain.fromList(Chain.fromList(1 :: 2 :: Nil) :: Chain.singleton(3) :: Nil));
+    Chain.toList(xs) == 1 :: 2 :: 3 :: Nil
 
 /////////////////////////////////////////////////////////////////////////////
 // foldRight                                                               //
@@ -79,7 +72,7 @@ def concat04(): Bool =
 
 @test
 def foldRight01(): Bool =
-    use Data/Transient/JoinList.{repeat, foldRight};
+    use Chain.{repeat, foldRight};
     let xs = repeat(1, 1000000);
     foldRight((a,b) -> Int32.max(a,b), 0, xs) == 1
 
@@ -89,7 +82,7 @@ def foldRight01(): Bool =
 
 @test
 def foldLeft01(): Bool =
-    use Data/Transient/JoinList.{repeat, foldLeft};
+    use Chain.{repeat, foldLeft};
     let xs = repeat(1, 1000000);
     foldLeft((a,b) -> Int32.max(a,b), 0, xs) == 1
 
@@ -99,20 +92,20 @@ def foldLeft01(): Bool =
 
 @test
 def map01(): Bool =
-    use Data/Transient/JoinList.{toList, map, empty};
-    let xs = map(x -> x+1, empty(): JoinList[Int32]);
+    use Chain.{toList, map, empty};
+    let xs = map(x -> x+1, empty(): Chain[Int32]);
     toList(xs) == Nil
 
 @test
 def map02(): Bool =
-    use Data/Transient/JoinList.{toList, map, singleton};
+    use Chain.{toList, map, singleton};
     let xs = map(x -> x+1, singleton(0));
     toList(xs) == 1 :: Nil
 
 
 @test
 def map03(): Bool =
-    use Data/Transient/JoinList.{toList, map, cons, singleton};
+    use Chain.{toList, map, cons, singleton};
     let xs = map(x -> x+1, cons(1, singleton(0)));
     toList(xs) == 2 :: 1 :: Nil
 
