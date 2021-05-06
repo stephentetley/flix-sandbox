@@ -58,4 +58,29 @@ namespace Text/NumberFormatter {
     }
 
 
+    ///
+    /// Format `x` with underscores delimiting every three digits.
+    ///
+    pub def formatInt64WithGrouping(x: Int64): String =
+        formatInt64WithGroupingHelper(x) as & Pure
+
+    ///
+    /// Helper function for `formatInt64WithGrouping`.
+    ///
+    def formatInt64WithGroupingHelper(x: Int64): String & Impure =
+        import new java.text.DecimalFormat() as newDecimalFormat;
+        import java.text.DecimalFormat.setGroupingSize(Int32);
+        import java.text.DecimalFormat.setDecimalFormatSymbols(##java.text.DecimalFormatSymbols);
+        import new java.text.DecimalFormatSymbols() as newDecimalFormatSymbols;
+        import java.text.DecimalFormatSymbols.setGroupingSeparator(Char);
+        import java.text.NumberFormat.format(Int64);
+        let format1 = newDecimalFormat();
+        let symbols = newDecimalFormatSymbols();
+        setGroupingSeparator(symbols, '_');
+        setGroupingSize(format1, 3);
+        setDecimalFormatSymbols(format1, symbols);
+        let format2 = format1 as ##java.text.NumberFormat;
+        format(format2, x)
+
+
 }
