@@ -649,16 +649,28 @@ namespace Chain {
         List.foldLeft(snoc, empty(), xs)
 
     ///
+    /// Returns the mutable list `xs` as a chain.
+    ///
+    pub def fromMutList(xs: MutList[a]): Chain[a] & Impure =
+        MutList.foldLeft((ac, x) -> snoc(ac, x), empty(), xs)
+
+    ///
     /// Returns `xs` as a mutable list.
     ///
-    pub def toMut(xs: Chain[a]): MutList[a] & Impure =
+    pub def toMutList(xs: Chain[a]): MutList[a] & Impure =
         MutList(ref toArray(xs), ref length(xs))
+
 
     ///
     /// Returns the list `xs` as a set.
     ///
     pub def toSet(xs: Chain[a]): Set[a] with Order[a] = foldRight(Set.insert, Set.empty(), xs)
 
+    ///
+    /// Returns the set `xs` as a chain.
+    ///
+    pub def fromSet(xs: Set[a]): Chain[a] =
+        Set.foldLeft((ac, x) -> snoc(ac, x), empty(), xs)
 
     ///
     /// Returns the association list `xs` as a map.
@@ -679,16 +691,23 @@ namespace Chain {
         case SomeLeft(x, rs) => f(x); foreach(f, rs)
     }
 
+
+    ///
+    /// Returns the array `xs` as a chain.
+    ///
+    pub def fromArray(xs: Array[a]): Chain[a] & Impure =
+        Array.foldLeft(snoc, empty(), xs)
+
     ///
     /// Returns the chain `xs` as an array.
     ///
     pub def toArray(xs: Chain[a]) : Array[a] & Impure = match head(xs) {
         case None => []
         case Some(x) =>
-            let a = Array.new(x, length(xs));
-            let f = (i,b) -> { a[i] = b; i + 1 };
+            let arr = Array.new(x, length(xs));
+            let f = (i, b) -> { arr[i] = b; i + 1 };
             foldLeft(f, 0, xs);
-            a
+            arr
         }
 
     ///
