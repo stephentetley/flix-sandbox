@@ -636,6 +636,37 @@ namespace Chain {
         case NoneLeft => (ac1, ac2)
     }
 
+    pub def mapAccumLeft(f: (s, a) -> (s, b) & ef, start: s, xs: Chain[a]): (s, Chain[b]) & ef =
+        mapAccumLeftHelper(f, start, xs, (s1, ks) -> (s1, ks))
+
+    ///
+    /// Helper function for `mapAccumLeft`.
+    ///
+    def mapAccumLeftHelper(f: (s, a) -> (s, b) & ef, s1: s, xs: Chain[a], k: (s, Chain[b]) -> (s, Chain[b])): (s, Chain[b]) & ef =
+        match viewLeft(xs) {
+            case NoneLeft => k(s1, empty())
+            case SomeLeft(x, rs) => {
+                let (s2, x1) = f(s1, x);
+                mapAccumLeftHelper(f, s2, rs, (s3, ks) -> k(s3, cons(x1, ks)))
+            }
+        }
+
+    pub def mapAccumRight(f: (s, a) -> (s, b) & ef, start: s, xs: Chain[a]): (s, Chain[b]) & ef =
+        mapAccumRightHelper(f, start, xs, (s1, ks) -> (s1, ks) as & ef)
+
+    ///
+    /// Helper function for `mapAccumRight`.
+    ///
+    def mapAccumRightHelper(f: (s, a) -> (s, b) & ef, s1: s, xs: Chain[a], k: (s, Chain[b]) -> (s, Chain[b]) & ef): (s, Chain[b]) & ef =
+        match viewRight(xs) {
+            case NoneRight => k(s1, empty())
+            case SomeRight(rs, x) => {
+                let (s2, x1) = f(s1, x);
+                mapAccumRightHelper(f, s2, rs, (s3, ks) -> k(s3, snoc(ks, x1)))
+           }
+        }
+
+
     ///
     /// Returns `xs` as a list.
     ///
