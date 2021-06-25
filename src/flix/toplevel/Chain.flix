@@ -108,7 +108,6 @@ namespace Chain {
         case _ => None
     }
 
-
     ///
     /// Returns `Some(x)` if `x` is the last element of `xs`.
     ///
@@ -116,6 +115,15 @@ namespace Chain {
     ///
     pub def last(xs: Chain[a]): Option[a] = match viewRight(xs) {
         case SomeRight(_, x) => Some(x)
+        case _ => None
+    }
+
+    ///
+    /// Returns the sublist of `xs` without the last element.
+    /// Returns `None` if the chain `xs` is empty.
+    ///
+    pub def init(xs: Chain[a]): Option[Chain[a]] = match viewRight(xs) {
+        case SomeRight(rs, _) => Some(rs)
         case _ => None
     }
 

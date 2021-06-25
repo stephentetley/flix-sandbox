@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+/// TODO - possibly call this DataCursor to avoid strong connotation
+/// to a database cursor.
+
 opaque type Cursor[e, a] = Cursor.CursorImpl[e, a]
 
 type alias CursorAlg[e, a] = { hasNext: Unit ~> Bool, next: Unit ~> Result[a, e], finalize: Unit ~> Unit }

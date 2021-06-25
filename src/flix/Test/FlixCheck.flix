@@ -59,18 +59,17 @@ namespace Test/FlixCheck {
         let Random(r1) = r;
         r1.nextLong(lo, hi)
 
-    def stringCompare(s: String, t: String): Int32 = 
-        import java.lang.String.compareTo(String);
-        s.compareTo(t) as & Pure
+    def stringCompare(s: String, t: String): Comparison =
+        Order.compare(s, t)
 
-    def listCompareWith(cmp: (a,a) -> Int32, xs: List[a], ys: List[a]): Int32 = 
+    def listCompareWith(cmp: (a,a) -> Comparison, xs: List[a], ys: List[a]): Comparison =
         match (xs,ys) {
-            case (Nil, Nil)             => 0
-            case (Nil, _)               => -1
-            case (_, Nil)               => 1
+            case (Nil, Nil)             => EqualTo
+            case (Nil, _)               => LessThan
+            case (_, Nil)               => GreaterThan
             case (x :: xs1, y :: ys1)   => { 
                 let c = cmp(x,y);
-                if (c == 0) 
+                if (c == EqualTo)
                     listCompareWith(cmp, xs1, ys1)
                 else
                     c
@@ -440,7 +439,7 @@ namespace Test/FlixCheck {
             |> List.sortWith(listCompareWith(stringCompare))
             |> List.groupBy((s,t) -> s == t)
             |> List.map(pairLength)
-            |> List.sortWith((u,v) -> Int32.compare(fst(u),fst(v)))
+            |> List.sortWith((u,v) -> Order.compare(fst(u), fst(v)))
             |> List.reverse
             |> List.map(entry)
             |> display
