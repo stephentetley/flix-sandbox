@@ -29,12 +29,36 @@ namespace System {
             path1.toString() as & Pure
     }
 
+    instance FromString[FilePath] {
+        pub def fromString(x: String): Option[FilePath] =
+            Some(System/FilePath.new(x))
+    }
+
     instance Eq[FilePath] {
         pub def eq(x: FilePath, y: FilePath): Bool =
             import java.nio.file.Path.equals(##java.lang.Object);
             let FilePath(x1) = x;
             let FilePath(y1) = y;
             x1.equals(y1 as ##java.lang.Object) as & Pure
+    }
+
+    instance Semigroup[FilePath] {
+        pub def combine(x: FilePath, y: FilePath): FilePath = System/FilePath.append(x, y)
+    }
+
+    instance Order[FilePath] {
+        pub def compare(x: FilePath, y: FilePath): Comparison =
+            import java.nio.file.Path.compareTo(##java.nio.file.Path);
+            let FilePath(x1) = x;
+            let FilePath(y1) = y;
+            compareTo(x1, y1) as & Pure |> Comparison.fromInt
+    }
+
+    instance Hash[FilePath] {
+        pub def hash(x: FilePath): Int32 =
+            import java.nio.file.Path.hashCode();
+            let FilePath(x1) = x;
+            hashCode(x1) as & Pure
     }
 
 }
@@ -51,9 +75,22 @@ namespace System/FilePath {
     ///
     /// Returns a new FilePath.
     ///
+    /// TODO - change to return Result so failure is explicitly signalled.
     pub def new(s: String): FilePath =
         import flix.runtime.spt.sandbox.system.FilePathWrapper:get1(String) as get1;
-        FilePath(get1(s)) as & Pure
+        try {
+            FilePath(get1(s)) as & Pure
+        } catch {
+            case _: ##java.lang.Exception => empty()
+        }
+
+    pub def empty(): FilePath =
+        import flix.runtime.spt.sandbox.system.FilePathWrapper:get1(String) as get1;
+        try {
+            FilePath(get1("")) as & Pure
+        } catch {
+            case _: ##java.lang.Exception => bug!("FilePath.empty")
+        }
 
     pub def normalize(path: FilePath): FilePath =
         import java.nio.file.Path.normalize();
@@ -133,7 +170,7 @@ namespace System/FilePath {
         normalize(resolve(path, other))
 
     pub def concat(xs: List[FilePath]): FilePath = match xs {
-        case Nil => new("")
+        case Nil => empty()
         case root :: rs => normalize(List.foldLeft(resolve, root, rs))
     }
 
