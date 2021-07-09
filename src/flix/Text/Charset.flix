@@ -43,8 +43,23 @@ namespace Text  {
 
     instance Order[Charset] {
         pub def compare(x: Charset, y: Charset): Comparison =
-            Text/Charset.compareTo(x,y) |> Comparison.fromInt
+            Text/Charset.compareTo(x, y) |> Comparison.fromInt
     }
+
+    instance Boxable[Charset] {
+        pub def box(x: Charset): Boxed = {
+            let Charset(x1) = x;
+            let value = x1 as ##java.lang.Object;
+            let compare = (o1, o2) -> Order.compare(Charset(o1 as ##java.nio.charset.Charset), Charset(o2 as ##java.nio.charset.Charset));
+            let toString = o1 -> ToString.toString(Charset(o1 as ##java.nio.charset.Charset));
+            BoxedObject(value, compare, toString)
+        }
+        pub def unbox(x: Boxed): Charset = match x {
+            case BoxedObject(v, _, _) => Charset(v as ##java.nio.charset.Charset)
+            case _                    => ?bug
+        }
+    }
+
 }
 
 namespace Text/Charset {
@@ -135,5 +150,11 @@ namespace Text/Charset {
         import java.nio.charset.Charset.isRegistered();
         let Charset(cs1) = cs;
         isRegistered(cs1) as & Pure
+
+    pub def contains(x: Charset, y: Charset): Bool =
+        import java.nio.charset.Charset.contains(##java.nio.charset.Charset);
+        let Charset(x1) = x;
+        let Charset(y1) = y;
+        contains(x1, y1) as & Pure
 
 }

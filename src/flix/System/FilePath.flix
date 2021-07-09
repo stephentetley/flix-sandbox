@@ -26,7 +26,7 @@ namespace System {
         pub def toString(path: FilePath): String =
             import java.nio.file.Path.toString();
             let FilePath(path1) = path;
-            path1.toString() as & Pure
+            toString(path1) as & Pure
     }
 
     instance FromString[FilePath] {
@@ -39,7 +39,7 @@ namespace System {
             import java.nio.file.Path.equals(##java.lang.Object);
             let FilePath(x1) = x;
             let FilePath(y1) = y;
-            x1.equals(y1 as ##java.lang.Object) as & Pure
+            equals(x1, y1 as ##java.lang.Object) as & Pure
     }
 
     instance Semigroup[FilePath] {
@@ -66,7 +66,7 @@ namespace System {
             let FilePath(x1) = x;
             let value = x1 as ##java.lang.Object;
             let compare = (o1, o2) -> Order.compare(FilePath(o1 as ##java.nio.file.Path), FilePath(o2 as ##java.nio.file.Path));
-            let toString = o -> ToString.toString(FilePath(o as ##java.nio.file.Path));
+            let toString = o1 -> ToString.toString(FilePath(o1 as ##java.nio.file.Path));
             BoxedObject(value, compare, toString)
         }
         pub def unbox(x: Boxed): FilePath = match x {
@@ -116,7 +116,7 @@ namespace System/FilePath {
     pub def normalize(path: FilePath): FilePath =
         import java.nio.file.Path.normalize();
         let FilePath(p1) = path;
-        FilePath(p1.normalize()) as & Pure
+        FilePath(normalize(p1)) as & Pure
 
 
     /// If `path` is a relative path `toAbsolutePath` resolves the path in a system specific manner.
@@ -134,14 +134,14 @@ namespace System/FilePath {
     pub def isAbsolute(path: FilePath): Bool =
         import java.nio.file.Path.isAbsolute();
         let FilePath(path1) = path;
-        path1.isAbsolute() as & Pure
+        isAbsolute(path1) as & Pure
 
     pub def isRelative(path: FilePath): Bool = not isAbsolute(path)
 
     pub def getRoot(path: FilePath): Option[FilePath] =
         import java.nio.file.Path.getRoot();
         let FilePath(path1) = path;
-        let root = path1.getRoot() as & Pure;
+        let root = getRoot(path1) as & Pure;
         if (Object.isNull(root))
             None
         else
@@ -150,7 +150,7 @@ namespace System/FilePath {
     pub def getParent(path: FilePath): Option[FilePath] =
         import java.nio.file.Path.getParent();
         let FilePath(path1) = path;
-        let parent = path1.getParent() as & Pure;
+        let parent = getParent(path1) as & Pure;
         if (Object.isNull(parent))
             None
         else
@@ -159,7 +159,7 @@ namespace System/FilePath {
     pub def getFileName(path: FilePath): Option[FilePath] =
         import java.nio.file.Path.getFileName();
         let FilePath(path1) = path;
-        let name = path1.getFileName() as & Pure;
+        let name = getFileName(path1) as & Pure;
         if (Object.isNull(name))
             None
         else
@@ -191,9 +191,9 @@ namespace System/FilePath {
 
     def resolve(path: FilePath, other: FilePath): FilePath =
         import java.nio.file.Path.resolve(##java.nio.file.Path);
-        let FilePath(p1) = path;
-        let FilePath(p2) = other;
-        FilePath(p1.resolve(p2)) as & Pure
+        let FilePath(path1) = path;
+        let FilePath(other1) = other;
+        FilePath(resolve(path1, other1)) as & Pure
 
     pub def append(path: FilePath, other: FilePath): FilePath =
         normalize(resolve(path, other))
@@ -210,7 +210,7 @@ namespace System/FilePath {
         import java.nio.file.Path.relativize(##java.nio.file.Path);
         let FilePath(p1) = path1;
         let FilePath(p2) = path2;
-        FilePath(p1.relativize(p2)) as & Pure
+        FilePath(relativize(p1, p2)) as & Pure
 
     ///
     /// Returns `true` if the filepath `path1` starts with the string `path2`.
@@ -219,7 +219,7 @@ namespace System/FilePath {
         import java.nio.file.Path.startsWith(##java.nio.file.Path);
         let FilePath(p1) = path1;
         let FilePath(p2) = path2;
-        p1.startsWith(p2) as & Pure
+        startsWith(p1, p2) as & Pure
 
 
     pub def getNameCount(path: FilePath): Int32 =
@@ -232,7 +232,7 @@ namespace System/FilePath {
     def getNameCountHelper(path: FilePath): Int32 =
         import java.nio.file.Path.getNameCount();
         let FilePath(path1) = path;
-        path1.getNameCount() as & Pure
+        getNameCount(path1) as & Pure
 
     pub def getNameAt(path: FilePath, ix: Int32): Option[FilePath] =
         if (ix < 0)
@@ -252,7 +252,7 @@ namespace System/FilePath {
         import java.nio.file.Path.getName(Int32);
         try {
             let FilePath(path1) = path;
-            let name1 = path1.getName(ix) as & Pure;
+            let name1 = getName(path1, ix) as & Pure;
             Some(FilePath(name1))
         } catch {
             case _: ##java.lang.Exception => None
@@ -380,5 +380,4 @@ namespace System/FilePath {
                 case None => k(Nil)
             }
 
-
- }
+}

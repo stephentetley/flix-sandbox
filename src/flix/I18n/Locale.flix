@@ -24,6 +24,16 @@ namespace I18n {
         pub def toString(x: Locale): String = I18n/Locale.toString(x)
     }
 
+    instance FromString[Locale] {
+        pub def fromString(x: String): Option[Locale] =
+                import new java.util.Locale(String) as newLocale;
+        try {
+            Some(Locale(newLocale(x))) as & Pure
+        } catch {
+            case _: ##java.lang.Exception => None
+        }
+    }
+
     instance Eq[Locale] {
         pub def eq(x: Locale, y: Locale): Bool = I18n/Locale.equals(x, y)
     }
@@ -32,6 +42,8 @@ namespace I18n {
         pub def hash(x: Locale): Int32 = I18n/Locale.hashCode(x)
     }
 
+    /// No Order, so no Boxable
+
 }
 
 namespace I18n/Locale {
@@ -39,6 +51,7 @@ namespace I18n/Locale {
     use I18n.Locale;
     use I18n.Locale.{Locale};
 
+    /// TODO - show return Result...
     pub def new(x: {language: String, country: String, variant: String}): Locale =
         import new java.util.Locale(String, String, String) as newLocale;
         Locale(newLocale(x.language, x.country, x.variant)) as & Pure
@@ -89,7 +102,7 @@ namespace I18n/Locale {
         import java.util.Locale.equals(##java.lang.Object);
         let Locale(x1) = x;
         let Locale(y1) = y;
-        x1.equals(y1 as ##java.lang.Object) as & Pure
+        equals(x1, y1 as ##java.lang.Object) as & Pure
 
     pub def toString(x: Locale): String =
         import java.util.Locale.toString();
