@@ -79,21 +79,31 @@ namespace System/Environment {
 
     pub def getUserName(): String =
         import java.lang.System:getProperty(String);
-        getProperty("user.name") as & Pure
+        let p1 = getProperty("user.name") as & Pure;
+        if (Object.isNull(p1))
+            ""
+        else p1
 
-    pub def getUserDirectory(): FilePath & Impure =
+
+    pub def getUserDirectory(): Result[FilePath, String] & Impure =
         import java.lang.System:getProperty(String);
         // Assume "user.dir" can change during a programs lifetime
         let p1 = getProperty("user.dir");
-        System/FilePath.new(p1)
-            |> System/FilePath.normalize
-            |> System/FilePath.toAbsolutePath
+        if (Object.isNull(p1))
+            Err("getUserDirectory")
+        else
+            System/FilePath.new(p1)
+                |> System/FilePath.normalize
+                |> System/FilePath.toAbsolutePath
 
-    pub def getUserHome(): FilePath =
+    pub def getUserHome(): Result[FilePath, String] =
         import java.lang.System:getProperty(String);
         let p1 = getProperty("user.home") as & Pure;
-        System/FilePath.new(p1)
-            |> System/FilePath.normalize
-            |> System/FilePath.toAbsolutePath
+        if (Object.isNull(p1))
+            Err("getUserHome")
+        else
+            System/FilePath.new(p1)
+                |> System/FilePath.normalize
+                |> System/FilePath.toAbsolutePath
 
 }

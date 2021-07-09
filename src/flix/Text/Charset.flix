@@ -28,6 +28,11 @@ namespace Text  {
             toS(cs1) as & Pure
     }
 
+    instance FromString[Charset] {
+        pub def fromString(x: String): Option[Charset] =
+            Text/Charset.forName(x)
+    }
+
     instance Eq[Charset] {
         pub def eq(x: Charset, y: Charset): Bool = Text/Charset.equals(x, y)
     }
@@ -37,11 +42,8 @@ namespace Text  {
     }
 
     instance Order[Charset] {
-        pub def compare(x: Charset, y: Charset): Comparison = match Text/Charset.compareTo(x,y) {
-            case n if n < 0 => LessThan
-            case n if n == 0 => EqualTo
-            case _ => GreaterThan
-        }
+        pub def compare(x: Charset, y: Charset): Comparison =
+            Text/Charset.compareTo(x,y) |> Comparison.fromInt
     }
 }
 

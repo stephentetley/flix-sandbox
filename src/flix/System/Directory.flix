@@ -21,15 +21,19 @@ namespace System/Directory {
     use System.FilePath;
     use System.FilePath.{FilePath};
 
-    pub def getCurrentDirectory(): FilePath & Impure =
+    pub def getCurrentDirectory(): Result[FilePath, String] & Impure =
         System/Environment.getUserDirectory()
 
-    pub def getTempDirectory(): FilePath & Impure =
+    pub def getTempDirectory(): Result[FilePath, String] & Impure =
         import java.lang.System:getProperty(String);
         let p1 = getProperty("java.io.tmpdir");
-        System/FilePath.new(p1)
-            |> System/FilePath.normalize
-            |> System/FilePath.toAbsolutePath
+        if (Object.isNull(p1))
+            Err("getTempDirectory")
+        else
+            System/FilePath.new(p1)
+                |> System/FilePath.normalize
+                |> System/FilePath.toAbsolutePath
+
 
     /// One level - not recursive, returns a Cursor
     pub def contents(path: FilePath): Cursor[String, FilePath] & Impure =

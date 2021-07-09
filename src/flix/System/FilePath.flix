@@ -61,6 +61,20 @@ namespace System {
             hashCode(x1) as & Pure
     }
 
+    instance Boxable[FilePath] {
+        pub def box(x: FilePath): Boxed = {
+            let FilePath(x1) = x;
+            let value = x1 as ##java.lang.Object;
+            let compare = (o1, o2) -> Order.compare(FilePath(o1 as ##java.nio.file.Path), FilePath(o2 as ##java.nio.file.Path));
+            let toString = o -> ToString.toString(FilePath(o as ##java.nio.file.Path));
+            BoxedObject(value, compare, toString)
+        }
+        pub def unbox(x: Boxed): FilePath = match x {
+            case BoxedObject(v, _, _) => FilePath(v as ##java.nio.file.Path)
+            case _                    => ?bug
+        }
+    }
+
 }
 
 namespace System/FilePath {
@@ -75,13 +89,20 @@ namespace System/FilePath {
     ///
     /// Returns a new FilePath.
     ///
-    /// TODO - change to return Result so failure is explicitly signalled.
     pub def new(s: String): FilePath =
         import flix.runtime.spt.sandbox.system.FilePathWrapper:get1(String) as get1;
         try {
             FilePath(get1(s)) as & Pure
         } catch {
             case _: ##java.lang.Exception => empty()
+        }
+
+    pub def tryNew(s: String): Result[FilePath, String] =
+        import flix.runtime.spt.sandbox.system.FilePathWrapper:get1(String) as get1;
+        try {
+            Ok(FilePath(get1(s))) as & Pure
+        } catch {
+            case _: ##java.lang.Exception => Err("Invalid FilePath")
         }
 
     pub def empty(): FilePath =
@@ -97,10 +118,18 @@ namespace System/FilePath {
         let FilePath(p1) = path;
         FilePath(p1.normalize()) as & Pure
 
-    pub def toAbsolutePath(path: FilePath): FilePath =
+
+    /// If `path` is a relative path `toAbsolutePath` resolves the path in a system specific manner.
+    /// Should this be Impure?
+    pub def toAbsolutePath(path: FilePath): Result[FilePath, String] =
         import java.nio.file.Path.toAbsolutePath();
-        let FilePath(p1) = path;
-        FilePath(p1.toAbsolutePath()) as & Pure
+        try {
+            let FilePath(p1) = path;
+            Ok(FilePath(toAbsolutePath(p1))) as & Pure
+        } catch {
+            case _: ##java.lang.Exception => Err("toAbsolutePath")
+        }
+
 
     pub def isAbsolute(path: FilePath): Bool =
         import java.nio.file.Path.isAbsolute();
@@ -287,20 +316,20 @@ namespace System/FilePath {
         use Option.flatMap;
         let* s = getFileName(path) |> Option.map(toString);
         let* ix = String.indexOfLeft(".", s);
-        Some(String.sliceRight(s, ix+1))
+        Some(String.sliceRight(s, ix + 1))
 
     ///
     /// Drop all extensions if the filepath has mutliple extensions,
     /// i.e. "archive.tar.gz" becomes "archive".
     ///
     pub def dropExtensions(path: FilePath): FilePath = match getExtensions(path) {
-            case Some(ext) => {
-                let str = toString(path);
-                let lhs = String.dropRight(String.length(ext) + 1, str);
-                new(lhs)
-            }
-            case None => path
+        case Some(ext) => {
+            let str = toString(path);
+            let lhs = String.dropRight(String.length(ext) + 1, str);
+            new(lhs)
         }
+        case None => path
+    }
 
     pub def putExtensions(path: FilePath, ext: String): FilePath =
         match getExtensions(path) {
@@ -341,7 +370,7 @@ namespace System/FilePath {
         let n = getNameCount(path);
         splitHelper(path, n, 0, xs -> xs)
 
-    pub def splitHelper(path: FilePath, count: Int32, i: Int32, k: List[FilePath] -> List[FilePath]): List[FilePath] =
+    def splitHelper(path: FilePath, count: Int32, i: Int32, k: List[FilePath] -> List[FilePath]): List[FilePath] =
         if (i >= count)
             k(Nil)
         else
