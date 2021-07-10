@@ -203,6 +203,14 @@ namespace System/FilePath {
         case root :: rs => normalize(List.foldLeft(resolve, root, rs))
     }
 
+    pub def <<>>(path: FilePath, name1: String): FilePath = snoc(path, name1)
+
+    def snoc(path: FilePath, name1: String): FilePath =
+        match tryNew(name1) {
+            case Ok(path1) => append(path, path1)
+            case Err(_) => path
+        }
+
     ///
     /// Returns `path1` with the path name contracted relative to `path2`.
     ///
@@ -302,6 +310,26 @@ namespace System/FilePath {
     pub def splitExtension(path: FilePath): (FilePath, Option[String]) =
         (dropExtension(path), getExtension(path))
 
+    pub def mapExtension(f: String -> String, path: FilePath): FilePath =
+        let (path1, ext) = splitExtension(path);
+        match ext {
+            case Some(s1) => addExtension(path1, f(s1))
+            case None => path
+        }
+
+    /// false if no extension
+    pub def testExtension(f: String -> Bool, path: FilePath): Bool =
+        match getExtension(path) {
+            case Some(s1) => f(s1)
+            case None => false
+        }
+
+    pub def isExtension(path: FilePath, s: String): Bool =
+        testExtension(x -> s == x, path)
+
+    pub def isExtensionOneOf(path: FilePath, xs: List[String]): Bool =
+        testExtension(x -> List.memberOf(x, xs), path)
+
     /// Suffixes the extension `ext` even if the path already has an extension.
     /// e.g. addExtension("archive.tar", "gz") == "archive.tar.gz"
     pub def addExtension(path: FilePath, ext: String): FilePath =
@@ -312,6 +340,10 @@ namespace System/FilePath {
             new(str + "." + ext)
         }
 
+    ///
+    /// Retuen all extensions if the filepath has multiple extensions,
+    /// i.e. "archive.tar.gz" becomes "tar.gz".
+    ///
     pub def getExtensions(path: FilePath): Option[String] =
         use Option.flatMap;
         let* s = getFileName(path) |> Option.map(toString);
@@ -349,7 +381,7 @@ namespace System/FilePath {
     /// If the extension of the filepath does not match ext or the filepath
     /// does not have an extension return None.
     ///
-    pub def stripExtension(path: FilePath, ext: String ): Option[FilePath] =
+    pub def stripExtension(path: FilePath, ext: String): Option[FilePath] =
         use Option.flatMap;
         let* ext1 = getExtension(path);
         if (ext1 == ext)
@@ -358,7 +390,7 @@ namespace System/FilePath {
             None
 
     /// Multiple extension version of `stripExtension`.
-    pub def stripExtensions(path: FilePath, exts: String ): Option[FilePath] =
+    pub def stripExtensions(path: FilePath, exts: String): Option[FilePath] =
         use Option.flatMap;
         let* exts1 = getExtensions(path);
         if (exts1 == exts)
