@@ -22,6 +22,7 @@ namespace System {
     ///
     pub opaque type FilePath = ##java.nio.file.Path
 
+    /// Note formatting is system dependent.
     instance ToString[FilePath] {
         pub def toString(path: FilePath): String =
             import java.nio.file.Path.toString();
@@ -189,6 +190,19 @@ namespace System/FilePath {
             case (_, _) => path
         }
 
+    pub def mapBaseName(f: String -> String, path: FilePath): FilePath =
+        match getBaseName(path) {
+            case Some(name1) => putBaseName(path, f(name1))
+            case _ => path
+        }
+
+    pub def testBaseName(f: String -> Bool, path: FilePath): Bool =
+        match getBaseName(path) {
+            case Some(name1) => f(name1)
+            case _ => false
+        }
+
+
     def resolve(path: FilePath, other: FilePath): FilePath =
         import java.nio.file.Path.resolve(##java.nio.file.Path);
         let FilePath(path1) = path;
@@ -324,8 +338,8 @@ namespace System/FilePath {
             case None => false
         }
 
-    pub def isExtension(path: FilePath, s: String): Bool =
-        testExtension(x -> s == x, path)
+    pub def isExtension(path: FilePath, ext: String): Bool =
+        testExtension(x -> x == ext, path)
 
     pub def isExtensionOneOf(path: FilePath, xs: List[String]): Bool =
         testExtension(x -> List.memberOf(x, xs), path)
@@ -412,4 +426,21 @@ namespace System/FilePath {
                 case None => k(Nil)
             }
 
+    pub def isGlobMatch(path: FilePath, glob: String): Result[Bool, String] =
+        import flix.runtime.spt.sandbox.system.FilePathWrapper:globMatches(##java.nio.file.Path, String);
+        try {
+            let FilePath(path1) = path;
+            Ok(globMatches(path1, glob)) as & Pure
+        } catch {
+            case _: ##java.lang.Exception => Err("isGlobMatch")
+        }
+
+    pub def isRegexMatch(path: FilePath, glob: String): Result[Bool, String] =
+        import flix.runtime.spt.sandbox.system.FilePathWrapper:regexMatches(##java.nio.file.Path, String);
+        try {
+            let FilePath(path1) = path;
+            Ok(regexMatches(path1, glob)) as & Pure
+        } catch {
+            case _: ##java.lang.Exception => Err("isRegexMatch")
+        }
 }

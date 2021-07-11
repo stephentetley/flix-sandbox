@@ -264,12 +264,9 @@ namespace I18n/Locale {
         let Locale(x1) = x;
         toLanguageTag(x1) as & Pure
 
-    pub def forLanguageTag(tag: String): Option[Locale] =
+    pub def forLanguageTag(tag: String): Locale =
         import java.util.Locale:forLanguageTag(String);
-        match forLanguageTag(tag) {
-            case s if Object.isNull(s) => None
-            case s => Some(Locale(s))
-        } as & Pure
+        Locale(forLanguageTag(tag)) as & Pure
 
 
 

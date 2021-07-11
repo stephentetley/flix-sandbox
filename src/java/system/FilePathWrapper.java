@@ -16,7 +16,10 @@
 
 package flix.runtime.spt.sandbox.system;
 
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 import java.nio.file.Path;
+import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
 
 /**
@@ -31,6 +34,18 @@ public class FilePathWrapper {
         return Paths.get(path);
     }
 
+    /// Wrapper function for `getPathMatcher` / `matches`.
+    public static boolean globMatches(Path path, String glob) throws Exception {
+        FileSystem fs = FileSystems.getDefault();
+        PathMatcher m1 = fs.getPathMatcher("glob:" + glob);
+        return m1.matches(path);
+    }
 
+    /// Wrapper function for `getPathMatcher` / `matches`.
+    public static boolean regexMatches(Path path, String pattern) throws Exception {
+        FileSystem fs = FileSystems.getDefault();
+        PathMatcher m1 = fs.getPathMatcher("regex:" + pattern);
+        return m1.matches(path);
+    }
 
 }
