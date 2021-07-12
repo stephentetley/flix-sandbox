@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Stephen Tetley
+ * Copyright 2021 Stephen Tetley
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,19 @@
  * limitations under the License.
  */
 
-package flix.runtime.spt.sandbox.system;
+package flix.runtime.spt.sandbox;
 
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 
 /**
  * A wrapper class for Directory related functions.
  * This class that provides concrete, non-overloaded methods.
  */
-public class DirectoryWrapper {
+
+public class IOPrelude {
 
     // Wrapper function for `exists` as it is a "varags" method
     // with FollowLinks == true.
@@ -37,22 +40,14 @@ public class DirectoryWrapper {
         return Files.isDirectory(path);
     }
 
-    // Wrapper function for `isRegularFile` as it is a "varags" method
-    // with FollowLinks == true.
-    public static boolean isRegularFileFollowLinks(Path path) throws Exception {
-        return Files.isRegularFile(path);
+    /// Wrapper function for `Files.writeString` as it is "varargs" in Java and uses the CharSequence interface.
+    public static void writeString(Path path, Charset charset, StandardOpenOption opt, String content) throws Exception {
+        final CharSequence content2 = content;
+        Files.writeString(path, content2, charset, opt);
     }
 
-    // Wrapper function for `createDirectory` as it is a "varags" method
-    // with no FileAttributes.
-    public static void createDirectory(Path path) throws Exception {
-        Files.createDirectory(path);
-    }
-
-    // Wrapper function for `createDirectories` as it is a "varags" method
-    // with no FileAttributes.
-    public static void createDirectories(Path path) throws Exception {
-        Files.createDirectories(path);
+    public static void writeBytes(Path path, StandardOpenOption opt, byte[] bytes)  throws Exception {
+        Files.write(path, bytes, opt);
     }
 
 }

@@ -72,14 +72,14 @@ namespace System/Directory {
         }
 
     pub def doesPathExist(path: FilePath): Bool & Impure =
-        import flix.runtime.spt.sandbox.system.DirectoryWrapper:existsFollowLinks(##java.nio.file.Path);
+        import flix.runtime.spt.sandbox.system.DirectoryWrapper:fileExistsFollowLinks(##java.nio.file.Path);
         let FilePath(p1) = path;
-        p1.existsFollowLinks()
+        fileExistsFollowLinks(p1)
 
     pub def isDirectory(path: FilePath): Bool & Impure =
         import flix.runtime.spt.sandbox.system.DirectoryWrapper:isDirectoryFollowLinks(##java.nio.file.Path);
         let FilePath(p1) = path;
-        p1.isDirectoryFollowLinks()
+        isDirectoryFollowLinks(p1)
 
     pub def isFile(path: FilePath): Bool & Impure =
         import flix.runtime.spt.sandbox.system.DirectoryWrapper:isRegularFileFollowLinks(##java.nio.file.Path);
