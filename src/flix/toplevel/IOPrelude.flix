@@ -142,6 +142,62 @@ namespace IOPrelude {
             case _: ##java.lang.Exception => Err("writeBytes")
         }
 
+    pub def foldableWriteBytesWith[t: Type -> Type](opts: {path: FilePath, mode: WriteMode},
+                                                    bytes: t[Int8]): Result[Unit, String] & Impure with Foldable[t] =
+        import flix.runtime.spt.sandbox.IOPrelude:openFileOutputStream(##java.nio.file.Path, ##java.nio.file.StandardOpenOption);
+        import flix.runtime.spt.sandbox.IOPrelude:outputStreamWriteByte(##java.io.OutputStream, Int8);
+        import java.io.OutputStream.close();
+        try {
+            let FilePath(path1) = opts.path;
+            let mode1 = writeModeToNative(opts.mode);
+            let outstream = openFileOutputStream(path1, mode1);
+            Foldable.foldLeft((_, x) -> outputStreamWriteByte(outstream, x), (), bytes);
+            let _ = close(outstream);
+            Ok()
+        }
+        catch {
+            case _: ##java.lang.Exception => Err("foldableWriteBytesWith")
+        }
+
+    pub def readChunks(path: FilePath, chunkSize: Int32): Iterator[Result[Array[Int8], String]] & Impure =
+        import new flix.runtime.spt.sandbox.SBCIterator(##java.nio.file.Path, Int32) as newIter;
+        import flix.runtime.spt.sandbox.SBCIterator.hasNext();
+        import flix.runtime.spt.sandbox.SBCIterator.nextBufferSize();
+        import flix.runtime.spt.sandbox.SBCIterator.next();
+        let FilePath(path1) = path;
+        let primIter = newIter(path1, chunkSize);
+        let iterDone = () -> if (hasNext(primIter)) false else true;
+        let iterNext = () -> {
+            try {
+                let sz = nextBufferSize(primIter);
+                let arr = next(primIter);
+                if (sz < chunkSize)
+                    Ok(Array.slice(arr, 0, sz))
+                else Ok(arr)
+            } catch {
+                case _: ##java.lang.Exception => Err("readChunks[next]")
+            }
+        };
+        Iterator(iterDone, iterNext)
+
+    pub def readLinesIterWith(opts: {charset: Text.Charset}, path: FilePath): Iterator[Result[String, String]] & Impure =
+        import new flix.runtime.spt.sandbox.LinesIterator(##java.nio.file.Path, ##java.nio.charset.Charset) as newIter;
+        import flix.runtime.spt.sandbox.LinesIterator.hasNext();
+        import flix.runtime.spt.sandbox.LinesIterator.next();
+        let FilePath(path1) = path;
+        let Charset(charset1) = opts.charset;
+        let primIter = newIter(path1, charset1);
+        let iterDone = () -> if (hasNext(primIter)) false else true;
+        let iterNext = () -> {
+            try {
+                let s1 = next(primIter);
+                Ok(s1)
+            } catch {
+                case _: ##java.lang.Exception => Err("readLinesIterWith[next]")
+            }
+        };
+        Iterator(iterDone, iterNext)
+
 
 }
 

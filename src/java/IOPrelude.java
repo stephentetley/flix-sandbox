@@ -16,6 +16,8 @@
 
 package flix.runtime.spt.sandbox;
 
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -49,5 +51,19 @@ public class IOPrelude {
     public static void writeBytes(Path path, StandardOpenOption opt, byte[] bytes)  throws Exception {
         Files.write(path, bytes, opt);
     }
+
+    public static InputStream openFileInputStream(Path path) throws Exception {
+        return Files.newInputStream(path);
+    }
+
+    public static OutputStream openFileOutputStream(Path path, StandardOpenOption opt) throws Exception {
+        return Files.newOutputStream(path, opt);
+    }
+
+    public static void outputStreamWriteByte(OutputStream strm, byte i) throws Exception {
+        byte[] arr1 = {i};
+        strm.write(arr1);
+    }
+
 
 }
