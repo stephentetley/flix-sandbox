@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package flix.runtime.spt.sandbox;
+package flix.runtime.spt.sandbox.ioprelude;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -27,8 +27,8 @@ public class SBCIterator {
     private SeekableByteChannel sbc;
     private int chunkSize;
 
-    public SBCIterator(Path path, int chunkLen) throws IOException {
-        this.sbc = Files.newByteChannel(path, StandardOpenOption.READ);
+    public SBCIterator(Path filepath, int chunkLen) throws IOException {
+        this.sbc = Files.newByteChannel(filepath, StandardOpenOption.READ);
         this.chunkSize = chunkLen;
     }
 

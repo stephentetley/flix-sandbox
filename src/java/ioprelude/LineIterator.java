@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package flix.runtime.spt.sandbox;
+package flix.runtime.spt.sandbox.ioprelude;
 
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -22,11 +22,11 @@ import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.stream.Stream;
 
-public class LinesIterator {
+public class LineIterator {
     Iterator<String> iter;
 
 
-    public LinesIterator(Path path, Charset cs) {
+    public LineIterator(Path path, Charset cs) {
         try {
             Stream<String> strm = Files.lines(path, cs);
             this.iter = strm.iterator();

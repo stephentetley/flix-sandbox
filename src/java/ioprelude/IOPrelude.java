@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package flix.runtime.spt.sandbox;
+package flix.runtime.spt.sandbox.ioprelude;
 
 import java.io.InputStream;
 import java.io.OutputStream;
