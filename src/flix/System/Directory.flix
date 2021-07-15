@@ -35,66 +35,74 @@ namespace System/Directory {
                 |> System/FilePath.toAbsolutePath
 
 
-    /// One level - not recursive, returns a Cursor
-    pub def contents(path: FilePath): Cursor[String, FilePath] & Impure =
-        import flix.runtime.spt.sandbox.system.FilesPathCursor:createFilesListCursor(##java.nio.file.Path) as newCursor;
-        import flix.runtime.spt.sandbox.system.FilesPathCursor.hasNext() as ffiHasNext;
-        import flix.runtime.spt.sandbox.system.FilesPathCursor.next() as ffiNext;
-        try {
-            let FilePath(path1) = path;
-            let iter = newCursor(path1);
-            let cursorAlg =  {
-                  hasNext = () -> ffiHasNext(iter)
-                , next = Cursor.guardThunk(_ -> FilePath(ffiNext(iter)), "next failed")
-                , finalize = () -> () as & Impure
-            };
-            Cursor.makeCursor(cursorAlg)
-        } catch {
-            case _: ##java.lang.Exception => Cursor.failure("Directory.contents")
-        }
+    pub def contents(path: FilePath): Result[List[FilePath], String] & Impure =
+        contentsIter(path)
+            |> Iterator.toList
+            |> Result.sequence
 
-    /// All levels - recursive, uses a Cursor
-    pub def contentsAll(path: FilePath, followLinks: Bool): Cursor[String, FilePath] & Impure =
-        import flix.runtime.spt.sandbox.system.FilesPathCursor:createFilesWalkCursor(##java.nio.file.Path, Bool) as newCursor;
-        import flix.runtime.spt.sandbox.system.FilesPathCursor.hasNext() as ffiHasNext;
-        import flix.runtime.spt.sandbox.system.FilesPathCursor.next() as ffiNext;
-        try {
-            let FilePath(path1) = path;
-            let iter = newCursor(path1, followLinks);
-            let cursorAlg =  {
-                  hasNext = () -> ffiHasNext(iter)
-                , next = Cursor.guardThunk(_ -> FilePath(ffiNext(iter)), "next failed")
-                , finalize = () -> () as & Impure
-            };
-            Cursor.makeCursor(cursorAlg)
-        } catch {
-            case _: ##java.lang.Exception => Cursor.failure("Directory.contentsAll")
-        }
 
-    pub def doesPathExist(path: FilePath): Bool & Impure =
-        import flix.runtime.spt.sandbox.system.DirectoryWrapper:fileExistsFollowLinks(##java.nio.file.Path);
-        let FilePath(p1) = path;
-        fileExistsFollowLinks(p1)
+    pub def contentsIter(path: FilePath): Iterator[Result[FilePath, String]] & Impure =
+        import flix.runtime.spt.sandbox.system.PathIterator:newFileslistIterator(##java.nio.file.Path);
+        import flix.runtime.spt.sandbox.system.PathIterator.hasNext();
+        import flix.runtime.spt.sandbox.system.PathIterator.next();
+        let FilePath(path1) = path;
+        let primIter = newFileslistIterator(path1);
+        let iterDone = () -> if (hasNext(primIter)) false else true;
+        let iterNext = () -> {
+            try {
+                let p1 = next(primIter);
+                Ok(FilePath(p1))
+            } catch {
+                case _: ##java.lang.Exception => Err("contentsIter[next]")
+            }
+        };
+        Iterator(iterDone, iterNext)
 
-    pub def isDirectory(path: FilePath): Bool & Impure =
-        import flix.runtime.spt.sandbox.system.DirectoryWrapper:isDirectoryFollowLinks(##java.nio.file.Path);
-        let FilePath(p1) = path;
-        isDirectoryFollowLinks(p1)
+    pub def matches(glob: String, path: FilePath): Result[List[FilePath], String] & Impure =
+        matchesIter(glob, path)
+            |> Iterator.toList
+            |> Result.sequence
 
-    pub def isFile(path: FilePath): Bool & Impure =
-        import flix.runtime.spt.sandbox.system.DirectoryWrapper:isRegularFileFollowLinks(##java.nio.file.Path);
-        let FilePath(p1) = path;
-        p1.isRegularFileFollowLinks()
+    pub def matchesIter(glob: String, path: FilePath): Iterator[Result[FilePath, String]] & Impure =
+        import flix.runtime.spt.sandbox.system.PathIterator:newFilesnewDirectoryStreamIterator(##java.nio.file.Path, String);
+        import flix.runtime.spt.sandbox.system.PathIterator.hasNext();
+        import flix.runtime.spt.sandbox.system.PathIterator.next();
+        let FilePath(path1) = path;
+        let primIter = newFilesnewDirectoryStreamIterator(path1, glob);
+        let iterDone = () -> if (hasNext(primIter)) false else true;
+        let iterNext = () -> {
+            try {
+                let p1 = next(primIter);
+                Ok(FilePath(p1))
+            } catch {
+                case _: ##java.lang.Exception => Err("matchesIter[next]")
+            }
+        };
+        Iterator(iterDone, iterNext)
 
-    pub def isSymbolicLink(path: FilePath): Bool & Impure =
-        import java.nio.file.Files:isSymbolicLink(##java.nio.file.Path);
-        let FilePath(p1) = path;
-        p1.isSymbolicLink()
+    pub def contentsAll(followLinks: Bool, path: FilePath): Result[List[FilePath], String] & Impure =
+        contentsAllIter(followLinks, path)
+            |> Iterator.toList
+            |> Result.sequence
 
-    pub def isHidden(path: FilePath): Bool & Impure =
-        import java.nio.file.Files:isHidden(##java.nio.file.Path);
-        let FilePath(p1) = path;
-        p1.isHidden()
+    /// All levels - recursive, uses a Iterator
+    pub def contentsAllIter(followLinks: Bool, path: FilePath): Iterator[Result[FilePath, String]] & Impure =
+        import flix.runtime.spt.sandbox.system.PathIterator:newFileswalkIterator(##java.nio.file.Path, Bool);
+        import flix.runtime.spt.sandbox.system.PathIterator.hasNext();
+        import flix.runtime.spt.sandbox.system.PathIterator.next();
+        let FilePath(path1) = path;
+        let primIter = newFileswalkIterator(path1, followLinks);
+        let iterDone = () -> if (hasNext(primIter)) false else true;
+        let iterNext = () -> {
+            try {
+                let p1 = next(primIter);
+                Ok(FilePath(p1))
+            } catch {
+                case _: ##java.lang.Exception => Err("contentsAllIter[next]")
+            }
+        };
+        Iterator(iterDone, iterNext)
+
 
     pub def createDirectory(path: FilePath): Unit & Impure =
         import flix.runtime.spt.sandbox.system.DirectoryWrapper:createDirectory(##java.nio.file.Path);

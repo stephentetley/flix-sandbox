@@ -1,8 +1,10 @@
 package flix.runtime.spt.sandbox.system;
 
+import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Iterator;
+import java.util.stream.Stream;
 
 public class PathIterator {
 
@@ -21,6 +23,19 @@ public class PathIterator {
     /// Factory method for `Files.newDirectoryStream`
     public static PathIterator newFilesnewDirectoryStreamIterator(Path dirpath, String glob) throws Exception {
         Iterator<Path> iter1 = Files.newDirectoryStream(dirpath, glob).iterator();
+        return new PathIterator(iter1);
+    }
+
+    /// Factory method for `Files.walk`
+    public static PathIterator newFileswalkIterator(Path dir, boolean followLinks) throws Exception {
+        Iterator<Path> iter1;
+        if (followLinks) {
+            Stream<Path> stream = Files.walk(dir, FileVisitOption.FOLLOW_LINKS);
+            iter1 = stream.iterator();
+        } else {
+            Stream<Path> stream = Files.walk(dir);
+            iter1 = stream.iterator();
+        }
         return new PathIterator(iter1);
     }
 

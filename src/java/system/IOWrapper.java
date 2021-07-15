@@ -42,6 +42,12 @@ public class IOWrapper {
         return Files.isDirectory(path);
     }
 
+    // Wrapper function for `isRegularFile` as it is a "varags" method
+    // with FollowLinks == true.
+    public static boolean isRegularFileFollowLinks(Path path) throws Exception {
+        return Files.isRegularFile(path);
+    }
+
     /// Wrapper function for `Files.writeString` as it is "varargs" in Java and uses the CharSequence interface.
     public static void writeString(Path path, Charset charset, StandardOpenOption opt, String content) throws Exception {
         final CharSequence content2 = content;

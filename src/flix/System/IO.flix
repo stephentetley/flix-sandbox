@@ -67,7 +67,7 @@ namespace System/IO {
             case CreateNew  => getCREATE_NEW()
         } as & Pure
 
-
+    /// # Queries
 
     pub def fileExists(path: FilePath): Result[Bool, String] & Impure =
         import flix.runtime.spt.sandbox.system.IOWrapper:fileExistsFollowLinks(##java.nio.file.Path);
@@ -75,17 +75,49 @@ namespace System/IO {
             let FilePath(p1) = path;
             Ok(fileExistsFollowLinks(p1))
         } catch {
-            case _: ##java.lang.Exception => Err("isDirectory")
+            case _: ##java.lang.Exception => Err("fileExists")
         }
+
+    pub def isFile(path: FilePath): Result[Bool, String] & Impure =
+        import flix.runtime.spt.sandbox.system.IOWrapper:isRegularFileFollowLinks(##java.nio.file.Path);
+        try {
+            let FilePath(path1) = path;
+            Ok(isRegularFileFollowLinks(path1))
+        } catch {
+            case _: ##java.lang.Exception => Err("isFile")
+        }
+
 
     pub def isDirectory(path: FilePath): Result[Bool, String] & Impure =
         import flix.runtime.spt.sandbox.system.IOWrapper:isDirectoryFollowLinks(##java.nio.file.Path);
         try {
-            let FilePath(p1) = path;
-            Ok(isDirectoryFollowLinks(p1))
+            let FilePath(path1) = path;
+            Ok(isDirectoryFollowLinks(path1))
         } catch {
             case _: ##java.lang.Exception => Err("isDirectory")
         }
+
+
+    pub def isSymbolicLink(path: FilePath): Result[Bool, String] & Impure =
+        import java.nio.file.Files:isSymbolicLink(##java.nio.file.Path);
+        try {
+            let FilePath(path1) = path;
+            Ok(isSymbolicLink(path1))
+        } catch {
+            case _: ##java.lang.Exception => Err("isSymbolicLink")
+        }
+
+    pub def isHidden(path: FilePath): Result[Bool, String] & Impure =
+        import java.nio.file.Files:isHidden(##java.nio.file.Path);
+        try {
+            let FilePath(path1) = path;
+            Ok(isHidden(path1))
+        } catch {
+            case _: ##java.lang.Exception => Err("isHidden")
+        }
+
+
+    /// #
 
     pub def readFile(path: FilePath, cs: Text.Charset): Result[String, String] & Impure =
         import java.nio.file.Files:readString(##java.nio.file.Path, ##java.nio.charset.Charset);

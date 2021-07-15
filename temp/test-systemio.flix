@@ -7,6 +7,7 @@ def main(_args: Array[String]): Int32 & Impure =
     test02() |> println;
     test03() |> println;
     test04() |> println;
+    test05() |> println;
     0
 
 def test01(): Result[Unit, String] & Impure = 
@@ -24,7 +25,7 @@ def foldablePrintBytesWith[t: Type -> Type](bytes: t[Int8]): Result[Unit, String
 def test02(): Result[Unit, String] & Impure = 
     use Result.{flatMap};
     let path1   = System/FilePath.new("E://coding//flix//flix-sandbox");
-    let iter    = System/IO.contentsIter(path1);
+    let iter    = System/Directory.contentsIter(path1);
     let xs      = Iterator.toList(iter);
     List.foreach(println, xs);
     Ok()
@@ -33,13 +34,20 @@ def test02(): Result[Unit, String] & Impure =
 def test03(): Result[Unit, String] & Impure = 
     use Result.{flatMap};
     let path1   = System/FilePath.new("E://coding//flix//flix-sandbox");
-    let* xs     = System/IO.contents(path1);
+    let* xs     = System/Directory.contents(path1);
     List.foreach(println, xs);
     Ok() 
 
 def test04(): Result[Unit, String] & Impure = 
     use Result.{flatMap};
     let path1   = System/FilePath.new("E://coding//flix//flix-sandbox//src//flix//System");
-    let* xs     = System/IO.matches("*.flix", path1);
+    let* xs     = System/Directory.matches("*.flix", path1);
+    List.foreach(println, xs);
+    Ok() 
+
+def test05(): Result[Unit, String] & Impure = 
+    use Result.{flatMap};
+    let path1   = System/FilePath.new("E://coding//flix//flix-sandbox//src//java");
+    let* xs     = System/Directory.contentsAll(false, path1);
     List.foreach(println, xs);
     Ok() 
