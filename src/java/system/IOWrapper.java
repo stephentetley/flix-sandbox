@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package flix.runtime.spt.sandbox.ioprelude;
+package flix.runtime.spt.sandbox.system;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -28,7 +28,7 @@ import java.nio.file.StandardOpenOption;
  * This class that provides concrete, non-overloaded methods.
  */
 
-public class IOPrelude {
+public class IOWrapper {
 
     // Wrapper function for `exists` as it is a "varags" method
     // with FollowLinks == true.

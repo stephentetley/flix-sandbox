@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package flix.runtime.spt.sandbox.ioprelude;
+package flix.runtime.spt.sandbox.system;
 
 import java.nio.charset.Charset;
 import java.nio.file.Files;

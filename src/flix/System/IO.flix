@@ -15,7 +15,7 @@
  */
 
 
-namespace IOPrelude {
+namespace System/IO {
 
     use System.FilePath;
     use System.FilePath.{FilePath};
@@ -70,7 +70,7 @@ namespace IOPrelude {
 
 
     pub def fileExists(path: FilePath): Result[Bool, String] & Impure =
-        import flix.runtime.spt.sandbox.ioprelude.IOPrelude:fileExistsFollowLinks(##java.nio.file.Path);
+        import flix.runtime.spt.sandbox.system.IOWrapper:fileExistsFollowLinks(##java.nio.file.Path);
         try {
             let FilePath(p1) = path;
             Ok(fileExistsFollowLinks(p1))
@@ -79,7 +79,7 @@ namespace IOPrelude {
         }
 
     pub def isDirectory(path: FilePath): Result[Bool, String] & Impure =
-        import flix.runtime.spt.sandbox.ioprelude.IOPrelude:isDirectoryFollowLinks(##java.nio.file.Path);
+        import flix.runtime.spt.sandbox.system.IOWrapper:isDirectoryFollowLinks(##java.nio.file.Path);
         try {
             let FilePath(p1) = path;
             Ok(isDirectoryFollowLinks(p1))
@@ -104,7 +104,7 @@ namespace IOPrelude {
 
     pub def writeFileWith(opts: {path: FilePath, charset: Text.Charset, mode: WriteMode},
                             content: String): Result[Unit, String] & Impure =
-        import flix.runtime.spt.sandbox.ioprelude.IOPrelude:writeString(##java.nio.file.Path, ##java.nio.charset.Charset, ##java.nio.file.StandardOpenOption, String);
+        import flix.runtime.spt.sandbox.system.IOWrapper:writeString(##java.nio.file.Path, ##java.nio.charset.Charset, ##java.nio.file.StandardOpenOption, String);
         try {
             let FilePath(path1) = opts.path;
             let Charset(cs1) = opts.charset;
@@ -131,7 +131,7 @@ namespace IOPrelude {
         writeBytesWith({path = path, mode = Create}, bytes)
 
     pub def writeBytesWith(opts: {path: FilePath, mode: WriteMode}, bytes: Array[Int8]): Result[Unit, String] & Impure =
-        import flix.runtime.spt.sandbox.ioprelude.IOPrelude:writeBytes(##java.nio.file.Path, ##java.nio.file.StandardOpenOption, Array[Int8]);
+        import flix.runtime.spt.sandbox.system.IOWrapper:writeBytes(##java.nio.file.Path, ##java.nio.file.StandardOpenOption, Array[Int8]);
         try {
             let FilePath(path1) = opts.path;
             let mode1 = writeModeToNative(opts.mode);
@@ -144,8 +144,8 @@ namespace IOPrelude {
 
     pub def foldableWriteBytesWith[t: Type -> Type](opts: {path: FilePath, mode: WriteMode},
                                                     bytes: t[Int8]): Result[Unit, String] & Impure with Foldable[t] =
-        import flix.runtime.spt.sandbox.ioprelude.IOPrelude:openFileOutputStream(##java.nio.file.Path, ##java.nio.file.StandardOpenOption);
-        import flix.runtime.spt.sandbox.ioprelude.IOPrelude:outputStreamWriteByte(##java.io.OutputStream, Int8);
+        import flix.runtime.spt.sandbox.system.IOWrapper:openFileOutputStream(##java.nio.file.Path, ##java.nio.file.StandardOpenOption);
+        import flix.runtime.spt.sandbox.system.IOWrapper:outputStreamWriteByte(##java.io.OutputStream, Int8);
         import java.io.OutputStream.close();
         try {
             let FilePath(path1) = opts.path;
@@ -160,10 +160,10 @@ namespace IOPrelude {
         }
 
     pub def readChunks(path: FilePath, chunkSize: Int32): Iterator[Result[Array[Int8], String]] & Impure =
-        import new flix.runtime.spt.sandbox.ioprelude.SBCIterator(##java.nio.file.Path, Int32) as newIter;
-        import flix.runtime.spt.sandbox.ioprelude.SBCIterator.hasNext();
-        import flix.runtime.spt.sandbox.ioprelude.SBCIterator.nextBufferSize();
-        import flix.runtime.spt.sandbox.ioprelude.SBCIterator.next();
+        import new flix.runtime.spt.sandbox.system.SBCIterator(##java.nio.file.Path, Int32) as newIter;
+        import flix.runtime.spt.sandbox.system.SBCIterator.hasNext();
+        import flix.runtime.spt.sandbox.system.SBCIterator.nextBufferSize();
+        import flix.runtime.spt.sandbox.system.SBCIterator.next();
         let FilePath(path1) = path;
         let primIter = newIter(path1, chunkSize);
         let iterDone = () -> if (hasNext(primIter)) false else true;
@@ -181,9 +181,9 @@ namespace IOPrelude {
         Iterator(iterDone, iterNext)
 
     pub def readLinesIterWith(opts: {charset: Text.Charset}, path: FilePath): Iterator[Result[String, String]] & Impure =
-        import new flix.runtime.spt.sandbox.ioprelude.LineIterator(##java.nio.file.Path, ##java.nio.charset.Charset) as newIter;
-        import flix.runtime.spt.sandbox.ioprelude.LineIterator.hasNext();
-        import flix.runtime.spt.sandbox.ioprelude.LineIterator.next();
+        import new flix.runtime.spt.sandbox.system.LineIterator(##java.nio.file.Path, ##java.nio.charset.Charset) as newIter;
+        import flix.runtime.spt.sandbox.system.LineIterator.hasNext();
+        import flix.runtime.spt.sandbox.system.LineIterator.next();
         let FilePath(path1) = path;
         let Charset(charset1) = opts.charset;
         let primIter = newIter(path1, charset1);
@@ -205,9 +205,9 @@ namespace IOPrelude {
 
 
     pub def contentsIter(path: FilePath): Iterator[Result[FilePath, String]] & Impure =
-        import flix.runtime.spt.sandbox.ioprelude.PathIterator:newFileslistIterator(##java.nio.file.Path);
-        import flix.runtime.spt.sandbox.ioprelude.PathIterator.hasNext();
-        import flix.runtime.spt.sandbox.ioprelude.PathIterator.next();
+        import flix.runtime.spt.sandbox.system.PathIterator:newFileslistIterator(##java.nio.file.Path);
+        import flix.runtime.spt.sandbox.system.PathIterator.hasNext();
+        import flix.runtime.spt.sandbox.system.PathIterator.next();
         let FilePath(path1) = path;
         let primIter = newFileslistIterator(path1);
         let iterDone = () -> if (hasNext(primIter)) false else true;
@@ -227,9 +227,9 @@ namespace IOPrelude {
             |> Result.sequence
 
     pub def matchesIter(glob: String, path: FilePath): Iterator[Result[FilePath, String]] & Impure =
-        import flix.runtime.spt.sandbox.ioprelude.PathIterator:newFilesnewDirectoryStreamIterator(##java.nio.file.Path, String);
-        import flix.runtime.spt.sandbox.ioprelude.PathIterator.hasNext();
-        import flix.runtime.spt.sandbox.ioprelude.PathIterator.next();
+        import flix.runtime.spt.sandbox.system.PathIterator:newFilesnewDirectoryStreamIterator(##java.nio.file.Path, String);
+        import flix.runtime.spt.sandbox.system.PathIterator.hasNext();
+        import flix.runtime.spt.sandbox.system.PathIterator.next();
         let FilePath(path1) = path;
         let primIter = newFilesnewDirectoryStreamIterator(path1, glob);
         let iterDone = () -> if (hasNext(primIter)) false else true;

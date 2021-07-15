@@ -1,4 +1,4 @@
-package flix.runtime.spt.sandbox.ioprelude;
+package flix.runtime.spt.sandbox.system;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
