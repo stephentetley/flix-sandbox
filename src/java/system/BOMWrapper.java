@@ -30,24 +30,8 @@ import java.nio.file.StandardCopyOption;
  * A wrapper class for File related functions.
  * This class that provides concrete, non-overloaded methods.
  */
-public class FileWrapper {
+public class BOMWrapper {
 
-
-    /// Wrapper function for `Files.exists` as it is "varargs" in Java.
-    public static boolean exists(Path path) throws Exception {
-        return Files.exists(path, LinkOption.NOFOLLOW_LINKS);
-    }
-
-    /// Wrapper function for `Files.copy` as it is "varargs" in Java.
-    public static Path copy(Path source, Path target) throws Exception {
-        return Files.copy(source, target, LinkOption.NOFOLLOW_LINKS, StandardCopyOption.REPLACE_EXISTING);
-    }
-
-    /// Wrapper function for `Files.writeString` as it is "varargs" in Java and uses the CharSequence interface.
-    public static void writeString(Path path, Charset charset, String content) throws Exception {
-        final CharSequence content2 = content;
-        Files.writeString(path, content2, charset);
-    }
 
     /// Reads the File with the Charset identified by the BOM
     public static String readFileWithBOM(Path path) throws Exception {

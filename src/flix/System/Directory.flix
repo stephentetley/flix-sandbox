@@ -116,4 +116,40 @@ namespace System/Directory {
         p1.createDirectories()
 
 
+    /// If path is a symbolic link the link is deleted.
+    /// If `path` is a directory, the directory must be empty.
+    /// If `path` does not exist, throw and error.
+    pub def delete(path: FilePath): Result[Unit, String] & Impure =
+        import java.nio.file.Files:delete(##java.nio.file.Path);
+        try {
+            let FilePath(path1) = path;
+            delete(path1);
+            Ok()
+        } catch {
+            case _: ##java.lang.Exception => Err("delete")
+        }
+
+    /// As `delete` but returns `Ok()` if the file does not exist.
+    pub def deleteIfExists(path: FilePath): Result[Unit, String] & Impure =
+        import java.nio.file.Files:deleteIfExists(##java.nio.file.Path);
+        try {
+            let FilePath(path1) = path;
+            deleteIfExists(path1);
+            Ok()
+        } catch {
+            case _: ##java.lang.Exception => Err("deleteIfExists")
+        }
+
+
+    pub def copy(source: FilePath, target: FilePath): Result[Unit, String] & Impure =
+        import flix.runtime.spt.sandbox.system.DirectoryWrapper:copy(##java.nio.file.Path, ##java.nio.file.Path);
+        try {
+            let FilePath(source1) = source;
+            let FilePath(target1) = target;
+            let _ = copy(source1, target1);
+            Ok()
+        } catch {
+            case _: ##java.lang.Exception => Err("copy")
+        }
+
 }

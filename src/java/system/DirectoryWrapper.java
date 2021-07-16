@@ -17,7 +17,9 @@
 package flix.runtime.spt.sandbox.system;
 
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 
 /**
  * A wrapper class for Directory related functions.
@@ -38,6 +40,10 @@ public class DirectoryWrapper {
     }
 
 
+    /// Wrapper function for `Files.copy` as it is "varargs" in Java.
+    public static Path copy(Path source, Path target) throws Exception {
+        return Files.copy(source, target, LinkOption.NOFOLLOW_LINKS, StandardCopyOption.REPLACE_EXISTING);
+    }
 
     // Wrapper function for `createDirectory` as it is a "varags" method
     // with no FileAttributes.
