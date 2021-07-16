@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-namespace System {
+/// Deprecated
+
+namespace System/X {
 
     ///
     /// Represents a FilePath.
@@ -24,10 +26,10 @@ namespace System {
 
 }
 
-namespace System/BufferedFileReader {
+namespace System/X/BufferedFileReader {
 
-    use System.BufferedFileReader;
-    use System.BufferedFileReader.{BufferedFileReader};
+    use System/X.BufferedFileReader;
+    use System/X.BufferedFileReader.{BufferedFileReader};
     use System.FilePath.{FilePath};
     use Text.Charset.{Charset};
 

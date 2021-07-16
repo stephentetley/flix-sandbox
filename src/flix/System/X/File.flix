@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
+/// Deprecated
 
-namespace System/File {
+namespace System/X/File {
 
     use System.FilePath;
     use System.FilePath.{FilePath};
@@ -85,9 +86,6 @@ namespace System/File {
         catch {
             case _: ##java.lang.Exception => Err("readFileWithBOM")
         }
-
-
-
 
     pub def writeFile(path: FilePath, cs: Text.Charset, content: String): Result[Unit, String] & Impure =
         import flix.runtime.spt.sandbox.system.FileWrapper:writeString(##java.nio.file.Path, ##java.nio.charset.Charset, String);
