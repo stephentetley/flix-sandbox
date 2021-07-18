@@ -16,24 +16,24 @@
 
 package flix.runtime.spt.sandbox.system;
 
-import java.nio.file.Files;
-import java.nio.file.LinkOption;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.nio.file.*;
 
 /**
- * A wrapper class for Directory related functions.
- * This class that provides concrete, non-overloaded methods.
+ * A wrapper class for java.nio.file.Files related functions.
+ * This class that provides concrete, non-overloaded methods without "varargs".
  */
-public class DirectoryWrapper {
+public class FilesWrapper {
 
-    // Wrapper function for `exists` as it is a "varags" method
+    // Wrapper function for `exists` as it is a "varargs" method
     // with FollowLinks == true.
     public static boolean fileExistsFollowLinks(Path path) throws Exception {
         return Files.exists(path);
     }
 
-    // Wrapper function for `isDirectory` as it is a "varags" method
+    // Wrapper function for `isDirectory` as it is a "varargs" method
     // with FollowLinks == true.
     public static boolean isDirectoryFollowLinks(Path path) throws Exception {
         return Files.isDirectory(path);
@@ -45,16 +45,22 @@ public class DirectoryWrapper {
         return Files.copy(source, target, LinkOption.NOFOLLOW_LINKS, StandardCopyOption.REPLACE_EXISTING);
     }
 
-    // Wrapper function for `createDirectory` as it is a "varags" method
+    // Wrapper function for `createDirectory` as it is a "varargs" method
     // with no FileAttributes.
     public static void createDirectory(Path path) throws Exception {
         Files.createDirectory(path);
     }
 
-    // Wrapper function for `createDirectories` as it is a "varags" method
+    // Wrapper function for `createDirectories` as it is a "varargs" method
     // with no FileAttributes.
     public static void createDirectories(Path path) throws Exception {
         Files.createDirectories(path);
+    }
+
+    // Not from nio.file.Files, but we want a concrete FileInputStream not
+    public static FileInputStream newInputStream(Path path) throws Exception {
+        File file = path.toFile();
+        return new FileInputStream(file);
     }
 
 }

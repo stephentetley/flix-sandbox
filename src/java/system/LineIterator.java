@@ -16,6 +16,7 @@
 
 package flix.runtime.spt.sandbox.system;
 
+import java.io.BufferedReader;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -25,14 +26,18 @@ import java.util.stream.Stream;
 public class LineIterator {
     Iterator<String> iter;
 
+    protected LineIterator(Iterator<String> iter1) {
+        iter = iter1;
+    }
 
-    public LineIterator(Path path, Charset cs) {
-        try {
-            Stream<String> strm = Files.lines(path, cs);
-            this.iter = strm.iterator();
-        } catch (Exception e) {
-            this.iter = null;
-        }
+    public static LineIterator newFileslinesIterator(Path path, Charset cs) throws Exception {
+        Iterator<String> iter1 = Files.lines(path, cs).iterator();
+        return new LineIterator(iter1);
+    }
+
+    public static LineIterator newBufferedReaderlinesIterator(BufferedReader reader) throws Exception {
+        Iterator<String> iter1 = reader.lines().iterator();
+        return new LineIterator(iter1);
     }
 
     public boolean hasNext() {

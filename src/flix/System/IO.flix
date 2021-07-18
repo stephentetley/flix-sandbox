@@ -213,12 +213,12 @@ namespace System/IO {
         Iterator(iterDone, iterNext)
 
     pub def readLinesIterWith(opts: {charset: Text.Charset}, path: FilePath): Iterator[Result[String, String]] & Impure =
-        import new flix.runtime.spt.sandbox.system.LineIterator(##java.nio.file.Path, ##java.nio.charset.Charset) as newIter;
+        import flix.runtime.spt.sandbox.system.LineIterator:newFileslinesIterator(##java.nio.file.Path, ##java.nio.charset.Charset);
         import flix.runtime.spt.sandbox.system.LineIterator.hasNext();
         import flix.runtime.spt.sandbox.system.LineIterator.next();
         let FilePath(path1) = path;
         let Charset(charset1) = opts.charset;
-        let primIter = newIter(path1, charset1);
+        let primIter = newFileslinesIterator(path1, charset1);
         let iterDone = () -> if (hasNext(primIter)) false else true;
         let iterNext = () -> {
             try {

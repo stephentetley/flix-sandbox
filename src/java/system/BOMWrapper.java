@@ -48,4 +48,15 @@ public class BOMWrapper {
         return answer;
     }
 
+    /// Open a BufferedReader for a file with a BOM
+    public static BufferedReader openBufferedReaderWithBOM(Path path) throws Exception {
+        InputStream instream = new FileInputStream(path.toFile());
+        BOMInputStream bomInstream = new BOMInputStream(instream);
+        String csname = bomInstream.getBOMCharsetName();
+        if (csname == null) csname = "UTF-16";
+        Charset charset = Charset.forName(csname);
+        BufferedReader br = new BufferedReader(new InputStreamReader(bomInstream, charset));
+        return br;
+    }
+
 }

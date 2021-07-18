@@ -14,12 +14,16 @@
  * limitations under the License.
  */
 
-/// Deprecated
+/// BOM has extra Jar dependencies Apache Commons `commons-io`
+/// so it should provide extra functionality for existing modules / types
+/// (whoich shouldn't depend it it).
 
 namespace System/BOM {
 
     use System.FilePath;
     use System.FilePath.{FilePath};
+    use System/File.BufferedReader;
+    use System/File.BufferedReader.{BufferedReader};
     use Text.Charset.{Charset};
 
 
@@ -32,6 +36,16 @@ namespace System/BOM {
         }
         catch {
             case _: ##java.lang.Exception => Err("readFileWithBOM")
+        }
+
+    pub def openBufferedReaderWithBOM(path: System.FilePath): Result[BufferedReader, String] & Impure =
+        import flix.runtime.spt.sandbox.system.BOMWrapper:openBufferedReaderWithBOM(##java.nio.file.Path);
+        try {
+            let FilePath(path1) = path;
+            Ok(BufferedReader(openBufferedReaderWithBOM(path1)))
+        }
+        catch {
+            case _: ##java.lang.Exception => Err("BufferedReader:newUsingBOM")
         }
 
 }
