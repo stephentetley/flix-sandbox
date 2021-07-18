@@ -105,13 +105,13 @@ namespace System/Directory {
 
 
     pub def createDirectory(path: FilePath): Unit & Impure =
-        import flix.runtime.spt.sandbox.system.DirectoryWrapper:createDirectory(##java.nio.file.Path);
+        import flix.runtime.spt.sandbox.system.FilesWrapper:createDirectory(##java.nio.file.Path);
         let FilePath(path1) = path;
         createDirectory(path1)
 
     /// Create any "missing" directories along the way...
     pub def createDirectoryAll(path: FilePath): Unit & Impure =
-        import flix.runtime.spt.sandbox.system.DirectoryWrapper:createDirectories(##java.nio.file.Path);
+        import flix.runtime.spt.sandbox.system.FilesWrapper:createDirectories(##java.nio.file.Path);
         let FilePath(path1) = path;
         createDirectories(path1)
 
@@ -142,7 +142,7 @@ namespace System/Directory {
 
 
     pub def copy(source: FilePath, target: FilePath): Result[Unit, String] & Impure =
-        import flix.runtime.spt.sandbox.system.DirectoryWrapper:copy(##java.nio.file.Path, ##java.nio.file.Path);
+        import flix.runtime.spt.sandbox.system.FilesWrapper:copy(##java.nio.file.Path, ##java.nio.file.Path);
         try {
             let FilePath(source1) = source;
             let FilePath(target1) = target;

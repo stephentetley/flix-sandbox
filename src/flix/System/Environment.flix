@@ -21,6 +21,11 @@ namespace System/Environment {
     use System.FilePath;
     use System.FilePath.{FilePath};
 
+    pub def currentTimeMilliseconds(): Int64 & Impure =
+        import java.lang.System:currentTimeMillis();
+        currentTimeMillis()
+
+
     /// Get env var...
     pub def getEnvVar(name: String): Result[String, String] & Impure = try {
         import java.lang.System:getenv(String);
