@@ -167,31 +167,36 @@ namespace Text/Regex {
 
 
     ///
-    /// Stream with a Cursor...
+    /// Stream with a Iterator...
     ///
-    pub def results(input: String, patt: Pattern, eval: MatchEvaluator[a]): Cursor[String, a] & Impure =
+    pub def results(input: String, patt: Pattern, eval: MatchEvaluator[a]): Iterator[Result[a, String]] & Impure =
         use Text/Regex/Internal/PrimMatcher.{newPrimMatcher, find};
         let Pattern(p1) = patt;
         let MatchEvaluator(fn1) = eval;
         let m1 = newPrimMatcher(p1, input);
-        let cursorAlg: CursorAlg[String, a] =  {
-              hasNext = () -> find(m1)
-            , next = () -> fn1(m1)
-            , finalize = () -> () as & Impure
+        let iterDone = () -> find(m1);
+        let iterNext = () -> {
+            try {
+                fn1(m1)
+            } catch {
+                case _: ##java.lang.Exception => Err("contentsAllIter[next]")
+            }
         };
-        Cursor.makeCursor(cursorAlg)
+        Iterator(iterDone, iterNext)
+
+
 
     ///
     /// Stream...
     ///
-    pub def contentResults(input: String, patt: Pattern): Cursor[String, String] & Impure =
+    pub def contentResults(input: String, patt: Pattern): Iterator[Result[String, String]] & Impure =
         use Text/Regex/MatchEvaluator.{content};
         results(input, patt, content())
 
     ///
     /// Stream...
     ///
-    pub def rangeResults(input: String, patt: Pattern): Cursor[String, (Int32, Int32)] & Impure =
+    pub def rangeResults(input: String, patt: Pattern): Iterator[Result[(Int32, Int32), String]] & Impure =
         use Text/Regex/MatchEvaluator.{getRange};
         results(input, patt, getRange())
 

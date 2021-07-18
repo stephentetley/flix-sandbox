@@ -51,10 +51,20 @@ namespace I18n/Locale {
     use I18n.Locale;
     use I18n.Locale.{Locale};
 
-    /// TODO - should return Result?
-    pub def new(x: {language: String, country: String, variant: String}): Locale =
+    /// `new` functions should not return Result as there isn't a tangible notion of failure.
+    /// Unrecognized locales can be built - operations on them just don't produce results.
+
+    pub def new(language: String): Locale =
+        import new java.util.Locale(String) as newLocale;
+        Locale(newLocale(language)) as & Pure
+
+    pub def newWithCountry(language: String, country: String): Locale =
+        import new java.util.Locale(String, String) as newLocale;
+        Locale(newLocale(language, country)) as & Pure
+
+    pub def newWithVariant(language: String, country: String, variant: String): Locale =
         import new java.util.Locale(String, String, String) as newLocale;
-        Locale(newLocale(x.language, x.country, x.variant)) as & Pure
+        Locale(newLocale(language, country, variant)) as & Pure
 
     pub def getDefault(): Locale & Impure = 
         import java.util.Locale:getDefault();
@@ -75,6 +85,16 @@ namespace I18n/Locale {
         case Display
         case Format
     }
+
+    instance Eq[Category] {
+        pub def eq(x: Category, y: Category): Bool = match (x, y) {
+            case (Display, Display) => true
+            case (Format, Format) => true
+            case (_, _) => false
+        }
+    }
+
+
 
     pub def getDefaultWithCategory(x: Category): Locale & Impure = 
         import flix.runtime.spt.sandbox.i18n.LocaleWrapper:getDefaultDISPLAY();
@@ -282,7 +302,7 @@ namespace I18n/Locale {
         case Part3
     }
 
-    pub def marshal(x: IsoCountryCode): ##flix.runtime.spt.sandbox.i18n.IsoCountryCodeEnum =
+    pub def isoCountryCodeToNative(x: IsoCountryCode): ##flix.runtime.spt.sandbox.i18n.IsoCountryCodeEnum =
         import get flix.runtime.spt.sandbox.i18n.IsoCountryCodeEnum:FLIX_PART1_ALPHA2   as getFLIX_PART1_ALPHA2;
         import get flix.runtime.spt.sandbox.i18n.IsoCountryCodeEnum:FLIX_PART1_ALPHA3   as getFLIX_PART1_ALPHA3;
         import get flix.runtime.spt.sandbox.i18n.IsoCountryCodeEnum:FLIX_PART3          as getFLIX_PART3;
@@ -324,7 +344,7 @@ namespace I18n/Locale {
     pub def getIsoCountriesWithIsoCountryCode(icc: IsoCountryCode): Result[Set[String], String] & Impure =
         import flix.runtime.spt.sandbox.i18n.LocaleStringIterator:newGetISOCountriesWithICCIterator(##flix.runtime.spt.sandbox.i18n.IsoCountryCodeEnum);
         try {
-            let icc1 = marshal(icc);
+            let icc1 = isoCountryCodeToNative(icc);
             let iter = newGetISOCountriesWithICCIterator(icc1);
             makeLocaleStringIter(iter, "getIsoCountryCodesWithIsoCountryCode failed")
                 |> Iterator.toList
