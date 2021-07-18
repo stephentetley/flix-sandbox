@@ -119,7 +119,7 @@ namespace System/IO {
 
     /// #
 
-    pub def readFile(path: FilePath, cs: Text.Charset): Result[String, String] & Impure =
+    pub def readFile(cs: Text.Charset, path: FilePath): Result[String, String] & Impure =
         import java.nio.file.Files:readString(##java.nio.file.Path, ##java.nio.charset.Charset);
         try {
             let FilePath(path1) = path;

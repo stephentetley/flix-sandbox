@@ -16,9 +16,9 @@
 
 /// BOM has extra Jar dependencies Apache Commons `commons-io`
 /// so it should provide extra functionality for existing modules / types
-/// (whoich shouldn't depend it it).
+/// (which shouldn't depend it it).
 
-namespace System/BOM {
+namespace System/File/BOM {
 
     use System.FilePath;
     use System.FilePath.{FilePath};
