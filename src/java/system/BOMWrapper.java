@@ -27,7 +27,8 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
 /**
- * A wrapper class for File related functions.
+ * A wrapper class for File functions that deal with BOM (Byte
+ * Order Mark) prefixed files.
  * This class that provides concrete, non-overloaded methods.
  */
 public class BOMWrapper {

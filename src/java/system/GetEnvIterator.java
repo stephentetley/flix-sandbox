@@ -22,10 +22,10 @@ import flix.runtime.spt.sandbox.system.marshal.TupleStringString;
 import java.util.Iterator;
 import java.util.Map;
 
-public class GetEnvCursor {
+public class GetEnvIterator {
     private Iterator<Map.Entry<String, String>> iter;
 
-    public GetEnvCursor() throws Exception {
+    public GetEnvIterator() throws Exception {
         Map<String, String> env = System.getenv();
         this.iter = env.entrySet().iterator();
     }

@@ -22,88 +22,83 @@ namespace System/Environment {
     use System.FilePath.{FilePath};
 
     /// Get env var...
-    pub def getEnvVar(name: String): Option[String] & Impure = try {
+    pub def getEnvVar(name: String): Result[String, String] & Impure = try {
         import java.lang.System:getenv(String);
         let ans = getenv(name);
         if (not Object.isNull(ans))
-            Some(ans)
+            Ok(ans)
         else
-            None
+            Err("getEnvVar - not found: ${name}")
     } catch {
-        case _:##java.lang.Exception => None
+        case _:##java.lang.Exception => Err("getEnvVar")
     }
 
-    pub def getEnvVars(): Option[Map[String, String]] & Impure =
-        import new flix.runtime.spt.sandbox.system.GetEnvCursor() as newCursor;
-        import flix.runtime.spt.sandbox.system.GetEnvCursor.hasNext() as ffiHasNext;
-        import flix.runtime.spt.sandbox.system.GetEnvCursor.next() as ffiNext;
+    pub def getEnvVars(): Result[Map[String, String], String] & Impure =
+        getEnvVarsIter()
+            |> Iterator.toList
+            |> Result.sequence
+            |> Result.map(List.toMap)
+
+    def getEnvVarsIter(): Iterator[Result[(String, String), String]] & Impure =
+        import new flix.runtime.spt.sandbox.system.GetEnvIterator() as newGetEnvIterator;
+        import flix.runtime.spt.sandbox.system.GetEnvIterator.hasNext();
+        import flix.runtime.spt.sandbox.system.GetEnvIterator.next();
         import flix.runtime.spt.sandbox.system.marshal.TupleStringString.get0();
         import flix.runtime.spt.sandbox.system.marshal.TupleStringString.get1();
+        let primIter = newGetEnvIterator();
+        let iterDone = () -> if (hasNext(primIter)) false else true;
+        let iterNext = () -> {
+            try {
+                let xy = next(primIter);
+                let k = get0(xy);
+                let v = get1(xy);
+                Ok((k, v))
+            } catch {
+                case _: ##java.lang.Exception => Err("getEnvVarsIter[next]")
+            }
+        };
+        Iterator(iterDone, iterNext)
+
+
+    def getProperty(funName: String, propName: String): Result[String, String] & Impure =
+        import java.lang.System:getProperty(String);
         try {
-            let iter = newCursor();
-            let nextF = Cursor.guardThunk(_ -> {
-                let tss = ffiNext(iter);
-                let k = get0(tss);
-                let v = get1(tss);
-                (k, v)
-            }, "next failed");
-            let cursorAlg =  {
-                  hasNext = () -> ffiHasNext(iter)
-                , next = nextF
-                , finalize = () -> () as & Impure
-            };
-            Cursor.makeCursor(cursorAlg)
-                |> Cursor.toMap!
-                |> Result.toOption
-         } catch {
-            case _: ##java.lang.Exception => None
+            let ans = getProperty(propName);
+            if (not Object.isNull(ans))
+                Ok(ans)
+            else
+                Err("${funName}: lookup is null")
+        } catch {
+            case _:##java.lang.Exception => Err("${funName} - system exception")
         }
 
 
-    pub def getOsName(): String =
-        import java.lang.System:getProperty(String);
-        getProperty("os.name") as & Pure
+    pub def getOsName(): Result[String, String] & Impure =
+        getProperty("getOsName", "os.name")
 
-    pub def getOsArch(): String =
-        import java.lang.System:getProperty(String);
-        getProperty("os.arch") as & Pure
+    pub def getOsArch(): Result[String, String] & Impure =
+        getProperty("getOsArch", "os.arch")
 
-    pub def getOsVersion(): String =
-        import java.lang.System:getProperty(String);
-        getProperty("os.version") as & Pure
+    pub def getOsVersion(): Result[String, String] & Impure =
+        getProperty("getOsVersion", "os.version")
 
-    pub def getPathSeparator(): String =
-        import java.lang.System:getProperty(String);
-        getProperty("path.separator") as & Pure
+    pub def getPathSeparator(): Result[String, String] & Impure =
+        getProperty("getPathSeparator", "path.separator")
 
-
-    pub def getUserName(): String =
-        import java.lang.System:getProperty(String);
-        let p1 = getProperty("user.name") as & Pure;
-        if (Object.isNull(p1))
-            ""
-        else p1
+    pub def getUserName(): Result[String, String] & Impure =
+        getProperty("getUserName", "user.name")
 
 
     pub def getUserDirectory(): Result[FilePath, String] & Impure =
-        import java.lang.System:getProperty(String);
-        // Assume "user.dir" can change during a programs lifetime
-        let p1 = getProperty("user.dir");
-        if (Object.isNull(p1))
-            Err("getUserDirectory")
-        else
-            System/FilePath.new(p1)
-                |> System/FilePath.normalize
-                |> System/FilePath.toAbsolutePath
+        getProperty("getUserDirectory", "user.dir")
+            |> Result.map(System/FilePath.new)
+            |> Result.map(System/FilePath.normalize)
+            |> Result.flatMap(System/FilePath.toAbsolutePath)
 
-    pub def getUserHome(): Result[FilePath, String] =
-        import java.lang.System:getProperty(String);
-        let p1 = getProperty("user.home") as & Pure;
-        if (Object.isNull(p1))
-            Err("getUserHome")
-        else
-            System/FilePath.new(p1)
-                |> System/FilePath.normalize
-                |> System/FilePath.toAbsolutePath
+    pub def getUserHome(): Result[FilePath, String] & Impure =
+        getProperty("getUserHome", "user.home")
+            |> Result.map(System/FilePath.new)
+            |> Result.map(System/FilePath.normalize)
+            |> Result.flatMap(System/FilePath.toAbsolutePath)
 
 }

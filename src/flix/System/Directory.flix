@@ -106,14 +106,14 @@ namespace System/Directory {
 
     pub def createDirectory(path: FilePath): Unit & Impure =
         import flix.runtime.spt.sandbox.system.DirectoryWrapper:createDirectory(##java.nio.file.Path);
-        let FilePath(p1) = path;
-        p1.createDirectory()
+        let FilePath(path1) = path;
+        createDirectory(path1)
 
     /// Create any "missing" directories along the way...
     pub def createDirectoryAll(path: FilePath): Unit & Impure =
         import flix.runtime.spt.sandbox.system.DirectoryWrapper:createDirectories(##java.nio.file.Path);
-        let FilePath(p1) = path;
-        p1.createDirectories()
+        let FilePath(path1) = path;
+        createDirectories(path1)
 
 
     /// If path is a symbolic link the link is deleted.
