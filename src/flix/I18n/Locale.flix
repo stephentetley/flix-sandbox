@@ -51,7 +51,7 @@ namespace I18n/Locale {
     use I18n.Locale;
     use I18n.Locale.{Locale};
 
-    /// TODO - show return Result...
+    /// TODO - should return Result?
     pub def new(x: {language: String, country: String, variant: String}): Locale =
         import new java.util.Locale(String, String, String) as newLocale;
         Locale(newLocale(x.language, x.country, x.variant)) as & Pure
@@ -293,60 +293,81 @@ namespace I18n/Locale {
         } as & Pure
 
 
-    /// Cursors differ only on the create function and what they are marshalled to, so make making them common...
-    def makeLocaleStringCursor(stringCursor: ##flix.runtime.spt.sandbox.i18n.LocaleStringCursor, failMsg: String): Cursor[String, String] =
-        import flix.runtime.spt.sandbox.i18n.LocaleStringCursor.hasNext() as ffiHasNext;
-        import flix.runtime.spt.sandbox.i18n.LocaleStringCursor.next() as ffiNext;
+    /// Iterators differ only on the create function and what they are marshalled to, so make making them common...
+    def makeLocaleStringIter(primIter: ##flix.runtime.spt.sandbox.i18n.LocaleStringIterator,
+                                failMsg: String): Iterator[Result[String, String]] =
+        import flix.runtime.spt.sandbox.i18n.LocaleStringIterator.hasNext();
+        import flix.runtime.spt.sandbox.i18n.LocaleStringIterator.next();
+        let iterDone = () -> if (hasNext(primIter)) false else true;
+        let iterNext = () -> {
+            try {
+                let s1 = next(primIter);
+                Ok(s1)
+            } catch {
+                case _: ##java.lang.Exception => Err(failMsg)
+            }
+        };
+        Iterator(iterDone, iterNext)
+
+    pub def getIsoCountries(): Result[List[String], String] & Impure =
+        import flix.runtime.spt.sandbox.i18n.LocaleStringIterator:newGetISOCountriesIterator();
         try {
-            let cursorAlg: CursorAlg[String, String] =  {
-                  hasNext = () -> ffiHasNext(stringCursor)
-                , next = Cursor.guardThunk(_ -> ffiNext(stringCursor), "next failed")
-                , finalize = () -> () as & Impure
-            };
-            Cursor.makeCursor(cursorAlg)
+            let iter = newGetISOCountriesIterator();
+            makeLocaleStringIter(iter, "getIsoCountryCodes failed")
+                |> Iterator.toList
+                |> Result.sequence
         } catch {
-            case _: ##java.lang.Exception => Cursor.failure(failMsg)
+            case _: ##java.lang.Exception => Err("getIsoCountries")
         }
 
-    pub def getIsoCountries(): List[String] & Impure =
-        import flix.runtime.spt.sandbox.i18n.LocaleStringCursor:createGetISOCountriesCursor() as newCursor;
-        let iter = newCursor();
-        makeLocaleStringCursor(iter, "getIsoCountryCodes failed")
-            |> Cursor.toList!
-            |> flip(Result.getWithDefault, Nil)
 
+    pub def getIsoCountriesWithIsoCountryCode(icc: IsoCountryCode): Result[Set[String], String] & Impure =
+        import flix.runtime.spt.sandbox.i18n.LocaleStringIterator:newGetISOCountriesWithICCIterator(##flix.runtime.spt.sandbox.i18n.IsoCountryCodeEnum);
+        try {
+            let icc1 = marshal(icc);
+            let iter = newGetISOCountriesWithICCIterator(icc1);
+            makeLocaleStringIter(iter, "getIsoCountryCodesWithIsoCountryCode failed")
+                |> Iterator.toList
+                |> Result.sequence
+                |> Result.map(List.toSet)
+        } catch {
+            case _: ##java.lang.Exception => Err("getIsoCountriesWithIsoCountryCode")
+        }
 
-    pub def getIsoCountriesWithIsoCountryCode(icc: IsoCountryCode): Set[String] & Impure =
-        import flix.runtime.spt.sandbox.i18n.LocaleStringCursor:createGetISOCountriesWithICCCursor(##flix.runtime.spt.sandbox.i18n.IsoCountryCodeEnum) as newCursor;
-        let icc1 = marshal(icc);
-        let iter = newCursor(icc1);
-        makeLocaleStringCursor(iter, "getIsoCountryCodesWithIsoCountryCode failed")
-            |> Cursor.toSet!
-            |> flip(Result.getWithDefault, Set#{})
+    pub def getIsoLanguages(): Result[List[String], String] & Impure =
+        import flix.runtime.spt.sandbox.i18n.LocaleStringIterator:newGetISOLanguagesIterator();
+        try {
+            let iter = newGetISOLanguagesIterator();
+            makeLocaleStringIter(iter, "getIsoLanguages failed")
+                |> Iterator.toList
+                |> Result.sequence
+        } catch {
+            case _: ##java.lang.Exception => Err("getIsoLanguages")
+        }
 
-    pub def getIsoLanguages(): List[String] & Impure =
-        import flix.runtime.spt.sandbox.i18n.LocaleStringCursor:createGetISOLanguagesCursor() as newCursor;
-        let iter = newCursor();
-        makeLocaleStringCursor(iter, "getIsoLanguages failed")
-            |> Cursor.toList!
-            |> flip(Result.getWithDefault, Nil)
+    pub def getUnicodeLocaleAttributes(locale: Locale): Result[Set[String], String] & Impure =
+        import flix.runtime.spt.sandbox.i18n.LocaleStringIterator:newGetUnicodeLocaleAttributesIterator(##java.util.Locale);
+        try {
+            let Locale(locale1) = locale;
+            let iter = newGetUnicodeLocaleAttributesIterator(locale1);
+            makeLocaleStringIter(iter, "getUnicodeLocaleAttributes failed")
+                |> Iterator.toList
+                |> Result.sequence
+                |> Result.map(List.toSet)
+        } catch {
+            case _: ##java.lang.Exception => Err("getUnicodeLocaleAttributes")
+        }
 
-
-    pub def getUnicodeLocaleAttributes(locale: Locale): Set[String] & Impure =
-        import flix.runtime.spt.sandbox.i18n.LocaleStringCursor:createGetUnicodeLocaleAttributesCursor(##java.util.Locale) as newCursor;
-        let Locale(locale1) = locale;
-        let iter = newCursor(locale1);
-        makeLocaleStringCursor(iter, "getUnicodeLocaleAttributes failed")
-            |> Cursor.toSet!
-            |> flip(Result.getWithDefault, Set#{})
-
-
-    pub def getUnicodeLocaleKeys(locale: Locale): Set[String] & Impure =
-        import flix.runtime.spt.sandbox.i18n.LocaleStringCursor:createGetUnicodeLocaleKeysCursor(##java.util.Locale) as newCursor;
-        let Locale(locale1) = locale;
-        let iter = newCursor(locale1);
-        makeLocaleStringCursor(iter, "getUnicodeLocaleKeys failed")
-            |> Cursor.toSet!
-            |> flip(Result.getWithDefault, Set#{})
-
+    pub def getUnicodeLocaleKeys(locale: Locale): Result[Set[String], String] & Impure =
+        import flix.runtime.spt.sandbox.i18n.LocaleStringIterator:newGetUnicodeLocaleKeysIterator(##java.util.Locale);
+        try {
+            let Locale(locale1) = locale;
+            let iter = newGetUnicodeLocaleKeysIterator(locale1);
+            makeLocaleStringIter(iter, "getUnicodeLocaleKeys failed")
+                |> Iterator.toList
+                |> Result.sequence
+                |> Result.map(List.toSet)
+        } catch {
+            case _: ##java.lang.Exception => Err("getUnicodeLocaleAttributes")
+        }
 }

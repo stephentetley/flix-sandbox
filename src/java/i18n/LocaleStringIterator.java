@@ -23,36 +23,36 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.Set;
 
-public class LocaleStringCursor {
+public class LocaleStringIterator {
     private Iterator<String> iter;
 
-    protected LocaleStringCursor(Iterator<String> iter1) {
+    protected LocaleStringIterator(Iterator<String> iter1) {
         iter = iter1;
     }
 
-    public static LocaleStringCursor createGetISOCountriesCursor() throws Exception {
+    public static LocaleStringIterator newGetISOCountriesIterator() throws Exception {
         String[] codes = Locale.getISOCountries();
-        return new LocaleStringCursor(Arrays.stream(codes).iterator());
+        return new LocaleStringIterator(Arrays.stream(codes).iterator());
     }
 
-    public static LocaleStringCursor createGetISOCountriesWithICCCursor(IsoCountryCodeEnum icc) throws Exception {
+    public static LocaleStringIterator newGetISOCountriesWithICCIterator(IsoCountryCodeEnum icc) throws Exception {
         Set<String> codes = Locale.getISOCountries(IsoCountryCodeEnum.convertToInner(icc));
-        return new LocaleStringCursor(codes.iterator());
+        return new LocaleStringIterator(codes.iterator());
     }
 
-    public static LocaleStringCursor createGetISOLanguagesCursor() throws Exception {
+    public static LocaleStringIterator newGetISOLanguagesIterator() throws Exception {
         String[] langs = Locale.getISOLanguages();
-        return new LocaleStringCursor(Arrays.stream(langs).iterator());
+        return new LocaleStringIterator(Arrays.stream(langs).iterator());
     }
 
-    public static LocaleStringCursor createGetUnicodeLocaleAttributesCursor(Locale locale) throws Exception {
+    public static LocaleStringIterator newGetUnicodeLocaleAttributesIterator(Locale locale) throws Exception {
         Set<String> attrs = locale.getUnicodeLocaleAttributes();
-        return new LocaleStringCursor(attrs.iterator());
+        return new LocaleStringIterator(attrs.iterator());
     }
 
-    public static LocaleStringCursor createGetUnicodeLocaleKeysCursor(Locale locale) throws Exception {
+    public static LocaleStringIterator newGetUnicodeLocaleKeysIterator(Locale locale) throws Exception {
         Set<String> keys = locale.getUnicodeLocaleKeys();
-        return new LocaleStringCursor(keys.iterator());
+        return new LocaleStringIterator(keys.iterator());
     }
 
 
