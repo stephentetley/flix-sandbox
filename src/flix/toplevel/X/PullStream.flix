@@ -27,7 +27,7 @@ pub opaque type PullStream[a] =
     , reset: Unit ~> Unit
     }
 
-namespace PullStream/Internal {
+namespace X/PullStream/Internal {
 
     ///
     /// The internal type of stream answers.
@@ -43,10 +43,10 @@ namespace PullStream/Internal {
 }
 
 
-namespace PullStream {
+namespace X/PullStream {
 
-    use PullStream/Internal.Step;
-    use PullStream/Internal.Step.{Done, Skip, Yield};
+    use X/PullStream/Internal.Step;
+    use X/PullStream/Internal.Step.{Done, Skip, Yield};
 
     ///
     /// Returns the empty stream.

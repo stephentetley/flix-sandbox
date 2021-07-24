@@ -166,7 +166,7 @@ namespace Text/Regex/Pattern {
     pub def unmatchable(): Pattern =
         import java.util.regex.Pattern:compile(String);
         try {
-            Pattern(compile("^\b$")) as & Pure
+            Pattern(compile("^\\b$")) as & Pure
         } catch {
             case _: ##java.util.regex.PatternSyntaxException => unreachable!()
         }

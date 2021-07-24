@@ -22,7 +22,6 @@ namespace Text/Regex {
     use Text/Regex.MatchEvaluator.{MatchEvaluator};
     use Text/Regex/Internal.PrimMatcher;
 
-
     ///
     /// Returns `true` if the entire string `input` is matched by the pattern `patt`.
     ///

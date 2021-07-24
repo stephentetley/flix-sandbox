@@ -14,14 +14,20 @@
  * limitations under the License.
  */
 
-/// TODO - possibly call this DataCursor to avoid strong connotation
-/// to a database cursor.
+/// DEPRECATED - stdlib now has Iterator.
 
-opaque type Cursor[e, a] = Cursor.CursorImpl[e, a]
+namespace X {
 
-type alias CursorAlg[e, a] = { hasNext: Unit ~> Bool, next: Unit ~> Result[a, e], finalize: Unit ~> Unit }
+    pub opaque type Cursor[e, a] = X/Cursor.CursorImpl[e, a]
 
-namespace Cursor {
+    type alias CursorAlg[e, a] = { hasNext: Unit ~> Bool, next: Unit ~> Result[a, e], finalize: Unit ~> Unit }
+}
+
+namespace X/Cursor {
+
+    use X.Cursor;
+    use X.CursorAlg;
+    use X.Cursor.{Cursor};
 
     type alias CursorImpl[e, a] = { hasNext: Unit ~> Bool, next: Unit ~> Step[e, a], finalize: Unit ~> Unit }
 

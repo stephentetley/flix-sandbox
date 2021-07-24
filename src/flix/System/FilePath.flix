@@ -219,7 +219,7 @@ namespace System/FilePath {
 
     pub def <<>>(path: FilePath, name1: String): FilePath = snoc(path, name1)
 
-    def snoc(path: FilePath, name1: String): FilePath =
+    pub def snoc(path: FilePath, name1: String): FilePath =
         match tryNew(name1) {
             case Ok(path1) => append(path, path1)
             case Err(_) => path
