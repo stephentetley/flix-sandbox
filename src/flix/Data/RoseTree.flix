@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-use Data.{RoseTree, RoseForest};
-use Data.RoseTree.{RoseTree};
 
 namespace Data {
 
@@ -28,6 +26,8 @@ namespace Data {
 
 namespace Data/RoseTree {
 
+    use Data.{RoseTree, RoseForest};
+    use Data.RoseTree.{RoseTree};
 
     def shift1(first: String, other: String, xs: List[String], k: List[String] -> List[String]): List[String] = 
         match xs { 

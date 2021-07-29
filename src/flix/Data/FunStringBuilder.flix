@@ -150,16 +150,17 @@ namespace Data/FunStringBuilder {
     
     def toStringHelper(sb: FunStringBuilder): String & Impure =
         let x = StringBuilder.new();
-        toStringHelperBody(x, sb);
+        toStringHelperBody(x, sb, x1 -> x1 as & Impure);
         StringBuilder.toString(x)
 
-    def toStringHelperBody(x: StringBuilder, src: FunStringBuilder): Unit & Impure = match src {
-        case Empty => ()
-        case Text(s) => StringBuilder.appendString!(x, s)
-        case Char(c) => StringBuilder.appendChar!(x, c)
+    def toStringHelperBody(x: StringBuilder, src: FunStringBuilder, k: Unit ~> Unit): Unit & Impure = match src {
+        case Empty => k()
+        case Text(s) => {StringBuilder.appendString!(x, s); k()}
+        case Char(c) => {StringBuilder.appendChar!(x, c); k()}
         case Join(src1, src2) => {
-            toStringHelperBody(x, src1);
-            toStringHelperBody(x, src2)
+            toStringHelperBody(x, src1, _ ->
+            toStringHelperBody(x, src2, _ ->
+            k()))
         }
     }
 

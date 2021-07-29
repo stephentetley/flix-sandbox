@@ -51,7 +51,7 @@ public class IOWrapper {
     /// Wrapper function for `Files.writeString` as it is "varargs" in Java and uses the CharSequence interface.
     public static void writeString(Path path, Charset charset, StandardOpenOption opt, String content) throws Exception {
         final CharSequence content2 = content;
-        Files.writeString(path, content2, charset, opt);
+        Files.writeString(path, content2, charset, opt, StandardOpenOption.TRUNCATE_EXISTING);
     }
 
     public static void writeBytes(Path path, StandardOpenOption opt, byte[] bytes)  throws Exception {
