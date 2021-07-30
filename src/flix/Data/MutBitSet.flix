@@ -18,6 +18,22 @@
 namespace Data {
 
     pub opaque type MutBitSet = ##java.util.BitSet
+
+    instance ToString[MutBitSet] {
+        pub def toString(x: MutBitSet): String =
+            import java.util.BitSet.toString();
+            let MutBitSet(x1) = x;
+            toString(x1) as & Pure
+    }
+
+    instance Eq[MutBitSet] {
+        pub def eq(x: MutBitSet, y: MutBitSet): Bool =
+            import java.util.BitSet.equals(##java.lang.Object);
+            let MutBitSet(x1) = x;
+            let MutBitSet(y1) = y;
+            equals(x1, y1 as ##java.lang.Object) as & Pure
+    }
+
 }
 
 namespace Data/MutBitSet {
@@ -33,6 +49,55 @@ namespace Data/MutBitSet {
         let x = empty();
         set!(idx, x);
         x
+
+    pub def isEmpty(s: MutBitSet): Bool & Impure =
+        import java.util.BitSet.isEmpty();
+        let MutBitSet(s1) = s;
+        isEmpty(s1)
+
+    pub def size(s: MutBitSet): Int32 & Impure =
+        import java.util.BitSet.size();
+        let MutBitSet(s1) = s;
+        size(s1)
+
+    pub def cardinality(s: MutBitSet): Int32 & Impure =
+        import java.util.BitSet.cardinality();
+        let MutBitSet(s1) = s;
+        cardinality(s1)
+
+    pub def clone(s: MutBitSet): MutBitSet & Impure =
+        import java.util.BitSet.clone();
+        let MutBitSet(s1) = s;
+        let s2 = clone(s1) as ##java.util.BitSet;
+        MutBitSet(s2)
+
+    pub def union(x: MutBitSet, y: MutBitSet): MutBitSet & Impure =
+        import java.util.BitSet.and(##java.util.BitSet) as primAnd!;
+        let MutBitSet(x1) = clone(x);
+        let MutBitSet(y1) = y;
+        primAnd!(x1, y1);       /// Mutates x1
+        MutBitSet(x1)
+
+    /// Mutates x
+    pub def union!(x: MutBitSet, y: MutBitSet): Unit & Impure =
+        import java.util.BitSet.and(##java.util.BitSet) as primAnd!;
+        let MutBitSet(x1) = x;
+        let MutBitSet(y1) = y;
+        primAnd!(x1, y1)
+
+    pub def intersection(x: MutBitSet, y: MutBitSet): MutBitSet & Impure =
+        import java.util.BitSet.or(##java.util.BitSet) as primOr!;
+        let MutBitSet(x1) = clone(x);
+        let MutBitSet(y1) = y;
+        primOr!(x1, y1);       /// Mutates x1
+        MutBitSet(x1)
+
+    /// Mutates x
+    pub def intersection!(x: MutBitSet, y: MutBitSet): Unit & Impure =
+        import java.util.BitSet.or(##java.util.BitSet) as primOr!;
+        let MutBitSet(x1) = x;
+        let MutBitSet(y1) = y;
+        primOr!(x1, y1)
 
     /// Set all bits to `false` imperatively.
     pub def clearAll!(s: MutBitSet): Unit & Impure =
@@ -56,11 +121,52 @@ namespace Data/MutBitSet {
         let MutBitSet(s1) = s;
         clear(s1, idx)
 
+    pub def flip!(idx: Int32, s: MutBitSet): Unit & Impure =
+        import java.util.BitSet.flip(Int32);
+        let MutBitSet(s1) = s;
+        flip(s1, idx)
+
     pub def nextSetBit(idx: Int32, s: MutBitSet): Option[Int32] & Impure =
         import java.util.BitSet.nextSetBit(Int32);
         try {
             let MutBitSet(s1) = s;
             let i = nextSetBit(s1, idx);
+            if (i < 0)
+                None
+            else Some(i)
+        } catch {
+            case _: ##java.lang.Exception => None
+        }
+
+    pub def nextClearBit(idx: Int32, s: MutBitSet): Option[Int32] & Impure =
+        import java.util.BitSet.nextClearBit(Int32);
+        try {
+            let MutBitSet(s1) = s;
+            let i = nextClearBit(s1, idx);
+            if (i < 0)
+                None
+            else Some(i)
+        } catch {
+            case _: ##java.lang.Exception => None
+        }
+
+    pub def previousSetBit(idx: Int32, s: MutBitSet): Option[Int32] & Impure =
+        import java.util.BitSet.previousSetBit(Int32);
+        try {
+            let MutBitSet(s1) = s;
+            let i = previousSetBit(s1, idx);
+            if (i < 0)
+                None
+            else Some(i)
+        } catch {
+            case _: ##java.lang.Exception => None
+        }
+
+    pub def previousClearBit(idx: Int32, s: MutBitSet): Option[Int32] & Impure =
+        import java.util.BitSet.previousClearBit(Int32);
+        try {
+            let MutBitSet(s1) = s;
+            let i = previousClearBit(s1, idx);
             if (i < 0)
                 None
             else Some(i)
