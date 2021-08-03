@@ -224,7 +224,4 @@ namespace Text/Regex/Internal/PrimMatcher {
         x1.appendTail(sb1);
         ()
 
-
-
-
 }
