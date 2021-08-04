@@ -19,9 +19,7 @@
 
 namespace Text/Regex {
 
-    use Text/Regex/Internal.{PrimMatcher};
-
-    pub opaque type Matcher[a] = PrimMatcher ~> Result[a, String]
+    pub opaque type Matcher[a] = ##java.util.regex.Matcher ~> Result[a, String]
 
 }
 
@@ -31,7 +29,6 @@ namespace Text/Regex/Matcher {
     use Text/Regex.{Matcher};
     use Text/Regex.Matcher.{Matcher};
 
-    use Text/Regex/Internal.{PrimMatcher};
     use Text/Regex.Pattern;
     use Text/Regex.Pattern.{Pattern};
     use Text/Regex.{MatchEvaluator};
@@ -39,11 +36,10 @@ namespace Text/Regex/Matcher {
 
     pub def runMatcher(ma: Matcher[a], patt: Pattern, input: String): Result[a, String] & Impure =
         use Result.flatMap;
-        use Text/Regex/Internal/PrimMatcher.{newPrimMatcher};
-        let Matcher(m1) = ma;
-        let Pattern(p1) = patt;
-        let prim = newPrimMatcher(p1, input);
-        m1(prim)
+        let Matcher(f) = ma;
+        let Pattern(patt1) = patt;
+        let m1 = Text/Regex/Internal/Matcher.new(patt1, input);
+        f(m1)
 
     ///
     /// Version of `runMatcher` that takes a regex string and compiles it to a Pattern.
@@ -60,9 +56,9 @@ namespace Text/Regex/Matcher {
     pub def fail(msg: String): Matcher[a] =
         Matcher(_ -> Err(msg) as & Impure)
 
-    def apply1(x: Matcher[a], m: PrimMatcher): Result[a, String] & Impure =
+    def apply1(x: Matcher[a], r: ##java.util.regex.Matcher): Result[a, String] & Impure =
         let Matcher(f) = x;
-        f(m)
+        f(r)
 
     pub def map(f: a -> b & e, x: Matcher[a]): Matcher[b] =
         Matcher(r ->
@@ -96,28 +92,25 @@ namespace Text/Regex/Matcher {
 
     pub def flatMap(k: a -> Matcher[b], x: Matcher[a]): Matcher[b] = bind(x, k)
 
-    def liftOptionPrim(fn : PrimMatcher ~> Option[a], errMsg: String): Matcher[a] =
-        Matcher(r -> Option.toOk(fn(r), errMsg))
+    def liftPrim(fn : ##java.util.regex.Matcher ~> a): Matcher[a] =
+        Matcher(r -> Ok(fn(r)))
 
-    def liftPrim(fn : PrimMatcher ~> Result[a, String]): Matcher[a] =
+    def liftPrimResult(fn : ##java.util.regex.Matcher ~> Result[a, String]): Matcher[a] =
         Matcher(r -> fn(r))
 
     pub def ignore(x: Matcher[a]): Matcher[Unit] = map(_ -> (), x)
 
-    pub def matches(): Matcher[Bool] =
-        liftPrim(x -> Ok(Text/Regex/Internal/PrimMatcher.matches(x)))
+    pub def matches(): Matcher[Bool] = liftPrim(Text/Regex/Internal/Matcher.matches)
 
-    pub def lookingAt(): Matcher[Bool] =
-        liftPrim(x -> Ok(Text/Regex/Internal/PrimMatcher.lookingAt(x)))
+    pub def lookingAt(): Matcher[Bool] = liftPrim(Text/Regex/Internal/Matcher.lookingAt)
 
-    pub def find(): Matcher[Bool] =
-        liftPrim(x -> Ok(Text/Regex/Internal/PrimMatcher.find(x)))
+    pub def find(): Matcher[Bool] = liftPrim(Text/Regex/Internal/Matcher.find)
 
     pub def findFrom(start: Int32): Matcher[Bool] =
-        liftPrim(x -> Ok(Text/Regex/Internal/PrimMatcher.findFrom(x, start)))
+        liftPrimResult(x -> Text/Regex/Internal/Matcher.findFrom(x, start))
 
     pub def content(): Matcher[String] =
-        liftOptionPrim(Text/Regex/Internal/PrimMatcher.group, "content")
+        liftPrimResult(Text/Regex/Internal/Matcher.group)
 
     pub def evaluate(eval: MatchEvaluator[a]): Matcher[a] =
         let MatchEvaluator(fn) = eval;
@@ -141,18 +134,17 @@ namespace Text/Regex/Matcher {
     pub def done(): Matcher[Bool] = ifThenElse(content(), _ -> return(false), return(true))
 
 
-    pub def reset!(): Matcher[Unit] =
-        liftPrim(x -> Ok(Text/Regex/Internal/PrimMatcher.reset(x)))
+    pub def reset!(): Matcher[Unit] = liftPrim(Text/Regex/Internal/Matcher.reset)
 
     pub def resetInput!(input: String): Matcher[Unit] =
-        liftPrim(x -> Ok(Text/Regex/Internal/PrimMatcher.resetInput(x, input)))
+        liftPrim(x -> Text/Regex/Internal/Matcher.resetInput(x, input))
 
     pub def setRegion!(start: Int32, end: Int32): Matcher[Unit] =
-        liftOptionPrim(x -> Text/Regex/Internal/PrimMatcher.region(x, start, end), "setRegion!")
+        liftPrimResult(x -> Text/Regex/Internal/Matcher.region(x, start, end))
 
     pub def setPattern!(patt: Pattern): Matcher[Unit] =
         let Pattern(p1) = patt;
-        liftPrim(x -> Ok(Text/Regex/Internal/PrimMatcher.usePattern(x, p1)))
+        liftPrimResult(x -> Text/Regex/Internal/Matcher.usePattern(x, p1))
 
     pub def countWith(append: (a, ac) -> ac, acc: ac, n: Int32, ma: Matcher[a]): Matcher[ac] =
         if (n <= 0)
@@ -168,6 +160,4 @@ namespace Text/Regex/Matcher {
 
 
 }        
-
-
 

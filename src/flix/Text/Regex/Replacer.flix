@@ -21,9 +21,7 @@
 
 namespace Text/Regex {
 
-    use Text/Regex/Internal.{PrimMatcher};
-    
-    pub opaque type Replacer[a] = (StringBuilder, PrimMatcher, Int32) ~> Result[(a, Int32), String]
+    pub opaque type Replacer[a] = (StringBuilder, ##java.util.regex.Matcher, Int32) ~> Result[(a, Int32), String]
 
 }
 
@@ -32,7 +30,6 @@ namespace Text/Regex/Replacer {
     use Text/Regex.{Replacer};
     use Text/Regex.Replacer.{Replacer};
 
-    use Text/Regex/Internal.{PrimMatcher};
     use Text/Regex.Pattern;
     use Text/Regex.Pattern.{Pattern};
     use Text/Regex.{MatchEvaluator};
@@ -40,13 +37,12 @@ namespace Text/Regex/Replacer {
 
     pub def runReplacer(rep: Replacer[a], patt: Pattern, input: String): Result[(a, String), String] & Impure =
         use Result.flatMap;
-        use Text/Regex/Internal/PrimMatcher.{newPrimMatcher};
         let sb = StringBuilder.new();
-        let Replacer(r1) = rep;
-        let Pattern(p1) = patt;
-        let prim = newPrimMatcher(p1, input);
-        /// Start index at -1 because we haven't fund anything yet...
-        match r1(sb, prim, -1) {
+        let Replacer(rep1) = rep;
+        let Pattern(patt1) = patt;
+        let m1 = Text/Regex/Internal/Matcher.new(patt1, input);
+        /// Start index at -1 because we haven't found anything yet...
+        match rep1(sb, m1, -1) {
             case Ok(a, _) => {
                 let s = StringBuilder.toString(sb);
                 Ok((a, s))
@@ -74,7 +70,7 @@ namespace Text/Regex/Replacer {
     pub def fail(msg: String): Replacer[a] =
         Replacer((_, _, _) -> Err(msg) as & Impure)
 
-    def apply1(rep: Replacer[a], sb: StringBuilder, m: PrimMatcher, n: Int32): Result[(a, Int32), String] & Impure =
+    def apply1(rep: Replacer[a], sb: StringBuilder, m: ##java.util.regex.Matcher, n: Int32): Result[(a, Int32), String] & Impure =
         let Replacer(f) = rep;
         f(sb, m, n)
 
@@ -113,25 +109,25 @@ namespace Text/Regex/Replacer {
     pub def ignore(x: Replacer[a]): Replacer[Unit] = map(_ -> (), x)
 
 
-    def liftPrim(fn : PrimMatcher ~> Result[a, String]): Replacer[a] =
+    def liftPrim(fn: ##java.util.regex.Matcher ~> a): Replacer[a] =
+        Replacer((_, m, n) -> Ok((fn(m), n)))
+
+    def liftPrimResult(fn: ##java.util.regex.Matcher ~> Result[a, String]): Replacer[a] =
         Replacer((_, m, n) -> Result.map(x -> (x, n), fn(m)))
 
-    def liftOptionPrim(fn : PrimMatcher ~> Option[a], errMsg: String): Replacer[a] =
-        Replacer((_, m, n) -> Result.map(x -> (x, n), Option.toOk(fn(m), errMsg)))
+    def liftWriterPrim(fn : (##java.util.regex.Matcher, StringBuilder) ~> a): Replacer[a] =
+        Replacer((sb, m, n) -> Ok((fn(m, sb), n)))
 
-    def liftWriterPrim(fn : (PrimMatcher, StringBuilder) ~> Result[a, String]): Replacer[a] =
+    def liftWriterPrimResult(fn : (##java.util.regex.Matcher, StringBuilder) ~> Result[a, String]): Replacer[a] =
         Replacer((sb, m, n) -> Result.map(x -> (x, n), fn(m, sb)))
 
-    def liftWriterOptionPrim(fn : (PrimMatcher, StringBuilder) ~> Option[a], errMsg: String): Replacer[a] =
-        Replacer((sb, m, n) -> Result.map(x -> (x, n), Option.toOk(fn(m, sb), errMsg)))
-
     pub def appendTail!(): Replacer[Unit] =
-        use Text/Regex/Internal/PrimMatcher.{appendTail};
-        liftWriterPrim((m,sb) -> Ok(appendTail(m, sb)))
+        use Text/Regex/Internal/Matcher.{appendTail};
+        liftWriterPrim((m, sb) -> appendTail(m, sb))
 
-    pub def appendReplacement!(replacement: String): Replacer[Unit] =
-        use Text/Regex/Internal/PrimMatcher.{appendReplacement};
-        liftWriterOptionPrim((m,sb) -> appendReplacement(m, sb, replacement), "appendReplacement!")
+    pub def appendReplacement!(rep: String): Replacer[Unit] =
+        use Text/Regex/Internal/Matcher.{appendReplacement};
+        liftWriterPrimResult((m, sb) -> appendReplacement(m, sb, rep))
 
     pub def getIndex(): Replacer[Int32] =
         Replacer((_, _, n) -> Ok((n, n)) as & Impure)
@@ -140,21 +136,20 @@ namespace Text/Regex/Replacer {
         Replacer((_, _, n) -> Ok(((), if (incr) n + 1 else n)) as & Impure)
 
     pub def find(): Replacer[Bool] =
-        let* bfound = liftPrim(x -> Ok(Text/Regex/Internal/PrimMatcher.find(x)));
+        let* bfound = liftPrim(x -> Text/Regex/Internal/Matcher.find(x));
         let* _ = incrementFinds!(bfound);
         return(bfound)
 
     pub def findFrom(start: Int32): Replacer[Bool] =
-        let* bfound = liftPrim(x -> Ok(Text/Regex/Internal/PrimMatcher.findFrom(x, start)));
+        let* bfound = liftPrimResult(x -> Text/Regex/Internal/Matcher.findFrom(x, start));
         let* _ = incrementFinds!(bfound);
         return(bfound)
 
-    pub def content(): Replacer[String] =
-        liftOptionPrim(Text/Regex/Internal/PrimMatcher.group, "content")
+    pub def content(): Replacer[String] = liftPrimResult(Text/Regex/Internal/Matcher.group)
 
     pub def evaluate(eval: MatchEvaluator[a]): Replacer[a] =
         let MatchEvaluator(fn) = eval;
-        liftPrim(fn)
+        liftPrimResult(fn)
 
     pub def replaceStep!(fn: String -> String): Replacer[Unit] =
         let* ans = find();
@@ -184,11 +179,11 @@ namespace Text/Regex/Replacer {
     pub def done(): Replacer[Bool] = ifThenElse(content(), _ -> return(false), return(true))
 
     pub def setRegion!(start: Int32, end: Int32): Replacer[Unit] =
-        liftOptionPrim(x -> Text/Regex/Internal/PrimMatcher.region(x, start, end), "setRegion!")
+        liftPrimResult(x -> Text/Regex/Internal/Matcher.region(x, start, end))
 
     pub def setPattern!(patt: Pattern): Replacer[Unit] =
-        let Pattern(p1) = patt;
-        liftPrim(x -> Ok(Text/Regex/Internal/PrimMatcher.usePattern(x, p1)))
+        let Pattern(patt1) = patt;
+        liftPrimResult(x -> Text/Regex/Internal/Matcher.usePattern(x, patt1))
 
     pub def countWith(append: (a, ac) -> ac, acc: ac, n: Int32, ma: Replacer[a]): Replacer[ac] =
         if (n <= 0)

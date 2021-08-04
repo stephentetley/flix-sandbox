@@ -18,14 +18,10 @@
 
 namespace Text/Regex {
 
-    use Text/Regex/Internal.PrimMatcher;
-
     ///
     /// Matcher is a monad (reader, error).
     ///
-    pub opaque type MatchEvaluator[a] = PrimMatcher ~> Result[a, String]
-
-    /// TODO - can we make this effect polymorphic?
+    pub opaque type MatchEvaluator[a] = ##java.util.regex.Matcher ~> Result[a, String]
 
 }
 
@@ -35,14 +31,13 @@ namespace Text/Regex/MatchEvaluator {
 
     use Text/Regex.MatchEvaluator;
     use Text/Regex.MatchEvaluator.{MatchEvaluator};
-    use Text/Regex/Internal.PrimMatcher;
     use Text/Regex.Pattern;
     use Text/Regex.Pattern.{Pattern};
 
     pub def return(x: a): MatchEvaluator[a] = 
         MatchEvaluator(_ -> Ok(x) as & Impure)
 
-    def apply1(x: MatchEvaluator[a], m: PrimMatcher): Result[a, String] & Impure =
+    def apply1(x: MatchEvaluator[a], m: ##java.util.regex.Matcher): Result[a, String] & Impure =
         let MatchEvaluator(f) = x;
         f(m)
 
@@ -89,8 +84,8 @@ namespace Text/Regex/MatchEvaluator {
 
 
 
-    def liftOptionPrim(fn : PrimMatcher ~> Option[a], errMsg: String): MatchEvaluator[a] =
-        MatchEvaluator(r -> Option.toOk(fn(r), errMsg))
+    def liftPrimResult(fn : ##java.util.regex.Matcher ~> Result[a, String]): MatchEvaluator[a] =
+        MatchEvaluator(r -> fn(r))
 
     pub def liftOption(x: Option[a], errMsg: String): MatchEvaluator[a] = match x { 
         case Some(x1) => return(x1)
@@ -105,15 +100,15 @@ namespace Text/Regex/MatchEvaluator {
         MatchEvaluator(_ -> fn())
 
 
-    pub def content(): MatchEvaluator[String] = liftOptionPrim(Text/Regex/Internal/PrimMatcher.group, "content")
+    pub def content(): MatchEvaluator[String] = liftPrimResult(Text/Regex/Internal/Matcher.group)
 
     /// TODO - is this worthwhile?
     pub def transformContent(f: String -> a): MatchEvaluator[a] = map(f, content())
 
 
-    pub def getStart(): MatchEvaluator[Int32] = liftOptionPrim(Text/Regex/Internal/PrimMatcher.start, "getStart")
+    pub def getStart(): MatchEvaluator[Int32] = liftPrimResult(Text/Regex/Internal/Matcher.start)
 
-    pub def getEnd(): MatchEvaluator[Int32] = liftOptionPrim(Text/Regex/Internal/PrimMatcher.end, "getEnd")
+    pub def getEnd(): MatchEvaluator[Int32] = liftPrimResult(Text/Regex/Internal/Matcher.end)
 
     pub def getLength(): MatchEvaluator[Int32] =
         lift2((x,y) -> y - x, getStart(), getEnd()) `swapError` "getLength"
@@ -128,29 +123,29 @@ namespace Text/Regex/MatchEvaluator {
     /// Note - this function uses 0-indexing, the equivalent Java method `group(int group)` uses 1-indexing.
     ///
     pub def getCaptureAt(ix: Int32): MatchEvaluator[String] =
-        liftOptionPrim(x -> Text/Regex/Internal/PrimMatcher.groupElementAt(x, ix+1), "getCaptureAt")
+        liftPrimResult(x -> Text/Regex/Internal/Matcher.groupWithIndex(x, ix+1))
 
     pub def getCaptureNamed(label: String): MatchEvaluator[String] =
-        liftOptionPrim(x -> Text/Regex/Internal/PrimMatcher.groupElementNamed(x, label), "getCaptureNamed")
+        liftPrimResult(x -> Text/Regex/Internal/Matcher.groupWithLabel(x, label))
 
     ///
     /// Note - this function uses 0-indexing, the equivalent Java method `group(int group)` uses 1-indexing.
     ///
     pub def getCaptureAtStart(ix: Int32): MatchEvaluator[Int32] =
-        liftOptionPrim(x -> Text/Regex/Internal/PrimMatcher.groupStartAt(x, ix+1), "getCaptureAtStart")
+        liftPrimResult(x -> Text/Regex/Internal/Matcher.startWithIndex(x, ix+1))
 
     pub def getCaptureNamedStart(label: String): MatchEvaluator[Int32] =
-        liftOptionPrim(x -> Text/Regex/Internal/PrimMatcher.groupStartNamed(x, label), "getCaptureNamedStart")
+        liftPrimResult(x -> Text/Regex/Internal/Matcher.startWithLabel(x, label))
 
     ///
     /// Note - this function uses 0-indexing, the equivalent Java method `group(int group)`
     /// uses 1-indexing.
     ///
     pub def getCaptureAtEnd(ix: Int32): MatchEvaluator[Int32] =
-        liftOptionPrim(x -> Text/Regex/Internal/PrimMatcher.groupEndAt(x, ix+1), "getCaptureAtEnd")
+        liftPrimResult(x -> Text/Regex/Internal/Matcher.endWithIndex(x, ix+1))
 
     pub def getCaptureNamedEnd(label: String): MatchEvaluator[Int32] =
-        liftOptionPrim(x -> Text/Regex/Internal/PrimMatcher.groupEndNamed(x, label), "getCaptureNamedEnd")
+        liftPrimResult(x -> Text/Regex/Internal/Matcher.endWithLabel(x, label))
 
     ///
     /// Note - this function uses 0-indexing, the equivalent Java method `group(int group)`
