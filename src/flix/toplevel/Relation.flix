@@ -16,6 +16,16 @@
 
 namespace Relation {
 
+    pub def when(test: Bool, reln: #{| r}): #{| r} = match test {
+        case true => reln
+        case _ => #{}
+    }
+
+    pub def whenNot(test: Bool, reln: #{| r}): #{| r} = match test {
+        case false => reln
+        case _ => #{}
+    }
+
     pub def guard(x: a, test: a -> Bool, f: a -> #{| r}): #{| r} = match test(x) {
         case true => f(x)
         case _ => #{}
@@ -45,6 +55,9 @@ namespace Relation {
         case (Some(x1), Some(y1), Some(z1)) => f(x1, y1, z1)
         case _ => #{}
     }
+
+    pub def combineAll(relns: t[#{| r}]): #{| r} with Foldable[t] =
+        Foldable.foldLeft((ac, x) -> ac <+> x, #{}, relns)
 
     pub def unfold(f: s -> Option[(#{| r}, s)] & ef, st: s): #{| r} & ef = unfoldHelper(f, st, #{})
 
