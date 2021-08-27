@@ -43,7 +43,7 @@ namespace System {
             equals(x1, y1 as ##java.lang.Object) as & Pure
     }
 
-    instance Semigroup[FilePath] {
+    instance SemiGroup[FilePath] {
         pub def combine(x: FilePath, y: FilePath): FilePath = System/FilePath.append(x, y)
     }
 

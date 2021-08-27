@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-
+/// DEPRECATED: there is now an Environment module in the stdlib.
 
 namespace System/Environment {
 
