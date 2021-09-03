@@ -92,7 +92,7 @@ namespace X/Cursor {
         Cursor({next = next1, hasNext = hasNext1, finalize = finalize1})
 
     def mapStep(f: a -> b & ef, x: Step[e, a]): Step[e, b] & Impure = match x {
-        case Ans(x1) => Ans(f(x1))
+        case Ans(x1) => Ans(f(x1) as & Impure)
         case Skip => Skip
         case Failed(e) => Failed(e)
     } as & Impure
@@ -122,6 +122,22 @@ namespace X/Cursor {
 
     def filterStep(f: a -> Bool, x: Step[e, a]): Step[e, a] = match x {
         case Ans(x1) => if (f(x1)) Ans(x1) else Skip
+        case Skip => Skip
+        case Failed(e) => Failed(e)
+    }
+
+    pub def filterMap(f: a -> Option[b] & ef, xs: Cursor[e, a]): Cursor[e, b] =
+        let Cursor(xs1) = xs;
+        let next1 = () -> {let nextF = xs1.next; let x1 = nextF(); filterMapStep(f, x1)};
+        let hasNext1 = xs1.hasNext;
+        let finalize1 = xs1.finalize;
+        Cursor({next = next1, hasNext = hasNext1, finalize = finalize1})
+
+    def filterMapStep(f: a -> Option[b] & ef, x: Step[e, a]): Step[e, b] & Impure = match x {
+        case Ans(x1) => match f(x1) as & Impure {
+            case Some(b1) => Ans(b1)
+            case None => Skip
+        }
         case Skip => Skip
         case Failed(e) => Failed(e)
     }
