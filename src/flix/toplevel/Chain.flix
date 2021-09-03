@@ -706,10 +706,17 @@ namespace Chain {
     pub def toSet(xs: Chain[a]): Set[a] with Order[a] = foldRight(Set.insert, Set.empty(), xs)
 
     ///
-    /// Returns the set `xs` as a chain.
+    /// Returns the set `s` as a chain.
     ///
-    pub def fromSet(xs: Set[a]): Chain[a] =
-        Set.foldLeft((ac, x) -> snoc(ac, x), empty(), xs)
+    pub def fromSet(s: Set[a]): Chain[a] =
+        Set.foldLeft((ac, x) -> snoc(ac, x), empty(), s)
+
+    ///
+    /// Returns the Map `m` as a chain of key-value pairs.
+    ///
+    pub def fromMap(m: Map[a, b]): Chain[(a, b)] with Order[a] =
+        Map.foldLeftWithKey((acc, k, v) -> snoc(acc, (k,v)), empty(), m)
+
 
     ///
     /// Returns the association list `xs` as a map.
