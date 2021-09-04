@@ -46,19 +46,7 @@ namespace Text  {
             Text/Charset.compareTo(x, y) |> Comparison.fromInt
     }
 
-    instance Boxable[Charset] {
-        pub def box(x: Charset): Boxed = {
-            let Charset(x1) = x;
-            let value = x1 as ##java.lang.Object;
-            let compare = (o1, o2) -> Order.compare(Charset(o1 as ##java.nio.charset.Charset), Charset(o2 as ##java.nio.charset.Charset));
-            let toString = o1 -> ToString.toString(Charset(o1 as ##java.nio.charset.Charset));
-            BoxedObject(value, compare, toString)
-        }
-        pub def unbox(x: Boxed): Charset = match x {
-            case BoxedObject(v, _, _) => Charset(v as ##java.nio.charset.Charset)
-            case _                    => ?bug
-        }
-    }
+    instance Boxable[Charset]
 
 }
 

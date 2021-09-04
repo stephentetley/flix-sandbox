@@ -62,19 +62,7 @@ namespace System {
             hashCode(x1) as & Pure
     }
 
-    instance Boxable[FilePath] {
-        pub def box(x: FilePath): Boxed = {
-            let FilePath(x1) = x;
-            let value = x1 as ##java.lang.Object;
-            let compare = (o1, o2) -> Order.compare(FilePath(o1 as ##java.nio.file.Path), FilePath(o2 as ##java.nio.file.Path));
-            let toString = o1 -> ToString.toString(FilePath(o1 as ##java.nio.file.Path));
-            BoxedObject(value, compare, toString)
-        }
-        pub def unbox(x: Boxed): FilePath = match x {
-            case BoxedObject(v, _, _) => FilePath(v as ##java.nio.file.Path)
-            case _                    => ?bug
-        }
-    }
+    instance Boxable[FilePath]
 
 }
 
