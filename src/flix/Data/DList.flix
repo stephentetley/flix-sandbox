@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-use Data/Transient.DList;
-use Data/Transient.DList.{DList};
-
-namespace Data/Transient {
+namespace Data {
 
     ///
     /// A DList
@@ -26,7 +23,10 @@ namespace Data/Transient {
 
 }
 
-namespace Data/Transient/DList {
+namespace Data/DList {
+
+    use Data.DList;
+    use Data.DList.{DList};
 
     ///
     /// Helper
