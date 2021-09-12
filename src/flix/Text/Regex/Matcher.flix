@@ -19,8 +19,17 @@
 
 namespace Text/Regex {
 
-    pub opaque type Matcher[a] = ##java.util.regex.Matcher ~> Result[a, String]
+    pub opaque type Matcher[a] = ##java.util.regex.Matcher -> Result[a, String]
 
+    instance Functor[Matcher] {
+        pub def map(f: a -> b & ef, o: Matcher[a]): Matcher[b] & ef = Text/Regex/Matcher.map(f, o)
+    }
+
+    instance Applicative[Matcher] {
+        pub def point(x: a) : Matcher[a] = Text/Regex/Matcher.point(x)
+
+        pub def ap(f: Matcher[a -> b & ef], x: Matcher[a]) : Matcher[b] & ef = Text/Regex/Matcher.ap(f, x)
+    }
 }
 
 namespace Text/Regex/Matcher {
@@ -49,74 +58,76 @@ namespace Text/Regex/Matcher {
         let* patt = Option.toOk(Text/Regex/Pattern.compile(regex), "runsMatcher - invalid regex: ${regex}");
         runMatcher(ma, patt, input)
 
+    pub def point(x: a): Matcher[a] =
+        Matcher(_ -> Ok(x))
 
-    pub def return(x: a): Matcher[a] =
-        Matcher(_ -> Ok(x) as & Impure)
+    /// DEPRECATED - to remove...
+    pub def return(x: a): Matcher[a] = point(x)
 
     pub def fail(msg: String): Matcher[a] =
-        Matcher(_ -> Err(msg) as & Impure)
+        Matcher(_ -> Err(msg))
 
-    def apply1(x: Matcher[a], r: ##java.util.regex.Matcher): Result[a, String] & Impure =
+    def apply1(x: Matcher[a], r: ##java.util.regex.Matcher): Result[a, String] =
         let Matcher(f) = x;
         f(r)
 
-    pub def map(f: a -> b & e, x: Matcher[a]): Matcher[b] =
+    pub def map(f: a -> b & ef, x: Matcher[a]): Matcher[b] & ef =
         Matcher(r ->
             match apply1(x, r) {
                 case Ok(a) => {
-                    let ans = f(a) as & Impure;
+                    let ans = f(a) as & Pure;
                     Ok(ans)
                 }
                 case Err(e) => Err(e)
             }
-        )
+        ) as & ef
 
-    pub def ap(mf: Matcher[a -> b], ma: Matcher[a]): Matcher[b] =
+    pub def ap(mf: Matcher[a -> b & ef], ma: Matcher[a]): Matcher[b] & ef =
         Matcher(r ->
             match apply1(mf, r) {
                 case Ok(f) => match apply1(ma, r) {
-                    case Ok(a) => Ok(f(a))
+                    case Ok(a) => Ok(f(a) as & Pure)
                     case Err(e2) => Err(e2)
                 }
                 case Err(e1) => Err(e1)
             }
-        )
+        ) as & ef
 
-    pub def bind(x: Matcher[a], k: a -> Matcher[b]): Matcher[b] =
+    pub def bind(x: Matcher[a], k: a -> Matcher[b] & ef): Matcher[b] & ef =
         Matcher(r ->
             match apply1(x, r) {
-                case Ok(a) => apply1(k(a), r)
+                case Ok(a) => apply1(k(a) as & Pure, r)
                 case Err(e) => Err(e)
             }
-        )
+        ) as & ef
 
-    pub def flatMap(k: a -> Matcher[b], x: Matcher[a]): Matcher[b] = bind(x, k)
+    pub def flatMap(k: a -> Matcher[b] & ef, x: Matcher[a]): Matcher[b] & ef = bind(x, k)
 
-    def liftPrim(fn : ##java.util.regex.Matcher ~> a): Matcher[a] =
-        Matcher(r -> Ok(fn(r)))
+    def liftPrim(fn : ##java.util.regex.Matcher ~> a): Matcher[a] & Impure =
+        Matcher(r -> Ok(fn(r) as & Pure)) as & Impure
 
-    def liftPrimResult(fn : ##java.util.regex.Matcher ~> Result[a, String]): Matcher[a] =
-        Matcher(r -> fn(r))
+    def liftPrimResult(fn : ##java.util.regex.Matcher ~> Result[a, String]): Matcher[a] & Impure =
+        Matcher(r -> fn(r) as & Pure) as & Impure
 
     pub def ignore(x: Matcher[a]): Matcher[Unit] = map(_ -> (), x)
 
-    pub def matches(): Matcher[Bool] = liftPrim(Text/Regex/Internal/Matcher.matches)
+    pub def matches(): Matcher[Bool] & Impure = liftPrim(Text/Regex/Internal/Matcher.matches)
 
-    pub def lookingAt(): Matcher[Bool] = liftPrim(Text/Regex/Internal/Matcher.lookingAt)
+    pub def lookingAt(): Matcher[Bool] & Impure = liftPrim(Text/Regex/Internal/Matcher.lookingAt)
 
-    pub def find(): Matcher[Bool] = liftPrim(Text/Regex/Internal/Matcher.find)
+    pub def find(): Matcher[Bool] & Impure = liftPrim(Text/Regex/Internal/Matcher.find)
 
-    pub def findFrom(start: Int32): Matcher[Bool] =
+    pub def findFrom(start: Int32): Matcher[Bool] & Impure =
         liftPrimResult(x -> Text/Regex/Internal/Matcher.findFrom(x, start))
 
-    pub def content(): Matcher[String] =
+    pub def content(): Matcher[String] & Impure =
         liftPrimResult(Text/Regex/Internal/Matcher.group)
 
-    pub def evaluate(eval: MatchEvaluator[a]): Matcher[a] =
+    pub def evaluate(eval: MatchEvaluator[a]): Matcher[a] & Impure =
         let MatchEvaluator(fn) = eval;
-        Matcher(r -> fn(r))
+        Matcher(r -> fn(r) as & Pure) as & Impure
 
-    pub def getMatch(): Matcher[String] =
+    pub def getMatch(): Matcher[String] & Impure =
         let* ans = find();
         if (ans)
             content()
@@ -131,18 +142,17 @@ namespace Text/Regex/Matcher {
             }
         )
 
-    pub def done(): Matcher[Bool] = ifThenElse(content(), _ -> return(false), return(true))
+    pub def done(): Matcher[Bool] & Impure = ifThenElse(content(), _ -> return(false), return(true))
 
+    pub def reset!(): Matcher[Unit] & Impure = liftPrim(Text/Regex/Internal/Matcher.reset)
 
-    pub def reset!(): Matcher[Unit] = liftPrim(Text/Regex/Internal/Matcher.reset)
-
-    pub def resetInput!(input: String): Matcher[Unit] =
+    pub def resetInput!(input: String): Matcher[Unit] & Impure =
         liftPrim(x -> Text/Regex/Internal/Matcher.resetInput(x, input))
 
-    pub def setRegion!(start: Int32, end: Int32): Matcher[Unit] =
+    pub def setRegion!(start: Int32, end: Int32): Matcher[Unit] & Impure =
         liftPrimResult(x -> Text/Regex/Internal/Matcher.region(x, start, end))
 
-    pub def setPattern!(patt: Pattern): Matcher[Unit] =
+    pub def setPattern!(patt: Pattern): Matcher[Unit] & Impure =
         let Pattern(p1) = patt;
         liftPrimResult(x -> Text/Regex/Internal/Matcher.usePattern(x, p1))
 
@@ -157,7 +167,6 @@ namespace Text/Regex/Matcher {
     pub def count(n: Int32, ma: Matcher[a]): Matcher[List[a]] =
         use Chain.{empty, snoc, toList};
         map(toList, countWith((x, xs) -> snoc(xs, x), empty(), n, ma))
-
 
 }        
 
