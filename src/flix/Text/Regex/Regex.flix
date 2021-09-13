@@ -158,12 +158,11 @@ namespace Text/Regex {
     ///
     pub def results(input: String, patt: Pattern, eval: MatchEvaluator[a]): Iterator[Result[a, String]] & Impure =
         let Pattern(patt1) = patt;
-        let MatchEvaluator(eval1) = eval;
         let m1 = Text/Regex/Internal/Matcher.new(patt1, input);
         let iterDone = () -> Text/Regex/Internal/Matcher.find(m1);
         let iterNext = () -> {
             try {
-                eval1(m1)
+                Text/Regex/MatchEvaluator.runMatchEvaluator(eval, m1)
             } catch {
                 case _: ##java.lang.Exception => Err("results[next]")
             }

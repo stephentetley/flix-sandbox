@@ -21,8 +21,17 @@
 
 namespace Text/Regex {
 
-    pub opaque type Replacer[a] = (StringBuilder, ##java.util.regex.Matcher, Int32) ~> Result[(a, Int32), String]
+    pub opaque type Replacer[a] = (StringBuilder, ##java.util.regex.Matcher, Int32) -> Result[(a, Int32), String]
 
+    instance Functor[Replacer] {
+        pub def map(f: a -> b & ef, o: Replacer[a]): Replacer[b] & ef = Text/Regex/Replacer.map(f, o)
+    }
+
+    instance Applicative[Replacer] {
+        pub def point(x: a) : Replacer[a] = Text/Regex/Replacer.point(x)
+
+        pub def ap(f: Replacer[a -> b & ef], x: Replacer[a]) : Replacer[b] & ef = Text/Regex/Replacer.ap(f, x)
+    }
 }
 
 namespace Text/Regex/Replacer {
@@ -64,94 +73,96 @@ namespace Text/Regex/Replacer {
     pub def execsReplacer(rep: Replacer[a], regex: String, input: String): Result[String, String] & Impure =
         runsReplacer(rep, regex, input) |> Result.map(snd)
 
-    pub def return(x: a): Replacer[a] =
-        Replacer((_, _, n) -> Ok(x, n) as & Impure)
+    pub def point(x: a): Replacer[a] =
+        Replacer((_, _, n) -> Ok(x, n))
+
+    pub def return(x: a): Replacer[a] = point(x)
 
     pub def fail(msg: String): Replacer[a] =
-        Replacer((_, _, _) -> Err(msg) as & Impure)
+        Replacer((_, _, _) -> Err(msg))
 
-    def apply1(rep: Replacer[a], sb: StringBuilder, m: ##java.util.regex.Matcher, n: Int32): Result[(a, Int32), String] & Impure =
+    def apply1(rep: Replacer[a], sb: StringBuilder, m: ##java.util.regex.Matcher, n: Int32): Result[(a, Int32), String] =
         let Replacer(f) = rep;
         f(sb, m, n)
 
-    pub def map(f: a -> b & e, rep: Replacer[a]): Replacer[b] =
+    pub def map(f: a -> b & ef, rep: Replacer[a]): Replacer[b] & ef =
         Replacer((sb, m, n) ->
             match apply1(rep, sb, m, n) {
                 case Ok((a, n1)) => {
-                    let a1 = f(a) as & Impure;
+                    let a1 = f(a) as & Pure;
                     Ok(a1, n1)
                 }
                 case Err(e) => Err(e)
             }
-        )
+        ) as & ef
 
-    pub def ap(repf: Replacer[a -> b], rep: Replacer[a]): Replacer[b] =
+    pub def ap(repf: Replacer[a -> b & ef], rep: Replacer[a]): Replacer[b] & ef =
         Replacer((sb, m, n) ->
             match apply1(repf, sb, m, n) {
                 case Ok((f, n1)) => match apply1(rep, sb, m, n1) {
-                    case Ok((a, n2)) => Ok((f(a), n2))
+                    case Ok((a, n2)) => Ok((f(a) as & Pure, n2))
                     case Err(e2) => Err(e2)
                 }
                 case Err(e1) => Err(e1)
             }
-        )
+        ) as & ef
 
-    pub def bind(rep: Replacer[a], k: a -> Replacer[b]): Replacer[b] =
+    pub def bind(rep: Replacer[a], k: a -> Replacer[b] & ef): Replacer[b] & ef =
         Replacer((sb, m, n) ->
             match apply1(rep, sb, m, n) {
-                case Ok((a, n1)) => apply1(k(a), sb , m, n1)
+                case Ok((a, n1)) => apply1(k(a) as & Pure, sb , m, n1)
                 case Err(e) => Err(e)
             }
-        )
+        ) as & ef
 
-    pub def flatMap(k: a -> Replacer[b], x: Replacer[a]): Replacer[b] = bind(x, k)
+    pub def flatMap(k: a -> Replacer[b] & ef, x: Replacer[a]): Replacer[b] & ef = bind(x, k)
 
     pub def ignore(x: Replacer[a]): Replacer[Unit] = map(_ -> (), x)
 
 
-    def liftPrim(fn: ##java.util.regex.Matcher ~> a): Replacer[a] =
-        Replacer((_, m, n) -> Ok((fn(m), n)))
+    def liftPrim(fn: ##java.util.regex.Matcher ~> a): Replacer[a] & Impure =
+        Replacer((_, m, n) -> Ok((fn(m) as & Pure, n))) as & Impure
 
-    def liftPrimResult(fn: ##java.util.regex.Matcher ~> Result[a, String]): Replacer[a] =
-        Replacer((_, m, n) -> Result.map(x -> (x, n), fn(m)))
+    def liftPrimResult(fn: ##java.util.regex.Matcher ~> Result[a, String]): Replacer[a] & Impure =
+        Replacer((_, m, n) -> Result.map(x -> (x, n), fn(m) as & Pure)) as & Impure
 
-    def liftWriterPrim(fn : (##java.util.regex.Matcher, StringBuilder) ~> a): Replacer[a] =
-        Replacer((sb, m, n) -> Ok((fn(m, sb), n)))
+    def liftWriterPrim(fn : (##java.util.regex.Matcher, StringBuilder) ~> a): Replacer[a] & Impure =
+        Replacer((sb, m, n) -> Ok((fn(m, sb) as & Pure, n))) as & Impure
 
-    def liftWriterPrimResult(fn : (##java.util.regex.Matcher, StringBuilder) ~> Result[a, String]): Replacer[a] =
-        Replacer((sb, m, n) -> Result.map(x -> (x, n), fn(m, sb)))
+    def liftWriterPrimResult(fn : (##java.util.regex.Matcher, StringBuilder) ~> Result[a, String]): Replacer[a] & Impure =
+        Replacer((sb, m, n) -> Result.map(x -> (x, n), fn(m, sb) as & Pure)) as & Impure
 
-    pub def appendTail!(): Replacer[Unit] =
+    pub def appendTail!(): Replacer[Unit] & Impure =
         use Text/Regex/Internal/Matcher.{appendTail};
         liftWriterPrim((m, sb) -> appendTail(m, sb))
 
-    pub def appendReplacement!(rep: String): Replacer[Unit] =
+    pub def appendReplacement!(rep: String): Replacer[Unit] & Impure =
         use Text/Regex/Internal/Matcher.{appendReplacement};
         liftWriterPrimResult((m, sb) -> appendReplacement(m, sb, rep))
 
     pub def getIndex(): Replacer[Int32] =
-        Replacer((_, _, n) -> Ok((n, n)) as & Impure)
+        Replacer((_, _, n) -> Ok((n, n)))
 
     def incrementFinds!(incr: Bool): Replacer[Unit] =
-        Replacer((_, _, n) -> Ok(((), if (incr) n + 1 else n)) as & Impure)
+        Replacer((_, _, n) -> Ok(((), if (incr) n + 1 else n)))
 
-    pub def find(): Replacer[Bool] =
+    pub def find(): Replacer[Bool] & Impure =
         let* bfound = liftPrim(x -> Text/Regex/Internal/Matcher.find(x));
         let* _ = incrementFinds!(bfound);
         return(bfound)
 
-    pub def findFrom(start: Int32): Replacer[Bool] =
+    pub def findFrom(start: Int32): Replacer[Bool] & Impure =
         let* bfound = liftPrimResult(x -> Text/Regex/Internal/Matcher.findFrom(x, start));
         let* _ = incrementFinds!(bfound);
         return(bfound)
 
-    pub def content(): Replacer[String] = liftPrimResult(Text/Regex/Internal/Matcher.group)
+    pub def content(): Replacer[String] & Impure = liftPrimResult(Text/Regex/Internal/Matcher.group)
 
-    pub def evaluate(eval: MatchEvaluator[a]): Replacer[a] =
+    pub def evaluate(eval: MatchEvaluator[a]): Replacer[a] & Impure =
         let MatchEvaluator(fn) = eval;
-        liftPrimResult(fn)
+        liftPrimResult(x -> fn(x) as & Impure)
 
-    pub def replaceStep!(fn: String -> String): Replacer[Unit] =
+    pub def replaceStep!(fn: String -> String): Replacer[Unit] & Impure =
         let* ans = find();
         if (ans) {
             let* s = content();
@@ -159,7 +170,7 @@ namespace Text/Regex/Replacer {
         } else
             fail("replaceStep!")
 
-    pub def evaluateReplace!(eval: MatchEvaluator[String]): Replacer[Unit] =
+    pub def evaluateReplace!(eval: MatchEvaluator[String]): Replacer[Unit] & Impure =
         let* ans = find();
         if (ans) {
             let* s = evaluate(eval);
@@ -176,12 +187,12 @@ namespace Text/Regex/Replacer {
             }
         )
 
-    pub def done(): Replacer[Bool] = ifThenElse(content(), _ -> return(false), return(true))
+    pub def done(): Replacer[Bool] & Impure = ifThenElse(content(), _ -> return(false), return(true))
 
-    pub def setRegion!(start: Int32, end: Int32): Replacer[Unit] =
+    pub def setRegion!(start: Int32, end: Int32): Replacer[Unit] & Impure =
         liftPrimResult(x -> Text/Regex/Internal/Matcher.region(x, start, end))
 
-    pub def setPattern!(patt: Pattern): Replacer[Unit] =
+    pub def setPattern!(patt: Pattern): Replacer[Unit] & Impure =
         let Pattern(patt1) = patt;
         liftPrimResult(x -> Text/Regex/Internal/Matcher.usePattern(x, patt1))
 
@@ -201,7 +212,7 @@ namespace Text/Regex/Replacer {
 
     /// Strategies
 
-    pub def rewriteAll!(fn: String -> String): Replacer[Unit] =
+    pub def rewriteAll!(fn: String -> String): Replacer[Unit] & Impure =
         let* more = find();
         if (more) {
             let* s = content();
@@ -210,7 +221,7 @@ namespace Text/Regex/Replacer {
         } else
             appendTail!()
 
-    pub def evalRewriteAll!(eval: MatchEvaluator[String]): Replacer[Unit] =
+    pub def evalRewriteAll!(eval: MatchEvaluator[String]): Replacer[Unit] & Impure =
         let* more = find();
         if (more) {
             let* s = evaluate(eval);
@@ -219,7 +230,7 @@ namespace Text/Regex/Replacer {
         } else
             appendTail!()
 
-    pub def rewriteSome!(fn: String -> Option[String]): Replacer[Unit] =
+    pub def rewriteSome!(fn: String -> Option[String]): Replacer[Unit] & Impure =
         let* more = find();
         if (more) {
             let* s = content();
@@ -231,7 +242,7 @@ namespace Text/Regex/Replacer {
         } else
             appendTail!()
 
-    pub def evalRewriteSome!(eval: MatchEvaluator[Option[String]]): Replacer[Unit] =
+    pub def evalRewriteSome!(eval: MatchEvaluator[Option[String]]): Replacer[Unit] & Impure =
         let* more = find();
         if (more) {
             let* opt = evaluate(eval);
@@ -243,7 +254,7 @@ namespace Text/Regex/Replacer {
         } else
             appendTail!()
 
-    pub def rewriteAllWithIndex!(fn: (Int32, String) -> String): Replacer[Unit] =
+    pub def rewriteAllWithIndex!(fn: (Int32, String) -> String): Replacer[Unit] & Impure =
         let* more = find();
         if (more) {
             let* ix = getIndex();
@@ -254,7 +265,7 @@ namespace Text/Regex/Replacer {
             appendTail!()
 
 
-    pub def evalRewriteAllWithIndex!(eval: Int32 -> MatchEvaluator[String]): Replacer[Unit] =
+    pub def evalRewriteAllWithIndex!(eval: Int32 -> MatchEvaluator[String]): Replacer[Unit] & Impure =
         let* more = find();
         if (more) {
             let* ix = getIndex();
@@ -264,7 +275,7 @@ namespace Text/Regex/Replacer {
         } else
             appendTail!()
 
-    pub def rewriteSomeWithIndex!(fn: (Int32, String) -> Option[String]): Replacer[Unit] =
+    pub def rewriteSomeWithIndex!(fn: (Int32, String) -> Option[String]): Replacer[Unit] & Impure =
         let* more = find();
         if (more) {
             let* ix = getIndex();
@@ -278,7 +289,7 @@ namespace Text/Regex/Replacer {
             appendTail!()
 
 
-    pub def evalRewriteSomeWithIndex!(eval: Int32 -> MatchEvaluator[Option[String]]): Replacer[Unit] =
+    pub def evalRewriteSomeWithIndex!(eval: Int32 -> MatchEvaluator[Option[String]]): Replacer[Unit] & Impure =
         let* more = find();
         if (more) {
             let* ix = getIndex();
@@ -293,13 +304,13 @@ namespace Text/Regex/Replacer {
 
 
 
-    pub def rewriteCount!(ntimes: Int32, fn: String -> String): Replacer[Unit] =
+    pub def rewriteCount!(ntimes: Int32, fn: String -> String): Replacer[Unit] & Impure =
         if (ntimes < 0)
             return()
         else
             rewriteCountHelper!(ntimes, fn, 0)
 
-    def rewriteCountHelper!(ntimes: Int32, fn: String -> String, i: Int32): Replacer[Unit] =
+    def rewriteCountHelper!(ntimes: Int32, fn: String -> String, i: Int32): Replacer[Unit] & Impure =
         let* more = find();
         if (more or i < ntimes) {
             let* s = content();
@@ -308,13 +319,13 @@ namespace Text/Regex/Replacer {
         } else
             appendTail!()
 
-    pub def evalRewriteCount!(ntimes: Int32, eval: MatchEvaluator[String]): Replacer[Unit] =
+    pub def evalRewriteCount!(ntimes: Int32, eval: MatchEvaluator[String]): Replacer[Unit] & Impure =
         if (ntimes < 0)
             return()
         else
             evalRewriteCountHelper!(ntimes, eval, 0)
 
-    def evalRewriteCountHelper!(ntimes: Int32, eval: MatchEvaluator[String], i: Int32): Replacer[Unit] =
+    def evalRewriteCountHelper!(ntimes: Int32, eval: MatchEvaluator[String], i: Int32): Replacer[Unit] & Impure =
         let* more = find();
         if (more or i < ntimes) {
             let* s = evaluate(eval);
