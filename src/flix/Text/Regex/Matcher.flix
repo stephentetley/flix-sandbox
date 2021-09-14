@@ -55,7 +55,7 @@ namespace Text/Regex/Matcher {
     ///
     pub def runsMatcher(ma: Matcher[a], regex: String, input: String): Result[a, String] & Impure =
         use Result.flatMap;
-        let* patt = Option.toOk(Text/Regex/Pattern.compile(regex), "runsMatcher - invalid regex: ${regex}");
+        let* patt = Text/Regex/Pattern.compile(regex) |> Result.mapErr(constant("runsMatcher - invalid regex: ${regex}"));
         runMatcher(ma, patt, input)
 
     pub def point(x: a): Matcher[a] =
@@ -103,6 +103,25 @@ namespace Text/Regex/Matcher {
 
     pub def flatMap(k: a -> Matcher[b] & ef, x: Matcher[a]): Matcher[b] & ef = bind(x, k)
 
+    pub def seqR(ma: Matcher[a], mb: Matcher[b]): Matcher[b] =
+        Matcher(r ->
+            match apply1(ma, r) {
+                case Ok(_) => apply1(mb, r)
+                case Err(e1) => Err(e1)
+            }
+        )
+
+    pub def seqL(ma: Matcher[a], mb: Matcher[b]): Matcher[a] =
+        Matcher(r ->
+            match apply1(ma, r) {
+                case Ok(a1) => match apply1(mb, r) {
+                    case Ok(_) => Ok(a1)
+                    case Err(e2) => Err(e2)
+                }
+                case Err(e1) => Err(e1)
+            }
+        )
+
     def liftPrim(fn : ##java.util.regex.Matcher ~> a): Matcher[a] & Impure =
         Matcher(r -> Ok(fn(r) as & Pure)) as & Impure
 
@@ -124,8 +143,7 @@ namespace Text/Regex/Matcher {
         liftPrimResult(Text/Regex/Internal/Matcher.group)
 
     pub def evaluate(eval: MatchEvaluator[a]): Matcher[a] & Impure =
-        let MatchEvaluator(fn) = eval;
-        Matcher(r -> fn(r) as & Pure) as & Impure
+        Matcher(r -> Text/Regex/MatchEvaluator.runMatchEvaluator(eval, r) as & Pure) as & Impure
 
     pub def getMatch(): Matcher[String] & Impure =
         let* ans = find();

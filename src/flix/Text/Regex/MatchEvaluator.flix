@@ -140,10 +140,10 @@ namespace Text/Regex/MatchEvaluator {
     /// Note - this function uses 0-indexing, the equivalent Java method `group(int group)` uses 1-indexing.
     ///
     pub def getCaptureAt(ix: Int32): MatchEvaluator[String] & Impure =
-        liftPrimResult(x -> Text/Regex/Internal/Matcher.groupWithIndex(x, ix+1))
+        liftPrimResult(x -> Text/Regex/Internal/Matcher.groupWithIndex(x, ix+1)) `swapError` "getCaptureAt - ${ix}"
 
     pub def getCaptureNamed(label: String): MatchEvaluator[String] & Impure =
-        liftPrimResult(x -> Text/Regex/Internal/Matcher.groupWithLabel(x, label))
+        liftPrimResult(x -> Text/Regex/Internal/Matcher.groupWithLabel(x, label)) `swapError` "getCaptureNamed - '${label}'"
 
     ///
     /// Note - this function uses 0-indexing, the equivalent Java method `group(int group)` uses 1-indexing.

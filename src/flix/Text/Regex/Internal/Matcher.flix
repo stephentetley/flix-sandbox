@@ -128,7 +128,7 @@ namespace Text/Regex/Internal/Matcher {
         try {
             Ok(group(x, ix))
         } catch {
-            case _: ##java.lang.Exception => Err("groupWithIndex")
+            case _: ##java.lang.Exception => Err("groupWithIndex - ${ix}")
         }
 
     pub def groupWithLabel(x: ##java.util.regex.Matcher, label: String): Result[String, String] & Impure =
@@ -136,7 +136,7 @@ namespace Text/Regex/Internal/Matcher {
         try {
             Ok(group(x, label))
         } catch {
-            case _: ##java.lang.Exception => Err("groupWithLabel")
+            case _: ##java.lang.Exception => Err("groupWithLabel - '${label}'")
         }
 
     /// This follows the Java convention where index 0 matches everything.

@@ -67,7 +67,7 @@ namespace Text/Regex/Replacer {
     ///
     pub def runsReplacer(rep: Replacer[a], regex: String, input: String): Result[(a, String), String] & Impure =
         use Result.flatMap;
-        let* patt = Option.toOk(Text/Regex/Pattern.compile(regex), "runsReplacer - invalid regex: ${regex}");
+        let* patt = Text/Regex/Pattern.compile(regex) |> Result.mapErr(constant("runsReplacer - invalid regex: ${regex}"));
         runReplacer(rep, patt, input)
 
     pub def execsReplacer(rep: Replacer[a], regex: String, input: String): Result[String, String] & Impure =

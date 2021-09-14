@@ -33,7 +33,19 @@ namespace Text/Regex {
             import java.util.regex.Pattern.toString();
             let Pattern(p1) = patt;
             p1.toString() as & Pure
+    }
 
+    instance FromString[Pattern] {
+        ///
+        /// Return the string representation of the Pattern `patt`.
+        ///
+        pub def fromString(regex: String): Option[Pattern] =
+            import java.util.regex.Pattern:compile(String);
+            try {
+                Some(Pattern(compile(regex))) as & Pure
+            } catch {
+                case _: ##java.util.regex.PatternSyntaxException => None
+            }
     }
 
 }
@@ -120,14 +132,14 @@ namespace Text/Regex/Pattern {
     ///
     /// Compile the regular expression `regex` into a Pattern.
     ///
-    /// Returns `None` if the regex is ill-formed and cannot be compiled.
+    /// Returns `Err` if the regex is ill-formed and cannot be compiled.
     ///
-    pub def compile(regex: String): Option[Pattern] =
+    pub def compile(regex: String): Result[Pattern, String] =
         import java.util.regex.Pattern:compile(String);
         try {
-            Some(Pattern(compile(regex))) as & Pure
+            Ok(Pattern(compile(regex))) as & Pure
         } catch {
-            case _: ##java.util.regex.PatternSyntaxException => None
+            case _: ##java.util.regex.PatternSyntaxException => Err("Text/Regex/Pattern.compile failed - '${regex}'")
         }
 
 
@@ -135,14 +147,14 @@ namespace Text/Regex/Pattern {
     ///
     /// Compile the regular expression `regex` into a Pattern.
     ///
-    /// Returns `None` if the regex is ill-formed and cannot be compiled.
+    /// Returns `Err` if the regex is ill-formed and cannot be compiled.
     ///
-    pub def compileWithFlags(regex: String, flags: List[Flag]): Option[Pattern] =
+    pub def compileWithFlags(regex: String, flags: List[Flag]): Result[Pattern, String] =
         import java.util.regex.Pattern:compile(String, Int32);
         try {
-            Some(Pattern(compile(regex, sumFlags(flags)))) as & Pure
+            Ok(Pattern(compile(regex, sumFlags(flags)))) as & Pure
         } catch {
-            case _: ##java.lang.Exception => None
+            case _: ##java.lang.Exception => Err("Text/Regex/Pattern.compileWithFlags failed - '${regex}', ${flags}")
         }
 
     ///
