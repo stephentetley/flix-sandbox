@@ -27,20 +27,21 @@ namespace FunctorExtras {
 
 }
 
+
 namespace ApplicativeExtras {
 
-    pub def seqL(ma: m[a], mb : m[b]): m[a] with Applicative[m] =
+    pub def seqLeft(ma: m[a], mb : m[b]): m[a] with Applicative[m] =
         Applicative.liftA2((a, _) -> a, ma, mb)
 
-    pub def seqR(ma: m[a], mb : m[b]): m[b] with Applicative[m] =
+    pub def seqRight(ma: m[a], mb : m[b]): m[b] with Applicative[m] =
         Applicative.liftA2((_, b) -> b, ma, mb)
 
     pub def <*>(mf: m[a -> b & ef], ma: m[a]): m[b] & ef with Applicative[m] = Applicative.ap(mf, ma)
 
     pub def <**>(ma : m[a], mf: m[a -> b & ef]): m[b] & ef with Applicative[m] = Applicative.liftA2((a, f) -> f(a), ma, mf)
 
-    pub def <*(ma: m[a], mb : m[b]): m[a] with Applicative[m] = seqL(ma, mb)
+    pub def <*(ma: m[a], mb : m[b]): m[a] with Applicative[m] = seqLeft(ma, mb)
 
-    pub def *>(ma: m[a], mb : m[b]): m[b] with Applicative[m] = seqR(ma, mb)
+    pub def *>(ma: m[a], mb : m[b]): m[b] with Applicative[m] = seqRight(ma, mb)
 
 }

@@ -32,6 +32,8 @@ namespace Text/Regex {
 
         pub def ap(f: Replacer[a -> b & ef], x: Replacer[a]) : Replacer[b] & ef = Text/Regex/Replacer.ap(f, x)
     }
+
+
 }
 
 namespace Text/Regex/Replacer {

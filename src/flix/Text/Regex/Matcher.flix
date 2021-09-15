@@ -31,11 +31,12 @@ namespace Text/Regex {
         pub def ap(f: Matcher[a -> b & ef], x: Matcher[a]) : Matcher[b] & ef = Text/Regex/Matcher.ap(f, x)
     }
 
-    instance Alternative[Matcher] {
-        pub def zero(): Matcher[a] = Text/Regex/Matcher.mzero()
-
-        pub def alt(x: Matcher[a], y: Matcher[a]): Matcher[a] = Text/Regex/Matcher.alt(x, y)
+    instance Monad[Matcher] {
+        pub def bind(ma: Matcher[a], k: a -> Matcher[b] & ef) : Matcher[b] & ef = Text/Regex/Matcher.bind(ma, k)
     }
+
+    /// Don't make Matcher Alternative because Matcher has imperative state (a handle) rather
+    /// than a pure, resettable context (an environment).
 
 }
 
@@ -109,16 +110,6 @@ namespace Text/Regex/Matcher {
         ) as & ef
 
     pub def flatMap(k: a -> Matcher[b] & ef, x: Matcher[a]): Matcher[b] & ef = bind(x, k)
-
-    pub def mzero(): Matcher[a] = Matcher(_ -> Err("Matcher.mzero"))
-
-    pub def alt(ma: Matcher[a], mb: Matcher[a]): Matcher[a] =
-        Matcher(r ->
-            match apply1(ma, r) {
-                case Ok(a) => Ok(a)
-                case Err(_) => apply1(mb, r)
-            }
-        )
 
     pub def seqR(ma: Matcher[a], mb: Matcher[b]): Matcher[b] =
         Matcher(r ->

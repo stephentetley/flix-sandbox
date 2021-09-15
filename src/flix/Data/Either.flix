@@ -21,6 +21,29 @@ enum Either[a, b] {
     case Right(b)
 }
 
+instance Functor[Either[e]] {
+    pub def map(f: a -> b & ef, x: Either[e, a]): Either[e, b] & ef = Either.mapRight(f, x)
+}
+
+instance Applicative[Either[e]] {
+    pub def point(x: a): Either[e, a] = Right(x)
+
+    pub def ap(mf: Either[e, a -> b & ef], mx: Either[e, a]): Either[e, b] & ef = match mf {
+        case Right(f) => match mx {
+            case Right(x) => Right(f(x))
+            case Left(a1) => Left(a1)
+        }
+        case Left(a) => Left(a)
+    }
+}
+
+instance Monad[Either[e]] {
+    pub def bind(ma: Either[e, a], k: a -> Either[e, b] & ef): Either[e, b] & ef = match ma {
+        case Right(a) => k(a)
+        case Left(e) => Left(e) as & ef
+    }
+}
+
 namespace Either {
 
 
@@ -46,13 +69,13 @@ namespace Either {
         case Right(b) => g(b)
     }
 
-    pub def mapLeft(f: a -> c, x: Either[a, b]): Either[c, b] = match x {
+    pub def mapLeft(f: a -> c & ef, x: Either[a, b]): Either[c, b] & ef = match x {
         case Left(a) => Left(f(a))
-        case Right(b) => Right(b)
+        case Right(b) => Right(b) as & ef
     }
 
-    pub def mapRight(g: b -> c, x: Either[a ,b]): Either[a, c] = match x {
-        case Left(a) => Left(a)
+    pub def mapRight(g: b -> c & ef, x: Either[a, b]): Either[a, c] & ef = match x {
+        case Left(a) => Left(a) as & ef
         case Right(b) => Right(g(b))
     }
 
