@@ -33,6 +33,12 @@ namespace Text/Regex {
         pub def ap(f: MatchEvaluator[a -> b & ef], x: MatchEvaluator[a]) : MatchEvaluator[b] & ef = Text/Regex/MatchEvaluator.ap(f, x)
     }
 
+    instance Alternative[MatchEvaluator] {
+        pub def zero(): MatchEvaluator[a] = Text/Regex/MatchEvaluator.mzero()
+
+        pub def alt(x: MatchEvaluator[a], y: MatchEvaluator[a]): MatchEvaluator[a] = Text/Regex/MatchEvaluator.alt(x, y)
+    }
+
 }
 
 namespace Text/Regex/MatchEvaluator {
@@ -99,6 +105,16 @@ namespace Text/Regex/MatchEvaluator {
 
     pub def flatMap(k: a -> MatchEvaluator[b] & ef, x: MatchEvaluator[a]): MatchEvaluator[b] & ef = bind(x, k)
 
+
+    pub def mzero(): MatchEvaluator[a] = MatchEvaluator(_ -> Err("MatchEvaluator.mzero"))
+
+    pub def alt(ma: MatchEvaluator[a], mb: MatchEvaluator[a]): MatchEvaluator[a] =
+        MatchEvaluator(r ->
+            match apply1(ma, r) {
+                case Ok(a) => Ok(a)
+                case Err(_) => apply1(mb, r)
+            }
+        )
 
 
     def liftPrimResult(fn : ##java.util.regex.Matcher ~> Result[a, String]): MatchEvaluator[a] & Impure=
