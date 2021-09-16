@@ -24,43 +24,43 @@ pub lawless class Traversable[t : Type -> Type] with Functor[t] {
 
 instance Traversable[List] {
     /// CPS transformed...
-    pub def traverse(f: a -> m[b] & ef, c: List[a]): m[List[b]] & ef with Applicative[m] = ListHelper.traverse(f, c)
+    pub def traverse(f: a -> m[b] & ef, t: List[a]): m[List[b]] & ef with Applicative[m] = ListHelper.traverse(f, t)
 
-    pub def sequence(c: List[m[a]]): m[List[a]] with Applicative[m] = ListHelper.sequence(c)
+    pub def sequence(t: List[m[a]]): m[List[a]] with Applicative[m] = ListHelper.sequence(t)
 
 }
 
 instance Traversable[Option] {
-    pub def traverse(f: a -> m[b] & ef, c: Option[a]): m[Option[b]] & ef with Applicative[m] =
+    pub def traverse(f: a -> m[b] & ef, t: Option[a]): m[Option[b]] & ef with Applicative[m] =
         use Applicative.{point};
         use FunctorExtras.{<&>};
-        match c {
+        match t {
             case None => point(None)
             case Some(a) => Some <&> f(a)
         }
 
-    pub def sequence(c: Option[m[a]]): m[Option[a]] with Applicative[m] =
+    pub def sequence(t: Option[m[a]]): m[Option[a]] with Applicative[m] =
         use Applicative.{point};
         use FunctorExtras.{<&>};
-        match c {
+        match t {
             case Some(ma) => Some <&> ma
             case None => point(None)
         }
 }
 
 instance Traversable[Either[e]] {
-    pub def traverse(f: a -> m[b] & ef, c: Either[e, a]): m[Either[e, b]] & ef with Applicative[m] =
+    pub def traverse(f: a -> m[b] & ef, t: Either[e, a]): m[Either[e, b]] & ef with Applicative[m] =
         use Applicative.{point};
         use FunctorExtras.{<&>};
-        match c {
+        match t {
             case Left(e) => point(Left(e))
             case Right(a) => Right <&> f(a)
         }
 
-    pub def sequence(c: Either[e, m[a]]): m[Either[e, a]] with Applicative[m] =
+    pub def sequence(t: Either[e, m[a]]): m[Either[e, a]] with Applicative[m] =
         use Applicative.{point};
         use FunctorExtras.{<&>};
-        match c {
+        match t {
             case Left(e) => point(Left(e))
             case Right(ma) => Right <&> ma
         }

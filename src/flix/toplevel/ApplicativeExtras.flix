@@ -48,7 +48,24 @@ namespace ApplicativeExtras {
 
 namespace FoldableExtras {
 
-    pub def sequenceX(c: t[m[a]]): m[Unit] with Applicative[m], Foldable[t] =
+    pub def sequenceX(t: t[m[a]]): m[Unit] with Applicative[m], Foldable[t] =
         use ApplicativeExtras.{*>};
-        Foldable.foldLeft((mb, ma) -> ma *> mb, Applicative.point(()), c)
+        Foldable.foldLeft((mb, ma) -> ma *> mb, Applicative.point(()), t)
+
+    pub def traverseX(f: a -> m[b] & ef, t: t[a]): m[Unit] & ef with Foldable[t], Applicative[m] =
+        use ApplicativeExtras.{*>};
+        Foldable.foldLeft((mb, a) -> f(a) *> mb, Applicative.point(()), t)
+
+    pub def forX(t: t[a], f: a -> m[b] & ef): m[Unit] & ef with Foldable[t], Applicative[m] = traverseX(f, t)
+
+    pub def asum(t: t[m[a]]): m[a] with Foldable[t], Alternative[m] =
+        use Alternative.{<|>};
+        Foldable.foldLeft((mb, ma) -> mb <|> ma, Alternative.zero(), t)
+
+    pub def concat(t: t[List[a]]): List[a] with Foldable[t] =
+        let makeDList = xs -> (ys -> List.append(xs, ys));
+        let appendDList = (f, g) -> xs -> f(g(xs));
+        let unDList = f -> f(Nil);
+        Foldable.foldLeft((ac, xs) -> appendDList(ac, makeDList(xs)), xs -> xs, t) |> unDList
+
 }
