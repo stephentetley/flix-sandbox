@@ -75,6 +75,10 @@ namespace Text/Regex/Matcher {
     pub def fail(msg: String): Matcher[a] =
         Matcher(_ -> Err(msg))
 
+    pub def throwError(msg: String): Matcher[a] =
+        Matcher(_ -> Err(msg))
+
+
     def apply1(x: Matcher[a], r: ##java.util.regex.Matcher): Result[a, String] =
         let Matcher(f) = x;
         f(r)
@@ -144,8 +148,12 @@ namespace Text/Regex/Matcher {
 
     pub def find(): Matcher[Bool] & Impure = liftPrim(Text/Regex/Internal/Matcher.find)
 
-    pub def findFrom(start: Int32): Matcher[Bool] & Impure =
-        liftPrimResult(x -> Text/Regex/Internal/Matcher.findFrom(x, start))
+    pub def start(): Matcher[Int32] & Impure = liftPrimResult(Text/Regex/Internal/Matcher.start)
+
+    pub def end(): Matcher[Int32] & Impure = liftPrimResult(Text/Regex/Internal/Matcher.end)
+
+    pub def findFrom(b: Int32): Matcher[Bool] & Impure =
+        liftPrimResult(m1 -> Text/Regex/Internal/Matcher.findFrom(m1, b))
 
     pub def content(): Matcher[String] & Impure =
         liftPrimResult(Text/Regex/Internal/Matcher.group)
@@ -175,8 +183,8 @@ namespace Text/Regex/Matcher {
     pub def resetInput!(input: String): Matcher[Unit] & Impure =
         liftPrim(x -> Text/Regex/Internal/Matcher.resetInput(x, input))
 
-    pub def setRegion!(start: Int32, end: Int32): Matcher[Unit] & Impure =
-        liftPrimResult(x -> Text/Regex/Internal/Matcher.region(x, start, end))
+    pub def setRegion!(b: Int32, e: Int32): Matcher[Unit] & Impure =
+        liftPrimResult(x -> Text/Regex/Internal/Matcher.region(x, b, e))
 
     pub def setPattern!(patt: Pattern): Matcher[Unit] & Impure =
         let Pattern(p1) = patt;

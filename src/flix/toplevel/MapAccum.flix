@@ -153,3 +153,29 @@ namespace List {
         }
 
 }
+
+namespace String {
+
+    pub def mapAccumLeft(f: (s, Char) -> (s, Char) & ef, start: s, s: String): (s, String) & ef =
+        mapAccumLeftHelper(f, start, s) as & ef
+
+    ///
+    /// Helper function for `mapAccumLeft`.
+    ///
+    def mapAccumLeftHelper(f: (s, Char) -> (s, Char) & ef, start: s, s: String): (s, String) & Impure =
+        let arr = String.toArray(s);
+        let (s1, arr1) = Array.mapAccumLeft(f, start, arr);
+        (s1, Array.formatWith(Char.toString, "", arr1))
+
+    pub def mapAccumRight(f: (s, Char) -> (s, Char) & ef, start: s, s: String): (s, String) & ef =
+        mapAccumRightHelper(f, start, s) as & ef
+
+    ///
+    /// Helper function for `mapAccumLeft`.
+    ///
+    def mapAccumRightHelper(f: (s, Char) -> (s, Char) & ef, start: s, s: String): (s, String) & Impure =
+        let arr = String.toArray(s);
+        let (s1, arr1) = Array.mapAccumRight(f, start, arr);
+        (s1, Array.formatWith(Char.toString, "", arr1))
+
+}

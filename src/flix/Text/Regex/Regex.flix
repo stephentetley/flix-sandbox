@@ -216,5 +216,50 @@ namespace Text/Regex {
         use Text/Regex/Replacer.{execReplacer, evalRewriteAllWithIndex!};
         execReplacer(evalRewriteAllWithIndex!(eval), patt, input)
 
+    /// REgex should provide Regex version of common String functions...
+
+    ///
+    /// Return the index of the first occurence of `patt` in `s` from the left.
+    ///
+    /// If `patt` is not present in `s` return None.
+    ///
+    /// If `patt` is the empty string return None.
+    ///
+    pub def indexOfLeft(patt: Pattern, s: String): Option[Int32] = indexOfLeftHelper(patt, s) as & Pure
+
+    def indexOfLeftHelper(patt: Pattern, s: String): Option[Int32] & Impure =
+        use Text/Regex/Matcher.{flatMap, find, start, throwError};
+        let m1 = {
+            let* bfound = find();
+            if (bfound) start() else throwError("none")
+        };
+        Text/Regex/Matcher.runMatcher(m1, patt, s) |> Result.toOption
+
+    pub def indexOfEndLeft(patt: Pattern, s: String): Option[Int32] = indexOfEndLeftHelper(patt, s) as & Pure
+
+    def indexOfEndLeftHelper(patt: Pattern, s: String): Option[Int32] & Impure =
+        use Text/Regex/Matcher.{flatMap, find, end, throwError};
+        let m1 = {
+            let* bfound = find();
+            if (bfound) end() else throwError("none")
+        };
+        Text/Regex/Matcher.runMatcher(m1, patt, s) |> Result.toOption
+
+
+    ///
+    /// Find the first instance of `patt` in string `s`, return a pair of the
+    /// prefix of string `s` up to `sub` and the rest of string `s` including `sub`.
+    ///
+    pub def breakOnLeft(patt: Pattern, s: String): (String, String) =
+        match indexOfLeft(patt, s) {
+            case None => (s, "")
+            case Some(i) => (String.sliceLeft(s, i), String.sliceRight(s, i))
+        }
+
+    pub def breakAfterLeft(patt: Pattern, s: String): (String, String) =
+        match indexOfEndLeft(patt, s) {
+            case None => (s, "")
+            case Some(i) => (String.sliceLeft(s, i), String.sliceRight(s, i))
+        }
 
 }
