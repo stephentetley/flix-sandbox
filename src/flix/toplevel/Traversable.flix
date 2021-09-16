@@ -21,13 +21,45 @@ pub lawless class Traversable[t : Type -> Type] with Functor[t] {
 }
 
 instance Traversable[List] {
-    /// TODO CPS transform...
-    pub def traverse(f: a -> m[b] & ef, c: List[a]): m[List[b]] & ef with Applicative[m] =
+    /// CPS transformed...
+    pub def traverse(f: a -> m[b] & ef, c: List[a]): m[List[b]] & ef with Applicative[m] = ListHelper.traverse(f, c)
+}
+
+instance Traversable[Option] {
+    pub def traverse(f: a -> m[b] & ef, c: Option[a]): m[Option[b]] & ef with Applicative[m] =
         use Applicative.{point};
-        use ApplicativeExtras.{<*>};
+        use FunctorExtras.{<&>};
         match c {
-            case Nil => point(Nil)
-            case x :: rs => point((y,ys) -> y :: ys) <*> f(x) <*> Traversable.traverse(f, rs)
+            case None => point(None)
+            case Some(a) => Some <&> f(a)
         }
+}
+
+instance Traversable[Either[e]] {
+    pub def traverse(f: a -> m[b] & ef, c: Either[e, a]): m[Either[e, b]] & ef with Applicative[m] =
+        use Applicative.{point};
+        use FunctorExtras.{<&>};
+        match c {
+            case Left(e) => point(Left(e))
+            case Right(a) => Right <&> f(a)
+        }
+}
+
+namespace ListHelper {
+    use ApplicativeExtras.{<*>};
+    use FunctorExtras.{<&>};
+
+    pub def traverse(f: a -> m[b] & ef, xs: List[a]): m[List[b]] & ef with Applicative[m] =
+        traverseHelper(f, xs, ks -> ks as & ef)
+
+    pub def traverseHelper(f: a -> m[b] & ef, xs: List[a], k: m[List[b]] -> m[List[b]] & ef): m[List[b]] & ef with Applicative[m] =
+        match xs {
+            case Nil => k(Applicative.point(Nil)) as & ef
+            case x :: rs => traverseHelper(f, rs, ks -> k(consA(f(x), ks)))
+        }
+
+    def consA(mx: f[a], mxs: f[List[a]]): f[List[a]] with Applicative[f] =
+        ((x, xs) -> x :: xs) <&> mx <*> mxs
+
 }
 
