@@ -45,3 +45,10 @@ namespace ApplicativeExtras {
     pub def *>(ma: m[a], mb : m[b]): m[b] with Applicative[m] = seqRight(ma, mb)
 
 }
+
+namespace FoldableExtras {
+
+    pub def sequenceX(c: t[m[a]]): m[Unit] with Applicative[m], Foldable[t] =
+        use ApplicativeExtras.{*>};
+        Foldable.foldLeft((mb, ma) -> ma *> mb, Applicative.point(()), c)
+}

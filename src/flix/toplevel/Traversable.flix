@@ -18,11 +18,16 @@ pub lawless class Traversable[t : Type -> Type] with Functor[t] {
 
     pub def traverse(f: a -> m[b] & ef, c: t[a]): m[t[b]] & ef with Applicative[m]
 
+    pub def sequence(c: t[m[a]]): m[t[a]] with Applicative[m]
+
 }
 
 instance Traversable[List] {
     /// CPS transformed...
     pub def traverse(f: a -> m[b] & ef, c: List[a]): m[List[b]] & ef with Applicative[m] = ListHelper.traverse(f, c)
+
+    pub def sequence(c: List[m[a]]): m[List[a]] with Applicative[m] = ListHelper.sequence(c)
+
 }
 
 instance Traversable[Option] {
@@ -33,6 +38,14 @@ instance Traversable[Option] {
             case None => point(None)
             case Some(a) => Some <&> f(a)
         }
+
+    pub def sequence(c: Option[m[a]]): m[Option[a]] with Applicative[m] =
+        use Applicative.{point};
+        use FunctorExtras.{<&>};
+        match c {
+            case Some(ma) => Some <&> ma
+            case None => point(None)
+        }
 }
 
 instance Traversable[Either[e]] {
@@ -42,6 +55,14 @@ instance Traversable[Either[e]] {
         match c {
             case Left(e) => point(Left(e))
             case Right(a) => Right <&> f(a)
+        }
+
+    pub def sequence(c: Either[e, m[a]]): m[Either[e, a]] with Applicative[m] =
+        use Applicative.{point};
+        use FunctorExtras.{<&>};
+        match c {
+            case Left(e) => point(Left(e))
+            case Right(ma) => Right <&> ma
         }
 }
 
@@ -60,6 +81,24 @@ namespace ListHelper {
 
     def consA(mx: f[a], mxs: f[List[a]]): f[List[a]] with Applicative[f] =
         ((x, xs) -> x :: xs) <&> mx <*> mxs
+
+
+    pub def sequence(xs: List[m[a]]): m[List[a]] with Applicative[m] = sequenceHelper(xs, ks -> ks)
+
+    pub def sequenceHelper(xs: List[m[a]], k: m[List[a]] -> m[List[a]]): m[List[a]] with Applicative[m] =
+        match xs {
+            case Nil => k(Applicative.point(Nil))
+            case mx :: rs => sequenceHelper(rs, ks -> k(consA(mx, ks)))
+        }
+
+    pub def sequenceX(xs: List[m[a]]): m[Unit] with Applicative[m] = sequenceXHelper(xs, k -> k)
+
+    pub def sequenceXHelper(xs: List[m[a]], k: m[Unit] -> m[Unit]): m[Unit] with Applicative[m] =
+        use ApplicativeExtras.{seqRight};
+        match xs {
+            case Nil => k(Applicative.point(()))
+            case mx :: rs => sequenceXHelper(rs, ka -> k(seqRight(mx, ka)))
+        }
 
 }
 
