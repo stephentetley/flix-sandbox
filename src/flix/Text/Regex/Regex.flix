@@ -216,7 +216,7 @@ namespace Text/Regex {
         use Text/Regex/Replacer.{execReplacer, evalRewriteAllWithIndex!};
         execReplacer(evalRewriteAllWithIndex!(eval), patt, input)
 
-    /// REgex should provide Regex version of common String functions...
+    /// Regex should provide Regex version of common String functions...
 
     ///
     /// Return the index of the first occurence of `patt` in `s` from the left.
@@ -234,6 +234,17 @@ namespace Text/Regex {
             if (bfound) start() else throwError("none")
         };
         Text/Regex/Matcher.runMatcher(m1, patt, s) |> Result.toOption
+
+    pub def indexOfRight(patt: Pattern, s: String): Option[Int32] = indexOfRightHelper(patt, s) as & Pure
+
+    def indexOfRightHelper(patt: Pattern, s: String): Option[Int32] & Impure =
+        use Text/Regex/Matcher.{flatMap, findLast, start, throwError};
+        let m1 = {
+            let* bfound = findLast();
+            if (bfound) start() else throwError("none")
+        };
+        Text/Regex/Matcher.runMatcher(m1, patt, s) |> Result.toOption
+
 
     pub def indexOfEndLeft(patt: Pattern, s: String): Option[Int32] = indexOfEndLeftHelper(patt, s) as & Pure
 

@@ -152,6 +152,22 @@ namespace Text/Regex/Matcher {
 
     pub def end(): Matcher[Int32] & Impure = liftPrimResult(Text/Regex/Internal/Matcher.end)
 
+    pub def findLast(): Matcher[Bool] & Impure =
+        let* first = find();
+        if (first) {
+            let* pos = start();
+            let* endpos = findLastHelper(pos);
+            findFrom(endpos - 1)
+        } else return(false)
+
+    def findLastHelper(lastPos: Int32): Matcher[Int32] & Impure =
+        let* more = find();
+        if (more) {
+            let* pos = start();
+            findLastHelper(pos)
+        } else return(lastPos)
+
+
     pub def findFrom(b: Int32): Matcher[Bool] & Impure =
         liftPrimResult(m1 -> Text/Regex/Internal/Matcher.findFrom(m1, b))
 

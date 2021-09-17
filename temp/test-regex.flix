@@ -7,6 +7,7 @@ def main(_args: Array[String]): Int32 & Impure =
     runTest("test03", _ -> test03());
     runTest("test03a", _ -> test03a());
     runTest("test04", _ -> test04());
+    runTest("test05", _ -> test05());
     0
 
 
@@ -46,3 +47,12 @@ def test04(): Result[Int32, String] & Impure =
     let* patt = Text/Regex/Pattern.compile("Set\\p{Blank}*(?<set>\\p{Digit}+)");
     let eval1 = Text/Regex/MatchEvaluator.getInt32Named("set");
     runMatcher(seqR(find(), evaluate(eval1)), patt, "Set 1 Match 1")    
+
+
+def test05(): Result[Unit, String] & Impure =
+    use Result.{flatMap};
+    let* patt = Text/Regex/Pattern.compile("\\p{Blank}+");
+    Text/Regex.indexOfLeft(patt, "Set 1 Match 1") |> println; 
+    Text/Regex.indexOfRight(patt, "Set 1 Match 1") |> println;    
+    String.indexOfRight(" ", "Set 1 Match 1") |> println;
+    Ok()
