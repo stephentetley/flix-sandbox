@@ -17,7 +17,7 @@
 
 
 /// This is a "steppable" replacer like Matcher.
-/// Index is nuber of `finds` not the number of replacements.
+/// Index is number of `finds` not the number of replacements.
 
 namespace Text/Regex {
 

@@ -171,6 +171,15 @@ namespace Text/Regex/Matcher {
     pub def findFrom(b: Int32): Matcher[Bool] & Impure =
         liftPrimResult(m1 -> Text/Regex/Internal/Matcher.findFrom(m1, b))
 
+
+    pub def findLastFrom(b: Int32): Matcher[Bool] & Impure =
+        let* first = findFrom(b);
+        if (first) {
+            let* pos = start();
+            let* endpos = findLastHelper(pos);
+            findFrom(endpos - 1)
+        } else return(false)
+
     pub def content(): Matcher[String] & Impure =
         liftPrimResult(Text/Regex/Internal/Matcher.group)
 

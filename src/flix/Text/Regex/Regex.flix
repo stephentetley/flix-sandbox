@@ -219,6 +219,19 @@ namespace Text/Regex {
     /// Regex should provide Regex version of common String functions...
 
     ///
+    /// Count the occurences of `patt` in string `s`.
+    ///
+    pub def countMatches(patt: Pattern, s: String): Int32 =
+        Text/Regex/Matcher.runMatcher(countMatcher(0), patt, s) as & Pure
+            |> flip(Result.getWithDefault, 0)
+
+    def countMatcher(n: Int32): Matcher[Int32] & Impure =
+        use Text/Regex/Matcher.{flatMap, find, point};
+        let* first = find();
+        if (first) countMatcher(n+1) else point(n)
+
+
+    ///
     /// Return the index of the first occurence of `patt` in `s` from the left.
     ///
     /// If `patt` is not present in `s` return None.
@@ -256,6 +269,38 @@ namespace Text/Regex {
         };
         Text/Regex/Matcher.runMatcher(m1, patt, s) |> Result.toOption
 
+
+    ///
+    /// This is `indexOfLeft` with a start offset.
+    ///
+    /// Returns `None` if `patt` does not match.
+    ///
+    pub def indexOfLeftWithOffset(patt: Pattern, offset: Int32, s: String): Option[Int32] =
+        indexOfLeftWithOffsetHelper(patt, offset, s) as & Pure
+
+    def indexOfLeftWithOffsetHelper(patt: Pattern, offset: Int32, s: String): Option[Int32] & Impure =
+        use Text/Regex/Matcher.{flatMap, findFrom, start, throwError};
+        let m1 = {
+            let* bfound = findFrom(offset);
+            if (bfound) start() else throwError("none")
+        };
+        Text/Regex/Matcher.runMatcher(m1, patt, s) |> Result.toOption
+
+    ///
+    /// This is `indexOfRight` with a start offset.
+    ///
+    /// Returns `None` if `patt` does not match.
+    ///
+    pub def indexOfRightWithOffset(patt: Pattern, offset: Int32, s: String): Option[Int32] =
+        indexOfRightWithOffsetHelper(patt, offset, s) as & Pure
+
+    def indexOfRightWithOffsetHelper(patt: Pattern, offset: Int32, s: String): Option[Int32] & Impure =
+        use Text/Regex/Matcher.{flatMap, findLastFrom, start, throwError};
+        let m1 = {
+            let* bfound = findLastFrom(offset);
+            if (bfound) start() else throwError("none")
+        };
+        Text/Regex/Matcher.runMatcher(m1, patt, s) |> Result.toOption
 
     ///
     /// Find the first instance of `patt` in string `s`, return a pair of the
