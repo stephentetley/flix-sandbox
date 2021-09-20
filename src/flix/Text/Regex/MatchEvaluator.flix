@@ -129,8 +129,21 @@ namespace Text/Regex/MatchEvaluator {
     pub def liftResult(x: Result[a, String]): MatchEvaluator[a] =
         MatchEvaluator(_ -> x)
 
-    pub def liftOperation(fn: Unit ~> Result[a, String]): MatchEvaluator[a] & Impure=
+    pub def liftOperation(fn: Unit ~> Result[a, String]): MatchEvaluator[a] & Impure =
         MatchEvaluator(_ -> fn() as & Pure) as & Impure
+
+
+    pub def optional(mx: MatchEvaluator[a]): MatchEvaluator[Option[a]] =
+        MatchEvaluator(r -> match apply1(mx, r) {
+            case Ok(a) => Ok(Some(a))
+            case Err(_) => Ok(None)
+        })
+
+    pub def withDefault(mx: MatchEvaluator[a], d: a): MatchEvaluator[a] =
+        MatchEvaluator(r -> match apply1(mx, r) {
+            case Ok(a) => Ok(a)
+            case Err(_) => Ok(d)
+        })
 
 
     pub def content(): MatchEvaluator[String] & Impure = liftPrimResult(Text/Regex/Internal/Matcher.group)
