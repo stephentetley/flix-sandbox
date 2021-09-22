@@ -50,7 +50,8 @@ namespace Text/Regex {
 
     /// Design note - if a function uses a MatchEvaluator it should return `Result[a, String]` rather than `Option[a]`
     /// as MatchEvaluator has user supplied error messages.
-    def evalWithTest(test: ##java.util.regex.Matcher ~> Bool, input: String, patt: Pattern, eval: MatchEvaluator[a]): Result[a, String] & Impure =
+    def evalWithTest(test: ##java.util.regex.Matcher ~> Bool,
+                        patt: Pattern, eval: MatchEvaluator[a], input: String): Result[a, String] & Impure =
         let Pattern(patt1) = patt;
         let m1 = Text/Regex/Internal/Matcher.new(patt1, input);
         if (test(m1)) {
@@ -64,8 +65,8 @@ namespace Text/Regex {
     /// The MatchEvaluator `eval` is potentially impure (e.g. it might create an array),
     /// so this function is impure.
     ///
-    pub def evalMatches(input: String, patt: Pattern, eval: MatchEvaluator[a]): Result[a, String] & Impure =
-        evalWithTest(Text/Regex/Internal/Matcher.matches, input, patt, eval)
+    pub def evalMatches(patt: Pattern, eval: MatchEvaluator[a], input: String): Result[a, String] & Impure =
+        evalWithTest(Text/Regex/Internal/Matcher.matches, patt, eval, input)
 
 
     /// Input matches at least once (left to right)...
@@ -73,14 +74,14 @@ namespace Text/Regex {
     /// The MatchEvaluator `eval` is potentially impure (e.g. it might create an array),
     /// so this function is impure.
     ///
-    pub def evalContains(input: String, patt: Pattern, eval: MatchEvaluator[a]): Result[a, String] & Impure =
-        evalWithTest(Text/Regex/Internal/Matcher.find, input, patt, eval)
+    pub def evalContains(patt: Pattern, eval: MatchEvaluator[a], input: String): Result[a, String] & Impure =
+        evalWithTest(Text/Regex/Internal/Matcher.find, patt, eval, input)
 
     /// Input matches at least once (left to right)...
-    pub def evalStartsWith(input: String, patt: Pattern, eval: MatchEvaluator[a]): Result[a, String] & Impure =
-        evalWithTest(Text/Regex/Internal/Matcher.lookingAt, input, patt, eval)
+    pub def evalStartsWith(patt: Pattern, eval: MatchEvaluator[a], input: String): Result[a, String] & Impure =
+        evalWithTest(Text/Regex/Internal/Matcher.lookingAt, patt, eval, input)
 
-    def boundedWithTest(test: ##java.util.regex.Matcher ~> Bool, input: String, patt: Pattern, start: Int32, end: Int32): Option[String] & Impure =
+    def boundedWithTest(test: ##java.util.regex.Matcher ~> Bool, start: Int32, end: Int32, patt: Pattern, input: String): Option[String] & Impure =
         use Option.flatMap;
         let Pattern(patt1) = patt;
         let m1 = Text/Regex/Internal/Matcher.new(patt1, input);
@@ -93,25 +94,25 @@ namespace Text/Regex {
     /// TODO - should this be pure (yes), return a Bool (?)...
     /// Need to investigate why they were written this way, before changing them.
     /// Match input within region, match must start at start of region...
-    pub def boundedMatches(input: String, patt: Pattern, start: Int32, end: Int32): Option[String] & Impure =
+    pub def boundedMatches(start: Int32, end: Int32, patt: Pattern, input: String): Option[String] & Impure =
         use Text/Regex/Internal/Matcher.{matches};
-        boundedWithTest(matches, input, patt, start, end)
+        boundedWithTest(matches, start, end, patt, input)
 
     /// Match input within region, match must start at start of region...
-    pub def boundedContains(input: String, patt: Pattern, start: Int32, end: Int32): Option[String] & Impure =
+    pub def boundedContains(start: Int32, end: Int32, patt: Pattern, input: String): Option[String] & Impure =
         use Text/Regex/Internal/Matcher.{find};
-        boundedWithTest(find, input, patt, start, end)
+        boundedWithTest(find, start, end, patt, input)
 
 
     /// Match input within region, match must start at start of region...
-    pub def boundedStartsWith(input: String, patt: Pattern, start: Int32, end: Int32): Option[String] & Impure =
+    pub def boundedStartsWith(start: Int32, end: Int32, patt: Pattern, input: String): Option[String] & Impure =
         use Text/Regex/Internal/Matcher.{lookingAt};
-        boundedWithTest(lookingAt, input, patt, start, end)
+        boundedWithTest(lookingAt, start, end, patt, input)
 
 
 
     /// Whole input matches within region...
-    def evalBoundedWithTest(test: ##java.util.regex.Matcher ~> Bool, input: String, patt: Pattern, start: Int32, end: Int32, eval: MatchEvaluator[a]): Result[a, String] & Impure =
+    def evalBoundedWithTest(test: ##java.util.regex.Matcher ~> Bool, start: Int32, end: Int32, patt: Pattern, eval: MatchEvaluator[a], input: String): Result[a, String] & Impure =
         use Result.flatMap;
         let Pattern(patt1) = patt;
         let m1 = Text/Regex/Internal/Matcher.new(patt1, input);
@@ -123,23 +124,23 @@ namespace Text/Regex {
             Err("evalBoundedWithTest - test")
 
     /// Match input within region, match must start at start of region...
-    pub def evalBoundedMatches(input: String, patt: Pattern, start: Int32, end: Int32, eval: MatchEvaluator[a]): Result[a, String] & Impure =
-        evalBoundedWithTest(Text/Regex/Internal/Matcher.matches, input, patt, start, end, eval)
+    pub def evalBoundedMatches(start: Int32, end: Int32, patt: Pattern, eval: MatchEvaluator[a], input: String): Result[a, String] & Impure =
+        evalBoundedWithTest(Text/Regex/Internal/Matcher.matches, start, end, patt, eval, input)
 
     /// Match input within region, match must start at start of region...
-    pub def evalBoundedContains(input: String, patt: Pattern, start: Int32, end: Int32, eval: MatchEvaluator[a]): Result[a, String] & Impure =
-        evalBoundedWithTest(Text/Regex/Internal/Matcher.find, input, patt, start, end, eval)
+    pub def evalBoundedContains(start: Int32, end: Int32, patt: Pattern, eval: MatchEvaluator[a], input: String): Result[a, String] & Impure =
+        evalBoundedWithTest(Text/Regex/Internal/Matcher.find, start, end, patt, eval, input)
 
 
     /// Match input within region, match must start at start of region...
-    pub def evalBoundedStartsWith(input: String, patt: Pattern, start: Int32, end: Int32, eval: MatchEvaluator[a]): Result[a, String] & Impure =
-        evalBoundedWithTest(Text/Regex/Internal/Matcher.lookingAt, input, patt, start, end, eval)
+    pub def evalBoundedStartsWith(start: Int32, end: Int32, patt: Pattern, eval: MatchEvaluator[a], input: String): Result[a, String] & Impure =
+        evalBoundedWithTest(Text/Regex/Internal/Matcher.lookingAt, start, end, patt, eval, input)
 
 
     ///
     /// Splits the string `s` around matches of the pattern `p`.
     ///
-    pub def split(input: String, patt: Pattern): Array[String] & Impure =
+    pub def split(patt: Pattern, input: String): Array[String] & Impure =
         import java.util.regex.Pattern.split(##java.lang.CharSequence);
         let Pattern(p1) = patt;
         let cs1 = input as ##java.lang.CharSequence;
@@ -148,15 +149,15 @@ namespace Text/Regex {
     ///
     /// Splits the string `s` around matches of the pattern `p`.
     ///
-    pub def boundedSplit(input: String, patt: Pattern, start: Int32, end: Int32): Array[String] & Impure =
+    pub def boundedSplit(start: Int32, end: Int32, patt: Pattern, input: String): Array[String] & Impure =
         let input1 = String.slice(input, start, end);
-        split(input1, patt)
+        split(patt, input1)
 
 
     ///
     /// Stream with a Iterator...
     ///
-    pub def results(input: String, patt: Pattern, eval: MatchEvaluator[a]): Iterator[Result[a, String]] & Impure =
+    pub def results(patt: Pattern, eval: MatchEvaluator[a], input: String): Iterator[Result[a, String]] & Impure =
         let Pattern(patt1) = patt;
         let m1 = Text/Regex/Internal/Matcher.new(patt1, input);
         let iterDone = () -> Text/Regex/Internal/Matcher.find(m1);
@@ -174,21 +175,21 @@ namespace Text/Regex {
     ///
     /// Stream...
     ///
-    pub def contentResults(input: String, patt: Pattern): Iterator[Result[String, String]] & Impure =
+    pub def contentResults(patt: Pattern, input: String): Iterator[Result[String, String]] & Impure =
         use Text/Regex/MatchEvaluator.{content};
-        results(input, patt, content())
+        results(patt, content(), input)
 
     ///
     /// Stream...
     ///
-    pub def rangeResults(input: String, patt: Pattern): Iterator[Result[(Int32, Int32), String]] & Impure =
+    pub def rangeResults(patt: Pattern, input: String): Iterator[Result[(Int32, Int32), String]] & Impure =
         use Text/Regex/MatchEvaluator.{getRange};
-        results(input, patt, getRange())
+        results(patt, getRange(), input)
 
     ///
     /// Returns `input` with every match of the pattern `patt` replaced by the string `rep`.
     ///
-    pub def replace(input: String, patt: Pattern, rep: String): String =
+    pub def replace(patt: Pattern, rep: String, input: String): String =
         let Pattern(patt1) = patt;
         let m1 = Text/Regex/Internal/Matcher.new(patt1, input) as & Pure;
         Text/Regex/Internal/Matcher.replaceAll(m1, rep) as & Pure
@@ -196,7 +197,7 @@ namespace Text/Regex {
     ///
     /// Returns `input` with the first match of the regular expression `patt` replaced by the string `rep`.
     ///
-    pub def replaceFirstMatch(input: String, patt: Pattern, rep: String): String =
+    pub def replaceFirstMatch(patt: Pattern, rep: String, input: String): String =
         let Pattern(patt1) = patt;
         let m1 = Text/Regex/Internal/Matcher.new(patt1, input) as & Pure;
         Text/Regex/Internal/Matcher.replaceFirst(m1, rep) as & Pure
@@ -205,14 +206,14 @@ namespace Text/Regex {
     /// Rewrite the string `input` by applying the function `f` to the
     /// substring produced by each match of the pattern `patt`.
     ///
-    pub def rewriteWith(input: String, patt: Pattern, eval: MatchEvaluator[String]): Result[String, String] & Impure =
+    pub def rewriteWith(patt: Pattern, eval: MatchEvaluator[String], input: String): Result[String, String] & Impure =
         use Text/Regex/Replacer.{execReplacer, evalRewriteAll!};
         execReplacer(evalRewriteAll!(eval), patt, input)
 
     ///
     /// Rewrite the string `input` by apply the function `f` to the substring produced by each match of the pattern `patt`.
     ///
-    pub def rewriteWithIndex(input: String, patt: Pattern, eval: Int32 -> MatchEvaluator[String]): Result[String, String] & Impure =
+    pub def rewriteWithIndex(patt: Pattern, eval: Int32 -> MatchEvaluator[String], input: String): Result[String, String] & Impure =
         use Text/Regex/Replacer.{execReplacer, evalRewriteAllWithIndex!};
         execReplacer(evalRewriteAllWithIndex!(eval), patt, input)
 

@@ -18,14 +18,14 @@ def runTest(msg: String, f: Unit ~> Result[a, String]): Unit & Impure with ToStr
 def test01(): Result[Unit, String] & Impure = 
     use Result.{flatMap};
     let* patt = Text/Regex/Pattern.compile("[Oo]");
-    Text/Regex.replaceFirstMatch("Hello World", patt, "0") |> println;
+    Text/Regex.replaceFirstMatch(patt, "0", "Hello World") |> println;
     Ok()
 
 def test02(): Result[Int32, String] & Impure =
     use Result.{flatMap};
     let* patt = Text/Regex/Pattern.compile("(\\p{Digit}+)");
     let eval1 = Text/Regex/MatchEvaluator.getInt32At(0);
-    Text/Regex.evalMatches("1000", patt, eval1)
+    Text/Regex.evalMatches(patt, eval1, "1000")
 
 def test03(): Result[Bool, String] & Impure =
     use Result.{flatMap};
