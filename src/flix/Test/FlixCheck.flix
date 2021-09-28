@@ -305,7 +305,7 @@ namespace Test/FlixCheck {
     pub def genList(gena: Gen[a]): Gen[List[a]] = 
         sized(n -> bind(choose(0,n+1), x -> list(gena, x)))
 
-    type alias Answer = { okay: Option[Bool], stamp: List[String], arguments: List[String] }
+    type alias Answer = { okay :: Option[Bool], stamp :: List[String], arguments :: List[String] }
 
     def nothing(): Answer = { okay = None, stamp = Nil, arguments = Nil }
 
@@ -329,11 +329,11 @@ namespace Test/FlixCheck {
 
     pub def testableProperty(x: Property): Property = x
 
-    pub def testableFunction(dict: {show: a -> String, testable: b -> Property, arbitrary: Gen[a]}, f: a -> b): Property = 
+    pub def testableFunction(dict: {show :: a -> String, testable :: b -> Property, arbitrary :: Gen[a]}, f: a -> b): Property =
         let dminus = {show = dict.show, testable = dict.testable};
         forall(dminus, dict.arbitrary, f)
 
-    pub def forall(dict: {show: a -> String, testable: b -> Property}, gen: Gen[a], body: a -> b): Property = 
+    pub def forall(dict: {show :: a -> String, testable :: b -> Property}, gen: Gen[a], body: a -> b): Property =
         let argument = (a,ans) -> { 
             let show1 = dict.show; 
             let args = show1(a) :: ans.arguments;             
@@ -366,16 +366,16 @@ namespace Test/FlixCheck {
     pub def trivial(testable: a -> Property, b: Bool, x: a): Property = 
         classify(testable, b, "trivial", x)
 
-    pub def collect(dict: {show: a -> String, testable: b -> Property}, v: a, x:b): Property = 
+    pub def collect(dict: {show :: a -> String, testable :: b -> Property}, v: a, x: b): Property =
         let show1 = dict.show;
         label(dict.testable, show1(v), x)
 
 
     type alias Config = 
-        { configMaxTest: Int32
-        , configMaxFail: Int32
-        , configSize: Int32 -> Int32
-        , configEvery: (Int32, List[String]) -> String
+        { configMaxTest :: Int32
+        , configMaxFail :: Int32
+        , configSize :: Int32 -> Int32
+        , configEvery :: (Int32, List[String]) -> String
         }
 
     pub def quick(): Config = 

@@ -35,6 +35,7 @@ instance UpperBound[Max[a]] with UpperBound[a] {
     pub def maxValue(): Max[a] = Max(UpperBound.maxValue())
 }
 
+/// Not sure about this - should Max have a `Bottom` case?
 instance LowerBound[Max[a]] with LowerBound[a] {
     pub def minValue(): Max[a] = Max(LowerBound.minValue())
 }

@@ -134,7 +134,7 @@ namespace System/IO {
     pub def writeFile(path: FilePath, content: String): Result[Unit, String] & Impure =
         writeFileWith({path = path, charset = Text/Charset.utf_8(), mode = Create}, content)
 
-    pub def writeFileWith(opts: {path: FilePath, charset: Text.Charset, mode: WriteMode},
+    pub def writeFileWith(opts: {path :: FilePath, charset :: Text.Charset, mode:: WriteMode},
                             content: String): Result[Unit, String] & Impure =
         import flix.runtime.spt.sandbox.system.IOWrapper:writeString(##java.nio.file.Path, ##java.nio.charset.Charset, ##java.nio.file.StandardOpenOption, String);
         try {
@@ -162,7 +162,7 @@ namespace System/IO {
     pub def writeBytes(path: FilePath, bytes: Array[Int8]): Result[Unit, String] & Impure =
         writeBytesWith({path = path, mode = Create}, bytes)
 
-    pub def writeBytesWith(opts: {path: FilePath, mode: WriteMode}, bytes: Array[Int8]): Result[Unit, String] & Impure =
+    pub def writeBytesWith(opts: {path :: FilePath, mode :: WriteMode}, bytes: Array[Int8]): Result[Unit, String] & Impure =
         import flix.runtime.spt.sandbox.system.IOWrapper:writeBytes(##java.nio.file.Path, ##java.nio.file.StandardOpenOption, Array[Int8]);
         try {
             let FilePath(path1) = opts.path;
@@ -174,7 +174,7 @@ namespace System/IO {
             case _: ##java.lang.Exception => Err("writeBytes")
         }
 
-    pub def foldableWriteBytesWith[t: Type -> Type](opts: {path: FilePath, mode: WriteMode},
+    pub def foldableWriteBytesWith[t: Type -> Type](opts: {path :: FilePath, mode :: WriteMode},
                                                     bytes: t[Int8]): Result[Unit, String] & Impure with Foldable[t] =
         import flix.runtime.spt.sandbox.system.IOWrapper:openFileOutputStream(##java.nio.file.Path, ##java.nio.file.StandardOpenOption);
         import flix.runtime.spt.sandbox.system.IOWrapper:outputStreamWriteByte(##java.io.OutputStream, Int8);
@@ -212,7 +212,7 @@ namespace System/IO {
         };
         Iterator(iterDone, iterNext)
 
-    pub def readLinesIterWith(opts: {charset: Text.Charset}, path: FilePath): Iterator[Result[String, String]] & Impure =
+    pub def readLinesIterWith(opts: {charset :: Text.Charset}, path: FilePath): Iterator[Result[String, String]] & Impure =
         import flix.runtime.spt.sandbox.system.LineIterator:newFileslinesIterator(##java.nio.file.Path, ##java.nio.charset.Charset);
         import flix.runtime.spt.sandbox.system.LineIterator.hasNext();
         import flix.runtime.spt.sandbox.system.LineIterator.next();

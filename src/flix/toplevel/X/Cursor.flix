@@ -20,7 +20,7 @@ namespace X {
 
     pub opaque type Cursor[e, a] = X/Cursor.CursorImpl[e, a]
 
-    type alias CursorAlg[e, a] = { hasNext: Unit ~> Bool, next: Unit ~> Result[a, e], finalize: Unit ~> Unit }
+    type alias CursorAlg[e, a] = { hasNext :: Unit ~> Bool, next :: Unit ~> Result[a, e], finalize :: Unit ~> Unit }
 }
 
 namespace X/Cursor {
@@ -29,7 +29,7 @@ namespace X/Cursor {
     use X.CursorAlg;
     use X.Cursor.{Cursor};
 
-    type alias CursorImpl[e, a] = { hasNext: Unit ~> Bool, next: Unit ~> Step[e, a], finalize: Unit ~> Unit }
+    type alias CursorImpl[e, a] = { hasNext :: Unit ~> Bool, next :: Unit ~> Step[e, a], finalize :: Unit ~> Unit }
 
     enum Step[e, a] {
         case Ans(a)
