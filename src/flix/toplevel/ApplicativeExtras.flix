@@ -30,6 +30,14 @@ namespace FunctorExtras {
 
 namespace ApplicativeExtras {
 
+    use FunctorExtras.{<&>};
+    use Applicative.{point};
+
+    ///  Applicative cons.
+    def consA(f: m[a], fs: m[List[a]]): m[List[a]] with Applicative[m] =
+        (((x, xs) -> x :: xs) <&> f) <*> fs
+
+
     pub def seqLeft(ma: m[a], mb : m[b]): m[a] with Applicative[m] =
         Applicative.liftA2((a, _) -> a, ma, mb)
 
@@ -44,9 +52,19 @@ namespace ApplicativeExtras {
 
     pub def *>(ma: m[a], mb : m[b]): m[b] with Applicative[m] = seqRight(ma, mb)
 
+    pub def replicateA(ntimes: Int32, mx: m[a]): m[List[a]]  with Applicative[m] =
+        replicateAHelper(ntimes, mx, point(Nil))
+
+    def replicateAHelper(ntimes: Int32, mx: m[a], ac: m[List[a]]): m[List[a]] with Applicative[m] =
+        if (ntimes <= 0)
+            ac
+        else
+            replicateAHelper(ntimes - 1, mx, consA(mx, ac))
+
 }
 
 namespace FoldableExtras {
+
 
     pub def sequenceX(t: t[m[a]]): m[Unit] with Applicative[m], Foldable[t] =
         use ApplicativeExtras.{*>};
@@ -67,5 +85,6 @@ namespace FoldableExtras {
         let appendDList = (f, g) -> xs -> f(g(xs));
         let unDList = f -> f(Nil);
         Foldable.foldLeft((ac, xs) -> appendDList(ac, makeDList(xs)), xs -> xs, t) |> unDList
+
 
 }

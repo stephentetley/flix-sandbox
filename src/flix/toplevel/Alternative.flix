@@ -43,12 +43,16 @@ instance Alternative[Option] {
 }
 
 namespace Alternative {
+    use Applicative.{point};
 
     pub def <|>(x: m[a] , y: m[a]): m[a] with Alternative[m] =
         alt(x, y)
 
     pub def optional(x: m[a]): m[Option[a]] with Alternative[m] =
-        alt(Functor.map(x1 -> Some(x1), x), Applicative.point(None))
+        alt(Functor.map(x1 -> Some(x1), x), point(None))
+
+    pub def optionalWithDefault(v: m[a], d: a): m[a] with Alternative[m] =
+        alt(v, point(d))
 
 }
 
