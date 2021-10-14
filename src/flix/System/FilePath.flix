@@ -271,14 +271,14 @@ namespace System/FilePath {
     pub def hasExtension(path: FilePath): Bool =
         match getFileName(path) |> Option.map(toString) {
             case None => false
-            case Some(str) => String.startsWith(".", str)
+            case Some(str) => String.startsWith({prefix = "."}, str)
         }
 
 
     pub def getExtension(path: FilePath): Option[String] =
         use Option.flatMap;
         let* s = getFileName(path) |> Option.map(toString);
-        let* ix = String.indexOfRight(".", s);
+        let* ix = String.indexOfRight({substr = "."}, s);
         Some(String.sliceRight(s, ix+1))
 
     ///
@@ -349,7 +349,7 @@ namespace System/FilePath {
     pub def getExtensions(path: FilePath): Option[String] =
         use Option.flatMap;
         let* s = getFileName(path) |> Option.map(toString);
-        let* ix = String.indexOfLeft(".", s);
+        let* ix = String.indexOfLeft({substr = "."}, s);
         Some(String.sliceRight(s, ix + 1))
 
     ///
