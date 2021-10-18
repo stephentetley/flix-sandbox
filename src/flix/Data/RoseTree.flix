@@ -142,4 +142,26 @@ namespace Data/RoseTree {
         case x :: rs => { foreach(f, x); foreachForest(f, rs) }
     }
 
+    pub def unfoldTree(f: b -> (a, List[b]) & ef, st: b): RoseTree[a] & ef=
+        unfoldTreeHelper(f, st, k -> k as & ef)
+
+    /// CPS
+    def unfoldTreeHelper(f: b -> (a, List[b]) & ef, st: b, k: RoseTree[a] -> RoseTree[a] & ef): RoseTree[a] & ef =
+        let (a, bs) = f(st);
+        unfoldTreeListHelper(f, bs, ks -> k(RoseTree(a, ks)))
+
+    /// CPS
+    def unfoldTreeListHelper(f: b -> (a, List[b]) & ef, ss: List[b], k: RoseForest[a] -> RoseTree[a] & ef): RoseTree[a] & ef =
+        match ss {
+            case Nil => k(Nil)
+            case s :: rs => unfoldTreeHelper(f, s, k1 ->
+                                unfoldTreeListHelper(f, rs, ks -> k(k1 :: ks)))
+        }
+
+
+    pub def unfoldForest(f: b -> (a, List[b]) & ef, ss: List[b]): RoseForest[a] & ef =
+        List.map(unfoldTree(f), ss)
+
+
+
 }
