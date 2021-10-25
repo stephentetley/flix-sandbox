@@ -27,8 +27,11 @@ namespace System/File {
 
 namespace System/File/BufferedReader {
 
+    use X.Cursor;
+    use X.Cursor.{Cursor};
     use System/File.BufferedReader;
     use System/File.BufferedReader.{BufferedReader};
+    use System.FilePath;
     use System.FilePath.{FilePath};
     use Text.Charset.{Charset};
 
@@ -88,13 +91,12 @@ namespace System/File/BufferedReader {
     ///
     /// Closes the BufferedReader when done.
     ///
-    pub def lines(x: BufferedReader): Iterator[Result[String, String]] & Impure =
+    pub def lines(x: BufferedReader): Cursor[String, String] & Impure =
         import flix.runtime.spt.sandbox.system.LineIterator:newBufferedReaderlinesIterator(##java.io.BufferedReader);
         import flix.runtime.spt.sandbox.system.LineIterator.hasNext();
         import flix.runtime.spt.sandbox.system.LineIterator.next();
         let BufferedReader(x1) = x;
         let primIter = newBufferedReaderlinesIterator(x1);
-        let iterDone = () -> if (hasNext(primIter)) false else true;
         let iterNext = () -> {
             try {
                 let s1 = next(primIter);
@@ -103,6 +105,11 @@ namespace System/File/BufferedReader {
                 case _: ##java.lang.Exception => Err("lines[next]")
             }
         };
-        Iterator(iterDone, iterNext)
+        let cursorAlg: X.CursorAlg[String, String] =  {
+              hasNext = () -> hasNext(primIter)
+            , next = iterNext
+            , finalize = () -> () as & Impure
+        };
+        X/Cursor.makeCursor(cursorAlg)
 
 }

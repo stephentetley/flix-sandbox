@@ -21,13 +21,18 @@ namespace Data {
         case RoseTree(a, List[RoseTree[a]])
     }
 
-    type alias RoseForest[a] = List[RoseTree[a]]
+    pub type alias RoseForest[a] = List[RoseTree[a]]
 }
 
 namespace Data/RoseTree {
 
     use Data.{RoseTree, RoseForest};
     use Data.RoseTree.{RoseTree};
+
+
+    pub def drawTree(x: RoseTree[String]): String = drawTree1(x, xs -> xs) |> String.unlines
+
+    pub def drawForest(x: RoseForest[String]): String = String.unlines(List.map(drawTree, x))
 
     def shift1(first: String, other: String, xs: List[String], k: List[String] -> List[String]): List[String] = 
         match xs { 
@@ -64,9 +69,6 @@ namespace Data/RoseTree {
         }
 
 
-    pub def drawTree (x: RoseTree[String]): String = drawTree1(x, xs -> xs) |> String.unlines
-
-    pub def drawForest (x: RoseForest[String]): String = String.unlines(List.map(drawTree, x))
 
     pub def flatten(x: RoseTree[a]): List[a] = preorder(x)
 

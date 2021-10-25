@@ -16,6 +16,8 @@
 
 namespace Text/Regex {
 
+    use X.Cursor;
+    use X.Cursor.{Cursor};
     use Text/Regex.Pattern;
     use Text/Regex.Pattern.Pattern;
     use Text/Regex.MatchEvaluator;
@@ -208,34 +210,32 @@ namespace Text/Regex {
 
 
     ///
-    /// Stream with a Iterator...
+    /// Stream with a Cursor...
     ///
-    pub def results(patt: Pattern, eval: MatchEvaluator[a], input: String): Iterator[Result[a, String]] & Impure =
+    pub def results(patt: Pattern, eval: MatchEvaluator[a], input: String): Cursor[String, a] & Impure =
         let Pattern(patt1) = patt;
+        let MatchEvaluator(eval1) = eval;
         let m1 = Text/Regex/Internal/Matcher.new(patt1, input);
-        let iterDone = () -> Text/Regex/Internal/Matcher.find(m1);
-        let iterNext = () -> {
-            try {
-                Text/Regex/MatchEvaluator.runMatchEvaluator(eval, m1)
-            } catch {
-                case _: ##java.lang.Exception => Err("results[next]")
-            }
+        let cursorAlg: X.CursorAlg[String, a] =  {
+              hasNext = () -> Text/Regex/Internal/Matcher.find(m1)
+            , next = () -> eval1(m1) as & Impure
+            , finalize = () -> () as & Impure
         };
-        Iterator(iterDone, iterNext)
+        X/Cursor.makeCursor(cursorAlg)
 
 
 
     ///
     /// Stream...
     ///
-    pub def contentResults(patt: Pattern, input: String): Iterator[Result[String, String]] & Impure =
+    pub def contentResults(patt: Pattern, input: String): Cursor[String, String] & Impure =
         use Text/Regex/MatchEvaluator.{content};
         results(patt, content(), input)
 
     ///
     /// Stream...
     ///
-    pub def rangeResults(patt: Pattern, input: String): Iterator[Result[(Int32, Int32), String]] & Impure =
+    pub def rangeResults(patt: Pattern, input: String): Cursor[String, (Int32, Int32)] & Impure =
         use Text/Regex/MatchEvaluator.{getRange};
         results(patt, getRange(), input)
 

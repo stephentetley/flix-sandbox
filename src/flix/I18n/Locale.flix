@@ -48,6 +48,8 @@ namespace I18n {
 
 namespace I18n/Locale {
 
+    use X.Cursor;
+    use X.Cursor.{Cursor};
     use I18n.Locale;
     use I18n.Locale.{Locale};
 
@@ -315,10 +317,9 @@ namespace I18n/Locale {
 
     /// Iterators differ only on the create function and what they are marshalled to, so make making them common...
     def makeLocaleStringIter(primIter: ##flix.runtime.spt.sandbox.i18n.LocaleStringIterator,
-                                failMsg: String): Iterator[Result[String, String]] =
+                                failMsg: String): Cursor[String, String] =
         import flix.runtime.spt.sandbox.i18n.LocaleStringIterator.hasNext();
         import flix.runtime.spt.sandbox.i18n.LocaleStringIterator.next();
-        let iterDone = () -> if (hasNext(primIter)) false else true;
         let iterNext = () -> {
             try {
                 let s1 = next(primIter);
@@ -327,15 +328,19 @@ namespace I18n/Locale {
                 case _: ##java.lang.Exception => Err(failMsg)
             }
         };
-        Iterator(iterDone, iterNext)
+        let cursorAlg: X.CursorAlg[String, String] =  {
+              hasNext = () -> hasNext(primIter)
+            , next = iterNext
+            , finalize = () -> () as & Impure
+        };
+        X/Cursor.makeCursor(cursorAlg)
 
     pub def getIsoCountries(): Result[List[String], String] & Impure =
         import flix.runtime.spt.sandbox.i18n.LocaleStringIterator:newGetISOCountriesIterator();
         try {
             let iter = newGetISOCountriesIterator();
             makeLocaleStringIter(iter, "getIsoCountryCodes failed")
-                |> Iterator.toList
-                |> Result.sequence
+                |> X/Cursor.toList!
         } catch {
             case _: ##java.lang.Exception => Err("getIsoCountries")
         }
@@ -347,8 +352,7 @@ namespace I18n/Locale {
             let icc1 = isoCountryCodeToNative(icc);
             let iter = newGetISOCountriesWithICCIterator(icc1);
             makeLocaleStringIter(iter, "getIsoCountryCodesWithIsoCountryCode failed")
-                |> Iterator.toList
-                |> Result.sequence
+                |> X/Cursor.toList!
                 |> Result.map(List.toSet)
         } catch {
             case _: ##java.lang.Exception => Err("getIsoCountriesWithIsoCountryCode")
@@ -359,8 +363,7 @@ namespace I18n/Locale {
         try {
             let iter = newGetISOLanguagesIterator();
             makeLocaleStringIter(iter, "getIsoLanguages failed")
-                |> Iterator.toList
-                |> Result.sequence
+                |> X/Cursor.toList!
         } catch {
             case _: ##java.lang.Exception => Err("getIsoLanguages")
         }
@@ -371,8 +374,7 @@ namespace I18n/Locale {
             let Locale(locale1) = locale;
             let iter = newGetUnicodeLocaleAttributesIterator(locale1);
             makeLocaleStringIter(iter, "getUnicodeLocaleAttributes failed")
-                |> Iterator.toList
-                |> Result.sequence
+                |> X/Cursor.toList!
                 |> Result.map(List.toSet)
         } catch {
             case _: ##java.lang.Exception => Err("getUnicodeLocaleAttributes")
@@ -384,8 +386,7 @@ namespace I18n/Locale {
             let Locale(locale1) = locale;
             let iter = newGetUnicodeLocaleKeysIterator(locale1);
             makeLocaleStringIter(iter, "getUnicodeLocaleKeys failed")
-                |> Iterator.toList
-                |> Result.sequence
+                |> X/Cursor.toList!
                 |> Result.map(List.toSet)
         } catch {
             case _: ##java.lang.Exception => Err("getUnicodeLocaleAttributes")

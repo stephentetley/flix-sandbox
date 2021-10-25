@@ -17,7 +17,8 @@
 
 namespace System/Directory {
 
-
+    use X.Cursor;
+    use X.Cursor.{Cursor};
     use System.FilePath;
     use System.FilePath.{FilePath};
 
@@ -37,17 +38,15 @@ namespace System/Directory {
 
     pub def contents(path: FilePath): Result[List[FilePath], String] & Impure =
         contentsIter(path)
-            |> Iterator.toList
-            |> Result.sequence
+            |> X/Cursor.toList!
 
 
-    pub def contentsIter(path: FilePath): Iterator[Result[FilePath, String]] & Impure =
+    pub def contentsIter(path: FilePath): Cursor[String, FilePath] & Impure =
         import flix.runtime.spt.sandbox.system.PathIterator:newFileslistIterator(##java.nio.file.Path);
         import flix.runtime.spt.sandbox.system.PathIterator.hasNext();
         import flix.runtime.spt.sandbox.system.PathIterator.next();
         let FilePath(path1) = path;
         let primIter = newFileslistIterator(path1);
-        let iterDone = () -> if (hasNext(primIter)) false else true;
         let iterNext = () -> {
             try {
                 let p1 = next(primIter);
@@ -56,20 +55,23 @@ namespace System/Directory {
                 case _: ##java.lang.Exception => Err("contentsIter[next]")
             }
         };
-        Iterator(iterDone, iterNext)
+        let cursorAlg: X.CursorAlg[String, FilePath] =  {
+              hasNext = () -> hasNext(primIter)
+            , next = iterNext
+            , finalize = () -> () as & Impure
+        };
+        X/Cursor.makeCursor(cursorAlg)
 
     pub def matches(glob: String, path: FilePath): Result[List[FilePath], String] & Impure =
         matchesIter(glob, path)
-            |> Iterator.toList
-            |> Result.sequence
+            |> X/Cursor.toList!
 
-    pub def matchesIter(glob: String, path: FilePath): Iterator[Result[FilePath, String]] & Impure =
+    pub def matchesIter(glob: String, path: FilePath): Cursor[String, FilePath] & Impure =
         import flix.runtime.spt.sandbox.system.PathIterator:newFilesnewDirectoryStreamIterator(##java.nio.file.Path, String);
         import flix.runtime.spt.sandbox.system.PathIterator.hasNext();
         import flix.runtime.spt.sandbox.system.PathIterator.next();
         let FilePath(path1) = path;
         let primIter = newFilesnewDirectoryStreamIterator(path1, glob);
-        let iterDone = () -> if (hasNext(primIter)) false else true;
         let iterNext = () -> {
             try {
                 let p1 = next(primIter);
@@ -78,21 +80,24 @@ namespace System/Directory {
                 case _: ##java.lang.Exception => Err("matchesIter[next]")
             }
         };
-        Iterator(iterDone, iterNext)
+        let cursorAlg: X.CursorAlg[String, FilePath] =  {
+              hasNext = () -> hasNext(primIter)
+            , next = iterNext
+            , finalize = () -> () as & Impure
+        };
+        X/Cursor.makeCursor(cursorAlg)
 
     pub def contentsAll(followLinks: Bool, path: FilePath): Result[List[FilePath], String] & Impure =
         contentsAllIter(followLinks, path)
-            |> Iterator.toList
-            |> Result.sequence
+            |> X/Cursor.toList!
 
     /// All levels - recursive, uses a Iterator
-    pub def contentsAllIter(followLinks: Bool, path: FilePath): Iterator[Result[FilePath, String]] & Impure =
+    pub def contentsAllIter(followLinks: Bool, path: FilePath): Cursor[String, FilePath] & Impure =
         import flix.runtime.spt.sandbox.system.PathIterator:newFileswalkIterator(##java.nio.file.Path, Bool);
         import flix.runtime.spt.sandbox.system.PathIterator.hasNext();
         import flix.runtime.spt.sandbox.system.PathIterator.next();
         let FilePath(path1) = path;
         let primIter = newFileswalkIterator(path1, followLinks);
-        let iterDone = () -> if (hasNext(primIter)) false else true;
         let iterNext = () -> {
             try {
                 let p1 = next(primIter);
@@ -101,7 +106,12 @@ namespace System/Directory {
                 case _: ##java.lang.Exception => Err("contentsAllIter[next]")
             }
         };
-        Iterator(iterDone, iterNext)
+        let cursorAlg: X.CursorAlg[String, FilePath] =  {
+              hasNext = () -> hasNext(primIter)
+            , next = iterNext
+            , finalize = () -> () as & Impure
+        };
+        X/Cursor.makeCursor(cursorAlg)
 
 
     pub def createDirectory(path: FilePath): Unit & Impure =

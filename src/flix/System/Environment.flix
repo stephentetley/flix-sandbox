@@ -18,6 +18,8 @@
 
 namespace System/Environment {
 
+    use X.Cursor;
+    use X.Cursor.{Cursor};
     use System.FilePath;
     use System.FilePath.{FilePath};
 
@@ -40,18 +42,16 @@ namespace System/Environment {
 
     pub def getEnvVars(): Result[Map[String, String], String] & Impure =
         getEnvVarsIter()
-            |> Iterator.toList
-            |> Result.sequence
+            |> X/Cursor.toList!
             |> Result.map(List.toMap)
 
-    def getEnvVarsIter(): Iterator[Result[(String, String), String]] & Impure =
+    def getEnvVarsIter(): Cursor[String, (String, String)] & Impure =
         import new flix.runtime.spt.sandbox.system.GetEnvIterator() as newGetEnvIterator;
         import flix.runtime.spt.sandbox.system.GetEnvIterator.hasNext();
         import flix.runtime.spt.sandbox.system.GetEnvIterator.next();
         import flix.runtime.spt.sandbox.system.marshal.TupleStringString.get0();
         import flix.runtime.spt.sandbox.system.marshal.TupleStringString.get1();
         let primIter = newGetEnvIterator();
-        let iterDone = () -> if (hasNext(primIter)) false else true;
         let iterNext = () -> {
             try {
                 let xy = next(primIter);
@@ -62,7 +62,12 @@ namespace System/Environment {
                 case _: ##java.lang.Exception => Err("getEnvVarsIter[next]")
             }
         };
-        Iterator(iterDone, iterNext)
+        let cursorAlg: X.CursorAlg[String, (String, String)] =  {
+              hasNext = () -> hasNext(primIter)
+            , next = iterNext
+            , finalize = () -> () as & Impure
+        };
+        X/Cursor.makeCursor(cursorAlg)
 
 
     def getProperty(funName: String, propName: String): Result[String, String] & Impure =

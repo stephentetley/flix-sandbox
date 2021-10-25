@@ -17,6 +17,8 @@
 
 namespace System/IO {
 
+    use X.Cursor;
+    use X.Cursor.{Cursor};
     use System.FilePath;
     use System.FilePath.{FilePath};
     use Text.Charset;
@@ -191,89 +193,79 @@ namespace System/IO {
             case _: ##java.lang.Exception => Err("foldableWriteBytesWith")
         }
 
-    pub def readChunks(path: FilePath, chunkSize: Int32): Iterator[Result[Array[Int8], String]] & Impure =
+    pub def readChunks(path: FilePath, chunkSize: Int32): Cursor[String, Array[Int8]] & Impure =
         import new flix.runtime.spt.sandbox.system.SBCIterator(##java.nio.file.Path, Int32) as newIter;
         import flix.runtime.spt.sandbox.system.SBCIterator.hasNext();
         import flix.runtime.spt.sandbox.system.SBCIterator.nextBufferSize();
         import flix.runtime.spt.sandbox.system.SBCIterator.next();
         let FilePath(path1) = path;
         let primIter = newIter(path1, chunkSize);
-        let iterDone = () -> if (hasNext(primIter)) false else true;
         let iterNext = () -> {
             try {
                 let sz = nextBufferSize(primIter);
                 let arr = next(primIter);
                 if (sz < chunkSize)
-                    Ok(Array.slice(arr, 0, sz))
+                    Ok(Array.slice(0, sz, arr))
                 else Ok(arr)
             } catch {
                 case _: ##java.lang.Exception => Err("readChunks[next]")
             }
         };
-        Iterator(iterDone, iterNext)
+        let cursorAlg: X.CursorAlg[String, Array[Int8]] =  {
+              hasNext = () -> hasNext(primIter)
+            , next = iterNext
+            , finalize = () -> () as & Impure
+        };
+        X/Cursor.makeCursor(cursorAlg)
 
-    pub def readLinesIterWith(opts: {charset :: Text.Charset}, path: FilePath): Iterator[Result[String, String]] & Impure =
+    pub def readLinesIterWith(opts: {charset :: Text.Charset}, path: FilePath): Cursor[String, String] & Impure =
         import flix.runtime.spt.sandbox.system.LineIterator:newFileslinesIterator(##java.nio.file.Path, ##java.nio.charset.Charset);
         import flix.runtime.spt.sandbox.system.LineIterator.hasNext();
         import flix.runtime.spt.sandbox.system.LineIterator.next();
         let FilePath(path1) = path;
         let Charset(charset1) = opts.charset;
         let primIter = newFileslinesIterator(path1, charset1);
-        let iterDone = () -> if (hasNext(primIter)) false else true;
-        let iterNext = () -> {
-            try {
-                let s1 = next(primIter);
-                Ok(s1)
-            } catch {
-                case _: ##java.lang.Exception => Err("readLinesIterWith[next]")
-            }
+        let cursorAlg: X.CursorAlg[String, String] =  {
+              hasNext = () -> hasNext(primIter)
+            , next = X/Cursor.guardThunk(_ -> next(primIter), "next failed")
+            , finalize = () -> () as & Impure
         };
-        Iterator(iterDone, iterNext)
+        X/Cursor.makeCursor(cursorAlg)
 
     pub def contents(path: FilePath): Result[List[FilePath], String] & Impure =
         contentsIter(path)
-            |> Iterator.toList
-            |> Result.sequence
+            |> X/Cursor.toList!
 
 
-    pub def contentsIter(path: FilePath): Iterator[Result[FilePath, String]] & Impure =
+    pub def contentsIter(path: FilePath): Cursor[String, FilePath] & Impure =
         import flix.runtime.spt.sandbox.system.PathIterator:newFileslistIterator(##java.nio.file.Path);
         import flix.runtime.spt.sandbox.system.PathIterator.hasNext();
         import flix.runtime.spt.sandbox.system.PathIterator.next();
         let FilePath(path1) = path;
         let primIter = newFileslistIterator(path1);
-        let iterDone = () -> if (hasNext(primIter)) false else true;
-        let iterNext = () -> {
-            try {
-                let p1 = next(primIter);
-                Ok(FilePath(p1))
-            } catch {
-                case _: ##java.lang.Exception => Err("contentsIter[next]")
-            }
+        let cursorAlg: X.CursorAlg[String, FilePath] =  {
+              hasNext = () -> hasNext(primIter)
+            , next = X/Cursor.guardThunk(_ -> FilePath(next(primIter)), "next failed")
+            , finalize = () -> () as & Impure
         };
-        Iterator(iterDone, iterNext)
+        X/Cursor.makeCursor(cursorAlg)
 
     pub def matches(glob: String, path: FilePath): Result[List[FilePath], String] & Impure =
         matchesIter(glob, path)
-            |> Iterator.toList
-            |> Result.sequence
+            |> X/Cursor.toList!
 
-    pub def matchesIter(glob: String, path: FilePath): Iterator[Result[FilePath, String]] & Impure =
+    pub def matchesIter(glob: String, path: FilePath): Cursor[String, FilePath] & Impure =
         import flix.runtime.spt.sandbox.system.PathIterator:newFilesnewDirectoryStreamIterator(##java.nio.file.Path, String);
         import flix.runtime.spt.sandbox.system.PathIterator.hasNext();
         import flix.runtime.spt.sandbox.system.PathIterator.next();
         let FilePath(path1) = path;
         let primIter = newFilesnewDirectoryStreamIterator(path1, glob);
-        let iterDone = () -> if (hasNext(primIter)) false else true;
-        let iterNext = () -> {
-            try {
-                let p1 = next(primIter);
-                Ok(FilePath(p1))
-            } catch {
-                case _: ##java.lang.Exception => Err("matchesIter[next]")
-            }
+        let cursorAlg: X.CursorAlg[String, FilePath] =  {
+              hasNext = () -> hasNext(primIter)
+            , next = X/Cursor.guardThunk(_ -> FilePath(next(primIter)), "next failed")
+            , finalize = () -> () as & Impure
         };
-        Iterator(iterDone, iterNext)
+        X/Cursor.makeCursor(cursorAlg)
 
 }
 

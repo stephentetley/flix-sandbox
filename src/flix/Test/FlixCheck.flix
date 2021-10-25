@@ -194,7 +194,7 @@ namespace Test/FlixCheck {
         else {
             let (r1, r2) = split2(r0);
             let n1 = n / 2;
-            let s = n % 2;
+            let s = n `Mod.mod` 2;
             if (s == 0)
                 makeRands(r1, n1)
             else
