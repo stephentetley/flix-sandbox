@@ -39,7 +39,7 @@ namespace System/Process {
         import flix.runtime.spt.sandbox.system.marshal.MarshalStringArray.snoc(String);
         import flix.runtime.spt.sandbox.system.ProcessWrapper:create(String, MarshalStringArray) as create;
         let argArray = newStringArray();
-        Array.foreach(x -> argArray.snoc(x), args);
+        Array.foreach(x -> snoc(argArray, x), args);
         ProcessBuilder(create(cmd, argArray))
 
     pub def directory!(x: ProcessBuilder, path: System.FilePath): Unit & Impure =
@@ -55,29 +55,24 @@ namespace System/Process {
         import java.lang.ProcessBuilder.directory();
         import java.io.File.toPath();
         let ProcessBuilder(x1) = x;
-        let p1 = x1.directory().toPath();
+        let p1 = directory(x1) |> toPath;
         FilePath(p1)
-
-
-
 
     pub def start(x: ProcessBuilder): Result[Process, String] & Impure =
         import java.lang.ProcessBuilder.start();
         try {
             let ProcessBuilder(x1) = x;
-            let proc = x1.start();
+            let proc = start(x1);
             Ok(Process(proc))
         } catch {
             case _: ##java.io.IOException => Err("start")
         }
-            
-        
 
     pub def waitFor(x: Process): Result[Int32, String] & Impure =
         import java.lang.Process.waitFor();
         try {
             let Process(x1) = x;
-            let retcode = x1.waitFor();
+            let retcode = waitFor(x1);
             Ok(retcode)
         } catch {
             case _: ##java.io.IOException => Err("waitFor")

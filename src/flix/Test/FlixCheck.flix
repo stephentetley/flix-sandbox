@@ -40,11 +40,11 @@ namespace Test/FlixCheck {
     def split(r: Random): Random & Impure = 
         import java.util.SplittableRandom.split();
         let Random(r1) = r;
-        Random(r1.split())
+        Random(split(r1))
 
     def split2(r: Random): (Random, Random) & Impure = 
-        let rx = r.split();
-        let ry = rx.split();
+        let rx = split(r);
+        let ry = split(rx);
         (rx, ry)
 
 

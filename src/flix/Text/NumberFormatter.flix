@@ -30,9 +30,9 @@ namespace Text/NumberFormatter {
         import java.text.DecimalFormat.setMaximumFractionDigits(Int32);
         import java.text.NumberFormat.format(Float64);
         let df = newDecimalFormat();
-        df.setMaximumFractionDigits(decimalPlaces);
+        setMaximumFractionDigits(df, decimalPlaces);
         let nf = df as ##java.text.NumberFormat;
-        nf.format(x)
+        format(nf, x)
 
     ///
     /// Parse the decimal string `s` as a Float64, leading or trailing whitespace is trimmed.
@@ -51,8 +51,8 @@ namespace Text/NumberFormatter {
         import java.text.NumberFormat.parse(String);
         import java.lang.Number.doubleValue();
         let nf = newDecimalFormat() as ##java.text.NumberFormat;
-        let n1 = nf.parse(s.strip());
-        Ok(n1.doubleValue())
+        let n1 = parse(nf, strip(s));
+        Ok(doubleValue(n1))
     } catch {
         case _: ##java.lang.NumberFormatException => Err("Float64.fromDecimalString")
     }
@@ -81,6 +81,5 @@ namespace Text/NumberFormatter {
         setDecimalFormatSymbols(format1, symbols);
         let format2 = format1 as ##java.text.NumberFormat;
         format(format2, x)
-
 
 }

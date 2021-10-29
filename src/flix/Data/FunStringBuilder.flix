@@ -62,61 +62,63 @@ namespace Data/FunStringBuilder {
     /// Returns `sb` with the Int8 `i` appended.
     ///
     pub def appendInt8(sb: FunStringBuilder, i: Int8): FunStringBuilder =
-        sb.appendString(Int8.toString(i))
+        appendString(sb, Int8.toString(i))
         
     ///
     /// Returns `sb` with the Int16 `i` appended.
     ///
     pub def appendInt16(sb: FunStringBuilder, i: Int16): FunStringBuilder =
-        sb.appendString(Int16.toString(i))
+        appendString(sb, Int16.toString(i))
     
     ///
     /// Returns `sb` with the Int32 `i` appended.
     ///
     pub def appendInt32(sb: FunStringBuilder, i: Int32): FunStringBuilder =
-        sb.appendString(Int32.toString(i))
+        appendString(sb, Int32.toString(i))
 
     ///
     /// Returns `sb` with the Int64 `i` appended.
     ///
     pub def appendInt64(sb: FunStringBuilder, i: Int64): FunStringBuilder =
-        sb.appendString(Int64.toString(i))
+        appendString(sb, Int64.toString(i))
 
     ///
     /// Returns `sb` with the BigInt `i` appended.
     ///
     pub def appendBigInt(sb: FunStringBuilder, i: BigInt): FunStringBuilder =
-        sb.appendString(BigInt.toString(i))
+        appendString(sb, BigInt.toString(i))
 
     ///
     /// Returns `sb` with the Float32 `d` appended.
     ///
     pub def appendFloat32(sb: FunStringBuilder, d: Float32): FunStringBuilder =
-        sb.appendString(Float32.toString(d))
+        appendString(sb, Float32.toString(d))
 
     ///
     /// Returns `sb` with the Float64 `d` appended.
     ///
     pub def appendFloat64(sb: FunStringBuilder, d: Float64): FunStringBuilder =
-        sb.appendString(Float64.toString(d))
+        appendString(sb, Float64.toString(d))
 
     ///
     /// Returns `sb` with the system line separator append.
     ///
     pub def appendLineSeparator(sb: FunStringBuilder): FunStringBuilder =
-        sb.appendString(String.lineSeparator())
+        appendString(sb, String.lineSeparator())
 
     ///
     /// Returns `sb` with the string `s` appended followed by the system line separator.
     ///
     pub def appendLine(sb: FunStringBuilder, s: String): FunStringBuilder =
-        sb.appendString(s).appendLineSeparator()
+        let sb1 = appendString(sb, s);
+        appendLineSeparator(sb1)
 
     ///
     /// Returns `sb` with the string produced by `f(x)` appended.
     ///
     pub def appendLineWith(sb: FunStringBuilder, f: a -> String, x: a): FunStringBuilder =
-        sb.appendString(f(x)).appendLineSeparator()
+        let sb1 = appendString(sb, f(x));
+        appendLineSeparator(sb1)
 
     ///
     /// Returns `sb` with each string in the array `a` appended.
@@ -137,9 +139,9 @@ namespace Data/FunStringBuilder {
         let step = (ac, s) -> {
             let (sb1, i) = ac;
             if (i == 0)
-                (sb1.appendString(s), i + 1)
+                (appendString(sb1, s), i + 1)
             else
-                (sb1.appendString(sep).appendString(s), i + 1)
+                (let sb2 = appendString(sb1, sep); appendString(sb2), i + 1)
         };
         Array.foldLeft(step, (sb, 0), a) |> fst
 

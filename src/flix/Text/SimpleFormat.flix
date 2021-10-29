@@ -37,12 +37,12 @@ namespace Text/SimpleFormat {
     pub def text(s: String): Doc = 
         use Data/FunStringBuilder.appendString;
         let sb = Data/FunStringBuilder.new();
-        Doc(sb.appendString(s))
+        Doc(appendString(sb, s))
 
     pub def char(c: Char): Doc = 
         use Data/FunStringBuilder.appendChar;
         let sb = Data/FunStringBuilder.new();
-        Doc(sb.appendChar(c))
+        Doc(appendChar(sb, c))
 
     ///
     /// Concatenate two documents horizontally (no separating space).
@@ -56,7 +56,7 @@ namespace Text/SimpleFormat {
     pub def line(): Doc = 
         use Data/FunStringBuilder.appendLineSeparator;
         let sb = Data/FunStringBuilder.new();
-        Doc(sb.appendLineSeparator())
+        Doc(appendLineSeparator(sb))
 
     ///
     /// Concatenate two documents horizontally (no separating space).
