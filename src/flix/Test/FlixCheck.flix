@@ -30,12 +30,12 @@ namespace Test/FlixCheck {
     // def nextInt(r: Random, max: Int32): Int32 & Impure = 
     //     import java.util.SplittableRandom.nextInt(Int32);
     //     let Random(r1) = r;
-    //     r1.nextInt(max)
+    //     nextInt(r1, max)
 
     // def nextLong(r: Random, max: Int64): Int64 & Impure = 
     //     import java.util.SplittableRandom.nextLong(Int64);
     //     let Random(r1) = r;
-    //     r1.nextLong(max)
+    //     nextLong(r1, max)
 
     def split(r: Random): Random & Impure = 
         import java.util.SplittableRandom.split();
@@ -52,12 +52,12 @@ namespace Test/FlixCheck {
     def randomR(lo: Int32, hi: Int32, r: Random): Int32 & Impure = 
         import java.util.SplittableRandom.nextInt(Int32, Int32);
         let Random(r1) = r;
-        r1.nextInt(lo, hi)
+        nextInt(r1, lo, hi)
 
     def randomR64(lo: Int64, hi: Int64, r: Random): Int64 & Impure = 
         import java.util.SplittableRandom.nextLong(Int64, Int64);
         let Random(r1) = r;
-        r1.nextLong(lo, hi)
+        nextLong(r1, lo, hi)
 
     def stringCompare(s: String, t: String): Comparison =
         Order.compare(s, t)

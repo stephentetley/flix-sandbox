@@ -141,7 +141,7 @@ namespace Data/FunStringBuilder {
             if (i == 0)
                 (appendString(sb1, s), i + 1)
             else
-                (let sb2 = appendString(sb1, sep); appendString(sb2), i + 1)
+                (let sb2 = appendString(sb1, sep); appendString(sb2, s), i + 1)
         };
         Array.foldLeft(step, (sb, 0), a) |> fst
 

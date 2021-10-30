@@ -279,7 +279,7 @@ namespace System/FilePath {
         use Option.flatMap;
         let* s = getFileName(path) |> Option.map(toString);
         let* ix = String.indexOfRight({substr = "."}, s);
-        Some(String.sliceRight(s, ix+1))
+        Some(String.sliceRight(ix+1, s))
 
     ///
     /// Replaces the extension.
@@ -350,7 +350,7 @@ namespace System/FilePath {
         use Option.flatMap;
         let* s = getFileName(path) |> Option.map(toString);
         let* ix = String.indexOfLeft({substr = "."}, s);
-        Some(String.sliceRight(s, ix + 1))
+        Some(String.sliceRight(ix + 1, s))
 
     ///
     /// Drop all extensions if the filepath has mutliple extensions,

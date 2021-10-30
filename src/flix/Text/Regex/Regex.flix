@@ -205,7 +205,7 @@ namespace Text/Regex {
     /// Splits the string `s` around matches of the pattern `p`.
     ///
     pub def boundedSplit(start: Int32, end: Int32, patt: Pattern, input: String): Array[String] & Impure =
-        let input1 = String.slice(input, start, end);
+        let input1 = String.slice(start, end, input);
         split(patt, input1)
 
 
@@ -363,13 +363,13 @@ namespace Text/Regex {
     pub def breakOnLeft(patt: Pattern, s: String): (String, String) =
         match indexOfLeft(patt, s) {
             case None => (s, "")
-            case Some(i) => (String.sliceLeft(s, i), String.sliceRight(s, i))
+            case Some(i) => (String.sliceLeft(i, s), String.sliceRight(i, s))
         }
 
     pub def breakAfterLeft(patt: Pattern, s: String): (String, String) =
         match indexOfEndLeft(patt, s) {
             case None => (s, "")
-            case Some(i) => (String.sliceLeft(s, i), String.sliceRight(s, i))
+            case Some(i) => (String.sliceLeft(i, s), String.sliceRight(i, s))
         }
 
 }

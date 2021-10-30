@@ -32,7 +32,7 @@ namespace Text/Regex {
         pub def toString(patt: Pattern): String =
             import java.util.regex.Pattern.toString();
             let Pattern(p1) = patt;
-            p1.toString() as & Pure
+            toString(p1) as & Pure
     }
 
     instance FromString[Pattern] {
