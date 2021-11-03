@@ -14,26 +14,6 @@
  * limitations under the License.
  */
 
-/// This is a temporary module until the stdlib gets a Monad class.
-
-
-
-pub lawless class Monad[m : Type -> Type] with Applicative[m] {
-    pub def bind(x: m[a], k: a -> m[b] & ef): m[b] & ef
-
-}
-
-
-instance Monad[List] {
-    pub def bind(ma: List[a], k: a -> List[b] & ef): List[b] & ef = List.flatMap(k, ma)
-}
-
-instance Monad[Option] {
-    pub def bind(ma: Option[a], k: a -> Option[b] & ef): Option[b] & ef = match ma {
-        case Some(a) => k(a)
-        case None => None
-    }
-}
 
 
 
@@ -41,10 +21,13 @@ namespace Monad {
 
     use Applicative.{point};
     use Alternative.{alt};
+    use Monad.{flatMap};
 
-    pub def >>=(x: m[a], k: a -> m[b] & ef): m[b] & ef with Monad[m] = bind(x, k)
+    pub def bind(x: m[a], k: a -> m[b] & ef): m[b] & ef with Monad[m] = flatMap(k, x)
 
-    pub def =<<(k: a -> m[b] & ef, x: m[a]): m[b] & ef with Monad[m] = bind(x, k)
+    pub def >>=(x: m[a], k: a -> m[b] & ef): m[b] & ef with Monad[m] = flatMap(k, x)
+
+    pub def =<<(k: a -> m[b] & ef, x: m[a]): m[b] & ef with Monad[m] = flatMap(k, x)
 
 
     pub def kleisliLeft(f1: a -> m[b] & ef1, f2: b -> m[c] & ef2, x: a): m[c] & (ef1 and ef2) with Monad[m] =

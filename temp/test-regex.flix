@@ -54,5 +54,5 @@ def test05(): Result[Unit, String] & Impure =
     let* patt = Text/Regex/Pattern.compile("\\p{Blank}+");
     Text/Regex.indexOfLeft(patt, "Set 1 Match 1") |> println; 
     Text/Regex.indexOfRight(patt, "Set 1 Match 1") |> println;    
-    String.indexOfRight(" ", "Set 1 Match 1") |> println;
+    String.indexOfRight(substr = " ", "Set 1 Match 1") |> println;
     Ok()

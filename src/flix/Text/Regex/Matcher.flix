@@ -32,7 +32,7 @@ namespace Text/Regex {
     }
 
     instance Monad[Matcher] {
-        pub def bind(ma: Matcher[a], k: a -> Matcher[b] & ef) : Matcher[b] & ef = Text/Regex/Matcher.bind(ma, k)
+        pub def flatMap(k: a -> Matcher[b] & ef, ma: Matcher[a]) : Matcher[b] & ef = Text/Regex/Matcher.bind(ma, k)
     }
 
     /// Don't make Matcher Alternative because Matcher has imperative state (a handle) rather

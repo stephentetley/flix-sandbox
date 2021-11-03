@@ -38,7 +38,7 @@ instance Applicative[Either[e]] {
 }
 
 instance Monad[Either[e]] {
-    pub def bind(ma: Either[e, a], k: a -> Either[e, b] & ef): Either[e, b] & ef = match ma {
+    pub def flatMap(k: a -> Either[e, b] & ef, ma: Either[e, a]): Either[e, b] & ef = match ma {
         case Right(a) => k(a)
         case Left(e) => Left(e) as & ef
     }

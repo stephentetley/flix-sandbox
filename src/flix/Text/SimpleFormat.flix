@@ -187,10 +187,10 @@ namespace Text/SimpleFormat {
     pub def bigInt(i: BigInt): Doc = BigInt.toString(i) |> text
 
     pub def repeatString(s: String, n: Int32): Doc = 
-        String.repeat(s, n) |> text
+        String.repeat(n, s) |> text
 
     pub def repeat(d: Doc, n: Int32): Doc = 
-        List.repeat(d, n) |> hcat
+        List.repeat(n, d) |> hcat
 
     // ************************************************************************
     // Character printers
