@@ -54,26 +54,28 @@ instance Monoid[Chain[a]] {
 }
 
 instance Functor[Chain] {
-    pub def map(f: a -> b & e, xs: Chain[a]): Chain[b] & e = Chain.map(f, xs)
+    pub def map(f: a -> b & ef, xs: Chain[a]): Chain[b] & ef = Chain.map(f, xs)
 }
 
 instance Foldable[Chain] {
-    pub def foldLeft(f: (b, a) -> b & e, s: b, xs: Chain[a]): b & e = Chain.foldLeft(f, s, xs)
-    pub def foldRight(f: (a, b) -> b & e, s: b, xs: Chain[a]): b & e = Chain.foldRight(f, s, xs)
+    pub def foldLeft(f: (b, a) -> b & ef, s: b, xs: Chain[a]): b & ef = Chain.foldLeft(f, s, xs)
+    pub def foldRight(f: (a, b) -> b & ef, s: b, xs: Chain[a]): b & ef = Chain.foldRight(f, s, xs)
 }
 
 
-enum ViewLeft[t] {
-    case NoneLeft
-    case SomeLeft(t, Chain[t])
-}
 
-enum ViewRight[t] {
-    case NoneRight
-    case SomeRight(Chain[t], t)
-}
 
 namespace Chain {
+
+    enum ViewLeft[t] {
+        case NoneLeft
+        case SomeLeft(t, Chain[t])
+    }
+
+    enum ViewRight[t] {
+        case NoneRight
+        case SomeRight(Chain[t], t)
+    }
 
     pub def empty(): Chain[a] = Empty
 
@@ -81,12 +83,12 @@ namespace Chain {
 
     pub def cons(x: a, xs: Chain[a]): Chain[a] = match xs {
         case Empty => One(x)
-        case _ => Chain(One(x), xs)
+        case _     => Chain(One(x), xs)
     }
 
     pub def snoc(xs: Chain[a], x: a): Chain[a] = match xs {
         case Empty => One(x)
-        case _ => Chain(xs, One(x))
+        case _     => Chain(xs, One(x))
     }
 
 
@@ -95,7 +97,7 @@ namespace Chain {
     ///
     pub def isEmpty(xs: Chain[a]): Bool = match xs {
         case Empty => true
-        case _ => false
+        case _     => false
     }
 
     ///
@@ -105,7 +107,7 @@ namespace Chain {
     ///
     pub def head(xs: Chain[a]): Option[a] = match viewLeft(xs) {
         case SomeLeft(x, _) => Some(x)
-        case _ => None
+        case _              => None
     }
 
     ///
@@ -115,7 +117,7 @@ namespace Chain {
     ///
     pub def last(xs: Chain[a]): Option[a] = match viewRight(xs) {
         case SomeRight(_, x) => Some(x)
-        case _ => None
+        case _               => None
     }
 
     ///
@@ -124,7 +126,7 @@ namespace Chain {
     ///
     pub def init(xs: Chain[a]): Option[Chain[a]] = match viewRight(xs) {
         case SomeRight(rs, _) => Some(rs)
-        case _ => None
+        case _                => None
     }
 
     ///
@@ -138,7 +140,7 @@ namespace Chain {
     pub def append(xs: Chain[a], ys: Chain[a]): Chain[a] = match (xs, ys) {
         case (Empty, _) => ys
         case (_, Empty) => xs
-        case (_, _) => Chain(xs, ys)
+        case (_, _)     => Chain(xs, ys)
     }
 
     ///
@@ -153,12 +155,11 @@ namespace Chain {
     /// This means that `Empty` can only be encountered on the first match and it
     /// can ignore the accumulator which is also `Empty` the first time this is called.
     ///
-    def viewLeftHelper(xs: Chain[a], ac: Chain[a], k: ViewLeft[a] -> ViewLeft[a]): ViewLeft[a] =
-        match xs {
-            case Empty => k(NoneLeft)
-            case One(x) => k(SomeLeft(x, ac))
-            case Chain(ls, rs) => viewLeftHelper(ls, append(rs, ac),  k)
-        }
+    def viewLeftHelper(xs: Chain[a], ac: Chain[a], k: ViewLeft[a] -> ViewLeft[a]): ViewLeft[a] = match xs {
+        case Empty         => k(NoneLeft)
+        case One(x)        => k(SomeLeft(x, ac))
+        case Chain(ls, rs) => viewLeftHelper(ls, append(rs, ac),  k)
+    }
 
     ///
     /// Deconstruct a Chain from the right end.
@@ -173,8 +174,8 @@ namespace Chain {
     /// can ignore the accumulator which is also `Empty` the first time this is called.
     ///
     def viewRightHelper(xs: Chain[a], ac: Chain[a], k: ViewRight[a] -> ViewRight[a]): ViewRight[a] = match xs {
-        case Empty => k(NoneRight)
-        case One(x) => k(SomeRight(ac, x))
+        case Empty         => k(NoneRight)
+        case One(x)        => k(SomeRight(ac, x))
         case Chain(ls, rs) => viewRightHelper(rs, append(ac, ls),  k)
     }
 
@@ -187,9 +188,9 @@ namespace Chain {
     /// Helper function for `memberOf`.
     ///
     def memberOfHelper(a: a, vx: ViewLeft[a]): Bool with Eq[a] = match vx {
+        case NoneLeft                 => false
         case SomeLeft(x, _) if x == a => true
-        case SomeLeft(_, xs) => memberOfHelper(a, viewLeft(xs))
-        case NoneLeft => false
+        case SomeLeft(_, xs)          => memberOfHelper(a, viewLeft(xs))
     }
 
     ///
@@ -203,7 +204,7 @@ namespace Chain {
     /// Helper function for `indexOf`.
     ///
     def indexOfHelper(a: a, ac: Int32, vx: ViewLeft[a]): Int32 with Eq[a] = match vx {
-        case NoneLeft => -1
+        case NoneLeft        => -1
         case SomeLeft(x, xs) => if (x == a) ac else indexOfHelper(a, ac + 1, viewLeft(xs))
     }
 
@@ -220,7 +221,7 @@ namespace Chain {
     /// The function `f` must be pure.
     ///
     pub def findLeft(f: a -> Bool, xs: Chain[a]): Option[a] = match viewLeft(xs) {
-        case NoneLeft => None
+        case NoneLeft        => None
         case SomeLeft(x, rs) => if (f(x)) Some(x) else findLeft(f, rs)
     }
 
@@ -230,7 +231,7 @@ namespace Chain {
     /// The function `f` must be pure.
     ///
     pub def findRight(f: a -> Bool, xs: Chain[a]): Option[a] = match viewRight(xs) {
-        case NoneRight => None
+        case NoneRight        => None
         case SomeRight(rs, x) => if (f(x)) Some(x) else findRight(f, rs)
     }
 
@@ -268,20 +269,20 @@ namespace Chain {
     ///
     /// Alias for `scanLeft`.
     ///
-    pub def scan(f: (b, a) -> b & e, s: b, xs: Chain[a]): Chain[b] & e = scanLeft(f, s, xs)
+    pub def scan(f: (b, a) -> b & ef, s: b, xs: Chain[a]): Chain[b] & ef = scanLeft(f, s, xs)
 
     ///
     /// Accumulates the result of applying `f` to `xs` going left to right.
     ///
     /// That is, the result is of the form: `s :: f(s, x1) :: f(f(s, x1), x2)  ...`.
     ///
-    pub def scanLeft(f: (b, a) -> b & e, s: b, xs: Chain[a]): Chain[b] & e = scanLeftHelper(f, s, xs, singleton(s))
+    pub def scanLeft(f: (b, a) -> b & ef, s: b, xs: Chain[a]): Chain[b] & ef = scanLeftHelper(f, s, xs, singleton(s))
 
     ///
     /// Helper function for `scanLeft`.
     ///
-    def scanLeftHelper(f: (b, a) -> b & e, s: b, xs: Chain[a], ac: Chain[b]): Chain[b] & e = match viewLeft(xs) {
-        case NoneLeft => ac
+    def scanLeftHelper(f: (b, a) -> b & ef, s: b, xs: Chain[a], ac: Chain[b]): Chain[b] & ef = match viewLeft(xs) {
+        case NoneLeft        => ac
         case SomeLeft(x, rs) => {let a = f(s, x); scanLeftHelper(f, a, rs, snoc(ac, a))}
     }
 
@@ -290,13 +291,13 @@ namespace Chain {
     ///
     /// That is, the result is of the form: `... f(xn-1, f(xn, s)) :: f(xn, s) :: s`.
     ///
-    pub def scanRight(f: (a, b) -> b & e, s: b, xs: Chain[a]): Chain[b] & e = scanRightHelper(f, s, xs, singleton(s))
+    pub def scanRight(f: (a, b) -> b & ef, s: b, xs: Chain[a]): Chain[b] & ef = scanRightHelper(f, s, xs, singleton(s))
 
     ///
     /// Helper function for `scanLeft`.
     ///
-    def scanRightHelper(f: (a, b) -> b & e, s: b, xs: Chain[a], ac: Chain[b]): Chain[b] & e = match viewRight(xs) {
-        case NoneRight => ac
+    def scanRightHelper(f: (a, b) -> b & ef, s: b, xs: Chain[a], ac: Chain[b]): Chain[b] & ef = match viewRight(xs) {
+        case NoneRight        => ac
         case SomeRight(rs, x) => {let a = f(x, s); scanRightHelper(f, a, rs, cons(a, ac))}
     }
 
@@ -312,7 +313,7 @@ namespace Chain {
     /// Helper function for `map`.
     ///
     def mapHelper(f: a -> b & ef, xs: Chain[a], ac: Chain[b]): Chain[b] & ef = match viewLeft(xs) {
-        case NoneLeft => ac
+        case NoneLeft        => ac
         case SomeLeft(a, rs) => mapHelper(f, rs, snoc(ac, f(a)))
     }
 
@@ -321,28 +322,27 @@ namespace Chain {
     ///
     /// That is, the result is of the form: `f(x1, 0) :: f(x2, 1) :: ...`.
     ///
-    pub def mapWithIndex(f: (a, Int32) -> b & e, xs: Chain[a]): Chain[b] & e =
+    pub def mapWithIndex(f: (a, Int32) -> b & ef, xs: Chain[a]): Chain[b] & ef =
         mapWithIndexHelper(f, xs, 0, Empty)
 
     ///
     /// Helper function for `mapWithIndex`.
     ///
-    def mapWithIndexHelper(f: (a, Int32) -> b & e, xs: Chain[a], i: Int32, ac: Chain[b]): Chain[b] & e =
-        match viewLeft(xs) {
-            case NoneLeft => ac
-            case SomeLeft(x, rs) => {let a = f(x, i); mapWithIndexHelper(f, rs, i+1, snoc(ac, a))}
-        }
+    def mapWithIndexHelper(f: (a, Int32) -> b & ef, xs: Chain[a], i: Int32, ac: Chain[b]): Chain[b] & ef = match viewLeft(xs) {
+        case NoneLeft        => ac
+        case SomeLeft(x, rs) => {let a = f(x, i); mapWithIndexHelper(f, rs, i+1, snoc(ac, a))}
+    }
 
     ///
     /// Returns the result of applying `f` to every element in `xs` and concatenating the results.
     ///
-    pub def flatMap(f: a -> Chain[b] & e, xs: Chain[a]): Chain[b] & e = flatMapHelper(f, xs, Empty)
+    pub def flatMap(f: a -> Chain[b] & ef, xs: Chain[a]): Chain[b] & ef = flatMapHelper(f, xs, Empty)
 
     ///
     /// Helper function for `flatMap`.
     ///
-    pub def flatMapHelper(f: a -> Chain[b] & e, xs: Chain[a], ac: Chain[b]): Chain[b] & e = match viewLeft(xs) {
-        case NoneLeft => ac
+    pub def flatMapHelper(f: a -> Chain[b] & ef, xs: Chain[a], ac: Chain[b]): Chain[b] & ef = match viewLeft(xs) {
+        case NoneLeft        => ac
         case SomeLeft(x, rs) => flatMapHelper(f, rs, append(ac, f(x)))
     }
 
@@ -355,7 +355,7 @@ namespace Chain {
     /// Helper function for `reverse`.
     ///
     def reverseHelper(xs: Chain[a], ac: Chain[a]): Chain[a] = match viewLeft(xs) {
-        case NoneLeft => ac
+        case NoneLeft        => ac
         case SomeLeft(x, rs) => reverseHelper(rs, cons(x, ac))
     }
 
@@ -363,7 +363,7 @@ namespace Chain {
     /// Returns `xs` with `a` inserted between every two adjacent elements.
     ///
     pub def intersperse(a: a, xs: Chain[a]): Chain[a] = match viewLeft(xs) {
-        case NoneLeft => Empty
+        case NoneLeft        => Empty
         case SomeLeft(x, rs) => intersperseHelper(a, rs, singleton(x))
     }
 
@@ -371,7 +371,7 @@ namespace Chain {
     /// Helper function for `reverse`.
     ///
     def intersperseHelper(sep: a, xs: Chain[a], ac: Chain[a]): Chain[a] = match viewLeft(xs) {
-        case NoneLeft => ac
+        case NoneLeft        => ac
         case SomeLeft(x, rs) => intersperseHelper(sep, rs, ac `snoc` sep `snoc` x)
     }
 
@@ -386,7 +386,7 @@ namespace Chain {
     /// Helper function for `count`.
     ///
     def countHelper(f: a -> Bool, xs: Chain[a], ac: Int32): Int32 = match viewLeft(xs) {
-        case NoneLeft => ac
+        case NoneLeft        => ac
         case SomeLeft(x, rs) => if (f(x)) countHelper(f, rs, ac + 1) else countHelper(f, rs, ac)
     }
 
@@ -404,7 +404,7 @@ namespace Chain {
     /// The function `f` must be pure.
     ///
     pub def exists(f: a -> Bool, xs: Chain[a]): Bool = match viewLeft(xs) {
-        case NoneLeft => false
+        case NoneLeft        => false
         case SomeLeft(x, rs) => if (f(x)) true else exists(f, rs)
     }
 
@@ -416,7 +416,7 @@ namespace Chain {
     /// The function `f` must be pure.
     ///
     pub def forall(f: a -> Bool, xs: Chain[a]): Bool = match viewLeft(xs) {
-        case NoneLeft => true
+        case NoneLeft        => true
         case SomeLeft(x, rs) => if (not f(x)) false else forall(f, rs)
     }
 
@@ -425,13 +425,13 @@ namespace Chain {
     ///
     /// The function `f` must be pure.
     ///
-    pub def filter(f: a -> Bool, xs: Chain[a]): Chain[a] = filterHelper(f, xs, Empty)
+    pub def filter(f: a -> Bool & ef, xs: Chain[a]): Chain[a] & ef = filterHelper(f, xs, Empty)
 
     ///
     /// Helper function for `filter`.
     ///
-    def filterHelper(f: a -> Bool, xs: Chain[a], ac: Chain[a]): Chain[a] = match viewLeft(xs) {
-        case NoneLeft => ac
+    def filterHelper(f: a -> Bool & ef, xs: Chain[a], ac: Chain[a]): Chain[a] & ef = match viewLeft(xs) {
+        case NoneLeft        => ac
         case SomeLeft(x, rs) => if (f(x)) filterHelper(f, rs, snoc(ac, x)) else filterHelper(f, rs, ac)
     }
 
@@ -441,7 +441,7 @@ namespace Chain {
     /// That is, the result is of the form: `f(...f(f(s, x1), x2)..., xn)`.
     ///
     pub def foldLeft(f: (b, a) -> b & ef, ac: b, xs: Chain[a]): b & ef = match viewLeft(xs) {
-        case NoneLeft => ac
+        case NoneLeft        => ac
         case SomeLeft(x, rs) => {
             let b = f(ac, x);
             foldLeft(f, b, rs)
@@ -454,7 +454,7 @@ namespace Chain {
     /// That is, the result is of the form: `f(x1, ...f(xn-1, f(xn, s))...)`.
     ///
     pub def foldRight(f: (a, b) -> b & ef, ac: b, xs: Chain[a]): b & ef = match viewRight(xs) {
-        case NoneRight => ac
+        case NoneRight        => ac
         case SomeRight(rs, x) => {
             let b = f(x, ac);
             foldRight(f, b, rs)
@@ -467,11 +467,14 @@ namespace Chain {
     /// Returns `Nil` if `n > length(xs)`.
     /// Returns `xs` if `n < 0`.
     ///
-    pub def dropLeft(n: Int32, xs: Chain[a]): Chain[a] = if (n < 0) xs else match (n, viewLeft(xs)) {
-        case (_, NoneLeft) => Empty
-        case (0, _) => xs
-        case (i, SomeLeft(_, rs)) => dropLeft(i - 1, rs)
-    }
+    pub def dropLeft(n: Int32, xs: Chain[a]): Chain[a] =
+        if (n < 0)
+            xs
+        else match (n, viewLeft(xs)) {
+            case (_, NoneLeft)        => Empty
+            case (0, _)               => xs
+            case (i, SomeLeft(_, rs)) => dropLeft(i - 1, rs)
+        }
 
     ///
     /// Returns `xs` without the last `n` elements.
@@ -479,11 +482,14 @@ namespace Chain {
     /// Returns `Nil` if `n > length(xs)`.
     /// Returns `xs` if `n < 0`.
     ///
-    pub def dropRight(n: Int32, xs: Chain[a]): Chain[a] = if (n < 0) xs else match (n, viewRight(xs)) {
-        case (_, NoneRight) => Empty
-        case (0, _) => xs
-        case (i, SomeRight(rs, _)) => dropRight(i - 1, rs)
-    }
+    pub def dropRight(n: Int32, xs: Chain[a]): Chain[a] =
+        if (n < 0)
+            xs
+        else match (n, viewRight(xs)) {
+            case (_, NoneRight)        => Empty
+            case (0, _)                => xs
+            case (i, SomeRight(rs, _)) => dropRight(i - 1, rs)
+        }
 
     ///
     /// Returns `xs` without the longest prefix that satisfies the predicate `f`.
@@ -491,8 +497,8 @@ namespace Chain {
     /// The function `f` must be pure.
     ///
     pub def dropWhileLeft(f: a -> Bool, xs: Chain[a]): Chain[a] = match viewLeft(xs) {
-        case NoneLeft => Empty
-        case SomeLeft(x, rs) => if (f(x)) dropWhileLeft(f, rs) else xs
+        case SomeLeft(x, rs) if (f(x)) => dropWhileLeft(f, rs)
+        case _                         => xs
     }
 
     ///
@@ -501,8 +507,8 @@ namespace Chain {
     /// The function `f` must be pure.
     ///
     pub def dropWhileRight(f: a -> Bool, xs: Chain[a]): Chain[a] = match viewRight(xs) {
-        case NoneRight => Empty
-        case SomeRight(rs, x) => if (f(x)) dropWhileRight(f, rs) else xs
+        case SomeRight(rs, x) if (f(x)) => dropWhileRight(f, rs)
+        case _                          => xs
     }
 
     ///
@@ -511,17 +517,22 @@ namespace Chain {
     /// Returns `xs` if `n > length(xs)`.
     /// Returns `Nil` if `n < 0`.
     ///
-    pub def takeLeft(n: Int32, xs: Chain[a]): Chain[a] = takeLeftHelper(n, xs, Empty)
+    pub def takeLeft(n: Int32, xs: Chain[a]): Chain[a] =
+        if (n < 0)
+            Empty
+        else
+            takeLeftHelper(n, xs, Empty)
 
     ///
     /// Helper for function for `takeLeft`.
     ///
-    def takeLeftHelper(n: Int32, xs: Chain[a], ac: Chain[a]): Chain[a] =
-        if (n < 0) Empty else match (n, viewLeft(xs)) {
-            case (_, NoneLeft) => ac
-            case (0, _) => ac
-            case (i, SomeLeft(x, rs)) => takeLeftHelper(i-1, rs, snoc(ac, x))
-        }
+    /// Precondition n >= 0
+    ///
+    def takeLeftHelper(n: Int32, xs: Chain[a], ac: Chain[a]): Chain[a] = match (n, viewLeft(xs)) {
+        case (_, NoneLeft)        => ac
+        case (i, _) if i < 1      => ac
+        case (i, SomeLeft(x, rs)) => takeLeftHelper(i-1, rs, snoc(ac, x))
+    }
 
     ///
     /// Returns the last `n` elements of `xs`.
@@ -529,15 +540,20 @@ namespace Chain {
     /// Returns `xs` if `n > length(xs)`.
     /// Returns `Nil` if `n < 0`.
     ///
-    pub def takeRight(n: Int32, xs: Chain[a]): Chain[a] = takeRightHelper(n, xs, Empty)
+    pub def takeRight(n: Int32, xs: Chain[a]): Chain[a] =
+        if (n < 0)
+            Empty
+        else
+            takeRightHelper(n, xs, Empty)
 
     ///
     /// Helper for function for `takeRight`.
     ///
-    def takeRightHelper(n: Int32, xs: Chain[a], ac: Chain[a]): Chain[a] =
-        if (n < 0) Empty else match (n, viewRight(xs)) {
-            case (_, NoneRight) => ac
-            case (0, _) => ac
+    /// Precodition: n >= 0
+    ///
+    def takeRightHelper(n: Int32, xs: Chain[a], ac: Chain[a]): Chain[a] = match (n, viewRight(xs)) {
+            case (_, NoneRight)        => ac
+            case (i, _)  if i < 1      => ac
             case (i, SomeRight(rs, x)) => takeRightHelper(i-1, rs, cons(x, ac))
         }
 
@@ -552,7 +568,7 @@ namespace Chain {
     /// Helper for function for `takeWhileLeft`.
     ///
     def takeWhileLeftHelper(f: a -> Bool, xs: Chain[a], ac: Chain[a]): Chain[a] = match viewLeft(xs) {
-        case NoneLeft => ac
+        case NoneLeft        => ac
         case SomeLeft(x, rs) => if (f(x)) takeWhileLeftHelper(f, rs, snoc(ac, x)) else ac
     }
 
@@ -567,17 +583,17 @@ namespace Chain {
     /// Helper for function for `takeWhileRight`.
     ///
     def takeWhileRightHelper(f: a -> Bool, xs: Chain[a], ac: Chain[a]): Chain[a] = match viewRight(xs) {
-        case NoneRight => ac
-        case SomeRight(rs, x) => if (f(x)) takeWhileRightHelper(f, rs, cons(x, ac)) else ac
+        case SomeRight(rs, x) if (f(x)) => takeWhileRightHelper(f, rs, cons(x, ac))
+        case _                          => ac
     }
 
     ///
     /// Collects the results of applying the partial function `f` to every element in `xs`.
     ///
-    pub def filterMap(f: a -> Option[b] & e, xs: Chain[a]): Chain[b] & e =
+    pub def filterMap(f: a -> Option[b] & ef, xs: Chain[a]): Chain[b] & ef =
         let step = (ac, x) -> match f(x) {
-                                case None => ac
-                                case Some(v) => snoc(ac, v)
+            case None    => ac
+            case Some(v) => snoc(ac, v)
         };
         foldLeft(step, empty(), xs)
 
@@ -586,11 +602,11 @@ namespace Chain {
     ///
     /// Returns `None` if every element of `xs` is `None`.
     ///
-    pub def findMap(f: a -> Option[b] & e, xs: Chain[a]): Option[b] & e = match viewLeft(xs) {
-        case NoneLeft => None
+    pub def findMap(f: a -> Option[b] & ef, xs: Chain[a]): Option[b] & ef = match viewLeft(xs) {
+        case NoneLeft        => None
         case SomeLeft(x, rs) => match f(x) {
-                            case None => findMap(f, rs)
-                            case Some(v) => Some(v)
+            case None    => findMap(f, rs)
+            case Some(v) => Some(v)
         }
     }
 
@@ -608,7 +624,7 @@ namespace Chain {
     ///
     def zipHelper(xs: Chain[a], ys: Chain[b], ac: Chain[(a,b)]): Chain[(a,b)] = match (viewLeft(xs), viewLeft(ys)) {
         case (SomeLeft(x, rs), SomeLeft(y, qs)) => zipHelper(rs, qs, snoc(ac, (x, y)))
-        case _ => ac
+        case _                                  => ac
     }
 
     ///
@@ -617,17 +633,17 @@ namespace Chain {
     ///
     /// If either `xs` or `ys` becomes depleted, then no further elements are added to the resulting chain.
     ///
-    pub def zipWith(f: (a, b) -> c & e, xs: Chain[a], ys: Chain[b]): Chain[c] & e = zipWithHelper(f, xs, ys, Chain.empty())
+    pub def zipWith(f: (a, b) -> c & ef, xs: Chain[a], ys: Chain[b]): Chain[c] & ef = zipWithHelper(f, xs, ys, Chain.empty())
 
     ///
     /// Helper function for `zipWith`.
     ///
-    def zipWithHelper(f: (a, b) -> c & e, xs: Chain[a], ys: Chain[b], ac: Chain[c]): Chain[c] & e = match (viewLeft(xs), viewLeft(ys)) {
+    def zipWithHelper(f: (a, b) -> c & ef, xs: Chain[a], ys: Chain[b], ac: Chain[c]): Chain[c] & ef = match (viewLeft(xs), viewLeft(ys)) {
         case (SomeLeft(x, rs), SomeLeft(y, qs)) => {
             let a = f(x, y);
             zipWithHelper(f, rs, qs, snoc(ac, a))
         }
-        case _ => ac
+        case _                                  => ac
     }
 
     ///
@@ -640,8 +656,8 @@ namespace Chain {
     /// Helper function for `unzip`.
     ///
     def unzipHelper(xs: Chain[(a, b)], ac1: Chain[a], ac2: Chain[b]): (Chain[a], Chain[b]) = match viewLeft(xs) {
+        case NoneLeft               => (ac1, ac2)
         case SomeLeft((x1, x2), rs) => unzipHelper(rs, snoc(ac1, x1), snoc(ac2, x2))
-        case NoneLeft => (ac1, ac2)
     }
 
     pub def mapAccumLeft(f: (s, a) -> (s, b) & ef, start: s, xs: Chain[a]): (s, Chain[b]) & ef =
@@ -652,7 +668,7 @@ namespace Chain {
     ///
     def mapAccumLeftHelper(f: (s, a) -> (s, b) & ef, s1: s, xs: Chain[a], k: (s, Chain[b]) -> (s, Chain[b])): (s, Chain[b]) & ef =
         match viewLeft(xs) {
-            case NoneLeft => k(s1, empty())
+            case NoneLeft        => k(s1, empty())
             case SomeLeft(x, rs) => {
                 let (s2, x1) = f(s1, x);
                 mapAccumLeftHelper(f, s2, rs, (s3, ks) -> k(s3, cons(x1, ks)))
@@ -667,7 +683,7 @@ namespace Chain {
     ///
     def mapAccumRightHelper(f: (s, a) -> (s, b) & ef, s1: s, xs: Chain[a], k: (s, Chain[b]) -> (s, Chain[b]) & ef): (s, Chain[b]) & ef =
         match viewRight(xs) {
-            case NoneRight => k(s1, empty())
+            case NoneRight        => k(s1, empty())
             case SomeRight(rs, x) => {
                 let (s2, x1) = f(s1, x);
                 mapAccumRightHelper(f, s2, rs, (s3, ks) -> k(s3, snoc(ks, x1)))
@@ -698,7 +714,6 @@ namespace Chain {
     ///
     pub def toMutList(xs: Chain[a]): MutList[a] & Impure =
         MutList(ref toArray(xs), ref length(xs))
-
 
     ///
     /// Returns the list `xs` as a set.
@@ -733,7 +748,7 @@ namespace Chain {
     /// The function `f` must be impure.
     ///
     pub def foreach(f: a ~> Unit, xs: Chain[a]): Unit & Impure = match viewLeft(xs) {
-        case NoneLeft => ()
+        case NoneLeft        => ()
         case SomeLeft(x, rs) => f(x); foreach(f, rs)
     }
 
@@ -770,13 +785,9 @@ namespace Chain {
     /// decide equality which imposes an order on the Chain.
     ///
     def equalsHelper(vx: ViewLeft[a], vy: ViewLeft[a]): Bool with Eq[a] = match (vx, vy) {
-        case (NoneLeft, NoneLeft) => true
-        case (SomeLeft(x, xs), SomeLeft(y, ys)) =>
-            if (x == y)
-                equalsHelper(viewLeft(xs), viewLeft(ys))
-            else
-                false
-        case (_, _) => false
+        case (NoneLeft, NoneLeft)                           => true
+        case (SomeLeft(x, xs), SomeLeft(y, ys)) if (x == y) => equalsHelper(viewLeft(xs), viewLeft(ys))
+        case (_, _)                                         => false
     }
 
     ///
