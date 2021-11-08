@@ -18,8 +18,10 @@
 /// The Chain type.
 ///
 /// A chain is a list represented as an unbalanced binary tree.
-/// It supports fast append and "snoc" - appending elements at the tail
+/// It supports efficient append and "snoc" - appending elements at the tail
 /// of the list.
+///
+/// Note - the constructors `Empty`, `One` and `Chain` should not be used directly.
 ///
 enum Chain[t] {
     case Empty,
@@ -81,19 +83,35 @@ instance Foldable[Chain] {
 namespace Chain {
 
     ///
-    /// Datatype for pattern matching on a chain (traversing left-to-right).
+    /// A datatype for pattern matching on a chain (traversing left-to-right).
     ///
-    enum ViewLeft[t] {
+    pub enum ViewLeft[t] {
         case NoneLeft
         case SomeLeft(t, Chain[t])
     }
 
+    instance Eq[ViewLeft[a]] with Eq[a] {
+        pub def eq(xs: ViewLeft[a], ys: ViewLeft[a]): Bool = match (xs, ys) {
+            case (NoneLeft, NoneLeft)                   => true
+            case (SomeLeft(x1, xs1), SomeLeft(y1, ys1)) => x1 == y1 and xs1 == ys1
+            case (_, _)                                 => false
+        }
+    }
+
     ///
-    /// Datatype for pattern matching on a chain (traversing right-to-left).
+    /// A datatype for pattern matching on a chain (traversing right-to-left).
     ///
-    enum ViewRight[t] {
+    pub enum ViewRight[t] {
         case NoneRight
         case SomeRight(Chain[t], t)
+    }
+
+    instance Eq[ViewRight[a]] with Eq[a] {
+        pub def eq(xs: ViewRight[a], ys: ViewRight[a]): Bool = match (xs, ys) {
+            case (NoneRight, NoneRight)                   => true
+            case (SomeRight(xs1, x1), SomeRight(ys1, y1)) => x1 == y1 and xs1 == ys1
+            case (_, _)                                   => false
+        }
     }
 
     ///
@@ -106,6 +124,11 @@ namespace Chain {
     ///
     pub def point(x: a): Chain[a] = One(x)
 
+    ///
+    /// Apply every function from `f` to every argument from `x` and return a chain with all results.
+    /// For `f = f1, f2, ...` and `x = x1, x2, ...` the results appear in the order
+    /// `f1(x1), f1(x2), ..., f2(x1), f2(x2), ...`.
+    ///
     pub def ap(f: Chain[a -> b & ef], x: Chain[a]) : Chain[b] & ef =
         apHelper(viewLeft(f), x, empty())
 
@@ -117,25 +140,28 @@ namespace Chain {
         case SomeLeft(f1, rs) => apHelper(viewLeft(rs), x, ac `append` map(f1, x))
     }
 
-
-
-    pub def cons(x: a, xs: Chain[a]): Chain[a] = match xs {
-        case Empty => One(x)
-        case _     => Chain(One(x), xs)
-    }
-
-    pub def snoc(xs: Chain[a], x: a): Chain[a] = match xs {
-        case Empty => One(x)
-        case _     => Chain(xs, One(x))
-    }
-
-
     ///
     /// Returns true if and only if `xs` is the empty chain, i.e. `Empty`.
     ///
     pub def isEmpty(xs: Chain[a]): Bool = match xs {
         case Empty => true
         case _     => false
+    }
+
+    ///
+    /// Add element `x` to the left end of Chain `xs`.
+    ///
+    pub def cons(x: a, xs: Chain[a]): Chain[a] = match xs {
+        case Empty => One(x)
+        case _     => Chain(One(x), xs)
+    }
+
+    ///
+    /// Add element `x` to the left end of Chain `xs`.
+    ///
+    pub def snoc(xs: Chain[a], x: a): Chain[a] = match xs {
+        case Empty => One(x)
+        case _     => Chain(xs, One(x))
     }
 
     ///
@@ -291,17 +317,17 @@ namespace Chain {
     ///
     /// Returns `Nil` if `n < 0`.
     ///
-    pub def repeat(a: a, n: Int32): Chain[a] = repeatHelper(a, n, Empty)
+    pub def repeat(n: Int32, a: a): Chain[a] = repeatHelper(n, a, Empty)
 
     ///
     /// Helper function for `repeat`.
     ///
-    def repeatHelper(a: a, n: Int32, ac: Chain[a]): Chain[a] =
+    def repeatHelper(n: Int32, a: a, ac: Chain[a]): Chain[a] =
         if (n <= 0)
             ac
         else {
             let ac1 = cons(a, ac);
-            repeatHelper(a, n-1, ac1)
+            repeatHelper(n-1, a, ac1)
         }
 
     ///
