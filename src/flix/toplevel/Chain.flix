@@ -24,8 +24,8 @@
 /// Note - the constructors `Empty`, `One` and `Chain` should not be used directly.
 ///
 enum Chain[t] {
-    case Empty,
-    case One(t),
+    case Empty
+    case One(t)
     case Chain(Chain[t], Chain[t])
 }
 
@@ -724,6 +724,10 @@ namespace Chain {
         case SomeLeft((x1, x2), rs) => unzipHelper(rs, snoc(ac1, x1), snoc(ac2, x2))
     }
 
+    ///
+    /// `mapAccumLeft` is a stateful version of `map`. The accumulating paramter `s` is updated at each
+    /// step in a left-to-right traversal.
+    ///
     pub def mapAccumLeft(f: (s, a) -> (s, b) & ef, start: s, xs: Chain[a]): (s, Chain[b]) & ef =
         mapAccumLeftHelper(f, start, xs, (s1, ks) -> (s1, ks))
 
@@ -739,6 +743,10 @@ namespace Chain {
             }
         }
 
+    ///
+    /// `mapAccumRight` is a stateful version of `map`. The accumulating paramter `s` is updated at each
+    /// step in a right-to-left traversal.
+    ///
     pub def mapAccumRight(f: (s, a) -> (s, b) & ef, start: s, xs: Chain[a]): (s, Chain[b]) & ef =
         mapAccumRightHelper(f, start, xs, (s1, ks) -> (s1, ks) as & ef)
 
@@ -754,6 +762,15 @@ namespace Chain {
            }
         }
 
+    ///
+    /// Applies `f` to every element of `xs`.
+    ///
+    /// The function `f` must be impure.
+    ///
+    pub def foreach(f: a ~> Unit, xs: Chain[a]): Unit & Impure = match viewLeft(xs) {
+        case NoneLeft        => ()
+        case SomeLeft(x, rs) => f(x); foreach(f, rs)
+    }
 
     ///
     /// Returns `xs` as a list.
@@ -796,7 +813,6 @@ namespace Chain {
     pub def fromMap(m: Map[a, b]): Chain[(a, b)] with Order[a] =
         Map.foldLeftWithKey((acc, k, v) -> snoc(acc, (k,v)), empty(), m)
 
-
     ///
     /// Returns the association list `xs` as a map.
     ///
@@ -804,18 +820,6 @@ namespace Chain {
     /// make any guarantees about which mapping will be in the resulting map.
     ///
     pub def toMap(xs: Chain[(a, b)]): Map[a, b] with Order[a] = foldRight((x, m) -> Map.insert(fst(x), snd(x), m), Map.empty(), xs)
-
-
-    ///
-    /// Applies `f` to every element of `xs`.
-    ///
-    /// The function `f` must be impure.
-    ///
-    pub def foreach(f: a ~> Unit, xs: Chain[a]): Unit & Impure = match viewLeft(xs) {
-        case NoneLeft        => ()
-        case SomeLeft(x, rs) => f(x); foreach(f, rs)
-    }
-
 
     ///
     /// Returns the array `xs` as a chain.

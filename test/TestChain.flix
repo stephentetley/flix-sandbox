@@ -979,4 +979,570 @@ namespace TestChain {
     @test
     def takeRight12(): Bool = Chain.takeRight(4, Chain.fromList(1 :: 2 :: 3 :: 4 :: 5 :: 6 :: Nil)) == Chain.fromList(3 :: 4 :: 5 :: 6 :: Nil)
 
+    /////////////////////////////////////////////////////////////////////////////
+    // takeWhileLeft                                                           //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def takeWhileLeft01(): Bool = Chain.takeWhileLeft(i -> i > 3, Chain.empty(): Chain[Int32]) == Chain.empty()
+
+    @test
+    def takeWhileLeft02(): Bool = Chain.takeWhileLeft(i -> i > 3, Chain.point(1)) == Chain.empty()
+
+    @test
+    def takeWhileLeft03(): Bool = Chain.takeWhileLeft(i -> i > 3, Chain.point(4)) == Chain.point(4)
+
+    @test
+    def takeWhileLeft04(): Bool = Chain.takeWhileLeft(i -> i > 3, Chain.fromList(1 :: 2 :: Nil)) == Chain.empty()
+
+    @test
+    def takeWhileLeft05(): Bool = Chain.takeWhileLeft(i -> i > 3, Chain.fromList(1 :: 5 :: Nil)) == Chain.empty()
+
+    @test
+    def takeWhileLeft06(): Bool = Chain.takeWhileLeft(i -> i > 3, Chain.fromList(5 :: 1 :: Nil)) == Chain.point(5)
+
+    @test
+    def takeWhileLeft07(): Bool = Chain.takeWhileLeft(i -> i > 3, Chain.fromList(5 :: 8 :: Nil)) == Chain.fromList(5 :: 8 :: Nil)
+
+    @test
+    def takeWhileLeft08(): Bool = Chain.takeWhileLeft(i -> i > 3, Chain.fromList(4 :: 6 :: -3 :: 11 :: -5 :: 1 :: 2 :: 16 :: 7 :: 1 :: 7 :: Nil)) ==
+                            Chain.fromList(4 :: 6 :: Nil)
+
+    /////////////////////////////////////////////////////////////////////////////
+    // takeWhileRight                                                          //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def takeWhileRight01(): Bool = Chain.takeWhileRight(i -> i > 3, Chain.empty(): Chain[Int32]) == Chain.empty()
+
+    @test
+    def takeWhileRight02(): Bool = Chain.takeWhileRight(i -> i > 3, Chain.point(1)) == Chain.empty()
+
+    @test
+    def takeWhileRight03(): Bool = Chain.takeWhileRight(i -> i > 3, Chain.point(4)) == Chain.point(4)
+
+    @test
+    def takeWhileRight04(): Bool = Chain.takeWhileRight(i -> i > 3, Chain.fromList(1 :: 2 :: Nil)) == Chain.empty()
+
+    @test
+    def takeWhileRight05(): Bool = Chain.takeWhileRight(i -> i > 3, Chain.fromList(1 :: 5 :: Nil)) == Chain.point(5)
+
+    @test
+    def takeWhileRight06(): Bool = Chain.takeWhileRight(i -> i > 3, Chain.fromList(5 :: 1 :: Nil)) == Chain.empty()
+
+    @test
+    def takeWhileRight07(): Bool = Chain.takeWhileRight(i -> i > 3, Chain.fromList(5 :: 8 :: Nil)) == Chain.fromList(5 :: 8 :: Nil)
+
+    @test
+    def takeWhileRight08(): Bool = Chain.takeWhileRight(i -> i > 3, Chain.fromList(4 :: 6 :: -3 :: 11 :: -5 :: 1 :: 2 :: 16 :: 7 :: 1 :: 7 :: Nil)) ==
+                            Chain.point(7)
+
+    /////////////////////////////////////////////////////////////////////////////
+    // filterMap                                                               //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def filterMap01(): Bool = Chain.filterMap(i -> if (i rem 2 == 0) Some(i/2) else None, Chain.empty()) == Chain.empty()
+    
+    @test
+    def filterMap02(): Bool = Chain.filterMap(i -> if (i rem 2 == 0) Some(i/2) else None, Chain.point(1)) == Chain.empty()
+    
+    @test
+    def filterMap03(): Bool = Chain.filterMap(i -> if (i rem 2 == 0) Some(i/2) else None, Chain.point(2)) == Chain.point(1)
+    
+    @test
+    def filterMap04(): Bool = Chain.filterMap(i -> if (i rem 2 == 0) Some(i/2) else None, Chain.fromList(1 :: 3 :: Nil)) == Chain.empty()
+    
+    @test
+    def filterMap05(): Bool = Chain.filterMap(i -> if (i rem 2 == 0) Some(i/2) else None, Chain.fromList(1 :: 4 :: Nil)) == Chain.point(2)
+    
+    @test
+    def filterMap06(): Bool = Chain.filterMap(i -> if (i rem 2 == 0) Some(i/2) else None, Chain.fromList(6 :: -1 :: Nil)) == Chain.point(3)
+    
+    @test
+    def filterMap07(): Bool = Chain.filterMap(i -> if (i rem 2 == 0) Some(i/2) else None, Chain.fromList(8 :: 6 :: Nil)) == Chain.fromList(4 :: 3 :: Nil)
+    
+    @test
+    def filterMap08(): Bool = Chain.filterMap(i -> if (i rem 2 == 0) Some(i/2) else None, Chain.fromList(0 :: 1 :: 2 :: 3 :: 4 :: 5 :: 10 :: Nil)) ==
+                            Chain.fromList(0 :: 1 :: 2 :: 5 :: Nil)
+
+    /////////////////////////////////////////////////////////////////////////////
+    // findMap                                                                 //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def findMap01(): Bool = Chain.findMap(i -> if (i rem 2 == 0) Some(i/2) else None, Chain.empty()) == None
+    
+    @test
+    def findMap02(): Bool = Chain.findMap(i -> if (i rem 2 == 0) Some(i/2) else None, Chain.point(1)) == None
+    
+    @test
+    def findMap03(): Bool = Chain.findMap(i -> if (i rem 2 == 0) Some(i/2) else None, Chain.point(2)) == Some(1)
+    
+    @test
+    def findMap04(): Bool = Chain.findMap(i -> if (i rem 2 == 0) Some(i/2) else None, Chain.fromList(1 :: 3 :: Nil)) == None
+    
+    @test
+    def findMap05(): Bool = Chain.findMap(i -> if (i rem 2 == 0) Some(i/2) else None, Chain.fromList(1 :: 4 :: Nil)) == Some(2)
+    
+    @test
+    def findMap06(): Bool = Chain.findMap(i -> if (i rem 2 == 0) Some(i/2) else None, Chain.fromList(6 :: -1 :: Nil)) == Some(3)
+    
+    @test
+    def findMap07(): Bool = Chain.findMap(i -> if (i rem 2 == 0) Some(i/2) else None, Chain.fromList(8 :: 6 :: Nil)) == Some(4)
+    
+    @test
+    def findMap08(): Bool = Chain.findMap(i -> if (i rem 2 == 0) Some(i/2) else None, Chain.fromList(0 :: 1 :: 2 :: 3 :: 4 :: 5 :: 10 :: Nil)) == Some(0)
+
+    /////////////////////////////////////////////////////////////////////////////
+    // zip                                                                     //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def zip01(): Bool = Chain.zip(Chain.empty(): Chain[Unit], Chain.empty(): Chain[Unit]) == Chain.empty()
+
+    @test
+    def zip02(): Bool = Chain.zip(Chain.point(1), Chain.empty(): Chain[Unit]) == Chain.empty()
+
+    @test
+    def zip03(): Bool = Chain.zip(Chain.empty(): Chain[Unit], Chain.point(2)) == Chain.empty()
+
+    @test
+    def zip04(): Bool = Chain.zip(Chain.point(1), Chain.point(2)) == Chain.point((1, 2))
+
+    @test
+    def zip05(): Bool = Chain.zip(Chain.fromList(1 :: 3 :: Nil), Chain.fromList(2 :: 4 :: Nil)) == Chain.fromList((1, 2) :: (3, 4) :: Nil)
+
+    @test
+    def zip06(): Bool = Chain.zip(Chain.fromList(1 :: 3 :: 5 :: Nil), Chain.fromList(2 :: 4 :: 6 :: Nil)) == Chain.fromList((1, 2) :: (3, 4) :: (5, 6) :: Nil)
+
+    @test
+    def zip07(): Bool = Chain.zip(Chain.fromList(1 :: 3 :: 5 :: 7 :: Nil), Chain.fromList(2 :: 4 :: 6 :: 8 :: Nil)) == Chain.fromList((1, 2) :: (3, 4) :: (5, 6) :: (7, 8) :: Nil)
+
+    /////////////////////////////////////////////////////////////////////////////
+    // zipWith                                                                 //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def zipWith01(): Bool = Chain.zipWith((a, b) -> if (b) a+1 else a, Chain.empty(), Chain.empty()) == Chain.empty()
+
+    @test
+    def zipWith02(): Bool = Chain.zipWith((a, b) -> if (b) a+1 else a, Chain.point(1), Chain.empty()) == Chain.empty()
+
+    @test
+    def zipWith03(): Bool = Chain.zipWith((a, b) -> if (b) a+1 else a, Chain.empty(), Chain.point(true)) == Chain.empty()
+
+    @test
+    def zipWith04(): Bool = Chain.zipWith((a, b) -> if (b) a+1 else a, Chain.point(1), Chain.point(true)) == Chain.point(2)
+
+    @test
+    def zipWith05(): Bool = Chain.zipWith((a, b) -> if (b) a+1 else a, Chain.point(1), Chain.point(false)) == Chain.point(1)
+
+    @test
+    def zipWith06(): Bool = Chain.zipWith((a, b) -> if (b) a+1 else a, Chain.fromList(1 :: 2 :: 3 :: 4 :: 5 :: 6 :: 7 :: 8 :: Nil),
+                          Chain.fromList(false :: true :: true :: false :: false :: true :: true :: true :: Nil)) ==
+                          Chain.fromList(1 :: 3 :: 4 :: 4 :: 5 :: 7 :: 8 :: 9 :: Nil)
+
+    /////////////////////////////////////////////////////////////////////////////
+    // unzip                                                                   //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def unzip01(): Bool = Chain.unzip(Chain.empty(): Chain[(Unit, Unit)]) == (Chain.empty(), Chain.empty())
+    
+    @test
+    def unzip02(): Bool = Chain.unzip(Chain.point((1, true))) == (Chain.point(1), Chain.point(true))
+    
+    @test
+    def unzip03(): Bool = Chain.unzip(Chain.fromList((1, true) :: (2, true) :: Nil)) == (Chain.fromList(1 :: 2 :: Nil), Chain.fromList(true :: true :: Nil))
+    
+    @test
+    def unzip04(): Bool = Chain.unzip(Chain.fromList((1, true) :: (2, true) :: (3, false) :: Nil)) ==
+                        (Chain.fromList(1 :: 2 :: 3 :: Nil), Chain.fromList(true :: true :: false :: Nil))
+
+    /////////////////////////////////////////////////////////////////////////////
+    // mapAccumLeft                                                            //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def mapAccumLeft01(): Bool = Chain.mapAccumLeft((s, x) -> (s+1, x+s), 0, Chain.empty()) == (0, Chain.empty())
+
+    @test
+    def mapAccumLeft02(): Bool = Chain.mapAccumLeft((s, x) -> (s+1, x+s), 0, Chain.point(1)) == (1, Chain.point(1))
+
+    @test
+    def mapAccumLeft03(): Bool = Chain.mapAccumLeft((s, x) -> (s+1, x+s), 0, Chain.fromList(1 :: 1 :: Nil)) == (2, Chain.fromList(1 :: 2 :: Nil))
+
+    @test
+    def mapAccumLeft04(): Bool = Chain.mapAccumLeft((s, x) -> (s+1, x+s), 0, Chain.fromList(1 :: 1 :: 1 :: Nil)) == (3, Chain.fromList(1 :: 2 :: 3 :: Nil))
+
+    /////////////////////////////////////////////////////////////////////////////
+    // mapAccumRight                                                           //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def mapAccumRight01(): Bool = Chain.mapAccumRight((s, x) -> (s+1, x+s), 0, Chain.empty()) == (0, Chain.empty())
+
+    @test
+    def mapAccumRight02(): Bool = Chain.mapAccumRight((s, x) -> (s+1, x+s), 0, Chain.point(1)) == (1, Chain.point(1))
+
+    @test
+    def mapAccumRight03(): Bool = Chain.mapAccumRight((s, x) -> (s+1, x+s), 0, Chain.fromList(1 :: 1 :: Nil)) == (2, Chain.fromList(2 :: 1 :: Nil))
+
+    @test
+    def mapAccumRight04(): Bool = Chain.mapAccumRight((s, x) -> (s+1, x+s), 0, Chain.fromList(1 :: 1 :: 1 :: Nil)) == (3, Chain.fromList(3 :: 2 :: 1 :: Nil))
+
+    /////////////////////////////////////////////////////////////////////////////
+    // foreach                                                                 //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def foreach01(): Bool & Impure =
+        let r = ref 21;
+        Chain.foreach(x -> r := x, Chain.empty());
+        21 == deref r
+
+    @test
+    def foreach02(): Bool & Impure =
+        let r = ref 21;
+        Chain.foreach(x -> r := x, Chain.fromList(1 :: 2 :: 3 :: Nil));
+        3 == deref r
+
+    /////////////////////////////////////////////////////////////////////////////
+    // toMutList                                                               //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def fromList01(): Bool =
+        Chain.fromList(Nil: List[Int]) == Chain.empty(): Chain[Int]
+
+    @test
+    def fromList02(): Bool =
+        Chain.fromList(1 :: Nil) == Chain.point(1)
+
+    @test
+    def fromList03(): Bool =
+        Chain.fromList(1 :: 2 :: Nil) == (1 `Chain.cons` (2 `Chain.cons` Chain.empty()))
+
+    @test
+    def fromList04(): Bool =
+        Chain.fromList(1 :: 2 :: 3 :: Nil) == (1 `Chain.cons` (2 `Chain.cons` (3 `Chain.cons` Chain.empty())))
+
+    /////////////////////////////////////////////////////////////////////////////
+    // toMutList                                                               //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def toList01(): Bool =
+        Chain.toList(Chain.empty(): Chain[Int]) == Nil: List[Int]
+
+    @test
+    def toList02(): Bool =
+        Chain.toList(Chain.point(1)) == 1 :: Nil
+
+    @test
+    def toList03(): Bool =
+        Chain.toList(Chain.fromList(1 :: 2 :: Nil)) == 1 :: 2 :: Nil
+
+    @test
+    def toList04(): Bool =
+        Chain.toList(Chain.fromList(1 :: 2 :: 3 :: Nil)) == 1 :: 2 :: 3 :: Nil
+
+    /////////////////////////////////////////////////////////////////////////////
+    // toMutList                                                               //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def fromMutList01(): Bool & Impure =
+        Chain.fromMutList(List.toMutList(Nil): MutList[Int]) == Chain.empty(): Chain[Int]
+
+    @test
+    def fromMutList02(): Bool & Impure =
+        Chain.fromMutList(List.toMutList(1 :: Nil)) == Chain.point(1)
+
+    @test
+    def fromMutList03(): Bool & Impure =
+        Chain.fromMutList(List.toMutList(1 :: 2 :: Nil)) == Chain.fromList(1 :: 2 :: Nil)
+
+    @test
+    def fromMutList04(): Bool & Impure =
+        Chain.fromMutList(List.toMutList(1 :: 2 :: 3 :: Nil)) == Chain.fromList(1 :: 2 :: 3 :: Nil)
+
+    /////////////////////////////////////////////////////////////////////////////
+    // toMutList                                                               //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def toMutList01(): Bool & Impure =
+        Chain.toMutList(Chain.empty(): Chain[Int]) == List.toMutList(Nil): MutList[Int]
+
+    @test
+    def toMutList02(): Bool & Impure =
+        Chain.toMutList(Chain.point(1)) == List.toMutList(1 :: Nil)
+
+    @test
+    def toMutList03(): Bool & Impure =
+        Chain.toMutList(Chain.fromList(1 :: 2 :: Nil)) == List.toMutList(1 :: 2 :: Nil)
+
+    @test
+    def toMutList04(): Bool & Impure =
+        Chain.toMutList(Chain.fromList(1 :: 2 :: 3 :: Nil)) == List.toMutList(1 :: 2 :: 3 :: Nil)
+
+    /////////////////////////////////////////////////////////////////////////////
+    // fromSet                                                                 //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def fromSet01(): Bool =
+        Chain.fromSet(Set#{}: Set[Int]) == Chain.empty(): Chain[Int]
+
+    @test
+    def fromSet02(): Bool =
+        Chain.fromSet(Set#{1}) == Chain.point(1)
+
+    @test
+    def fromSet03(): Bool =
+        Chain.fromSet(Set#{1, 2}) == Chain.fromList(1 :: 2 :: Nil)
+
+    @test
+    def fromSet04(): Bool =
+        Chain.fromSet(Set#{1, 2, 3}) == Chain.fromList(1 :: 2 :: 3 :: Nil)
+
+    /////////////////////////////////////////////////////////////////////////////
+    // toSet                                                                 //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def toSet01(): Bool =
+        Chain.toSet(Chain.empty(): Chain[Int]) == Set#{}: Set[Int]
+
+    @test
+    def toSet02(): Bool =
+        Chain.toSet(Chain.point(1)) == Set#{1}
+
+    @test
+    def toSet03(): Bool =
+        Chain.toSet(Chain.fromList(1 :: 2 :: Nil)) == Set#{1, 2}
+
+    @test
+    def toSet04(): Bool =
+        Chain.toSet(Chain.fromList(1 :: 2 :: 3 :: Nil)) == Set#{1, 2, 3}
+
+    /////////////////////////////////////////////////////////////////////////////
+    // fromMap                                                                 //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def fromMap01(): Bool =
+        Chain.fromMap(Map#{}: Map[Int, Int]) == Chain.empty(): Chain[(Int, Int)]
+
+    @test
+    def fromMap02(): Bool =
+        Chain.fromMap(Map#{1 -> 1}) == Chain.point((1, 1))
+
+    @test
+    def fromMap03(): Bool =
+        Chain.fromMap(Map#{1 -> 1, 2 -> 2}) == Chain.fromList((1, 1) :: (2, 2) :: Nil)
+
+    @test
+    def fromMap04(): Bool =
+        Chain.fromMap(Map#{1 -> 1, 2 -> 2, 3 -> 3}) == Chain.fromList((1, 1) :: (2, 2) :: (3, 3) :: Nil)
+
+    /////////////////////////////////////////////////////////////////////////////
+    // toMap                                                                   //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def toMap01(): Bool =
+        Chain.toMap(Chain.empty(): Chain[(Int, Int)]) == Map#{}: Map[Int, Int]
+
+    @test
+    def toMap02(): Bool =
+        Chain.toMap(Chain.point((1, 1))) == Map#{1 -> 1}
+
+    @test
+    def toMap03(): Bool =
+        Chain.toMap(Chain.fromList((1, 1) :: (2, 2) :: Nil)) == Map#{1 -> 1, 2 -> 2}
+
+    @test
+    def toMap04(): Bool =
+        Chain.toMap(Chain.fromList((1, 1) :: (2, 2) :: (3, 3) :: Nil)) == Map#{1 -> 1, 2 -> 2, 3 -> 3}
+
+    /////////////////////////////////////////////////////////////////////////////
+    // toArray                                                                 //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def toArray01(): Bool & Impure =
+        let xs: Chain[Int32] = Chain.empty();
+        let a: Array[Int32] = Chain.toArray(xs);
+        Array.sameElements(a, []: Array[Int32])
+
+    @test
+    def toArray02(): Bool & Impure =
+        let a = Chain.toArray(Chain.point(1));
+        Array.sameElements(a, [1])
+
+    @test
+    def toArray03(): Bool & Impure =
+        let a = Chain.toArray(Chain.fromList(1 :: 2 :: Nil));
+        Array.sameElements(a, [1,2])
+
+    @test
+    def toArray04(): Bool & Impure =
+        let a = Chain.toArray(Chain.fromList(1 :: 2 :: 3 :: Nil));
+        Array.sameElements(a, [1,2,3])
+
+    /////////////////////////////////////////////////////////////////////////////
+    // fromArray                                                               //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def fromArray01(): Bool & Impure =
+        Chain.fromArray([]: Array[Unit]) == Chain.empty(): Chain[Unit]
+
+    @test
+    def fromArray02(): Bool & Impure =
+        Chain.fromArray([1]) == Chain.point(1)
+
+    @test
+    def fromArray03(): Bool & Impure =
+        Chain.fromArray([1,2]) == Chain.fromList(1 :: 2 :: Nil)
+
+    @test
+    def fromArray04(): Bool & Impure =
+        Chain.fromArray([1,2,3]) == Chain.fromList(1 :: 2 :: 3 :: Nil)
+
+    /////////////////////////////////////////////////////////////////////////////
+    // sort                                                                    //
+    /////////////////////////////////////////////////////////////////////////////
+
+    def testSortVsSortWith(xs: Chain[Int32]) : Bool =
+        Chain.sort(xs) == Chain.sortWith(cmp, xs)
+
+    @test
+    def sort01(): Bool = testSortVsSortWith(Chain.empty(): Chain[Int32])
+
+    @test
+    def sort02(): Bool = testSortVsSortWith(Chain.point(0))
+
+    @test
+    def sort03(): Bool = testSortVsSortWith(Chain.fromList(0 :: 1 :: Nil))
+
+    @test
+    def sort04(): Bool = testSortVsSortWith(Chain.fromList(1 :: 0 :: Nil))
+
+    @test
+    def sort05(): Bool = testSortVsSortWith(Chain.fromList(1 :: 1 :: Nil))
+
+    @test
+    def sort06(): Bool = testSortVsSortWith(Chain.fromList(0 :: 1 :: 2 :: 3 :: 4 :: 5 :: Nil))
+
+    @test
+    def sort07(): Bool = testSortVsSortWith(Chain.fromList(5 :: 4 :: 3 :: 2 :: 1 :: 0 :: Nil))
+
+    @test
+    def sort08(): Bool = testSortVsSortWith(Chain.fromList(5 :: 3 :: 0 :: 4 :: 1 :: 2 :: Nil))
+
+    @test
+    def sort09(): Bool = testSortVsSortWith(Chain.fromList(2 :: 3 :: 0 :: 4 :: 1 :: 2 :: Nil))
+
+    /////////////////////////////////////////////////////////////////////////////
+    // sortBy                                                                  //
+    /////////////////////////////////////////////////////////////////////////////
+
+    def testSortByVsSort(a: Chain[Int32]) : Bool =
+        (Chain.sortBy(identity, a) == Chain.sort(a)) and
+        (Chain.sortBy(x -> 4*x+7, a) == Chain.sort(a)) and
+        (Chain.sortBy(x -> -x, a) == Chain.sortWith(flip(cmp),a))
+
+    @test
+    def sortBy01(): Bool = testSortByVsSort(Chain.empty(): Chain[Int32])
+
+    @test
+    def sortBy02(): Bool = testSortByVsSort(Chain.point(0))
+
+    @test
+    def sortBy03(): Bool = testSortByVsSort(Chain.fromList(0 :: 1 :: Nil))
+
+    @test
+    def sortBy04(): Bool = testSortByVsSort(Chain.fromList(1 :: 0 :: Nil))
+
+    @test
+    def sortBy05(): Bool = testSortByVsSort(Chain.fromList(1 :: 1 :: Nil))
+
+    @test
+    def sortBy06(): Bool = testSortByVsSort(Chain.fromList(0 :: 1 :: 2 :: 3 :: 4 :: 5 :: Nil))
+
+    @test
+    def sortBy07(): Bool = testSortByVsSort(Chain.fromList(5 :: 4 :: 3 :: 2 :: 1 :: 0 :: Nil))
+
+    @test
+    def sortBy08(): Bool = testSortByVsSort(Chain.fromList(5 :: 3 :: 0 :: 4 :: 1 :: 2 :: Nil))
+
+    @test
+    def sortBy09(): Bool = testSortByVsSort(Chain.fromList(2 :: 3 :: 0 :: 4 :: 1 :: 2 :: Nil))
+
+    /////////////////////////////////////////////////////////////////////////////
+    // sortWith                                                                //
+    /////////////////////////////////////////////////////////////////////////////
+
+    def cmp(x: Int32, y: Int32): Comparison =
+        if (x < y) LessThan
+        else if (x == y) EqualTo
+        else GreaterThan
+
+    @test
+    def sortWith01(): Bool =
+        Chain.sortWith(cmp, Chain.empty(): Chain[Int32]) == Chain.empty()
+
+    @test
+    def sortWith02(): Bool =
+        Chain.sortWith(cmp, Chain.point(0)) == Chain.point(0)
+
+    @test
+    def sortWith03(): Bool =
+        Chain.sortWith(cmp, Chain.fromList(0 :: 1 :: Nil)) == Chain.fromList(0 :: 1 :: Nil)
+
+    @test
+    def sortWith04(): Bool =
+        Chain.sortWith(cmp, Chain.fromList(1 :: 0 :: Nil)) == Chain.fromList(0 :: 1 :: Nil)
+
+    @test
+    def sortWith05(): Bool =
+        Chain.sortWith(cmp, Chain.fromList(1 :: 1 :: Nil)) == Chain.fromList(1 :: 1 :: Nil)
+
+    @test
+    def sortWith06(): Bool =
+        Chain.sortWith(cmp, Chain.fromList(0 :: 1 :: 2 :: 3 :: 4 :: 5 :: Nil)) == Chain.fromList(0 :: 1 :: 2 :: 3 :: 4 :: 5 :: Nil)
+
+    @test
+    def sortWith07(): Bool =
+        Chain.sortWith(cmp, Chain.fromList(5 :: 4 :: 3 :: 2 :: 1 :: 0 :: Nil)) == Chain.fromList(0 :: 1 :: 2 :: 3 :: 4 :: 5 :: Nil)
+
+    @test
+    def sortWith08(): Bool =
+        Chain.sortWith(cmp, Chain.fromList(5 :: 3 :: 0 :: 4 :: 1 :: 2 :: Nil)) == Chain.fromList(0 :: 1 :: 2 :: 3 :: 4 :: 5 :: Nil)
+
+    @test
+    def sortWith09(): Bool =
+        Chain.sortWith(cmp, Chain.fromList(2 :: 3 :: 0 :: 4 :: 1 :: 2 :: Nil)) == Chain.fromList(0 :: 1 :: 2 :: 2 :: 3 :: 4 :: Nil)
+
+    @test
+    def sortWith10(): Bool =
+        Chain.sortWith(flip(cmp), Chain.fromList(0 :: 1 :: 2 :: 3 :: 4 :: 5 :: Nil)) == Chain.fromList(5 :: 4 :: 3 :: 2 :: 1 :: 0 :: Nil)
+
+    @test
+    def sortWith11(): Bool =
+        Chain.sortWith(flip(cmp), Chain.fromList(5 :: 4 :: 3 :: 2 :: 1 :: 0 :: Nil)) == Chain.fromList(5 :: 4 :: 3 :: 2 :: 1 :: 0 :: Nil)
+
+    @test
+    def sortWith12(): Bool =
+        Chain.sortWith(flip(cmp), Chain.fromList(5 :: 3 :: 0 :: 4 :: 1 :: 2 :: Nil)) == Chain.fromList(5 :: 4 :: 3 :: 2 :: 1 :: 0 :: Nil)
+
+    @test
+    def sortWith13(): Bool =
+        Chain.sortWith(flip(cmp), Chain.fromList(2 :: 3 :: 0 :: 4 :: 1 :: 2 :: Nil)) == Chain.fromList(4 :: 3 :: 2 :: 2 :: 1 :: 0 :: Nil)
+
+
 }
