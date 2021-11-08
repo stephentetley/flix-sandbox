@@ -16,8 +16,6 @@
 
 namespace Text/Regex {
 
-    use X.Cursor;
-    use X.Cursor.{Cursor};
     use Text/Regex.Pattern;
     use Text/Regex.Pattern.Pattern;
     use Text/Regex.MatchEvaluator;
@@ -210,32 +208,29 @@ namespace Text/Regex {
 
 
     ///
-    /// Stream with a Cursor...
+    /// TODO: use a "Stream" when stdlib has an implementation finalized
     ///
-    pub def results(patt: Pattern, eval: MatchEvaluator[a], input: String): Cursor[String, a] & Impure =
+    pub def results(patt: Pattern, eval: MatchEvaluator[a], input: String): Result[List[a], String] & Impure =
         let Pattern(patt1) = patt;
         let MatchEvaluator(eval1) = eval;
         let m1 = Text/Regex/Internal/Matcher.new(patt1, input);
-        let cursorAlg: X.CursorAlg[String, a] =  {
-              hasNext = () -> Text/Regex/Internal/Matcher.find(m1)
-            , next = () -> eval1(m1) as & Impure
-            , finalize = () -> () as & Impure
+        let iter = _ -> match Text/Regex/Internal/Matcher.find(m1) {
+            case true  => eval1(m1) |> Result.map(Some)
+            case false => Ok(None)
         };
-        X/Cursor.makeCursor(cursorAlg)
-
-
+        List.unfoldWithOkIter(iter)
 
     ///
     /// Stream...
     ///
-    pub def contentResults(patt: Pattern, input: String): Cursor[String, String] & Impure =
+    pub def contentResults(patt: Pattern, input: String): Result[List[String], String] & Impure =
         use Text/Regex/MatchEvaluator.{content};
         results(patt, content(), input)
 
     ///
     /// Stream...
     ///
-    pub def rangeResults(patt: Pattern, input: String): Cursor[String, (Int32, Int32)] & Impure =
+    pub def rangeResults(patt: Pattern, input: String): Result[List[(Int32, Int32)], String] & Impure =
         use Text/Regex/MatchEvaluator.{getRange};
         results(patt, getRange(), input)
 

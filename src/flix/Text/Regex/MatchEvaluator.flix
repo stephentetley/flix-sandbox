@@ -33,12 +33,6 @@ namespace Text/Regex {
         pub def ap(f: MatchEvaluator[a -> b & ef], x: MatchEvaluator[a]) : MatchEvaluator[b] & ef = Text/Regex/MatchEvaluator.ap(f, x)
     }
 
-    instance Alternative[MatchEvaluator] {
-        pub def zero(): MatchEvaluator[a] = Text/Regex/MatchEvaluator.mzero()
-
-        pub def alt(x: MatchEvaluator[a], y: MatchEvaluator[a]): MatchEvaluator[a] = Text/Regex/MatchEvaluator.alt(x, y)
-    }
-
 }
 
 namespace Text/Regex/MatchEvaluator {
