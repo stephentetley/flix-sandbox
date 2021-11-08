@@ -52,8 +52,6 @@ namespace Text/Regex/MatchEvaluator {
 
     pub def point(x: a): MatchEvaluator[a] = MatchEvaluator(_ -> Ok(x))
 
-    // DEPRECATED - to remove...
-    pub def return(x: a): MatchEvaluator[a] = point(x)
 
     def apply1(x: MatchEvaluator[a], m: ##java.util.regex.Matcher): Result[a, String] =
         let MatchEvaluator(f) = x;
@@ -121,7 +119,7 @@ namespace Text/Regex/MatchEvaluator {
         MatchEvaluator(r -> fn(r) as & Pure) as & Impure
 
     pub def liftOption(x: Option[a], errMsg: String): MatchEvaluator[a] = match x { 
-        case Some(x1) => return(x1)
+        case Some(x1) => point(x1)
         case None => throwError(errMsg)
     }
         

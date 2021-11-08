@@ -208,6 +208,4 @@ namespace Text/Regex/Pattern {
         let i = flags(p1) as & Pure;
         listFlags(i)
 
-
-
 }

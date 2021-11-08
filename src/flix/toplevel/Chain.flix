@@ -48,6 +48,10 @@ instance Eq[Chain[a]] with Eq[a] {
     pub def eq(xs: Chain[a], ys: Chain[a]): Bool = Chain.equals(xs, ys)
 }
 
+instance SemiGroup[Chain[a]] {
+    pub def combine(xs: Chain[a], ys: Chain[a]): Chain[a] = Chain.append(xs, ys)
+}
+
 instance Monoid[Chain[a]] {
     pub def empty(): Chain[a] = Chain.empty()
     pub def combine(xs: Chain[a], ys: Chain[a]): Chain[a] = Chain.append(xs, ys)
@@ -55,6 +59,15 @@ instance Monoid[Chain[a]] {
 
 instance Functor[Chain] {
     pub def map(f: a -> b & ef, xs: Chain[a]): Chain[b] & ef = Chain.map(f, xs)
+}
+
+instance Applicative[Chain] {
+    pub def point(x: a) : Chain[a] = Chain.point(x)
+    pub def ap(f: Chain[a -> b & ef], x: Chain[a]) : Chain[b] & ef = Chain.ap(f, x)
+}
+
+instance Monad[Chain] {
+    pub def flatMap(f: a -> Chain[b] & ef, x : Chain[a]) : Chain[b] & ef = Chain.flatMap(f, x)
 }
 
 instance Foldable[Chain] {
@@ -67,19 +80,44 @@ instance Foldable[Chain] {
 
 namespace Chain {
 
+    ///
+    /// Datatype for pattern matching on a chain (traversing left-to-right).
+    ///
     enum ViewLeft[t] {
         case NoneLeft
         case SomeLeft(t, Chain[t])
     }
 
+    ///
+    /// Datatype for pattern matching on a chain (traversing right-to-left).
+    ///
     enum ViewRight[t] {
         case NoneRight
         case SomeRight(Chain[t], t)
     }
 
+    ///
+    /// Return the empty chain.
+    ///
     pub def empty(): Chain[a] = Empty
 
-    pub def singleton(x: a): Chain[a] = One(x)
+    ///
+    /// Return the singleton chain with element `x`.
+    ///
+    pub def point(x: a): Chain[a] = One(x)
+
+    pub def ap(f: Chain[a -> b & ef], x: Chain[a]) : Chain[b] & ef =
+        apHelper(viewLeft(f), x, empty())
+
+    ///
+    /// Helper function for `ap`.
+    ///
+    def apHelper(f: ViewLeft[a -> b & ef], x: Chain[a], ac: Chain[b]): Chain[b] & ef = match f {
+        case NoneLeft         => ac
+        case SomeLeft(f1, rs) => apHelper(viewLeft(rs), x, ac `append` map(f1, x))
+    }
+
+
 
     pub def cons(x: a, xs: Chain[a]): Chain[a] = match xs {
         case Empty => One(x)
@@ -276,7 +314,7 @@ namespace Chain {
     ///
     /// That is, the result is of the form: `s :: f(s, x1) :: f(f(s, x1), x2)  ...`.
     ///
-    pub def scanLeft(f: (b, a) -> b & ef, s: b, xs: Chain[a]): Chain[b] & ef = scanLeftHelper(f, s, xs, singleton(s))
+    pub def scanLeft(f: (b, a) -> b & ef, s: b, xs: Chain[a]): Chain[b] & ef = scanLeftHelper(f, s, xs, point(s))
 
     ///
     /// Helper function for `scanLeft`.
@@ -291,7 +329,7 @@ namespace Chain {
     ///
     /// That is, the result is of the form: `... f(xn-1, f(xn, s)) :: f(xn, s) :: s`.
     ///
-    pub def scanRight(f: (a, b) -> b & ef, s: b, xs: Chain[a]): Chain[b] & ef = scanRightHelper(f, s, xs, singleton(s))
+    pub def scanRight(f: (a, b) -> b & ef, s: b, xs: Chain[a]): Chain[b] & ef = scanRightHelper(f, s, xs, point(s))
 
     ///
     /// Helper function for `scanLeft`.
@@ -364,7 +402,7 @@ namespace Chain {
     ///
     pub def intersperse(a: a, xs: Chain[a]): Chain[a] = match viewLeft(xs) {
         case NoneLeft        => Empty
-        case SomeLeft(x, rs) => intersperseHelper(a, rs, singleton(x))
+        case SomeLeft(x, rs) => intersperseHelper(a, rs, point(x))
     }
 
     ///

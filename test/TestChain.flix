@@ -26,87 +26,85 @@ namespace TestChain {
         let xs: Chain[Int32] = Chain.empty();
         Chain.toList(xs) == Nil
 
-/////////////////////////////////////////////////////////////////////////////
-// singleton                                                               //
-/////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////
+    // point                                                                   //
+    /////////////////////////////////////////////////////////////////////////////
 
-@test
-def singleton01(): Bool =
-    use Chain.{toList, singleton};
-    let xs = singleton(1);
-    toList(xs) == 1 :: Nil
+    @test
+    def point01(): Bool =
+        let xs = Chain.point(1);
+        Chain.toList(xs) == 1 :: Nil
 
-@test
-def singleton02(): Bool =
-    use Chain.{toList, singleton};
-    let xs: Chain[Option[Int32]] = singleton(None);
-    toList(xs) == None :: Nil
+    @test
+    def point02(): Bool =
+        let xs: Chain[Option[Int32]] = Chain.point(None);
+        Chain.toList(xs) == None :: Nil
 
-/////////////////////////////////////////////////////////////////////////////
-// flatten                                                                  //
-/////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////
+    // flatten                                                                  //
+    /////////////////////////////////////////////////////////////////////////////
 
-@test
-def flatten01(): Bool =
-    let xs: Chain[Chain[Int32]] = Chain.flatten(Chain.empty());
-    Chain.toList(xs) == Nil
+    @test
+    def flatten01(): Bool =
+        let xs: Chain[Chain[Int32]] = Chain.flatten(Chain.empty());
+        Chain.toList(xs) == Nil
 
-@test
-def flatten02(): Bool =
-    let xs = Chain.flatten(Chain.singleton(Chain.singleton(1)));
-    Chain.toList(xs) == 1 :: Nil
+    @test
+    def flatten02(): Bool =
+        let xs = Chain.flatten(Chain.point(Chain.point(1)));
+        Chain.toList(xs) == 1 :: Nil
 
-@test
-def flatten03(): Bool =
-    let xs = Chain.flatten(Chain.fromList(Chain.singleton(1) :: Chain.singleton(2) :: Nil));
-    Chain.toList(xs) == 1 :: 2 :: Nil
+    @test
+    def flatten03(): Bool =
+        let xs = Chain.flatten(Chain.fromList(Chain.point(1) :: Chain.point(2) :: Nil));
+        Chain.toList(xs) == 1 :: 2 :: Nil
 
-@test
-def flatten04(): Bool =
-    let xs = Chain.flatten(Chain.fromList(Chain.fromList(1 :: 2 :: Nil) :: Chain.singleton(3) :: Nil));
-    Chain.toList(xs) == 1 :: 2 :: 3 :: Nil
+    @test
+    def flatten04(): Bool =
+        let xs = Chain.flatten(Chain.fromList(Chain.fromList(1 :: 2 :: Nil) :: Chain.point(3) :: Nil));
+        Chain.toList(xs) == 1 :: 2 :: 3 :: Nil
 
-/////////////////////////////////////////////////////////////////////////////
-// foldRight                                                               //
-/////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////
+    // foldRight                                                               //
+    /////////////////////////////////////////////////////////////////////////////
 
-@test
-def foldRight01(): Bool =
-    use Chain.{repeat, foldRight};
-    let xs = repeat(1, 1000000);
-    foldRight((a,b) -> Int32.max(a,b), 0, xs) == 1
+    @test
+    def foldRight01(): Bool =
+        use Chain.{repeat, foldRight};
+        let xs = repeat(1, 1000000);
+        foldRight((a,b) -> Int32.max(a,b), 0, xs) == 1
 
-/////////////////////////////////////////////////////////////////////////////
-// foldLeft                                                                //
-/////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////
+    // foldLeft                                                                //
+    /////////////////////////////////////////////////////////////////////////////
 
-@test
-def foldLeft01(): Bool =
-    use Chain.{repeat, foldLeft};
-    let xs = repeat(1, 1000000);
-    foldLeft((a,b) -> Int32.max(a,b), 0, xs) == 1
+    @test
+    def foldLeft01(): Bool =
+        use Chain.{repeat, foldLeft};
+        let xs = repeat(1, 1000000);
+        foldLeft((a,b) -> Int32.max(a,b), 0, xs) == 1
 
-/////////////////////////////////////////////////////////////////////////////
-// map                                                                     //
-/////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////
+    // map                                                                     //
+    /////////////////////////////////////////////////////////////////////////////
 
-@test
-def map01(): Bool =
-    use Chain.{toList, map, empty};
-    let xs = map(x -> x+1, empty(): Chain[Int32]);
-    toList(xs) == Nil
+    @test
+    def map01(): Bool =
+        use Chain.{toList, map, empty};
+        let xs = map(x -> x+1, empty(): Chain[Int32]);
+        toList(xs) == Nil
 
-@test
-def map02(): Bool =
-    use Chain.{toList, map, singleton};
-    let xs = map(x -> x+1, singleton(0));
-    toList(xs) == 1 :: Nil
+    @test
+    def map02(): Bool =
+        use Chain.{toList, map, point};
+        let xs = map(x -> x+1, point(0));
+        toList(xs) == 1 :: Nil
 
 
-@test
-def map03(): Bool =
-    use Chain.{toList, map, cons, singleton};
-    let xs = map(x -> x+1, cons(1, singleton(0)));
-    toList(xs) == 2 :: 1 :: Nil
+    @test
+    def map03(): Bool =
+        use Chain.{toList, map, cons, point};
+        let xs = map(x -> x+1, cons(1, point(0)));
+        toList(xs) == 2 :: 1 :: Nil
 
 }

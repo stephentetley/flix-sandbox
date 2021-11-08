@@ -76,7 +76,7 @@ namespace Data/RoseTree {
         preorderHelper(x, identity) |> Chain.toList
 
     def preorderHelper(x: RoseTree[a], k: Chain[a] -> Chain[a]): Chain[a] = match x {
-        case RoseTree(a, Nil) => k(Chain.singleton(a))
+        case RoseTree(a, Nil) => k(Chain.point(a))
         case RoseTree(a, xs) => preorderForest(xs, vs -> k(Chain.cons(a, vs)))
     }
 
@@ -90,7 +90,7 @@ namespace Data/RoseTree {
 
 
     def postorderHelper(x: RoseTree[a], k: Chain[a] -> Chain[a]): Chain[a] = match x {
-        case RoseTree(a, Nil) => k(Chain.singleton(a))
+        case RoseTree(a, Nil) => k(Chain.point(a))
         case RoseTree(a, xs) => postorderForest(xs, vs -> k(Chain.snoc(vs, a)))
     }
 

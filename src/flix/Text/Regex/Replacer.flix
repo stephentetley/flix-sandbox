@@ -33,6 +33,9 @@ namespace Text/Regex {
         pub def ap(f: Replacer[a -> b & ef], x: Replacer[a]) : Replacer[b] & ef = Text/Regex/Replacer.ap(f, x)
     }
 
+    instance Monad[Replacer] {
+        pub def flatMap(f: a -> Replacer[b] & ef, x: Replacer[a]) : Replacer[b] & ef = Text/Regex/Replacer.flatMap(f, x)
+    }
 
 }
 
@@ -78,9 +81,8 @@ namespace Text/Regex/Replacer {
     pub def point(x: a): Replacer[a] =
         Replacer((_, _, n) -> Ok(x, n))
 
-    pub def return(x: a): Replacer[a] = point(x)
 
-    pub def fail(msg: String): Replacer[a] =
+    pub def throwError(msg: String): Replacer[a] =
         Replacer((_, _, _) -> Err(msg))
 
     def apply1(rep: Replacer[a], sb: StringBuilder, m: ##java.util.regex.Matcher, n: Int32): Result[(a, Int32), String] =
@@ -151,12 +153,12 @@ namespace Text/Regex/Replacer {
     pub def find(): Replacer[Bool] & Impure =
         let* bfound = liftPrim(x -> Text/Regex/Internal/Matcher.find(x));
         let* _ = incrementFinds!(bfound);
-        return(bfound)
+        point(bfound)
 
     pub def findFrom(start: Int32): Replacer[Bool] & Impure =
         let* bfound = liftPrimResult(x -> Text/Regex/Internal/Matcher.findFrom(x, start));
         let* _ = incrementFinds!(bfound);
-        return(bfound)
+        point(bfound)
 
     pub def content(): Replacer[String] & Impure = liftPrimResult(Text/Regex/Internal/Matcher.group)
 
@@ -170,7 +172,7 @@ namespace Text/Regex/Replacer {
             let* s = content();
             appendReplacement!(fn(s))
         } else
-            fail("replaceStep!")
+            throwError("replaceStep!")
 
     pub def evaluateReplace!(eval: MatchEvaluator[String]): Replacer[Unit] & Impure =
         let* ans = find();
@@ -178,7 +180,7 @@ namespace Text/Regex/Replacer {
             let* s = evaluate(eval);
             appendReplacement!(s)
         } else
-            fail("replaceStep!")
+            throwError("replaceStep!")
 
     /// `cond` must not perform a rewrite step.
     def ifThenElse(cond: Replacer[s], thenm: s -> Replacer[t], elsem: Replacer[t]): Replacer[t] =
@@ -189,7 +191,7 @@ namespace Text/Regex/Replacer {
             }
         )
 
-    pub def done(): Replacer[Bool] & Impure = ifThenElse(content(), _ -> return(false), return(true))
+    pub def done(): Replacer[Bool] & Impure = ifThenElse(content(), _ -> point(false), point(true))
 
     pub def setRegion!(start: Int32, end: Int32): Replacer[Unit] & Impure =
         liftPrimResult(x -> Text/Regex/Internal/Matcher.region(x, start, end))
@@ -200,7 +202,7 @@ namespace Text/Regex/Replacer {
 
     pub def countWith(append: (a, ac) -> ac, acc: ac, n: Int32, ma: Replacer[a]): Replacer[ac] =
         if (n <= 0)
-            return(acc)
+            point(acc)
         else {
             let* a = ma;
             countWith(append, append(a, acc), n-1, ma)
@@ -238,7 +240,7 @@ namespace Text/Regex/Replacer {
             let* s = content();
             let* _ = match fn(s) {
                         case Some(s1) => appendReplacement!(s1)
-                        case None => return()
+                        case None => point()
                     };
             rewriteSome!(fn)
         } else
@@ -250,7 +252,7 @@ namespace Text/Regex/Replacer {
             let* opt = evaluate(eval);
             let* _ = match opt {
                         case Some(s) => appendReplacement!(s)
-                        case None => return()
+                        case None => point()
                     };
             evalRewriteSome!(eval)
         } else
@@ -284,7 +286,7 @@ namespace Text/Regex/Replacer {
             let* s = content();
             let* _ = match fn(ix, s) {
                         case Some(s1) => appendReplacement!(s1)
-                        case None => return()
+                        case None => point()
                     };
             rewriteSomeWithIndex!(fn)
         } else
@@ -298,7 +300,7 @@ namespace Text/Regex/Replacer {
             let* opt = evaluate(eval(ix));
             let* _ = match opt {
                         case Some(s) => appendReplacement!(s)
-                        case None => return()
+                        case None => point()
                     };
             evalRewriteSomeWithIndex!(eval)
         } else
@@ -308,7 +310,7 @@ namespace Text/Regex/Replacer {
 
     pub def rewriteCount!(ntimes: Int32, fn: String -> String): Replacer[Unit] & Impure =
         if (ntimes < 0)
-            return()
+            point()
         else
             rewriteCountHelper!(ntimes, fn, 0)
 
@@ -323,7 +325,7 @@ namespace Text/Regex/Replacer {
 
     pub def evalRewriteCount!(ntimes: Int32, eval: MatchEvaluator[String]): Replacer[Unit] & Impure =
         if (ntimes < 0)
-            return()
+            point()
         else
             evalRewriteCountHelper!(ntimes, eval, 0)
 

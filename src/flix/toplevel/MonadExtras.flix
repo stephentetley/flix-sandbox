@@ -57,7 +57,7 @@ namespace Monad {
 
 
 
-    pub def chainr(p: m[a], op: m[(a, a) -> a], x: a): m[a] with Alternative[m], Monad[m] =
+    pub def chainRight(p: m[a], op: m[(a, a) -> a], x: a): m[a] with Alternative[m], Monad[m] =
         alt(chainRight1(p, op), point(x))
 
 

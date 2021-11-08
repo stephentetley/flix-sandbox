@@ -66,14 +66,11 @@ namespace Text/Regex/Matcher {
         let* patt = Text/Regex/Pattern.compile(regex) |> Result.mapErr(constant("runsMatcher - invalid regex: ${regex}"));
         runMatcher(ma, patt, input)
 
+    ///
+    /// Returns `x` wrapped as a Matcher.
+    ///
     pub def point(x: a): Matcher[a] =
         Matcher(_ -> Ok(x))
-
-    /// DEPRECATED - to remove...
-    pub def return(x: a): Matcher[a] = point(x)
-
-    pub def fail(msg: String): Matcher[a] =
-        Matcher(_ -> Err(msg))
 
     pub def throwError(msg: String): Matcher[a] =
         Matcher(_ -> Err(msg))
@@ -158,14 +155,14 @@ namespace Text/Regex/Matcher {
             let* pos = start();
             let* endpos = findLastHelper(pos);
             findFrom(endpos - 1)
-        } else return(false)
+        } else point(false)
 
     def findLastHelper(lastPos: Int32): Matcher[Int32] & Impure =
         let* more = find();
         if (more) {
             let* pos = start();
             findLastHelper(pos)
-        } else return(lastPos)
+        } else point(lastPos)
 
 
     pub def findFrom(b: Int32): Matcher[Bool] & Impure =
@@ -178,7 +175,7 @@ namespace Text/Regex/Matcher {
             let* pos = start();
             let* endpos = findLastHelper(pos);
             findFrom(endpos - 1)
-        } else return(false)
+        } else point(false)
 
     pub def content(): Matcher[String] & Impure =
         liftPrimResult(Text/Regex/Internal/Matcher.group)
@@ -191,7 +188,7 @@ namespace Text/Regex/Matcher {
         if (ans)
             content()
         else
-            fail("getMatch")
+            throwError("getMatch")
 
     def ifThenElse(cond: Matcher[s], thenm: s -> Matcher[t], elsem: Matcher[t]): Matcher[t] =
         Matcher(r ->
@@ -201,7 +198,7 @@ namespace Text/Regex/Matcher {
             }
         )
 
-    pub def done(): Matcher[Bool] & Impure = ifThenElse(content(), _ -> return(false), return(true))
+    pub def done(): Matcher[Bool] & Impure = ifThenElse(content(), _ -> point(false), point(true))
 
     pub def reset!(): Matcher[Unit] & Impure = liftPrim(Text/Regex/Internal/Matcher.reset)
 
@@ -217,7 +214,7 @@ namespace Text/Regex/Matcher {
 
     pub def countWith(append: (a, ac) -> ac, acc: ac, n: Int32, ma: Matcher[a]): Matcher[ac] =
         if (n <= 0)
-            return(acc)
+            point(acc)
         else {
             let* a = ma;
             countWith(append, append(a, acc), n-1, ma)
