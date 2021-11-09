@@ -20,6 +20,10 @@ pub lawless class Traversable[t : Type -> Type] with Functor[t] {
 
     pub def sequence(c: t[m[a]]): m[t[a]] with Applicative[m]
 
+    pub def mapM(f: a -> m[b] & ef, c: t[a]): m[t[b]] & ef with Monad[m]
+
+    pub def mapX(f: a -> m[b] & ef, c: t[a]): m[Unit] & ef with Monad[m]
+
 }
 
 instance Traversable[List] {
@@ -27,6 +31,10 @@ instance Traversable[List] {
     pub def traverse(f: a -> m[b] & ef, t: List[a]): m[List[b]] & ef with Applicative[m] = ListHelper.traverse(f, t)
 
     pub def sequence(t: List[m[a]]): m[List[a]] with Applicative[m] = ListHelper.sequence(t)
+
+    pub def mapM(f: a -> m[b] & ef, t: List[a]): m[List[b]] & ef with Monad[m] = ListHelper.mapM(f, t)
+
+    pub def mapX(f: a -> m[b] & ef, t: List[a]): m[Unit] & ef with Monad[m] = ListHelper.mapX(f, t)
 
 }
 
@@ -46,25 +54,24 @@ instance Traversable[Option] {
             case Some(ma) => Some <&> ma
             case None => point(None)
         }
-}
 
-instance Traversable[Either[e]] {
-    pub def traverse(f: a -> m[b] & ef, t: Either[e, a]): m[Either[e, b]] & ef with Applicative[m] =
+    pub def mapM(f: a -> m[b] & ef, t: Option[a]): m[Option[b]] & ef with Monad[m] =
         use Applicative.{point};
         use FunctorExtras.{<&>};
         match t {
-            case Left(e) => point(Left(e))
-            case Right(a) => Right <&> f(a)
+            case None => point(None)
+            case Some(a) => Some <&> f(a)
         }
 
-    pub def sequence(t: Either[e, m[a]]): m[Either[e, a]] with Applicative[m] =
+    pub def mapX(f: a -> m[b] & ef, t: Option[a]): m[Unit] & ef with Monad[m] =
         use Applicative.{point};
-        use FunctorExtras.{<&>};
         match t {
-            case Left(e) => point(Left(e))
-            case Right(ma) => Right <&> ma
+            case None => point(())
+            case Some(a) => Monad.flatMap(_ -> point(()), f(a))
         }
 }
+
+
 
 namespace ListHelper {
     use ApplicativeExtras.{<*>};
@@ -98,6 +105,24 @@ namespace ListHelper {
         match xs {
             case Nil => k(Applicative.point(()))
             case mx :: rs => sequenceXHelper(rs, ka -> k(seqRight(mx, ka)))
+        }
+
+    pub def mapM(f: a -> m[b] & ef, xs: List[a]): m[List[b]] & ef with Monad[m] =
+        mapMHelper(f, xs, ks -> ks as & ef)
+
+    pub def mapMHelper(f: a -> m[b] & ef, xs: List[a], k: m[List[b]] -> m[List[b]] & ef): m[List[b]] & ef with Monad[m] =
+        match xs {
+            case Nil => k(Applicative.point(Nil)) as & ef
+            case x :: rs => mapMHelper(f, rs, ks -> k(consA(f(x), ks)))
+        }
+
+    pub def mapX(f: a -> m[b] & ef, xs: List[a]): m[Unit] & ef with Monad[m] =
+        mapXHelper(f, xs, ku -> ku as & ef)
+
+    pub def mapXHelper(f: a -> m[b] & ef, xs: List[a], k: m[Unit] -> m[Unit] & ef): m[Unit] & ef with Monad[m] =
+        match xs {
+            case Nil => k(Applicative.point(())) as & ef
+            case x :: rs => mapXHelper(f, rs, ku -> k(Monad.flatMap(_ -> ku, f(x))))
         }
 
 }

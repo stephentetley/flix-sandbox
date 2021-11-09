@@ -44,6 +44,40 @@ instance Monad[Either[e]] {
     }
 }
 
+instance Traversable[Either[e]] {
+    pub def traverse(f: a -> m[b] & ef, t: Either[e, a]): m[Either[e, b]] & ef with Applicative[m] =
+        use Applicative.{point};
+        use FunctorExtras.{<&>};
+        match t {
+            case Left(e) => point(Left(e))
+            case Right(a) => Right <&> f(a)
+        }
+
+    pub def sequence(t: Either[e, m[a]]): m[Either[e, a]] with Applicative[m] =
+        use Applicative.{point};
+        use FunctorExtras.{<&>};
+        match t {
+            case Left(e) => point(Left(e))
+            case Right(ma) => Right <&> ma
+        }
+
+    pub def mapM(f: a -> m[b] & ef, t: Either[e, a]): m[Either[e, b]] & ef with Monad[m] =
+        use Applicative.{point};
+        use FunctorExtras.{<&>};
+        match t {
+            case Left(e) => point(Left(e))
+            case Right(a) => Right <&> f(a)
+        }
+
+    pub def mapX(f: a -> m[b] & ef, t: Either[e, a]): m[Unit] & ef with Monad[m] =
+        use Applicative.{point};
+        match t {
+            case Left(_)  => point(())
+            case Right(a) => Monad.flatMap(_ -> point(()), f(a))
+        }
+
+}
+
 namespace Either {
 
 
