@@ -72,52 +72,46 @@ namespace I18n/Locale {
         import java.util.Locale:getDefault();
         Locale(getDefault())
 
-    pub def setDefault(x: Locale): Result[Unit, String] & Impure = 
+    pub def setJvmDefaultLocale!(x: Locale): Result[Unit, String] & Impure =
         import java.util.Locale:setDefault(##java.util.Locale);
         try { 
             let Locale(x1) = x;
             setDefault(x1);
             Ok()
         } catch {
-            case _: ##java.lang.Exception => Err("setDefault failed")
+            case _: ##java.lang.Exception => Err("setDefault! failed")
         }
 
 
-    pub enum Category {
+    pub enum Category with Eq, Order, ToString {
         case Display
         case Format
     }
 
-    instance Eq[Category] {
-        pub def eq(x: Category, y: Category): Bool = match (x, y) {
-            case (Display, Display) => true
-            case (Format, Format) => true
-            case (_, _) => false
-        }
-    }
 
-
-
-    pub def getDefaultWithCategory(x: Category): Locale & Impure = 
-        import flix.runtime.spt.sandbox.i18n.LocaleWrapper:getDefaultDISPLAY();
-        import flix.runtime.spt.sandbox.i18n.LocaleWrapper:getDefaultFORMAT();
+    pub def getDefaultWithCategory(x: Category): Locale & Impure =
+        import java.util.Locale:getDefault(##java.util.Locale$Category);
+        import get java.util.Locale$Category:DISPLAY as getDisplay;
+        import get java.util.Locale$Category:FORMAT as getFormat;
         match x { 
-            case Display => Locale(getDefaultDISPLAY())
-            case Format => Locale(getDefaultFORMAT())
+            case Display => getDisplay() |> getDefault |> Locale
+            case Format  => getFormat() |> getDefault |> Locale
         }
 
-    pub def setDefaultWithCategory (category: Category, x: Locale): Result[Unit, String] & Impure = 
-        import flix.runtime.spt.sandbox.i18n.LocaleWrapper:setDefaultDISPLAY(##java.util.Locale);
-        import flix.runtime.spt.sandbox.i18n.LocaleWrapper:setDefaultFORMAT(##java.util.Locale);
-        try { 
+    pub def setJvmDefaultLocaleWithCategory!(category: Category, x: Locale): Result[Unit, String] & Impure =
+        import java.util.Locale:setDefault(##java.util.Locale$Category, ##java.util.Locale);
+        import get java.util.Locale$Category:DISPLAY as getDisplay;
+        import get java.util.Locale$Category:FORMAT as getFormat;
+        try {
             let Locale(x1) = x;
-            match category { 
-                case Display => setDefaultDISPLAY(x1)
-                case Format => setDefaultFORMAT(x1)
+            let category = match category {
+                case Display => getDisplay()
+                case Format => getFormat()
             };
+            setDefault(category, x1);
             Ok()
         } catch {
-            case _: ##java.lang.Exception => Err("setDefault failed")
+            case _: ##java.lang.Exception => Err("setDefaultWithCategory! failed")
         }
 
     pub def equals(x: Locale, y: Locale): Bool =

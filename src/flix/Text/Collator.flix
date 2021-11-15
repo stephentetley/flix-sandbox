@@ -98,6 +98,9 @@ namespace Text/Collator {
         let Locale(locale1) = locale;
         Collator(getInstance(locale1)) as & Pure
 
+    /// TODO - instance with decomposition and strength?
+
+
     ///
     /// Test equality of strings `s1` and `s2` with the collator `x``.
     ///
