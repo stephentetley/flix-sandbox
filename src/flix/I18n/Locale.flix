@@ -292,20 +292,20 @@ namespace I18n/Locale {
         let arr = getAvailableLocales();
         Array.map(Locale, arr)
 
-    pub enum IsoCountryCode { 
+    pub enum IsoCountryCode with Eq, Order, Boxable, Hash, ToString {
         case Part1Alpha2
         case Part1Alpha3
         case Part3
     }
 
-    pub def isoCountryCodeToNative(x: IsoCountryCode): ##flix.runtime.spt.sandbox.i18n.IsoCountryCodeEnum =
-        import get flix.runtime.spt.sandbox.i18n.IsoCountryCodeEnum:FLIX_PART1_ALPHA2   as getFLIX_PART1_ALPHA2;
-        import get flix.runtime.spt.sandbox.i18n.IsoCountryCodeEnum:FLIX_PART1_ALPHA3   as getFLIX_PART1_ALPHA3;
-        import get flix.runtime.spt.sandbox.i18n.IsoCountryCodeEnum:FLIX_PART3          as getFLIX_PART3;
+    pub def isoCountryCodeToNative(x: IsoCountryCode): ##java.util.Locale$IsoCountryCode =
+        import get java.util.Locale$IsoCountryCode:PART1_ALPHA2 as getPart1Alpha2;
+        import get java.util.Locale$IsoCountryCode:PART1_ALPHA3 as getPart1Alpha3;
+        import get java.util.Locale$IsoCountryCode:PART3 as getPart3;
         match x {
-            case Part1Alpha2    => getFLIX_PART1_ALPHA2()
-            case Part1Alpha3    => getFLIX_PART1_ALPHA3()
-            case Part3          => getFLIX_PART3()
+            case Part1Alpha2    => getPart1Alpha2()
+            case Part1Alpha3    => getPart1Alpha3()
+            case Part3          => getPart3()
         } as & Pure
 
 
@@ -341,7 +341,7 @@ namespace I18n/Locale {
 
 
     pub def getIsoCountriesWithIsoCountryCode(icc: IsoCountryCode): Result[Set[String], String] & Impure =
-        import flix.runtime.spt.sandbox.i18n.LocaleStringIterator:newGetISOCountriesWithICCIterator(##flix.runtime.spt.sandbox.i18n.IsoCountryCodeEnum);
+        import flix.runtime.spt.sandbox.i18n.LocaleStringIterator:newGetISOCountriesWithICCIterator(##java.util.Locale$IsoCountryCode);
         try {
             let icc1 = isoCountryCodeToNative(icc);
             let iter = newGetISOCountriesWithICCIterator(icc1);
