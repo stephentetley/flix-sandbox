@@ -26,99 +26,62 @@ namespace Text/Collator {
     use Text.Collator;
     use Text.Collator.{Collator};
 
-
-    pub enum DecompositionMode {
+    pub enum DecompositionMode with Eq, Order, ToString {
         case NoDecomposition
         case CanonicalDecomposition
         case FullDecomposition
     }
 
-    instance ToString[DecompositionMode] {
-        pub def toString(x: DecompositionMode): String = match x {
-            case NoDecomposition => "NoDecomposition"
-            case CanonicalDecomposition => "CanonicalDecomposition"
-            case FullDecomposition => "FullDecomposition"
-        }
-    }
-
-    instance Eq[DecompositionMode] {
-        pub def eq(x: DecompositionMode, y: DecompositionMode): Bool = match (x, y) {
-            case (NoDecomposition, NoDecomposition) => true
-            case (CanonicalDecomposition, CanonicalDecomposition) => true
-            case (FullDecomposition, FullDecomposition) => true
-            case (_, _) => false
-        }
-    }
-
-    pub enum CollatorStrength {
+    pub enum CollatorStrength with Eq, Order, ToString {
         case Identical
         case Primary
         case Secondary
         case Tertiary
     }
 
-    instance ToString[CollatorStrength] {
-        pub def toString(x: CollatorStrength): String = match x {
-            case Identical => "Identical"
-            case Primary => "Primary"
-            case Secondary => "Secondary"
-            case Tertiary => "Tertiary"
-        }
-    }
-
-    instance Eq[CollatorStrength] {
-        pub def eq(x: CollatorStrength, y: CollatorStrength): Bool = match (x, y) {
-            case (Identical, Identical) => true
-            case (Primary, Primary) => true
-            case (Secondary, Secondary) => true
-            case (Tertiary, Tertiary) => true
-            case (_, _) => false
-        }
-    }
 
     def marshallDecompositionMode(x: DecompositionMode): Int32 =
-        import get java.text.Collator:NO_DECOMPOSITION          as getNO_DECOMPOSITION;
-        import get java.text.Collator:CANONICAL_DECOMPOSITION   as getCANONICAL_DECOMPOSITION;
-        import get java.text.Collator:FULL_DECOMPOSITION        as getFULL_DECOMPOSITION;
+        import get java.text.Collator:NO_DECOMPOSITION as getNoDecomposition;
+        import get java.text.Collator:CANONICAL_DECOMPOSITION as getCanonicalDecomposition;
+        import get java.text.Collator:FULL_DECOMPOSITION as getFullDecomposition;
         match x {
-            case NoDecomposition => getNO_DECOMPOSITION()
-            case CanonicalDecomposition => getCANONICAL_DECOMPOSITION()
-            case FullDecomposition => getFULL_DECOMPOSITION()
+            case NoDecomposition        => getNoDecomposition()
+            case CanonicalDecomposition => getCanonicalDecomposition()
+            case FullDecomposition      => getFullDecomposition()
         } as & Pure
 
    def unmarshallDecompositionMode(i: Int32): DecompositionMode =
-        import get java.text.Collator:NO_DECOMPOSITION          as getNO_DECOMPOSITION;
-        import get java.text.Collator:CANONICAL_DECOMPOSITION   as getCANONICAL_DECOMPOSITION;
-        import get java.text.Collator:FULL_DECOMPOSITION        as getFULL_DECOMPOSITION;
+        import get java.text.Collator:CANONICAL_DECOMPOSITION as getCanonicalDecomposition;
+        import get java.text.Collator:FULL_DECOMPOSITION as getFullDecomposition;
         match i {
-            case n if n == getNO_DECOMPOSITION() => NoDecomposition
-            case n if n == getCANONICAL_DECOMPOSITION() => CanonicalDecomposition
-            case n if n == getFULL_DECOMPOSITION() => FullDecomposition
+            case n if n == getCanonicalDecomposition() => CanonicalDecomposition
+            case n if n == getFullDecomposition() => FullDecomposition
+            case _ => NoDecomposition
         } as & Pure
 
     def marshallCollatorStrength(x: CollatorStrength): Int32 =
-        import get java.text.Collator:IDENTICAL as getIDENTICAL;
-        import get java.text.Collator:PRIMARY as getPRIMARY;
-        import get java.text.Collator:SECONDARY as getSECONDARY;
-        import get java.text.Collator:TERTIARY as getTERTIARY;
+        import get java.text.Collator:IDENTICAL as getIdentical;
+        import get java.text.Collator:PRIMARY as getPrimary;
+        import get java.text.Collator:SECONDARY as getSecondary;
+        import get java.text.Collator:TERTIARY as getTertiary;
         match x {
-            case Identical => getIDENTICAL()
-            case Primary => getPRIMARY()
-            case Secondary => getSECONDARY()
-            case Tertiary => getTERTIARY()
+            case Identical => getIdentical()
+            case Primary   => getPrimary()
+            case Secondary => getSecondary()
+            case Tertiary  => getTertiary()
         } as & Pure
 
     /// Warning - I am not sure each enum has a distinct int value in Java land...
     def unmarshallCollatorStrength(i: Int32): CollatorStrength =
-        import get java.text.Collator:IDENTICAL as getIDENTICAL;
-        import get java.text.Collator:PRIMARY as getPRIMARY;
-        import get java.text.Collator:SECONDARY as getSECONDARY;
-        import get java.text.Collator:TERTIARY as getTERTIARY;
+        import get java.text.Collator:IDENTICAL as getIdentical;
+        import get java.text.Collator:PRIMARY as getPrimary;
+        import get java.text.Collator:SECONDARY as getSecondary;
+        import get java.text.Collator:TERTIARY as getTertiary;
         match i {
-            case n if n == getIDENTICAL() => Identical
-            case n if n == getPRIMARY() => Primary
-            case n if n == getSECONDARY() => Secondary
-            case n if n == getTERTIARY() => Tertiary
+            case n if n == getIdentical() => Identical
+            case n if n == getPrimary() => Primary
+            case n if n == getSecondary() => Secondary
+            case n if n == getTertiary() => Tertiary
         } as & Pure
 
     ///
@@ -128,7 +91,7 @@ namespace Text/Collator {
         import java.text.Collator:getInstance();
         Collator(getInstance())
 
-
+    /// TODO: Move to Locale?
     pub def getInstanceWithLocale(locale: I18n.Locale): Collator =
         import java.text.Collator:getInstance(##java.util.Locale);
         use I18n.Locale.{Locale};
@@ -136,20 +99,20 @@ namespace Text/Collator {
         Collator(getInstance(locale1)) as & Pure
 
     ///
-    /// Test equality of strings `s1` and `s2` using Collator `x``.
+    /// Test equality of strings `s1` and `s2` with the collator `x``.
     ///
-    pub def equals(x: Collator, s1: String, s2: String): Bool =
+    pub def equalsWith(x: Collator, s1: String, s2: String): Bool =
         import java.text.Collator.equals(String, String);
         let Collator(x1) = x;
         equals(x1, s1, s2) as & Pure
 
     ///
-    /// Compare strings `s1` and `s2` using Collator `x``.
+    /// Compare strings `s1` and `s2` with the collator `x``.
     ///
-    pub def compare(x: Collator, s1: String, s2: String): Int32 =
+    pub def compareWith(x: Collator, s1: String, s2: String): Comparison =
         import java.text.Collator.compare(String, String);
         let Collator(x1) = x;
-        compare(x1, s1, s2) as & Pure
+        (compare(x1, s1, s2) as & Pure) |> Comparison.fromInt
 
 
 
@@ -158,11 +121,22 @@ namespace Text/Collator {
         let Collator(x1) = x;
         unmarshallDecompositionMode(getDecomposition(x1))
 
-    pub def setDecomposition!(x: Collator, mode: DecompositionMode): Unit & Impure =
-        import java.text.Collator.setDecomposition(Int32);
+    /// TODO - test cloning the Java objects and then get a pure API...
+
+    def clone(x: Collator): ##java.text.Collator & Impure =
+        import java.text.Collator.clone();
         let Collator(x1) = x;
-        let mode1 = marshallDecompositionMode(mode);
-        setDecomposition(x1, mode1)
+        clone(x1) as ##java.text.Collator
+
+    pub def setDecomposition(x: Collator, mode: DecompositionMode): Collator =
+        import java.text.Collator.setDecomposition(Int32);
+        let body = () -> {
+            let x1 = clone(x);
+            let mode1 = marshallDecompositionMode(mode);
+            setDecomposition(x1, mode1);
+            x1
+        };
+        Collator(body() as & Pure)
 
 
     pub def getStrength(x: Collator): CollatorStrength & Impure =
@@ -170,10 +144,14 @@ namespace Text/Collator {
         let Collator(x1) = x;
         unmarshallCollatorStrength(getStrength(x1))
 
-    pub def setStrength!(x: Collator, strength: CollatorStrength): Unit & Impure =
+    pub def setStrength(x: Collator, strength: CollatorStrength): Collator =
         import java.text.Collator.setStrength(Int32);
-        let Collator(x1) = x;
-        let strength1 = marshallCollatorStrength(strength);
-        setStrength(x1, strength1)
+        let body = () -> {
+            let x1 = clone(x);
+            let strength1 = marshallCollatorStrength(strength);
+            setStrength(x1, strength1);
+            x1
+        };
+        Collator(body() as & Pure)
 
 }
