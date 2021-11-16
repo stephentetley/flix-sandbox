@@ -35,11 +35,6 @@ public class LocaleStringIterator {
         return new LocaleStringIterator(Arrays.stream(codes).iterator());
     }
 
-    public static LocaleStringIterator newGetISOCountriesWithICCIterator(IsoCountryCodeEnum icc) throws Exception {
-        Set<String> codes = Locale.getISOCountries(IsoCountryCodeEnum.convertToInner(icc));
-        return new LocaleStringIterator(codes.iterator());
-    }
-
     public static LocaleStringIterator newGetISOLanguagesIterator() throws Exception {
         String[] langs = Locale.getISOLanguages();
         return new LocaleStringIterator(Arrays.stream(langs).iterator());

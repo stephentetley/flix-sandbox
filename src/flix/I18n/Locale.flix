@@ -339,18 +339,29 @@ namespace I18n/Locale {
             case _: ##java.lang.Exception => Err("getIsoCountries")
         }
 
-
     pub def getIsoCountriesWithIsoCountryCode(icc: IsoCountryCode): Result[Set[String], String] & Impure =
-        import flix.runtime.spt.sandbox.i18n.LocaleStringIterator:newGetISOCountriesWithICCIterator(##java.util.Locale$IsoCountryCode);
+        import java.util.Locale:getISOCountries(##java.util.Locale$IsoCountryCode);
+        import java.util.Set.iterator();
         try {
             let icc1 = isoCountryCodeToNative(icc);
-            let iter = newGetISOCountriesWithICCIterator(icc1);
-            makeLocaleStringIter(iter, "getIsoCountryCodesWithIsoCountryCode failed")
-                |> X/Cursor.toList!
-                |> Result.map(List.toSet)
+            let sjava = getISOCountries(icc1);
+            let iter = iterator(sjava);
+            let xs = iterateListOfString(iter, ks -> ks);
+            Ok(List.toSet(xs))
         } catch {
             case _: ##java.lang.Exception => Err("getIsoCountriesWithIsoCountryCode")
         }
+
+
+    def iterateListOfString(iter: ##java.util.Iterator, k: List[String] -> List[String]): List[String] & Impure =
+        import java.util.Iterator.hasNext();
+        import java.util.Iterator.next();
+        if (hasNext(iter))
+            let entry = next(iter) as String;
+            iterateListOfString(iter, ks -> k(entry :: ks))
+        else
+            k(Nil)
+
 
     pub def getIsoLanguages(): Result[List[String], String] & Impure =
         import flix.runtime.spt.sandbox.i18n.LocaleStringIterator:newGetISOLanguagesIterator();
