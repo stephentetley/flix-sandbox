@@ -309,32 +309,11 @@ namespace I18n/Locale {
         } as & Pure
 
 
-    /// Iterators differ only on the create function and what they are marshalled to, so make making them common...
-    def makeLocaleStringIter(primIter: ##flix.runtime.spt.sandbox.i18n.LocaleStringIterator,
-                                failMsg: String): Cursor[String, String] =
-        import flix.runtime.spt.sandbox.i18n.LocaleStringIterator.hasNext();
-        import flix.runtime.spt.sandbox.i18n.LocaleStringIterator.next();
-        let iterNext = () -> {
-            try {
-                let s1 = next(primIter);
-                Ok(s1)
-            } catch {
-                case _: ##java.lang.Exception => Err(failMsg)
-            }
-        };
-        let cursorAlg: X.CursorAlg[String, String] =  {
-              hasNext = () -> hasNext(primIter)
-            , next = iterNext
-            , finalize = () -> () as & Impure
-        };
-        X/Cursor.makeCursor(cursorAlg)
-
     pub def getIsoCountries(): Result[List[String], String] & Impure =
-        import flix.runtime.spt.sandbox.i18n.LocaleStringIterator:newGetISOCountriesIterator();
+        import java.util.Locale:getISOCountries();
         try {
-            let iter = newGetISOCountriesIterator();
-            makeLocaleStringIter(iter, "getIsoCountryCodes failed")
-                |> X/Cursor.toList!
+            let arr = getISOCountries();
+            Ok(Array.toList(arr))
         } catch {
             case _: ##java.lang.Exception => Err("getIsoCountries")
         }
@@ -364,36 +343,38 @@ namespace I18n/Locale {
 
 
     pub def getIsoLanguages(): Result[List[String], String] & Impure =
-        import flix.runtime.spt.sandbox.i18n.LocaleStringIterator:newGetISOLanguagesIterator();
+        import java.util.Locale:getISOLanguages();
         try {
-            let iter = newGetISOLanguagesIterator();
-            makeLocaleStringIter(iter, "getIsoLanguages failed")
-                |> X/Cursor.toList!
+            let arr = getISOLanguages();
+            Ok(Array.toList(arr))
         } catch {
             case _: ##java.lang.Exception => Err("getIsoLanguages")
         }
 
-    pub def getUnicodeLocaleAttributes(locale: Locale): Result[Set[String], String] & Impure =
-        import flix.runtime.spt.sandbox.i18n.LocaleStringIterator:newGetUnicodeLocaleAttributesIterator(##java.util.Locale);
+    pub def getUnicodeLocaleAttributes(x: Locale): Result[Set[String], String] & Impure =
+        import java.util.Locale.getUnicodeLocaleAttributes();
+        import java.util.Set.iterator();
         try {
-            let Locale(locale1) = locale;
-            let iter = newGetUnicodeLocaleAttributesIterator(locale1);
-            makeLocaleStringIter(iter, "getUnicodeLocaleAttributes failed")
-                |> X/Cursor.toList!
-                |> Result.map(List.toSet)
+            let Locale(x1) = x;
+            let sjava = getUnicodeLocaleAttributes(x1);
+            let iter = iterator(sjava);
+            let xs = iterateListOfString(iter, ks -> ks);
+            Ok(List.toSet(xs))
         } catch {
             case _: ##java.lang.Exception => Err("getUnicodeLocaleAttributes")
         }
 
-    pub def getUnicodeLocaleKeys(locale: Locale): Result[Set[String], String] & Impure =
-        import flix.runtime.spt.sandbox.i18n.LocaleStringIterator:newGetUnicodeLocaleKeysIterator(##java.util.Locale);
+    pub def getUnicodeLocaleKeys(x: Locale): Result[Set[String], String] & Impure =
+        import java.util.Locale.getUnicodeLocaleKeys();
+        import java.util.Set.iterator();
         try {
-            let Locale(locale1) = locale;
-            let iter = newGetUnicodeLocaleKeysIterator(locale1);
-            makeLocaleStringIter(iter, "getUnicodeLocaleKeys failed")
-                |> X/Cursor.toList!
-                |> Result.map(List.toSet)
+            let Locale(x1) = x;
+            let sjava = getUnicodeLocaleKeys(x1);
+            let iter = iterator(sjava);
+            let xs = iterateListOfString(iter, ks -> ks);
+            Ok(List.toSet(xs))
         } catch {
-            case _: ##java.lang.Exception => Err("getUnicodeLocaleAttributes")
+            case _: ##java.lang.Exception => Err("getUnicodeLocaleKeys")
         }
+
 }
