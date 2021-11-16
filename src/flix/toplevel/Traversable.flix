@@ -22,7 +22,8 @@ pub lawless class Traversable[t : Type -> Type] with Functor[t] {
 
     pub def mapM(f: a -> m[b] & ef, c: t[a]): m[t[b]] & ef with Monad[m]
 
-    pub def mapX(f: a -> m[b] & ef, c: t[a]): m[Unit] & ef with Monad[m]
+    /// This would be better placed in Foldable...
+    pub def foreachM(f: a -> m[b] & ef, c: t[a]): m[Unit] & ef with Monad[m]
 
 }
 
@@ -34,7 +35,7 @@ instance Traversable[List] {
 
     pub def mapM(f: a -> m[b] & ef, t: List[a]): m[List[b]] & ef with Monad[m] = ListHelper.mapM(f, t)
 
-    pub def mapX(f: a -> m[b] & ef, t: List[a]): m[Unit] & ef with Monad[m] = ListHelper.mapX(f, t)
+    pub def foreachM(f: a -> m[b] & ef, t: List[a]): m[Unit] & ef with Monad[m] = ListHelper.foreachM(f, t)
 
 }
 
@@ -63,7 +64,7 @@ instance Traversable[Option] {
             case Some(a) => Some <&> f(a)
         }
 
-    pub def mapX(f: a -> m[b] & ef, t: Option[a]): m[Unit] & ef with Monad[m] =
+    pub def foreachM(f: a -> m[b] & ef, t: Option[a]): m[Unit] & ef with Monad[m] =
         use Applicative.{point};
         match t {
             case None => point(())
@@ -116,13 +117,13 @@ namespace ListHelper {
             case x :: rs => mapMHelper(f, rs, ks -> k(consA(f(x), ks)))
         }
 
-    pub def mapX(f: a -> m[b] & ef, xs: List[a]): m[Unit] & ef with Monad[m] =
-        mapXHelper(f, xs, ku -> ku as & ef)
+    pub def foreachM(f: a -> m[b] & ef, xs: List[a]): m[Unit] & ef with Monad[m] =
+        foreachMHelper(f, xs, ku -> ku as & ef)
 
-    pub def mapXHelper(f: a -> m[b] & ef, xs: List[a], k: m[Unit] -> m[Unit] & ef): m[Unit] & ef with Monad[m] =
+    pub def foreachMHelper(f: a -> m[b] & ef, xs: List[a], k: m[Unit] -> m[Unit] & ef): m[Unit] & ef with Monad[m] =
         match xs {
             case Nil => k(Applicative.point(())) as & ef
-            case x :: rs => mapXHelper(f, rs, ku -> k(Monad.flatMap(_ -> ku, f(x))))
+            case x :: rs => foreachMHelper(f, rs, ku -> k(Monad.flatMap(_ -> ku, f(x))))
         }
 
 }

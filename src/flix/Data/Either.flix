@@ -69,7 +69,7 @@ instance Traversable[Either[e]] {
             case Right(a) => Right <&> f(a)
         }
 
-    pub def mapX(f: a -> m[b] & ef, t: Either[e, a]): m[Unit] & ef with Monad[m] =
+    pub def foreachM(f: a -> m[b] & ef, t: Either[e, a]): m[Unit] & ef with Monad[m] =
         use Applicative.{point};
         match t {
             case Left(_)  => point(())
