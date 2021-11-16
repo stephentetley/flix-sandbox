@@ -18,31 +18,13 @@
 namespace Text {
 
     ///
-    pub enum NormalizerForm {
+    pub enum NormalizerForm with Eq, Order, ToString {
         case Nfc
         case Nfd
         case Nfkc
         case Nfkd
     }
 
-    instance ToString[NormalizerForm] {
-        pub def toString(x: NormalizerForm): String = match x {
-            case Nfc    => "Nfc"
-            case Nfd    => "Nfd"
-            case Nfkc   => "Nfkc"
-            case Nfkd   => "Nfkd"
-        }
-    }
-
-    instance Eq[NormalizerForm] {
-        pub def eq(x: NormalizerForm, y: NormalizerForm): Bool = match (x,y) {
-            case (Nfc, Nfc)     => true
-            case (Nfd, Nfd)     => true
-            case (Nfkc, Nfkc)   => true
-            case (Nfkd, Nfkd)   => true
-            case (_,_)          => false
-        }
-    }
 }
 
 
@@ -51,50 +33,52 @@ namespace Text/Normalizer {
     use Text.NormalizerForm;
     use Text.NormalizerForm.{Nfc, Nfd, Nfkc, Nfkd};
 
-    pub def marshal(x: NormalizerForm): ##flix.runtime.spt.sandbox.text.NormalizerFormEnum =
-        import get flix.runtime.spt.sandbox.text.NormalizerFormEnum:FLIX_NFC    as getFLIX_NFC;
-        import get flix.runtime.spt.sandbox.text.NormalizerFormEnum:FLIX_NFD    as getFLIX_NFD;
-        import get flix.runtime.spt.sandbox.text.NormalizerFormEnum:FLIX_NFKC   as getFLIX_NFKC;
-        import get flix.runtime.spt.sandbox.text.NormalizerFormEnum:FLIX_NFKD   as getFLIX_NFKD;
+    pub def marshal(x: NormalizerForm): ##java.text.Normalizer$Form =
+        import get java.text.Normalizer$Form:NFC as getNFC;
+        import get java.text.Normalizer$Form:NFD as getNFD;
+        import get java.text.Normalizer$Form:NFKC as getNFKC;
+        import get java.text.Normalizer$Form:NFKD as getNFKD;
         match x {
-            case Nfc    => getFLIX_NFC()
-            case Nfd    => getFLIX_NFD()
-            case Nfkc   => getFLIX_NFKC()
-            case Nfkd   => getFLIX_NFKD()
+            case Nfc    => getNFC()
+            case Nfd    => getNFD()
+            case Nfkc   => getNFKC()
+            case Nfkd   => getNFKD()
         } as & Pure
 
-    pub def unmarshal(x: ##flix.runtime.spt.sandbox.text.NormalizerFormEnum): NormalizerForm =
-        import get flix.runtime.spt.sandbox.text.NormalizerFormEnum:FLIX_NFC    as getFLIX_NFC;
-        import get flix.runtime.spt.sandbox.text.NormalizerFormEnum:FLIX_NFD    as getFLIX_NFD;
-        import get flix.runtime.spt.sandbox.text.NormalizerFormEnum:FLIX_NFKC   as getFLIX_NFKC;
-        import get flix.runtime.spt.sandbox.text.NormalizerFormEnum:FLIX_NFKD   as getFLIX_NFKD;
+    pub def unmarshal(x: ##java.text.Normalizer$Form): NormalizerForm =
+        import get java.text.Normalizer$Form:NFC as getNFC;
+        import get java.text.Normalizer$Form:NFD as getNFD;
+        import get java.text.Normalizer$Form:NFKC as getNFKC;
+        import get java.text.Normalizer$Form:NFKD as getNFKD;
         match x {
-            case x1 if primEquals(x1, getFLIX_NFC())    => Nfc
-            case x1 if primEquals(x1, getFLIX_NFD())    => Nfd
-            case x1 if primEquals(x1, getFLIX_NFKC())   => Nfkc
-            case x1 if primEquals(x1, getFLIX_NFKD())   => Nfkd
+            case x1 if primEquals(x1, getNFC())    => Nfc
+            case x1 if primEquals(x1, getNFD())    => Nfd
+            case x1 if primEquals(x1, getNFKC())   => Nfkc
+            case x1 if primEquals(x1, getNFKD())   => Nfkd
         } as & Pure
 
-
-    def primEquals(x: ##flix.runtime.spt.sandbox.text.NormalizerFormEnum, y: ##flix.runtime.spt.sandbox.text.NormalizerFormEnum): Bool =
+    /// Warning - is this reference equality or value equality?
+    def primEquals(x: ##java.text.Normalizer$Form, y: ##java.text.Normalizer$Form): Bool =
         import java.lang.Object.equals(##java.lang.Object);
         let x1 = x as ##java.lang.Object;
         let y1 = y as ##java.lang.Object;
         equals(x1, y1) as & Pure
 
 
-    pub def normalize(src: String, form: NormalizerForm): String =
-        import flix.runtime.spt.sandbox.text.NormalizerWrapper:normalize(String, ##flix.runtime.spt.sandbox.text.NormalizerFormEnum);
+    pub def normalize(nform: NormalizerForm, src: String): String =
+        import java.text.Normalizer:normalize(##java.lang.CharSequence, ##java.text.Normalizer$Form);
         try {
-            normalize(src, marshal(form)) as & Pure
+            let nform1 = marshal(nform);
+            normalize(src as ##java.lang.CharSequence, nform1) as & Pure
         } catch {
             case _:##java.lang.Exception => ""
         }
 
-    pub def isNormalized(src: String, form: NormalizerForm): Bool =
-        import flix.runtime.spt.sandbox.text.NormalizerWrapper:isNormalized(String, ##flix.runtime.spt.sandbox.text.NormalizerFormEnum);
+    pub def isNormalized(nform: NormalizerForm, src: String): Bool =
+        import java.text.Normalizer:isNormalized(##java.lang.CharSequence, ##java.text.Normalizer$Form);
         try {
-            isNormalized(src, marshal(form)) as & Pure
+            let nform1 = marshal(nform);
+            isNormalized(src as ##java.lang.CharSequence, nform1) as & Pure
         } catch {
             case _:##java.lang.Exception => false
         }
