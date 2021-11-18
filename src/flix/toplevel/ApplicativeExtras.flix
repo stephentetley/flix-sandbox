@@ -15,19 +15,6 @@
  */
 
 
-namespace FunctorExtras {
-
-    pub def ignore(ma: f[a]): f[Unit] with Functor[f] = ma `Functor.as` ()
-
-    pub def <&>(f: a -> b & ef, ma: f[a]): f[b] & ef with Functor[f] = Functor.map(f, ma)
-
-    pub def <&(x: a, ma: f[b]): f[a] with Functor[f] = ma `Functor.as` x
-
-    pub def &>(ma: f[a], x: b): f[b] with Functor[f] = ma `Functor.as` x
-
-}
-
-
 namespace ApplicativeExtras {
 
     use FunctorExtras.{<&>};
@@ -60,31 +47,5 @@ namespace ApplicativeExtras {
             ac
         else
             replicateAHelper(ntimes - 1, mx, consA(mx, ac))
-
-}
-
-namespace FoldableExtras {
-
-
-    pub def sequenceX(t: t[m[a]]): m[Unit] with Applicative[m], Foldable[t] =
-        use ApplicativeExtras.{*>};
-        Foldable.foldLeft((mb, ma) -> ma *> mb, Applicative.point(()), t)
-
-    pub def traverseX(f: a -> m[b] & ef, t: t[a]): m[Unit] & ef with Foldable[t], Applicative[m] =
-        use ApplicativeExtras.{*>};
-        Foldable.foldLeft((mb, a) -> f(a) *> mb, Applicative.point(()), t)
-
-    pub def forX(t: t[a], f: a -> m[b] & ef): m[Unit] & ef with Foldable[t], Applicative[m] = traverseX(f, t)
-
-    pub def asum(t: t[m[a]]): m[a] with Foldable[t], Alternative[m] =
-        use Alternative.{<|>};
-        Foldable.foldLeft((mb, ma) -> mb <|> ma, Alternative.zero(), t)
-
-    pub def concat(t: t[List[a]]): List[a] with Foldable[t] =
-        let makeDList = xs -> (ys -> List.append(xs, ys));
-        let appendDList = (f, g) -> xs -> f(g(xs));
-        let unDList = f -> f(Nil);
-        Foldable.foldLeft((ac, xs) -> appendDList(ac, makeDList(xs)), xs -> xs, t) |> unDList
-
 
 }
