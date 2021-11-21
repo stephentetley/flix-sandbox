@@ -38,11 +38,10 @@ instance Alternative[List] {
 instance Alternative[Option] {
     pub def zero(): Option[a] = None
 
-    pub def alt(x: Option[a], y: Option[a]): Option[a] =
-        match x {
-            case Some(x1) => Some(x1)
-            case None => y
-        }
+    pub def alt(x: Option[a], y: Option[a]): Option[a] = match x {
+        case Some(x1) => Some(x1)
+        case None     => y
+    }
 }
 
 namespace Alternative {
