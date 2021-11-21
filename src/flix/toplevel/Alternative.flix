@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+/// TEMP
+/// see: https://stackoverflow.com/questions/13080606/confused-by-the-meaning-of-the-alternative-type-class-and-its-relationship-to
+
 ///
 /// A type class for moniodal applicative functors biased to "choice" / "alternative".
 ///
@@ -43,6 +46,7 @@ instance Alternative[Option] {
 }
 
 namespace Alternative {
+
     use Applicative.{point};
 
     pub def <|>(x: m[a] , y: m[a]): m[a] with Alternative[m] =
@@ -51,8 +55,12 @@ namespace Alternative {
     pub def optional(x: m[a]): m[Option[a]] with Alternative[m] =
         alt(Functor.map(x1 -> Some(x1), x), point(None))
 
-    pub def optionalWithDefault(v: m[a], d: a): m[a] with Alternative[m] =
+    pub def withDefault(v: m[a], d: a): m[a] with Alternative[m] =
         alt(v, point(d))
+
+    /// `foldLeft` or `foldRight`
+    pub def asum(x: t[m[a]]): m[a] with Alternative[m], Foldable[t] =
+        Foldable.foldLeft(alt, zero(), x)
 
 }
 

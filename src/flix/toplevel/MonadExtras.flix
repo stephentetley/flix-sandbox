@@ -23,6 +23,9 @@ namespace Monad {
     use Alternative.{alt};
     use Monad.{flatMap};
 
+
+    pub def join(x: m[m[a]]): m[a] with Monad[m] = flatMap(identity, x)
+
     pub def bind(x: m[a], k: a -> m[b] & ef): m[b] & ef with Monad[m] = flatMap(k, x)
 
     pub def >>=(x: m[a], k: a -> m[b] & ef): m[b] & ef with Monad[m] = flatMap(k, x)
@@ -45,6 +48,22 @@ namespace Monad {
         kleisliRight(f1, f2, x)
 
 
+    pub def mfilter(f: a -> Bool, x: m[a]): m[a] with Alternative[m], Monad[m] =
+        use Alternative.{zero};
+        flatMap(x1 -> if (f(x1)) point(x1) else zero(), x)
+
+
+    pub def whenTrueM(x: m[Bool], f: m[Unit]): m[Unit] with Monad[m] =
+        flatMap(x1 -> if (x1) f else point(()), x)
+
+
+    pub def whenFalseM(x: m[Bool], f: m[Unit]): m[Unit] with Monad[m] =
+        flatMap(x1 -> if (not x1) f else point(()), x)
+
+    /// Chains are too "special case" for adding to the Monad namespace.
+    /// But they are complicated to define and more general than being tied
+    /// to a specific parser combinator library...
+    /// Where should they go?
     pub def chainLeft(p: m[a], op: m[(a, a) -> a], x: a): m[a] with Alternative[m], Monad[m] =
         Alternative.alt(chainLeft1(p,op), Applicative.point(x))
 

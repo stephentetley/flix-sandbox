@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+/// Temp
+/// See: https://hackage.haskell.org/package/semigroups-0.8.4.1/docs/Data-Semigroup.html#t:Option
 
 namespace ApplicativeExtras {
 
@@ -21,9 +23,12 @@ namespace ApplicativeExtras {
     use Applicative.{point};
 
     ///  Applicative cons.
-    def consA(f: m[a], fs: m[List[a]]): m[List[a]] with Applicative[m] =
-        (((x, xs) -> x :: xs) <&> f) <*> fs
+    def consA(x: m[a], l: m[List[a]]): m[List[a]] with Applicative[m] =
+        (((x1, xs1) -> x1 :: xs1) <&> x) <*> l
 
+
+    /// def constantA(x: m[a], y: m[b]): m[a] with Applicative[m] =
+    ///     (((x1, _) -> x1) <&> x) <*> y
 
     pub def seqLeft(ma: m[a], mb : m[b]): m[a] with Applicative[m] =
         Applicative.liftA2((a, _) -> a, ma, mb)
@@ -39,13 +44,60 @@ namespace ApplicativeExtras {
 
     pub def *>(ma: m[a], mb : m[b]): m[b] with Applicative[m] = seqRight(ma, mb)
 
-    pub def replicateA(ntimes: Int32, mx: m[a]): m[List[a]]  with Applicative[m] =
-        replicateAHelper(ntimes, mx, point(Nil))
+    /// Should this be in List namespace?
+    pub def replicateA(i: Int32, mx: m[a]): m[List[a]]  with Applicative[m] =
+        replicateAHelper(i, mx, point(Nil))
 
-    def replicateAHelper(ntimes: Int32, mx: m[a], ac: m[List[a]]): m[List[a]] with Applicative[m] =
-        if (ntimes <= 0)
+    def replicateAHelper(i: Int32, mx: m[a], ac: m[List[a]]): m[List[a]] with Applicative[m] =
+        if (i <= 0)
             ac
         else
-            replicateAHelper(ntimes - 1, mx, consA(mx, ac))
+            replicateAHelper(i - 1, mx, consA(mx, ac))
+
+    /// aka `replicateM_`
+    pub def ntimes(i: Int32, mx: m[a]): m[Unit] with Applicative[m] =
+        ntimesHelper(i, mx, point(()))
+
+    /// Helper for `ntimes`.
+    ///
+    /// Must ensure that `mx` is evaluated at each step and the function is tail recursive,
+    /// so we use an accumulator (even though it doesn't change).
+    ///
+    def ntimesHelper(i: Int32, mx: m[a], ac: m[Unit]): m[Unit] with Applicative[m] =
+        if (i <= 0)
+            ac
+        else
+            ntimesHelper(i - 1, mx, seqLeft(ac, mx))
+
+
+    /// Should this be in the List namespace?
+    pub def filterA(f: a -> m[Bool], l: List[a]): m[List[a]]  with Applicative[m] =
+        filterAHelper(f, l, mx -> mx)
+
+    ///
+    /// Helper function for `filterA`.
+    ///
+    /// Implementation is quite tricky due to not using bind/flatMap (so we can Applicative)
+    /// and also being CPS/tail recursive.
+    ///
+    def filterAHelper(f: a -> m[Bool], l: List[a], k: m[List[a]] -> m[List[a]]): m[List[a]] with Applicative[m] =
+        match l {
+            case Nil => k(point(Nil))
+            case x :: rs => filterAHelper(f, rs, ks -> k(consWhenTrue(f(x), x, ks)))
+        }
+
+    ///
+    /// Helper function for `filterA`.
+    /// Conditional cons - cons `x` only if `test` is true.
+    ///
+    def consWhenTrue(test: m[Bool], x: a, l: m[List[a]]): m[List[a]] with Applicative[m] =
+        (((ans, xs1) -> if (ans) (x :: xs1) else xs1) <&> test) <*> l
+
+
+    pub def whenTrue(x: Bool, f: m[Unit]): m[Unit] with Applicative[m] =
+        if (x) f else point(())
+
+    pub def whenFalse(x: Bool, f: m[Unit]): m[Unit] with Applicative[m] =
+        if (not x) f else point(())
 
 }

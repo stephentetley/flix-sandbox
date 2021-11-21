@@ -24,4 +24,5 @@ class FamSuite extends Suites(
   new FlixTest("TestAlternative", "main/test/spt/fam/TestAlternative.flix")(Options.TestWithLibAll),
   new FlixTest("TestFunctor", "main/test/spt/fam/TestFunctor.flix")(Options.TestWithLibAll),
   new FlixTest("TestIdentity", "main/test/spt/fam/TestIdentity.flix")(Options.TestWithLibAll),
+  new FlixTest("TestMonad", "main/test/spt/fam/TestMonad.flix")(Options.TestWithLibAll),
 )
