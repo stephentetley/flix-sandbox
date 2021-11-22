@@ -155,7 +155,7 @@ namespace Data/FunStringBuilder {
         toStringHelperBody(x, sb, x1 -> x1 as & Impure);
         StringBuilder.toString(x)
 
-    def toStringHelperBody(x: StringBuilder, src: FunStringBuilder, k: Unit ~> Unit): Unit & Impure = match src {
+    def toStringHelperBody(x: StringBuilder, src: FunStringBuilder, k: Unit -> Unit & Impure): Unit & Impure = match src {
         case Empty => k()
         case Text(s) => {StringBuilder.appendString!(x, s); k()}
         case Char(c) => {StringBuilder.appendChar!(x, c); k()}

@@ -134,12 +134,12 @@ namespace Data/RoseTree {
     }
 
     /// Traversal order is preorder (check...)
-    pub def foreach(f: a ~> Unit, t: RoseTree[a]): Unit & Impure =
+    pub def foreach(f: a -> Unit & ef, t: RoseTree[a]): Unit & ef =
         let RoseTree(a,xs) = t;
         f(a);
         foreachForest(f, xs)
 
-    def foreachForest(f: a ~> Unit, ts: RoseForest[a]): Unit & Impure = match ts {
+    def foreachForest(f: a -> Unit & ef, ts: RoseForest[a]): Unit & ef = match ts {
         case Nil => ()
         case x :: rs => { foreach(f, x); foreachForest(f, rs) }
     }

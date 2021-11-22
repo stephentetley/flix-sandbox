@@ -78,7 +78,7 @@ namespace Test/FlixCheck {
         }
 
 
-    pub opaque type Gen[a] = (Int32, Random) ~> a
+    pub opaque type Gen[a] = (Int32, Random) -> a
 
     pub lawless class Arbitrary[a] {
         pub def arbitrary(): Gen[a]
@@ -132,7 +132,7 @@ namespace Test/FlixCheck {
 
     pub def flatMap(k: a -> Gen[b], x: Gen[a]): Gen[b] = bind(x, k)
 
-    pub def liftAction(f: Unit -> a & Impure): Gen[a] = 
+    pub def liftAction(f: Unit -> a & Impure): Gen[a] =
         Gen((_,_) -> f())
 
 
@@ -162,9 +162,9 @@ namespace Test/FlixCheck {
     ///
     /// /// Promote is difficult (impossible?) to type in presence of effects
     ///
-    /// pub def promote(f: a ~> Gen[b]): Gen[a ~> b] =
+    /// pub def promote(f: a -> Gen[b] & ef): Gen[a -> b] & ef=
     ///     Gen((n, r) ->
-    ///         let f1: a ~> b = a -> {
+    ///         let f1 = a -> {
     ///             let mf: Gen[b] = f(a);
     ///             let ans: b = apply1(mf, n, r);
     ///             ans

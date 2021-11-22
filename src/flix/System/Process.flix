@@ -100,4 +100,22 @@ namespace System/Process {
             case _: ##java.lang.Exception => Err("getError")
         }
 
+
+
+    pub type alias ProcessArgs =
+        { cmd :: String
+        , args :: Array[String]
+        , charset :: Text.Charset
+        }
+
+
+    pub def process(args: ProcessArgs): Result[{exitCode :: Int32, processResponse :: String}, String] & Impure =
+        use Result.flatMap;
+        let pb      = newProcessBuilder(args.cmd, args.args);
+        let* proc   = start(pb);
+        let* resp   = getInput(proc, args.charset);
+        let* code   = waitFor(proc);
+        Ok({exitCode = code, processResponse = resp})
+
+
 }

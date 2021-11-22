@@ -20,7 +20,7 @@ namespace X {
 
     pub opaque type Cursor[e, a] = X/Cursor.CursorImpl[e, a]
 
-    pub type alias CursorAlg[e, a] = { hasNext :: Unit ~> Bool, next :: Unit ~> Result[a, e], finalize :: Unit ~> Unit }
+    pub type alias CursorAlg[e, a] = { hasNext :: Unit -> Bool & Impure, next :: Unit -> Result[a, e] & Impure, finalize :: Unit -> Unit & Impure }
 }
 
 namespace X/Cursor {
@@ -29,7 +29,7 @@ namespace X/Cursor {
     use X.CursorAlg;
     use X.Cursor.{Cursor};
 
-    pub type alias CursorImpl[e, a] = { hasNext :: Unit ~> Bool, next :: Unit ~> Step[e, a], finalize :: Unit ~> Unit }
+    pub type alias CursorImpl[e, a] = { hasNext :: Unit -> Bool & Impure, next :: Unit -> Step[e, a] & Impure, finalize :: Unit -> Unit & Impure}
 
     enum Step[e, a] {
         case Ans(a)
@@ -45,7 +45,7 @@ namespace X/Cursor {
         };
         Cursor({hasNext = steps.hasNext, next = nextF, finalize = steps.finalize})
 
-    pub def guardThunk(thunk: Unit ~> a, err: e): Unit ~> Result[a, e] = match () ->
+    pub def guardThunk(thunk: Unit -> a & Impure, err: e): Unit -> Result[a, e] & Impure = match () ->
         try {
             Ok(thunk())
         } catch {
@@ -143,11 +143,11 @@ namespace X/Cursor {
     }
 
 
-    pub def foreach!(f: a ~> Unit, xs: Cursor[e, a]): Result[Unit, e] & Impure =
+    pub def foreach!(f: a -> Unit & Impure, xs: Cursor[e, a]): Result[Unit, e] & Impure =
         let Cursor(xs1) = xs;
         foreachHelper(f, xs1)
 
-    def foreachHelper(f: a ~> Unit, o: CursorImpl[e, a]): Result[Unit, e] & Impure =
+    def foreachHelper(f: a -> Unit & Impure, o: CursorImpl[e, a]): Result[Unit, e] & Impure =
         let hasNext = o.hasNext;
         match (hasNext()) {
             case true => {
@@ -259,11 +259,11 @@ namespace X/Cursor {
             }
         }
 
-    pub def foreachResult!(f: a ~> Result[b, e], xs: Cursor[e, a]): Result[Unit, e] & Impure =
+    pub def foreachResult!(f: a -> Result[b, e] & Impure, xs: Cursor[e, a]): Result[Unit, e] & Impure =
         let Cursor(xs1) = xs;
         foreachResultHelper(f, xs1)
 
-    def foreachResultHelper(f: a ~> Result[b, e], o: CursorImpl[e, a]): Result[Unit, e] & Impure =
+    def foreachResultHelper(f: a -> Result[b, e] & Impure, o: CursorImpl[e, a]): Result[Unit, e] & Impure =
         let hasNext = o.hasNext;
         match (hasNext()) {
             case true => {
