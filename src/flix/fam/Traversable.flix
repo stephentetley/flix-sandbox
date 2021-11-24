@@ -27,6 +27,9 @@ pub lawless class Traversable[t : Type -> Type] with Functor[t] {
 
 }
 
+/// Add instances for Nel, Chain
+
+
 instance Traversable[List] {
     /// CPS transformed...
     pub def traverse(f: a -> m[b] & ef, t: List[a]): m[List[b]] & ef with Applicative[m] = ListHelper.traverse(f, t)
@@ -42,26 +45,26 @@ instance Traversable[List] {
 instance Traversable[Option] {
     pub def traverse(f: a -> m[b] & ef, t: Option[a]): m[Option[b]] & ef with Applicative[m] =
         use Applicative.{point};
-        use FunctorExtras.{<&>};
+        use Functor.{map};
         match t {
             case None => point(None)
-            case Some(a) => Some <&> f(a)
+            case Some(a) => f(a) |> map(Some)
         }
 
     pub def sequence(t: Option[m[a]]): m[Option[a]] with Applicative[m] =
         use Applicative.{point};
-        use FunctorExtras.{<&>};
+        use Functor.{map};
         match t {
-            case Some(ma) => Some <&> ma
+            case Some(ma) => map(Some, ma)
             case None => point(None)
         }
 
     pub def mapM(f: a -> m[b] & ef, t: Option[a]): m[Option[b]] & ef with Monad[m] =
         use Applicative.{point};
-        use FunctorExtras.{<&>};
+        use Functor.{map};
         match t {
             case None => point(None)
-            case Some(a) => Some <&> f(a)
+            case Some(a) => f(a) |> map(Some)
         }
 
     pub def foreachM(f: a -> m[b] & ef, t: Option[a]): m[Unit] & ef with Monad[m] =
@@ -120,7 +123,7 @@ namespace Traversable {
     }
 
     instance Applicative[StateR[s]] {
-        pub def point(x: a): StateL[s, a] = StateL(s -> (s, x))
+        pub def point(x: a): StateR[s, a] = StateR(s -> (s, x))
 
         pub def ap(f: StateR[s, a -> b & ef], x: StateR[s, a]): StateR[s, b] & ef=
             let StateR(f1) = f;
