@@ -42,6 +42,18 @@ instance Traversable[List] {
 
 }
 
+instance Traversable[Chain] {
+    /// CPS transformed...
+    pub def traverse(f: a -> m[b] & ef, t: Chain[a]): m[Chain[b]] & ef with Applicative[m] = ChainHelper.traverse(f, t)
+
+    pub def sequence(t: Chain[m[a]]): m[Chain[a]] with Applicative[m] = ChainHelper.sequence(t)
+
+    pub def mapM(f: a -> m[b] & ef, t: Chain[a]): m[Chain[b]] & ef with Monad[m] = ChainHelper.mapM(f, t)
+
+    pub def foreachM(f: a -> m[b] & ef, t: Chain[a]): m[Unit] & ef with Monad[m] = ChainHelper.foreachM(f, t)
+
+}
+
 instance Traversable[Option] {
     pub def traverse(f: a -> m[b] & ef, t: Option[a]): m[Option[b]] & ef with Applicative[m] =
         use Applicative.{point};
@@ -197,3 +209,48 @@ namespace ListHelper {
 
 }
 
+/// To be added to Chain...
+namespace ChainHelper {
+    use Applicative.{point};
+    use ApplicativeExtras.{<*>};
+    use FunctorExtras.{<&>};
+
+    def snocA(mxs: f[Chain[a]], mx: f[a]): f[Chain[a]] with Applicative[f] =
+        ((xs, x) -> Chain.snoc(xs, x)) <&> mxs <*> mx
+
+    pub def traverse(f: a -> m[b] & ef, c: Chain[a]): m[Chain[b]] & ef with Applicative[m] =
+        traverseHelper(f, Chain.viewLeft(c), point(Chain.empty()))
+
+    def traverseHelper(f: a -> m[b] & ef, v: Chain.ViewLeft[a], acc: m[Chain[b]]): m[Chain[b]] & ef with Applicative[m] =
+        match v {
+            case Chain/ViewLeft.NoneLeft        => acc as & ef
+            case Chain/ViewLeft.SomeLeft(x, rs) => traverseHelper(f, Chain.viewLeft(rs), snocA(acc, f(x)))
+        }
+
+    pub def sequence(c: Chain[m[a]]): m[Chain[a]] with Applicative[m] =
+        sequenceHelper(Chain.viewLeft(c), point(Chain.empty()))
+
+    def sequenceHelper(v: Chain.ViewLeft[m[a]], acc: m[Chain[a]]): m[Chain[a]] with Applicative[m] =
+        match v {
+            case Chain/ViewLeft.NoneLeft        => acc
+            case Chain/ViewLeft.SomeLeft(x, rs) => sequenceHelper(Chain.viewLeft(rs), snocA(acc, x))
+        }
+
+    pub def mapM(f: a -> m[b] & ef, c: Chain[a]): m[Chain[b]] & ef with Monad[m] =
+        mapMHelper(f, Chain.viewLeft(c), point(Chain.empty()))
+
+    def mapMHelper(f: a -> m[b] & ef, v: Chain.ViewLeft[a], acc: m[Chain[b]]): m[Chain[b]] & ef with Monad[m] =
+        match v {
+            case Chain/ViewLeft.NoneLeft        => acc
+            case Chain/ViewLeft.SomeLeft(x, rs) => mapMHelper(f, Chain.viewLeft(rs), snocA(acc, f(x)))
+        }
+
+    pub def foreachM(f: a -> m[b] & ef, c: Chain[a]): m[Unit] & ef with Monad[m] =
+        foreachMHelper(f, Chain.viewLeft(c), point(()))
+
+    pub def foreachMHelper(f: a -> m[b] & ef, v: Chain.ViewLeft[a], acc: m[Unit]): m[Unit] & ef with Monad[m] =
+        match v {
+            case Chain/ViewLeft.NoneLeft        => acc as & ef
+            case Chain/ViewLeft.SomeLeft(x, rs) => foreachMHelper(f, Chain.viewLeft(rs), Monad.flatMap(_ -> acc, f(x)))
+        }
+}
