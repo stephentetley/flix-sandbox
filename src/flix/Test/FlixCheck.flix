@@ -21,11 +21,11 @@ namespace Test/FlixCheck {
     ///
     /// Represents a random number generator.
     ///
-    pub opaque type Random = ##java.util.SplittableRandom
+    pub opaque type SplittableRandom = ##java.util.SplittableRandom
 
-    def newRandom(): Random & Impure = 
+    def newRandom(): SplittableRandom & Impure =
         import new java.util.SplittableRandom() as newSplittableRandom;
-        Random(newSplittableRandom())
+        SplittableRandom(newSplittableRandom())
         
     // def nextInt(r: Random, max: Int32): Int32 & Impure = 
     //     import java.util.SplittableRandom.nextInt(Int32);
@@ -37,26 +37,26 @@ namespace Test/FlixCheck {
     //     let Random(r1) = r;
     //     nextLong(r1, max)
 
-    def split(r: Random): Random & Impure = 
+    def split(r: SplittableRandom): SplittableRandom & Impure =
         import java.util.SplittableRandom.split();
-        let Random(r1) = r;
-        Random(split(r1))
+        let SplittableRandom(r1) = r;
+        SplittableRandom(split(r1))
 
-    def split2(r: Random): (Random, Random) & Impure = 
+    def split2(r: SplittableRandom): (SplittableRandom, SplittableRandom) & Impure =
         let rx = split(r);
         let ry = split(rx);
         (rx, ry)
 
 
 
-    def randomR(lo: Int32, hi: Int32, r: Random): Int32 & Impure = 
+    def randomR(lo: Int32, hi: Int32, r: SplittableRandom): Int32 & Impure =
         import java.util.SplittableRandom.nextInt(Int32, Int32);
-        let Random(r1) = r;
+        let SplittableRandom(r1) = r;
         nextInt(r1, lo, hi)
 
-    def randomR64(lo: Int64, hi: Int64, r: Random): Int64 & Impure = 
+    def randomR64(lo: Int64, hi: Int64, r: SplittableRandom): Int64 & Impure =
         import java.util.SplittableRandom.nextLong(Int64, Int64);
-        let Random(r1) = r;
+        let SplittableRandom(r1) = r;
         nextLong(r1, lo, hi)
 
     def stringCompare(s: String, t: String): Comparison =
@@ -77,7 +77,7 @@ namespace Test/FlixCheck {
         }
 
 
-    pub opaque type Gen[a] = (Int32, Random) -> a & Impure
+    pub opaque type Gen[a] = (Int32, SplittableRandom) -> a & Impure
 
 
     instance Functor[Gen] {
@@ -99,6 +99,14 @@ namespace Test/FlixCheck {
         pub def coarbitrary(x: a, ma: Gen[b]): Gen[b]
     }
 
+    instance Arbitrary[Unit] {
+        pub def arbitrary(): Gen[Unit] = point()
+    }
+
+    instance Coarbitrary[Unit] {
+        pub def coarbitrary(_: Unit, ma: Gen[b]): Gen[b] = ma
+    }
+
     instance Arbitrary[Bool] {
         pub def arbitrary(): Gen[Bool] =
             let* arr = liftAction(_ -> [true, false]);
@@ -110,12 +118,65 @@ namespace Test/FlixCheck {
     }
 
     instance Arbitrary[Int32] {
-            pub def arbitrary(): Gen[Int32] =
-                sized(n -> choose(-n, n))
-        }
+            pub def arbitrary(): Gen[Int32] = sized(n -> choose(-n, n))
+    }
+
 
     instance Coarbitrary[Int32] {
         pub def coarbitrary(n: Int32, ma: Gen[b]): Gen[b] = coarbitraryInt32(n, ma)
+    }
+
+    instance Arbitrary[Int64] {
+        pub def arbitrary(): Gen[Int64] = sized(n -> { let x = Int32.toInt64(n); chooseInt64(-x, x + 1i64) })
+    }
+
+    instance Coarbitrary[Int64] {
+        pub def coarbitrary(n: Int64, ma: Gen[b]): Gen[b] = coarbitraryInt64(n, ma)
+    }
+
+    instance Arbitrary[(a1, a2)] with Arbitrary[a1], Arbitrary[a2] {
+        pub def arbitrary(): Gen[(a1, a2)] =
+            Applicative.liftA2((x, y) -> (x, y), Test/FlixCheck/Arbitrary.arbitrary(), Test/FlixCheck/Arbitrary.arbitrary())
+    }
+
+    instance Coarbitrary[(a1, a2)] with Coarbitrary[a1], Coarbitrary[a2] {
+        pub def coarbitrary(x: (a1, a2), ma: Gen[b]): Gen[b] =
+            let (a, b) = x;
+            Test/FlixCheck/Coarbitrary.coarbitrary(a, Test/FlixCheck/Coarbitrary.coarbitrary(b, ma))
+    }
+
+    instance Arbitrary[(a1, a2, a3)] with Arbitrary[a1], Arbitrary[a2], Arbitrary[a3] {
+        pub def arbitrary(): Gen[(a1, a2, a3)] =
+            Applicative.liftA3((x, y, z) -> (x, y, z),
+                                Test/FlixCheck/Arbitrary.arbitrary(),
+                                Test/FlixCheck/Arbitrary.arbitrary(),
+                                Test/FlixCheck/Arbitrary.arbitrary())
+    }
+
+    instance Coarbitrary[(a1, a2, a3)] with Coarbitrary[a1], Coarbitrary[a2], Coarbitrary[a3] {
+        pub def coarbitrary(x: (a1, a2, a3), ma: Gen[b]): Gen[b] =
+            let (a, b, c) = x;
+            Test/FlixCheck/Coarbitrary.coarbitrary(a,
+                Test/FlixCheck/Coarbitrary.coarbitrary(b,
+                    Test/FlixCheck/Coarbitrary.coarbitrary(c, ma)))
+    }
+
+    instance Arbitrary[List[a]] with Arbitrary[a] {
+        pub def arbitrary(): Gen[List[a]] =
+            sized(n -> bind(choose(0, n), list))
+    }
+
+    /// TODO make tail recursive
+    instance Coarbitrary[List[a]] with Coarbitrary[a] {
+        pub def coarbitrary(l: List[a], ma: Gen[b]): Gen[b] = match l {
+            case Nil => variant(0, ma)
+            case x :: rs => variant(1, Test/FlixCheck/Coarbitrary.coarbitrary(x, Test/FlixCheck/Coarbitrary.coarbitrary(rs, ma)))
+        }
+    }
+
+    instance Arbitrary[Array[a]] with Arbitrary[a] {
+        pub def arbitrary(): Gen[Array[a]] =
+            sized(n -> bind(choose(0, n), vector))
     }
 
     /// TODO - does this need to be tail recursive?
@@ -123,6 +184,12 @@ namespace Test/FlixCheck {
         case i if i == 0 => variant(0, ma)
         case i if i < 0  => variant(2, (coarbitraryInt32(-n, ma)))
         case _           => variant(1, (coarbitraryInt32(n / 2, ma)))
+    }
+
+    def coarbitraryInt64(n: Int64, ma: Gen[b]): Gen[b] = match n {
+        case i if i == 0i64 => variant(0, ma)
+        case i if i < 0i64  => variant(2, (coarbitraryInt64(-n, ma)))
+        case _              => variant(1, (coarbitraryInt64(n / 2i64, ma)))
     }
 
 
@@ -133,7 +200,7 @@ namespace Test/FlixCheck {
 
     pub def point(x: a): Gen[a] = Gen((_,_) -> x as & Impure)
 
-    def apply1(x: Gen[a], n: Int32, r: Random): a & Impure =
+    def apply1(x: Gen[a], n: Int32, r: SplittableRandom): a & Impure =
         let Gen(f) = x;
         f(n, r)
 
@@ -184,11 +251,11 @@ namespace Test/FlixCheck {
     pub def resize(bound: Int32, x:Gen[a]): Gen[a] = 
         Gen((_,r) -> apply1(x, bound, r))
 
-    pub def rand(): Gen[Random] = 
+    pub def rand(): Gen[SplittableRandom] =
         Gen((_,r) -> r as & Impure)
 
 
-    /// Promote is difficult  to type in presence of effects
+    /// Promote is difficult to type in presence of effects.
     /// See all the casting!
     pub def promote(f: a -> Gen[b] & ef): Gen[a -> b & ef] =
         Gen((n, r) ->
@@ -199,7 +266,7 @@ namespace Test/FlixCheck {
             f1 as & Impure
         )
 
-    pub def generate(n: Int32, rnd: Random, gen: Gen[a]): a & Impure = 
+    pub def generate(n: Int32, rnd: SplittableRandom, gen: Gen[a]): a & Impure =
         let size = randomR(0, Int32.abs(n), rnd);   /// TODO remove abs
         apply1(gen, size, rnd)
 
@@ -215,7 +282,7 @@ namespace Test/FlixCheck {
             mf(n, makeRands(r, v))
         )
 
-    def makeRands(r0: Random, n: Int32): Random & Impure =
+    def makeRands(r0: SplittableRandom, n: Int32): SplittableRandom & Impure =
         if (n <= 0)
             r0
         else {
@@ -241,17 +308,17 @@ namespace Test/FlixCheck {
         let* v = liftAction(_ -> arr[ix]);
         point(v)
 
-    pub def vector(arb: Gen[a], n: Int32): Gen[Array[a]] = 
+    pub def vector(n: Int32): Gen[Array[a]] with Arbitrary[a] =
         Gen((b,r) -> 
-            let f = _ -> apply1(arb, b, r);
+            let f = _ -> apply1(Test/FlixCheck/Arbitrary.arbitrary(), b, r);
             Array.init(f, n)
         )
 
-    pub def list(arb: Gen[a], n: Int32): Gen[List[a]] = 
+    pub def list(n: Int32): Gen[List[a]] with Arbitrary[a] =
         if (n <= 0)
             point(Nil)
         else 
-            listHelper(arb, n)
+            listHelper(Test/FlixCheck/Arbitrary.arbitrary(), n)
 
     def listHelper(arb: Gen[a], n: Int32): Gen[List[a]] = 
         Gen((b,r) -> 
@@ -264,19 +331,7 @@ namespace Test/FlixCheck {
 
     pub def oneof(arr: Array[Gen[a]]): Gen[a] = flatMap(x -> x, elements(arr)) 
 
-    pub def genUnit(): Gen[Unit] = point()
 
-    pub def genBool(): Gen[Bool] =
-        let* arr = liftAction(_ -> [true, false]);
-        elements(arr)
-
-    pub def genInt32(): Gen[Int32] = 
-        sized(n -> choose(-n, n+1))
-        
-
-
-    pub def genInt64(): Gen[Int64] = 
-        sized(n -> { let x = Int32.toInt64(n); chooseInt64(-x, x + 1i64) })
 
     ///
     /// Returns the absolute value of `x`.
@@ -293,9 +348,9 @@ namespace Test/FlixCheck {
         toFloat32(a) + (toFloat32(b) / (absF32(toFloat32(c)) + 1.0f32))
 
     pub def genFloat32(): Gen[Float32] = 
-        let* a = genInt32();
-        let* b = genInt32();
-        let* c = genInt32();        
+        let* a: Int32 = Test/FlixCheck/Arbitrary.arbitrary();
+        let* b: Int32 = Test/FlixCheck/Arbitrary.arbitrary();
+        let* c: Int32 = Test/FlixCheck/Arbitrary.arbitrary();
         point(fractionF32(a,b,c))
 
     ///
@@ -313,24 +368,12 @@ namespace Test/FlixCheck {
         toFloat64(a) + (toFloat64(b) / (absF64(toFloat64(c)) + 1.0f64))
 
     pub def genFloat64(): Gen[Float64] = 
-        let* a = genInt32();
-        let* b = genInt32();
-        let* c = genInt32();        
+        let* a: Int32 = Test/FlixCheck/Arbitrary.arbitrary();
+        let* b: Int32 = Test/FlixCheck/Arbitrary.arbitrary();
+        let* c: Int32 = Test/FlixCheck/Arbitrary.arbitrary();
         point(fractionF64(a,b,c))
 
-    pub def genTuple2(gena: Gen[a], genb: Gen[b]): Gen[(a,b)] = 
-        let* a = gena;
-        let* b = genb;
-        point((a,b))
 
-    pub def genTuple3(gena: Gen[a], genb: Gen[b], genc: Gen[c]): Gen[(a,b,c)] = 
-        let* a = gena;
-        let* b = genb;
-        let* c = genc;
-        point((a,b,c))
-
-    pub def genList(gena: Gen[a]): Gen[List[a]] = 
-        sized(n -> bind(choose(0,n+1), x -> list(gena, x)))
 
     type alias Answer = { okay :: Option[Bool], stamp :: List[String], arguments :: List[String] }
 
@@ -428,7 +471,7 @@ namespace Test/FlixCheck {
         let ans = evaluate(testable, x);
         tests(config, ans, rnd, 0, 0, Nil)
 
-    def tests(config: Config,  gen: Gen[Answer], rnd0: Random,  ntest: Int32, nfail: Int32,  stamps: List[List[String]]): Unit & Impure = 
+    def tests(config: Config,  gen: Gen[Answer], rnd0: SplittableRandom,  ntest: Int32, nfail: Int32,  stamps: List[List[String]]): Unit & Impure =
         match (config.configMaxTest, config.configMaxFail) {
             case (maxtest, _) if maxtest == ntest => done("Ok, passed", ntest, stamps)
             case (_, maxfail) if maxfail == nfail => done("Arguments exhausted after", ntest, stamps)
