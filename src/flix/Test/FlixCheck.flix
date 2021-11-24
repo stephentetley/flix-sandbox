@@ -74,11 +74,22 @@ namespace Test/FlixCheck {
                 else
                     c
                 }
-            
         }
 
 
-    pub opaque type Gen[a] = (Int32, Random) -> a
+    pub opaque type Gen[a] = (Int32, Random) -> a & Impure
+
+
+    instance Functor[Gen] {
+        pub def map(f: a -> b & ef, x: Gen[a]): Gen[b] & ef = map(f, x)
+    }
+
+    instance Applicative[Gen] {
+        pub def point(x: a): Gen[a] = point(x)
+
+        pub def ap(f: Gen[a -> b & ef], x: Gen[a]): Gen[b] & ef = ap(f, x)
+    }
+
 
     pub lawless class Arbitrary[a] {
         pub def arbitrary(): Gen[a]
@@ -98,45 +109,62 @@ namespace Test/FlixCheck {
         pub def coarbitrary(b: Bool, ma: Gen[b]): Gen[b] = variant(if (b) 0 else 1, ma)
     }
 
+    instance Arbitrary[Int32] {
+            pub def arbitrary(): Gen[Int32] =
+                sized(n -> choose(-n, n))
+        }
+
+    instance Coarbitrary[Int32] {
+        pub def coarbitrary(n: Int32, ma: Gen[b]): Gen[b] = coarbitraryInt32(n, ma)
+    }
+
+    /// TODO - does this need to be tail recursive?
+    def coarbitraryInt32(n: Int32, ma: Gen[b]): Gen[b] = match n {
+        case i if i == 0 => variant(0, ma)
+        case i if i < 0  => variant(2, (coarbitraryInt32(-n, ma)))
+        case _           => variant(1, (coarbitraryInt32(n / 2, ma)))
+    }
+
+
     pub def run(x: Gen[a], bounds: Int32): a & Impure = 
         let r1 = newRandom();
         apply1(x, bounds, r1)
 
 
-    pub def return(x: a): Gen[a] = Gen((_,_) -> x as & Impure)
+    pub def point(x: a): Gen[a] = Gen((_,_) -> x as & Impure)
 
     def apply1(x: Gen[a], n: Int32, r: Random): a & Impure =
         let Gen(f) = x;
         f(n, r)
 
-    pub def map(f: a -> b, x: Gen[a]): Gen[b] = 
+    pub def map(f: a -> b & ef, x: Gen[a]): Gen[b] & ef =
         Gen((b,r) -> 
             let a = apply1(x, b, r);
-            f(a)
-        )
+            f(a) as & Impure
+        ) as & ef
 
 
-    pub def ap(mf: Gen[a -> b], ma: Gen[a]): Gen[b] =
+    pub def ap(mf: Gen[a -> b & ef], ma: Gen[a]): Gen[b] & ef =
         Gen((b,r) ->
             let f = apply1(mf, b, r);
             let a = apply1(ma, b, r);
-            f(a)
-        )
+            f(a) as & Impure
+        ) as & ef
 
-    pub def bind(x: Gen[a], k: a -> Gen[b]): Gen[b] = 
+    pub def bind(x: Gen[a], k: a -> Gen[b] & ef): Gen[b] & ef=
         Gen((b,r) -> 
             let a = apply1(x, b, r); 
-            let y = k(a);
+            let y = k(a) as & Impure;
             apply1(y, b, r)
-        )
+        ) as & ef
 
-    pub def flatMap(k: a -> Gen[b], x: Gen[a]): Gen[b] = bind(x, k)
+    pub def flatMap(k: a -> Gen[b] & ef, x: Gen[a]): Gen[b] & ef = bind(x, k)
 
     pub def liftAction(f: Unit -> a & Impure): Gen[a] =
         Gen((_,_) -> f())
 
 
-    pub def sequence(xs: List[Gen[a]]): Gen[List[a]] = sequenceHelper(xs, return)
+    pub def sequence(xs: List[Gen[a]]): Gen[List[a]] = sequenceHelper(xs, point)
 
     pub def sequenceHelper(xs: List[Gen[a]], k: List[a]-> Gen[List[a]]): Gen[List[a]] = 
         match xs {
@@ -159,18 +187,17 @@ namespace Test/FlixCheck {
     pub def rand(): Gen[Random] = 
         Gen((_,r) -> r as & Impure)
 
-    ///
-    /// /// Promote is difficult (impossible?) to type in presence of effects
-    ///
-    /// pub def promote(f: a -> Gen[b] & ef): Gen[a -> b] & ef=
-    ///     Gen((n, r) ->
-    ///         let f1 = a -> {
-    ///             let mf: Gen[b] = f(a);
-    ///             let ans: b = apply1(mf, n, r);
-    ///             ans
-    ///             };
-    ///         f1
-    ///     )
+
+    /// Promote is difficult  to type in presence of effects
+    /// See all the casting!
+    pub def promote(f: a -> Gen[b] & ef): Gen[a -> b & ef] =
+        Gen((n, r) ->
+            let f1 = a -> {
+                let mf: Gen[b] = f(a) as & Pure;
+                apply1(mf, n, r) as & ef
+                };
+            f1 as & Impure
+        )
 
     pub def generate(n: Int32, rnd: Random, gen: Gen[a]): a & Impure = 
         let size = randomR(0, Int32.abs(n), rnd);   /// TODO remove abs
@@ -180,7 +207,7 @@ namespace Test/FlixCheck {
     pub def choose(lo:Int32, hi: Int32): Gen[Int32] = 
         let* r1 = rand();
         let* v = liftAction(_ -> randomR(lo, hi, r1));
-        return(v)
+        point(v)
 
     pub def variant(v: Int32, m: Gen[a]): Gen[a] =
         Gen((n,r) ->
@@ -206,13 +233,13 @@ namespace Test/FlixCheck {
     def chooseInt64(lo:Int64, hi: Int64): Gen[Int64] = 
         let* r1 = rand();
         let* v = liftAction(_ -> randomR64(lo, hi, r1));
-        return(v)
+        point(v)
 
     pub def elements(arr: Array[a]): Gen[a] = 
         let hi = Array.length(arr);
         let* ix = choose(0, hi);
         let* v = liftAction(_ -> arr[ix]);
-        return(v)
+        point(v)
 
     pub def vector(arb: Gen[a], n: Int32): Gen[Array[a]] = 
         Gen((b,r) -> 
@@ -222,7 +249,7 @@ namespace Test/FlixCheck {
 
     pub def list(arb: Gen[a], n: Int32): Gen[List[a]] = 
         if (n <= 0)
-            return(Nil)
+            point(Nil)
         else 
             listHelper(arb, n)
 
@@ -237,7 +264,7 @@ namespace Test/FlixCheck {
 
     pub def oneof(arr: Array[Gen[a]]): Gen[a] = flatMap(x -> x, elements(arr)) 
 
-    pub def genUnit(): Gen[Unit] = return()
+    pub def genUnit(): Gen[Unit] = point()
 
     pub def genBool(): Gen[Bool] =
         let* arr = liftAction(_ -> [true, false]);
@@ -269,7 +296,7 @@ namespace Test/FlixCheck {
         let* a = genInt32();
         let* b = genInt32();
         let* c = genInt32();        
-        return(fractionF32(a,b,c))
+        point(fractionF32(a,b,c))
 
     ///
     /// Returns the absolute value of `x`.
@@ -289,18 +316,18 @@ namespace Test/FlixCheck {
         let* a = genInt32();
         let* b = genInt32();
         let* c = genInt32();        
-        return(fractionF64(a,b,c))
+        point(fractionF64(a,b,c))
 
     pub def genTuple2(gena: Gen[a], genb: Gen[b]): Gen[(a,b)] = 
         let* a = gena;
         let* b = genb;
-        return((a,b))
+        point((a,b))
 
     pub def genTuple3(gena: Gen[a], genb: Gen[b], genc: Gen[c]): Gen[(a,b,c)] = 
         let* a = gena;
         let* b = genb;
         let* c = genc;
-        return((a,b,c))
+        point((a,b,c))
 
     pub def genList(gena: Gen[a]): Gen[List[a]] = 
         sized(n -> bind(choose(0,n+1), x -> list(gena, x)))
@@ -312,7 +339,7 @@ namespace Test/FlixCheck {
     pub opaque type Property = Gen[Answer]
 
     pub def answer(ans: Answer): Property = 
-        let ma = return(ans); 
+        let ma = point(ans);
         Property(ma)
 
     pub def evaluate(testable: a -> Property, x: a): Gen[Answer] = 
@@ -342,7 +369,7 @@ namespace Test/FlixCheck {
         Property(
             let* a = gen;
             let* ans = evaluate(dict.testable, body(a));
-            return(argument(a, ans))
+            point(argument(a, ans))
         )
 
     /// QuickChecks `==>`
