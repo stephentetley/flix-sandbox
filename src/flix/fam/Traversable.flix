@@ -72,8 +72,74 @@ instance Traversable[Option] {
         }
 }
 
+namespace Traversable {
 
+    pub def mapAccumLeft(f: acc -> a -> (acc, b), start: acc, t: t[a]): (acc, t[b]) with Traversable[t] =
+        runStateL(traverse(x1 -> StateL(flip(f, x1)), t), start)
 
+    opaque type StateL[s, a] = s -> (s, a)
+
+    instance Functor[StateL[s]] {
+        pub def map(f: a -> b & ef, x: StateL[s, a]): StateL[s, b] & ef=
+            let StateL(x1) = x;
+            StateL(s ->
+                let (s1, v1) = x1(s);
+                (s1, f(v1) as & Pure)
+            ) as & ef
+    }
+
+    instance Applicative[StateL[s]] {
+        pub def point(x: a): StateL[s, a] = StateL(s -> (s, x))
+
+        pub def ap(f: StateL[s, a -> b & ef], x: StateL[s, a]): StateL[s, b] & ef =
+            let StateL(f1) = f;
+            let StateL(x1) = x;
+            StateL(s ->
+                let (s1, f2) = f1(s);
+                let (s2, v) = x1(s1);
+                (s2, f2(v) as & Pure)
+            ) as & ef
+    }
+
+    def runStateL(x: StateL[s, a], state: s): (s, a) =
+        let StateL(x1) = x;
+        x1(state)
+
+    pub def mapAccumRight(f: acc -> a -> (acc, b), start: acc, t: t[a]): (acc, t[b]) with Traversable[t] =
+        runStateR(traverse(x1 -> StateR(flip(f, x1)), t), start)
+
+    opaque type StateR[s, a] = s -> (s, a)
+
+    instance Functor[StateR[s]] {
+        pub def map(f: a -> b & ef, x: StateR[s, a]): StateR[s, b] & ef =
+            let StateR(x1) = x;
+            StateR(s ->
+                let (s1, v1) = x1(s);
+                (s1, f(v1) as & Pure)
+            ) as & ef
+    }
+
+    instance Applicative[StateR[s]] {
+        pub def point(x: a): StateL[s, a] = StateL(s -> (s, x))
+
+        pub def ap(f: StateR[s, a -> b & ef], x: StateR[s, a]): StateR[s, b] & ef=
+            let StateR(f1) = f;
+            let StateR(x1) = x;
+            StateR(s ->
+                /// Eval order is reverse of StateL...
+                let (s1, v) = x1(s);
+                let (s2, f2) = f1(s1);
+                (s2, f2(v) as & Pure)
+            ) as & ef
+    }
+
+    def runStateR(x: StateR[s, a], state: s): (s, a) =
+        let StateR(x1) = x;
+        x1(state)
+
+}
+
+/// To be added to List...
 namespace ListHelper {
     use ApplicativeExtras.{<*>};
     use FunctorExtras.{<&>};
@@ -81,7 +147,7 @@ namespace ListHelper {
     pub def traverse(f: a -> m[b] & ef, xs: List[a]): m[List[b]] & ef with Applicative[m] =
         traverseHelper(f, xs, ks -> ks as & ef)
 
-    pub def traverseHelper(f: a -> m[b] & ef, xs: List[a], k: m[List[b]] -> m[List[b]] & ef): m[List[b]] & ef with Applicative[m] =
+    def traverseHelper(f: a -> m[b] & ef, xs: List[a], k: m[List[b]] -> m[List[b]] & ef): m[List[b]] & ef with Applicative[m] =
         match xs {
             case Nil => k(Applicative.point(Nil)) as & ef
             case x :: rs => traverseHelper(f, rs, ks -> k(consA(f(x), ks)))
@@ -93,7 +159,7 @@ namespace ListHelper {
 
     pub def sequence(xs: List[m[a]]): m[List[a]] with Applicative[m] = sequenceHelper(xs, ks -> ks)
 
-    pub def sequenceHelper(xs: List[m[a]], k: m[List[a]] -> m[List[a]]): m[List[a]] with Applicative[m] =
+    def sequenceHelper(xs: List[m[a]], k: m[List[a]] -> m[List[a]]): m[List[a]] with Applicative[m] =
         match xs {
             case Nil => k(Applicative.point(Nil))
             case mx :: rs => sequenceHelper(rs, ks -> k(consA(mx, ks)))
@@ -101,7 +167,7 @@ namespace ListHelper {
 
     pub def sequenceX(xs: List[m[a]]): m[Unit] with Applicative[m] = sequenceXHelper(xs, k -> k)
 
-    pub def sequenceXHelper(xs: List[m[a]], k: m[Unit] -> m[Unit]): m[Unit] with Applicative[m] =
+    def sequenceXHelper(xs: List[m[a]], k: m[Unit] -> m[Unit]): m[Unit] with Applicative[m] =
         use ApplicativeExtras.{seqRight};
         match xs {
             case Nil => k(Applicative.point(()))
@@ -111,7 +177,7 @@ namespace ListHelper {
     pub def mapM(f: a -> m[b] & ef, xs: List[a]): m[List[b]] & ef with Monad[m] =
         mapMHelper(f, xs, ks -> ks as & ef)
 
-    pub def mapMHelper(f: a -> m[b] & ef, xs: List[a], k: m[List[b]] -> m[List[b]] & ef): m[List[b]] & ef with Monad[m] =
+    def mapMHelper(f: a -> m[b] & ef, xs: List[a], k: m[List[b]] -> m[List[b]] & ef): m[List[b]] & ef with Monad[m] =
         match xs {
             case Nil => k(Applicative.point(Nil)) as & ef
             case x :: rs => mapMHelper(f, rs, ks -> k(consA(f(x), ks)))

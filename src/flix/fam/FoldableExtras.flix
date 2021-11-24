@@ -28,14 +28,32 @@ namespace FoldableExtras {
 
     pub def forX(t: t[a], f: a -> m[b] & ef): m[Unit] & ef with Foldable[t], Applicative[m] = traverseX(f, t)
 
-    pub def asum(t: t[m[a]]): m[a] with Foldable[t], Alternative[m] =
-        use Alternative.{<|>};
-        Foldable.foldLeft((mb, ma) -> mb <|> ma, Alternative.zero(), t)
 
     pub def concat(t: t[List[a]]): List[a] with Foldable[t] =
-        let makeDList = xs -> (ys -> List.append(xs, ys));
-        let appendDList = (f, g) -> xs -> f(g(xs));
-        let unDList = f -> f(Nil);
-        Foldable.foldLeft((ac, xs) -> appendDList(ac, makeDList(xs)), xs -> xs, t) |> unDList
+        Foldable.foldLeft((ac, xs) -> Chain.append(ac, List.toChain(xs)), Chain.empty(), t) |> Chain.toList
+
+    pub def concatMap(f: a -> List[b], t: t[a]): List[b] with Foldable[t] =
+        Foldable.foldLeft((ac, x) -> Chain.append(ac, List.toChain(f(x))), Chain.empty(), t) |> Chain.toList
+
+    /// `String.unlines` generalized to any Foldable `t[String]`.
+    pub def unlines(t: t[String]): String with Foldable[t] = unlinesHelper(t) as & Pure
+
+    def unlinesHelper(t: t[String]): String & Impure with Foldable[t] =
+        let sb = StringBuilder.new();
+        Foldable.foldLeft((_, x) -> StringBuilder.appendLine!(sb, x), (), t);
+        StringBuilder.toString(sb)
+
+    /// `String.unwords` generalized to any Foldable `t[String]`.
+    pub def unwords(t: t[String]): String with Foldable[t] = unwordsHelper(t) as & Pure
+
+    def unwordsHelper(t: t[String]): String & Impure with Foldable[t] =
+        let sb = StringBuilder.new();
+        let step = (n, x) ->
+            if (n < 1)
+                {StringBuilder.appendString!(sb, x); n + 1}
+            else
+                {StringBuilder.appendChar!(sb, ' '); StringBuilder.appendString!(sb, x); n + 1};
+        Foldable.foldLeft(step, 0, t);
+        StringBuilder.toString(sb)
 
 }
