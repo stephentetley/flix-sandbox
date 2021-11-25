@@ -66,21 +66,26 @@ instance Traversable[Chain] {
 
 }
 
-/// TODO - cannot introduce an Order constraint on the Traversable signature so this won't work.
-/// The solution would be to implement Functor and Traversable on RedBlackTree without rebuilding
-/// so we don't have to include Order in the signatures.
+instance Traversable[RedBlackTree.RedBlackTree[k]] {
+    pub def traverse(f: a -> m[b] & ef, t: RedBlackTree.RedBlackTree[k, a]): m[RedBlackTree.RedBlackTree[k, b]] & ef with Applicative[m] = RedBlackTreeHelper.traverse(f, t)
 
-/// instance Traversable[Map[k]] {
-///
-///     pub def traverse(f: a -> m[b] & ef, t: Map[k, a]): m[Map[k, b]] & ef with Applicative[m] = MapHelper.traverse(f, t)
-///
-///     pub def sequence(t: Map[k, m[a]]): m[Map[k, a]] with Applicative[m] = MapHelper.sequence(t)
-///
-///     pub def mapM(f: a -> m[b] & ef, t: Map[k, a]): m[Map[k, b]] & ef with Monad[m] = MapHelper.mapM(f, t)
-///
-///     pub def foreachM(f: a -> m[b] & ef, t: Map[k, a]): m[Unit] & ef with Monad[m] = MapHelper.foreachM(f, t)
-///
-/// }
+    pub def sequence(t: RedBlackTree.RedBlackTree[k, m[a]]): m[RedBlackTree.RedBlackTree[k, a]] with Applicative[m] = RedBlackTreeHelper.sequence(t)
+
+    pub def mapM(f: a -> m[b] & ef, t: RedBlackTree.RedBlackTree[k, a]): m[RedBlackTree.RedBlackTree[k, b]] & ef with Monad[m] = RedBlackTreeHelper.mapM(f, t)
+
+    pub def foreachM(f: a -> m[b] & ef, t: RedBlackTree.RedBlackTree[k, a]): m[Unit] & ef with Monad[m] = RedBlackTreeHelper.foreachM(f, t)
+}
+
+
+instance Traversable[Map[k]] {
+    pub def traverse(f: a -> m[b] & ef, t: Map[k, a]): m[Map[k, b]] & ef with Applicative[m] = MapHelper.traverse(f, t)
+
+    pub def sequence(t: Map[k, m[a]]): m[Map[k, a]] with Applicative[m] = MapHelper.sequence(t)
+
+    pub def mapM(f: a -> m[b] & ef, t: Map[k, a]): m[Map[k, b]] & ef with Monad[m] = MapHelper.mapM(f, t)
+
+    pub def foreachM(f: a -> m[b] & ef, t: Map[k, a]): m[Unit] & ef with Monad[m] = MapHelper.foreachM(f, t)
+}
 
 instance Traversable[Option] {
     pub def traverse(f: a -> m[b] & ef, t: Option[a]): m[Option[b]] & ef with Applicative[m] =
@@ -310,33 +315,72 @@ namespace ChainHelper {
         }
 }
 
+namespace RedBlackTreeHelper {
+
+    use RedBlackTree.RedBlackTree;
+    use RedBlackTree.Color;
+    use RedBlackTree.RedBlackTree.{Node, Leaf};
+    use Applicative.{point};
+    use FunctorExtras.{<&>};
+    use ApplicativeExtras.{<*>};
+
+
+    def nodeA(color: Color, left: m[RedBlackTree[k, v]], k: k, value: m[v], right: m[RedBlackTree[k, v]]): m[RedBlackTree[k, v]] with Applicative[m] =
+        (((l, v, r) -> Node(color, l, k, v, r)) <&> left <*> value) <*> right
+
+    ///
+    /// Returns a RedBlackTree with mappings `k -> f(v)` for every `k -> v` in `tree`.
+    ///
+    /// Not tail-recursive!
+    pub def mapAWithKey(f: (k, v1) -> m[v2] & ef, tree: RedBlackTree[k, v1]): m[RedBlackTree[k, v2]] & ef  with Applicative[m] = match tree {
+        case Node(color, left, k, v, right) => nodeA(color, mapAWithKey(f, left), k, f(k, v), mapAWithKey(f, right))
+        case _                              => point(Leaf)
+    }
+
+    pub def traverse(f: v1 -> m[v2] & ef, t: RedBlackTree[k, v1]): m[RedBlackTree[k, v2]] & ef  with Applicative[m] =
+        mapAWithKey((_, v) -> f(v), t)
+
+    pub def sequence(t: RedBlackTree[k, m[v]]): m[RedBlackTree[k, v]] with Applicative[m] =
+        mapAWithKey((_, v) -> v, t)
+
+    pub def mapM(f: v1 -> m[v2] & ef, t: RedBlackTree[k, v1]): m[RedBlackTree[k, v2]] & ef with Monad[m] =
+        mapAWithKey((_, v) -> f(v), t)
+
+    pub def foreachM(f: v1 -> m[v2] & ef, t: RedBlackTree[k, v1]): m[Unit] & ef with Monad[m] =
+        RedBlackTree.foldLeft((acc, _, v) -> (((_, acc1) -> acc1) <&> f(v) <*> acc), point(()), t)
+
+}
+
+
 /// To be added to Map...
 namespace MapHelper {
     use Applicative.{point};
     use ApplicativeExtras.{<*>};
     use FunctorExtras.{<&>};
 
-    def insertA(k: k, mx: m[v], mm: m[Map[k, v]]): m[Map[k, v]] with Applicative[m], Order[k] =
-        ((v, m) -> Map.insert(k, v, m)) <&> mx <*> mm
+    pub def traverse(f: v1 -> m[v2] & ef, m: Map[k, v1]): m[Map[k, v2]] & ef with Applicative[m] =
+        let Map(tree) = m;
+        Map <&> Traversable.traverse(f, tree)
 
+    pub def traverseWithKey(f: (k, v1) -> m[v2] & ef, m: Map[k, v1]): m[Map[k, v2]] & ef with Applicative[m] =
+        let Map(tree) = m;
+        Map <&> RedBlackTreeHelper.mapAWithKey(f, tree)
 
-    pub def traverse(f: v1 -> m[v2] & ef, m: Map[k, v1]): m[Map[k, v2]] & ef with Applicative[m], Order[k] =
-        Map.foldLeftWithKey((acc, k, v) -> insertA(k, f(v), acc), point(Map.empty()), m)
+    pub def sequence(m: Map[k, m[v]]): m[Map[k, v]] with Applicative[m] =
+        let Map(tree) = m;
+        Map <&> Traversable.sequence(tree)
 
-    pub def traverseWithKey(f: (k, v1) -> m[v2] & ef, m: Map[k, v1]): m[Map[k, v2]] & ef with Applicative[m], Order[k] =
-        Map.foldLeftWithKey((acc, k, v) -> insertA(k, f(k, v), acc), point(Map.empty()), m)
+    pub def mapM(f: v1 -> m[v2] & ef, m: Map[k, v1]): m[Map[k, v2]] & ef with Monad[m] =
+        let Map(tree) = m;
+        Map <&> Traversable.mapM(f, tree)
 
-    pub def sequence(m: Map[k, m[v]]): m[Map[k, v]] with Applicative[m], Order[k] =
-        Map.foldLeftWithKey((acc, k, v) -> insertA(k, v, acc), point(Map.empty()), m)
-
-    pub def mapM(f: v1 -> m[v2] & ef, m: Map[k, v1]): m[Map[k, v2]] & ef with Monad[m], Order[k] =
-        Map.foldLeftWithKey((acc, k, v) -> insertA(k, f(v), acc), point(Map.empty()), m)
-
-    pub def mapMWithKey(f: (k, v1) -> m[v2] & ef, m: Map[k, v1]): m[Map[k, v2]] & ef with Monad[m], Order[k] =
-        Map.foldLeftWithKey((acc, k, v) -> insertA(k, f(k, v), acc), point(Map.empty()), m)
+    pub def mapMWithKey(f: (k, v1) -> m[v2] & ef, m: Map[k, v1]): m[Map[k, v2]] & ef with Monad[m] =
+        let Map(tree) = m;
+        Map <&> RedBlackTreeHelper.mapAWithKey(f, tree)
 
     pub def foreachM(f: v1 -> m[v2] & ef, m: Map[k, v1]): m[Unit] & ef with Monad[m] =
-        Map.foldLeftWithKey((acc, _, v) -> (((_, acc1) -> acc1) <&> f(v) <*> acc), point(()), m)
+        let Map(tree) = m;
+        Traversable.foreachM(f, tree)
 
     pub def foreachMWithKey(f: (k, v1) -> m[v2] & ef, m: Map[k, v1]): m[Unit] & ef with Monad[m] =
         Map.foldLeftWithKey((acc, k, v) -> (((_, acc1) -> acc1) <&> f(k, v) <*> acc), point(()), m)
