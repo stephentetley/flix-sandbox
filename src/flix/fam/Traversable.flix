@@ -66,6 +66,22 @@ instance Traversable[Chain] {
 
 }
 
+/// TODO - cannot introduce an Order constraint on the Traversable signature so this won't work.
+/// The solution would be to implement Functor and Traversable on RedBlackTree without rebuilding
+/// so we don't have to include Order in the signatures.
+
+/// instance Traversable[Map[k]] {
+///
+///     pub def traverse(f: a -> m[b] & ef, t: Map[k, a]): m[Map[k, b]] & ef with Applicative[m] = MapHelper.traverse(f, t)
+///
+///     pub def sequence(t: Map[k, m[a]]): m[Map[k, a]] with Applicative[m] = MapHelper.sequence(t)
+///
+///     pub def mapM(f: a -> m[b] & ef, t: Map[k, a]): m[Map[k, b]] & ef with Monad[m] = MapHelper.mapM(f, t)
+///
+///     pub def foreachM(f: a -> m[b] & ef, t: Map[k, a]): m[Unit] & ef with Monad[m] = MapHelper.foreachM(f, t)
+///
+/// }
+
 instance Traversable[Option] {
     pub def traverse(f: a -> m[b] & ef, t: Option[a]): m[Option[b]] & ef with Applicative[m] =
         use Applicative.{point};
@@ -292,4 +308,37 @@ namespace ChainHelper {
             case Chain/ViewLeft.NoneLeft        => acc as & ef
             case Chain/ViewLeft.SomeLeft(x, rs) => foreachMHelper(f, Chain.viewLeft(rs), Monad.flatMap(_ -> acc, f(x)))
         }
+}
+
+/// To be added to Map...
+namespace MapHelper {
+    use Applicative.{point};
+    use ApplicativeExtras.{<*>};
+    use FunctorExtras.{<&>};
+
+    def insertA(k: k, mx: m[v], mm: m[Map[k, v]]): m[Map[k, v]] with Applicative[m], Order[k] =
+        ((v, m) -> Map.insert(k, v, m)) <&> mx <*> mm
+
+
+    pub def traverse(f: v1 -> m[v2] & ef, m: Map[k, v1]): m[Map[k, v2]] & ef with Applicative[m], Order[k] =
+        Map.foldLeftWithKey((acc, k, v) -> insertA(k, f(v), acc), point(Map.empty()), m)
+
+    pub def traverseWithKey(f: (k, v1) -> m[v2] & ef, m: Map[k, v1]): m[Map[k, v2]] & ef with Applicative[m], Order[k] =
+        Map.foldLeftWithKey((acc, k, v) -> insertA(k, f(k, v), acc), point(Map.empty()), m)
+
+    pub def sequence(m: Map[k, m[v]]): m[Map[k, v]] with Applicative[m], Order[k] =
+        Map.foldLeftWithKey((acc, k, v) -> insertA(k, v, acc), point(Map.empty()), m)
+
+    pub def mapM(f: v1 -> m[v2] & ef, m: Map[k, v1]): m[Map[k, v2]] & ef with Monad[m], Order[k] =
+        Map.foldLeftWithKey((acc, k, v) -> insertA(k, f(v), acc), point(Map.empty()), m)
+
+    pub def mapMWithKey(f: (k, v1) -> m[v2] & ef, m: Map[k, v1]): m[Map[k, v2]] & ef with Monad[m], Order[k] =
+        Map.foldLeftWithKey((acc, k, v) -> insertA(k, f(k, v), acc), point(Map.empty()), m)
+
+    pub def foreachM(f: v1 -> m[v2] & ef, m: Map[k, v1]): m[Unit] & ef with Monad[m] =
+        Map.foldLeftWithKey((acc, _, v) -> (((_, acc1) -> acc1) <&> f(v) <*> acc), point(()), m)
+
+    pub def foreachMWithKey(f: (k, v1) -> m[v2] & ef, m: Map[k, v1]): m[Unit] & ef with Monad[m] =
+        Map.foldLeftWithKey((acc, k, v) -> (((_, acc1) -> acc1) <&> f(k, v) <*> acc), point(()), m)
+
 }
