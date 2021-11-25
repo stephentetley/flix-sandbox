@@ -324,6 +324,22 @@ namespace RedBlackTreeHelper {
     use FunctorExtras.{<&>};
     use ApplicativeExtras.{<*>};
 
+    ///
+    /// Returns a RedBlackTree with mappings `k -> f(v)` for every `k -> v` in `tree`.
+    ///
+    pub def mapWithKey(f: (k, v1) -> v2 & ef, tree: RedBlackTree[k, v1]): RedBlackTree[k, v2] & ef =
+        mapWithKeyHelper(f, tree, t -> t as & ef)
+
+    def mapWithKeyHelper(f: (k, v1) -> v2 & ef,
+                        tree: RedBlackTree[k, v1],
+                        k: RedBlackTree[k, v2] -> RedBlackTree[k, v2] & ef): RedBlackTree[k, v2] & ef = match tree {
+        case Node(color, left, key, v, right) =>
+            mapWithKeyHelper(f, left, kl ->
+                mapWithKeyHelper(f, right, kr ->
+                    let v1 = f(key, v);
+                    k(Node(color, kl, key, v1, kr))))
+        case _                              => k(Leaf)
+    }
 
     def nodeA(color: Color, left: m[RedBlackTree[k, v]], k: k, value: m[v], right: m[RedBlackTree[k, v]]): m[RedBlackTree[k, v]] with Applicative[m] =
         (((l, v, r) -> Node(color, l, k, v, r)) <&> left <*> value) <*> right
@@ -331,11 +347,21 @@ namespace RedBlackTreeHelper {
     ///
     /// Returns a RedBlackTree with mappings `k -> f(v)` for every `k -> v` in `tree`.
     ///
-    /// Not tail-recursive!
-    pub def mapAWithKey(f: (k, v1) -> m[v2] & ef, tree: RedBlackTree[k, v1]): m[RedBlackTree[k, v2]] & ef  with Applicative[m] = match tree {
-        case Node(color, left, k, v, right) => nodeA(color, mapAWithKey(f, left), k, f(k, v), mapAWithKey(f, right))
-        case _                              => point(Leaf)
-    }
+    pub def mapAWithKey(f: (k, v1) -> m[v2] & ef,
+                        tree: RedBlackTree[k, v1]): m[RedBlackTree[k, v2]] & ef with Applicative[m] =
+        mapAWithKeyHelper(f, tree, t -> t as & ef)
+
+    def mapAWithKeyHelper(f: (k, v1) -> m[v2] & ef,
+                        tree: RedBlackTree[k, v1],
+                        k: m[RedBlackTree[k, v2]] -> m[RedBlackTree[k, v2]] & ef): m[RedBlackTree[k, v2]] & ef with Applicative[m] =
+        match tree {
+            case Node(color, left, key, v, right) =>
+                mapAWithKeyHelper(f, left, kl ->
+                    mapAWithKeyHelper(f, right, kr ->
+                        let mv = f(key, v);
+                        k(nodeA(color, kl, key, mv, kr))))
+            case _                              => k(point(Leaf))
+        }
 
     pub def traverse(f: v1 -> m[v2] & ef, t: RedBlackTree[k, v1]): m[RedBlackTree[k, v2]] & ef  with Applicative[m] =
         mapAWithKey((_, v) -> f(v), t)
