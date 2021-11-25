@@ -42,6 +42,18 @@ instance Traversable[List] {
 
 }
 
+instance Traversable[Nel] {
+    /// CPS transformed...
+    pub def traverse(f: a -> m[b] & ef, t: Nel[a]): m[Nel[b]] & ef with Applicative[m] = NelHelper.traverse(f, t)
+
+    pub def sequence(t: Nel[m[a]]): m[Nel[a]] with Applicative[m] = NelHelper.sequence(t)
+
+    pub def mapM(f: a -> m[b] & ef, t: Nel[a]): m[Nel[b]] & ef with Monad[m] = NelHelper.mapM(f, t)
+
+    pub def foreachM(f: a -> m[b] & ef, t: Nel[a]): m[Unit] & ef with Monad[m] = NelHelper.foreachM(f, t)
+
+}
+
 instance Traversable[Chain] {
     /// CPS transformed...
     pub def traverse(f: a -> m[b] & ef, t: Chain[a]): m[Chain[b]] & ef with Applicative[m] = ChainHelper.traverse(f, t)
@@ -207,6 +219,33 @@ namespace ListHelper {
             case x :: rs => foreachMHelper(f, rs, ku -> k(Monad.flatMap(_ -> ku, f(x))))
         }
 
+}
+
+/// To be added to Nel...
+namespace NelHelper {
+
+    use ApplicativeExtras.{<*>};
+    use FunctorExtras.{<&>};
+
+    pub def traverse(f: a -> m[b] & ef, xs: Nel[a]): m[Nel[b]] & ef with Applicative[m] =
+        match xs {
+            case Nel(x, rs) => ((y, ys) -> Nel(y, ys)) <&> f(x) <*> Traversable.traverse(f, rs)
+        }
+
+    pub def sequence(xs: Nel[m[a]]): m[Nel[a]] with Applicative[m] =
+        match xs {
+            case Nel(x, rs) => ((y, ys) -> Nel(y, ys)) <&> x <*> Traversable.sequence(rs)
+        }
+
+    pub def mapM(f: a -> m[b] & ef, xs: Nel[a]): m[Nel[b]] & ef with Monad[m] =
+        match xs {
+            case Nel(x, rs) => ((y, ys) -> Nel(y, ys)) <&> f(x) <*> Traversable.mapM(f, rs)
+        }
+
+    pub def foreachM(f: a -> m[b] & ef, xs: Nel[a]): m[Unit] & ef with Monad[m] =
+        match xs {
+            case Nel(x, rs) => ((_, ac) -> ac) <&> f(x) <*> Traversable.foreachM(f, rs)
+        }
 }
 
 /// To be added to Chain...
