@@ -347,8 +347,7 @@ namespace RedBlackTreeHelper {
     ///
     /// Returns a RedBlackTree with mappings `k -> f(v)` for every `k -> v` in `tree`.
     ///
-    pub def mapAWithKey(f: (k, v1) -> m[v2] & ef,
-                        tree: RedBlackTree[k, v1]): m[RedBlackTree[k, v2]] & ef with Applicative[m] =
+    pub def mapAWithKey(f: (k, v1) -> m[v2] & ef, tree: RedBlackTree[k, v1]): m[RedBlackTree[k, v2]] & ef with Applicative[m] =
         mapAWithKeyHelper(f, tree, t -> t as & ef)
 
     def mapAWithKeyHelper(f: (k, v1) -> m[v2] & ef,
