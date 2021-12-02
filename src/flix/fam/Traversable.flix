@@ -16,27 +16,30 @@
 
 pub lawless class Traversable[t : Type -> Type] with Functor[t] {
 
-    pub def traverse(f: a -> m[b] & ef, c: t[a]): m[t[b]] & ef with Applicative[m]
+    pub def traverse(f: a -> m[b] & ef, t: t[a]): m[t[b]] & ef with Applicative[m]
 
-    pub def sequence(c: t[m[a]]): m[t[a]] with Applicative[m]
+    pub def sequence(t: t[m[a]]): m[t[a]] with Applicative[m] =
+        Traversable.traverse(identity, t)
 
-    pub def mapM(f: a -> m[b] & ef, c: t[a]): m[t[b]] & ef with Monad[m]
+    pub def mapM(f: a -> m[b] & ef, t: t[a]): m[t[b]] & ef with Monad[m] =
+        Traversable.traverse(f, t)
 
     /// This would be better placed in Foldable...
     pub def foreachM(f: a -> m[b] & ef, c: t[a]): m[Unit] & ef with Monad[m]
 
-}
+    ///
+    /// Traversing with the identity function wrapped into an applicative preserves the container `t`.
+    ///
+    law identity: forall(t: t[a], f: a -> m[a]) with Eq[m[t[a]]], Applicative[m] . Traversable.traverse(f, t) == Applicative.point(t)
 
-/// Add instances for Nel, Chain
+}
 
 
 instance Traversable[List] {
-    /// CPS transformed...
+
     pub def traverse(f: a -> m[b] & ef, t: List[a]): m[List[b]] & ef with Applicative[m] = ListHelper.traverse(f, t)
 
-    pub def sequence(t: List[m[a]]): m[List[a]] with Applicative[m] = ListHelper.sequence(t)
-
-    pub def mapM(f: a -> m[b] & ef, t: List[a]): m[List[b]] & ef with Monad[m] = ListHelper.mapM(f, t)
+    pub override def sequence(t: List[m[a]]): m[List[a]] with Applicative[m] = ListHelper.sequence(t)
 
     pub def foreachM(f: a -> m[b] & ef, t: List[a]): m[Unit] & ef with Monad[m] = ListHelper.foreachM(f, t)
 
@@ -46,9 +49,7 @@ instance Traversable[Nel] {
     /// CPS transformed...
     pub def traverse(f: a -> m[b] & ef, t: Nel[a]): m[Nel[b]] & ef with Applicative[m] = NelHelper.traverse(f, t)
 
-    pub def sequence(t: Nel[m[a]]): m[Nel[a]] with Applicative[m] = NelHelper.sequence(t)
-
-    pub def mapM(f: a -> m[b] & ef, t: Nel[a]): m[Nel[b]] & ef with Monad[m] = NelHelper.mapM(f, t)
+    pub override def sequence(t: Nel[m[a]]): m[Nel[a]] with Applicative[m] = NelHelper.sequence(t)
 
     pub def foreachM(f: a -> m[b] & ef, t: Nel[a]): m[Unit] & ef with Monad[m] = NelHelper.foreachM(f, t)
 
@@ -58,9 +59,9 @@ instance Traversable[Chain] {
     /// CPS transformed...
     pub def traverse(f: a -> m[b] & ef, t: Chain[a]): m[Chain[b]] & ef with Applicative[m] = ChainHelper.traverse(f, t)
 
-    pub def sequence(t: Chain[m[a]]): m[Chain[a]] with Applicative[m] = ChainHelper.sequence(t)
+    pub override def sequence(t: Chain[m[a]]): m[Chain[a]] with Applicative[m] = ChainHelper.sequence(t)
 
-    pub def mapM(f: a -> m[b] & ef, t: Chain[a]): m[Chain[b]] & ef with Monad[m] = ChainHelper.mapM(f, t)
+    pub override def mapM(f: a -> m[b] & ef, t: Chain[a]): m[Chain[b]] & ef with Monad[m] = ChainHelper.mapM(f, t)
 
     pub def foreachM(f: a -> m[b] & ef, t: Chain[a]): m[Unit] & ef with Monad[m] = ChainHelper.foreachM(f, t)
 
@@ -69,9 +70,9 @@ instance Traversable[Chain] {
 instance Traversable[RedBlackTree.RedBlackTree[k]] {
     pub def traverse(f: a -> m[b] & ef, t: RedBlackTree.RedBlackTree[k, a]): m[RedBlackTree.RedBlackTree[k, b]] & ef with Applicative[m] = RedBlackTreeHelper.traverse(f, t)
 
-    pub def sequence(t: RedBlackTree.RedBlackTree[k, m[a]]): m[RedBlackTree.RedBlackTree[k, a]] with Applicative[m] = RedBlackTreeHelper.sequence(t)
+    pub override def sequence(t: RedBlackTree.RedBlackTree[k, m[a]]): m[RedBlackTree.RedBlackTree[k, a]] with Applicative[m] = RedBlackTreeHelper.sequence(t)
 
-    pub def mapM(f: a -> m[b] & ef, t: RedBlackTree.RedBlackTree[k, a]): m[RedBlackTree.RedBlackTree[k, b]] & ef with Monad[m] = RedBlackTreeHelper.mapM(f, t)
+    pub override def mapM(f: a -> m[b] & ef, t: RedBlackTree.RedBlackTree[k, a]): m[RedBlackTree.RedBlackTree[k, b]] & ef with Monad[m] = RedBlackTreeHelper.mapM(f, t)
 
     pub def foreachM(f: a -> m[b] & ef, t: RedBlackTree.RedBlackTree[k, a]): m[Unit] & ef with Monad[m] = RedBlackTreeHelper.foreachM(f, t)
 }
@@ -80,9 +81,9 @@ instance Traversable[RedBlackTree.RedBlackTree[k]] {
 instance Traversable[Map[k]] {
     pub def traverse(f: a -> m[b] & ef, t: Map[k, a]): m[Map[k, b]] & ef with Applicative[m] = MapHelper.traverse(f, t)
 
-    pub def sequence(t: Map[k, m[a]]): m[Map[k, a]] with Applicative[m] = MapHelper.sequence(t)
+    pub override def sequence(t: Map[k, m[a]]): m[Map[k, a]] with Applicative[m] = MapHelper.sequence(t)
 
-    pub def mapM(f: a -> m[b] & ef, t: Map[k, a]): m[Map[k, b]] & ef with Monad[m] = MapHelper.mapM(f, t)
+    pub override def mapM(f: a -> m[b] & ef, t: Map[k, a]): m[Map[k, b]] & ef with Monad[m] = MapHelper.mapM(f, t)
 
     pub def foreachM(f: a -> m[b] & ef, t: Map[k, a]): m[Unit] & ef with Monad[m] = MapHelper.foreachM(f, t)
 }
@@ -96,20 +97,12 @@ instance Traversable[Option] {
             case Some(a) => f(a) |> map(Some)
         }
 
-    pub def sequence(t: Option[m[a]]): m[Option[a]] with Applicative[m] =
+    pub override def sequence(t: Option[m[a]]): m[Option[a]] with Applicative[m] =
         use Applicative.{point};
         use Functor.{map};
         match t {
             case Some(ma) => map(Some, ma)
             case None => point(None)
-        }
-
-    pub def mapM(f: a -> m[b] & ef, t: Option[a]): m[Option[b]] & ef with Monad[m] =
-        use Applicative.{point};
-        use Functor.{map};
-        match t {
-            case None => point(None)
-            case Some(a) => f(a) |> map(Some)
         }
 
     pub def foreachM(f: a -> m[b] & ef, t: Option[a]): m[Unit] & ef with Monad[m] =
@@ -121,6 +114,48 @@ instance Traversable[Option] {
 }
 
 namespace Traversable {
+
+    enum Either[l, r] {
+        case Left(l)
+        case Right(r)
+    }
+
+    instance Functor[Either[e]] {
+        pub def map(f: a -> b & ef, x: Either[e, a]): Either[e, b] & ef = match x {
+            case Left(l) => Left(l) as & ef
+            case Right(r) => Right(f(r))
+        }
+    }
+
+    instance Applicative[Either[e]] {
+        pub def point(x: a): Either[e, a] = Right(x)
+
+        pub def ap(mf: Either[e, a -> b & ef], mx: Either[e, a]): Either[e, b] & ef = match mf {
+            case Right(f) => match mx {
+                case Right(x) => Right(f(x))
+                case Left(a1) => Left(a1)
+            }
+            case Left(a) => Left(a)
+        }
+    }
+
+
+    pub def sequenceOption(t: t[Option[a]]): Option[t[a]] with Traversable[t] = sequence(t)
+
+    pub def traverseOption(f: a -> Option[b] & ef, t: t[a]): Option[t[b]] & ef with Traversable[t] =
+        traverse(f, t)
+
+    pub def sequenceResult(t: t[Result[a, e]]): Result[t[a], e] with Traversable[t] =
+        let step = x -> match x {
+            case Err(e) => Left(e)
+            case Ok(a) => Right(a)
+        };
+        let final = x -> match x {
+            case Left(e) => Err(e)
+            case Right(a) => Ok(a)
+        };
+        traverse(step, t) |> final
+
 
     pub def mapAccumLeft(f: acc -> a -> (acc, b), start: acc, t: t[a]): (acc, t[b]) with Traversable[t] =
         runStateL(traverse(x1 -> StateL(flip(f, x1)), t), start)
@@ -197,7 +232,7 @@ namespace ListHelper {
 
     def traverseHelper(f: a -> m[b] & ef, xs: List[a], k: m[List[b]] -> m[List[b]] & ef): m[List[b]] & ef with Applicative[m] =
         match xs {
-            case Nil => k(Applicative.point(Nil)) as & ef
+            case Nil => k(Applicative.point(Nil))
             case x :: rs => traverseHelper(f, rs, ks -> k(consA(f(x), ks)))
         }
 
@@ -222,21 +257,13 @@ namespace ListHelper {
             case mx :: rs => sequenceXHelper(rs, ka -> k(seqRight(mx, ka)))
         }
 
-    pub def mapM(f: a -> m[b] & ef, xs: List[a]): m[List[b]] & ef with Monad[m] =
-        mapMHelper(f, xs, ks -> ks as & ef)
-
-    def mapMHelper(f: a -> m[b] & ef, xs: List[a], k: m[List[b]] -> m[List[b]] & ef): m[List[b]] & ef with Monad[m] =
-        match xs {
-            case Nil => k(Applicative.point(Nil)) as & ef
-            case x :: rs => mapMHelper(f, rs, ks -> k(consA(f(x), ks)))
-        }
 
     pub def foreachM(f: a -> m[b] & ef, xs: List[a]): m[Unit] & ef with Monad[m] =
         foreachMHelper(f, xs, ku -> ku as & ef)
 
     pub def foreachMHelper(f: a -> m[b] & ef, xs: List[a], k: m[Unit] -> m[Unit] & ef): m[Unit] & ef with Monad[m] =
         match xs {
-            case Nil => k(Applicative.point(())) as & ef
+            case Nil => k(Applicative.point(()))
             case x :: rs => foreachMHelper(f, rs, ku -> k(Monad.flatMap(_ -> ku, f(x))))
         }
 
@@ -256,11 +283,6 @@ namespace NelHelper {
     pub def sequence(xs: Nel[m[a]]): m[Nel[a]] with Applicative[m] =
         match xs {
             case Nel(x, rs) => ((y, ys) -> Nel(y, ys)) <&> x <*> Traversable.sequence(rs)
-        }
-
-    pub def mapM(f: a -> m[b] & ef, xs: Nel[a]): m[Nel[b]] & ef with Monad[m] =
-        match xs {
-            case Nel(x, rs) => ((y, ys) -> Nel(y, ys)) <&> f(x) <*> Traversable.mapM(f, rs)
         }
 
     pub def foreachM(f: a -> m[b] & ef, xs: Nel[a]): m[Unit] & ef with Monad[m] =

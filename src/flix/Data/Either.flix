@@ -53,20 +53,12 @@ instance Traversable[Either[e]] {
             case Right(a) => Right <&> f(a)
         }
 
-    pub def sequence(t: Either[e, m[a]]): m[Either[e, a]] with Applicative[m] =
+    pub override def sequence(t: Either[e, m[a]]): m[Either[e, a]] with Applicative[m] =
         use Applicative.{point};
         use FunctorExtras.{<&>};
         match t {
             case Left(e) => point(Left(e))
             case Right(ma) => Right <&> ma
-        }
-
-    pub def mapM(f: a -> m[b] & ef, t: Either[e, a]): m[Either[e, b]] & ef with Monad[m] =
-        use Applicative.{point};
-        use FunctorExtras.{<&>};
-        match t {
-            case Left(e) => point(Left(e))
-            case Right(a) => Right <&> f(a)
         }
 
     pub def foreachM(f: a -> m[b] & ef, t: Either[e, a]): m[Unit] & ef with Monad[m] =
