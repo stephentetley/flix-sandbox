@@ -18,7 +18,7 @@
 /// The Identity functor.
 ///
 
-pub enum Identity[a] with Eq, Order, ToString {
+pub enum Identity[a] with Eq, Order, Hash, ToString {
     case Identity(a)
 }
 

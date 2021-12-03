@@ -32,6 +32,11 @@ pub lawless class Traversable[t : Type -> Type] with Functor[t] {
     ///
     law identity: forall(t: t[a], f: a -> m[a]) with Eq[m[t[a]]], Applicative[m] . Traversable.traverse(f, t) == Applicative.point(t)
 
+    ///
+    /// sequence identity.
+    ///
+    law identity: forall(t: t[a], f: a -> m[a]) with Eq[m[t[a]]], Applicative[m] . Traversable.sequence(Functor.map(f, t)) == Applicative.point(t)
+
 }
 
 
@@ -61,8 +66,6 @@ instance Traversable[Chain] {
 
     pub override def sequence(t: Chain[m[a]]): m[Chain[a]] with Applicative[m] = ChainHelper.sequence(t)
 
-    pub override def mapM(f: a -> m[b] & ef, t: Chain[a]): m[Chain[b]] & ef with Monad[m] = ChainHelper.mapM(f, t)
-
     pub def foreachM(f: a -> m[b] & ef, t: Chain[a]): m[Unit] & ef with Monad[m] = ChainHelper.foreachM(f, t)
 
 }
@@ -72,8 +75,6 @@ instance Traversable[RedBlackTree.RedBlackTree[k]] {
 
     pub override def sequence(t: RedBlackTree.RedBlackTree[k, m[a]]): m[RedBlackTree.RedBlackTree[k, a]] with Applicative[m] = RedBlackTreeHelper.sequence(t)
 
-    pub override def mapM(f: a -> m[b] & ef, t: RedBlackTree.RedBlackTree[k, a]): m[RedBlackTree.RedBlackTree[k, b]] & ef with Monad[m] = RedBlackTreeHelper.mapM(f, t)
-
     pub def foreachM(f: a -> m[b] & ef, t: RedBlackTree.RedBlackTree[k, a]): m[Unit] & ef with Monad[m] = RedBlackTreeHelper.foreachM(f, t)
 }
 
@@ -82,8 +83,6 @@ instance Traversable[Map[k]] {
     pub def traverse(f: a -> m[b] & ef, t: Map[k, a]): m[Map[k, b]] & ef with Applicative[m] = MapHelper.traverse(f, t)
 
     pub override def sequence(t: Map[k, m[a]]): m[Map[k, a]] with Applicative[m] = MapHelper.sequence(t)
-
-    pub override def mapM(f: a -> m[b] & ef, t: Map[k, a]): m[Map[k, b]] & ef with Monad[m] = MapHelper.mapM(f, t)
 
     pub def foreachM(f: a -> m[b] & ef, t: Map[k, a]): m[Unit] & ef with Monad[m] = MapHelper.foreachM(f, t)
 }
@@ -114,6 +113,9 @@ instance Traversable[Option] {
 }
 
 namespace Traversable {
+
+    pub def for(t: t[a], f: a -> m[b] & ef): m[t[b]] & ef with Applicative[m], Traversable[t] =
+        Traversable.traverse(f, t)
 
     enum Either[l, r] {
         case Left(l)
@@ -227,45 +229,31 @@ namespace ListHelper {
     use ApplicativeExtras.{<*>};
     use FunctorExtras.{<&>};
 
-    pub def traverse(f: a -> m[b] & ef, xs: List[a]): m[List[b]] & ef with Applicative[m] =
-        traverseHelper(f, xs, ks -> ks as & ef)
-
-    def traverseHelper(f: a -> m[b] & ef, xs: List[a], k: m[List[b]] -> m[List[b]] & ef): m[List[b]] & ef with Applicative[m] =
-        match xs {
-            case Nil => k(Applicative.point(Nil))
-            case x :: rs => traverseHelper(f, rs, ks -> k(consA(f(x), ks)))
-        }
 
     def consA(mx: f[a], mxs: f[List[a]]): f[List[a]] with Applicative[f] =
         ((x, xs) -> x :: xs) <&> mx <*> mxs
 
-
-    pub def sequence(xs: List[m[a]]): m[List[a]] with Applicative[m] = sequenceHelper(xs, ks -> ks)
-
-    def sequenceHelper(xs: List[m[a]], k: m[List[a]] -> m[List[a]]): m[List[a]] with Applicative[m] =
-        match xs {
+    pub def traverse(f: a -> m[b] & ef, l: List[a]): m[List[b]] & ef with Applicative[m] =
+        def loop(xs, k) = match xs {
             case Nil => k(Applicative.point(Nil))
-            case mx :: rs => sequenceHelper(rs, ks -> k(consA(mx, ks)))
-        }
+            case x :: rs => loop(rs, ks -> k(consA(f(x), ks)))
+        };
+        loop(l, ks -> ks as & ef)
 
-    pub def sequenceX(xs: List[m[a]]): m[Unit] with Applicative[m] = sequenceXHelper(xs, k -> k)
 
-    def sequenceXHelper(xs: List[m[a]], k: m[Unit] -> m[Unit]): m[Unit] with Applicative[m] =
-        use ApplicativeExtras.{seqRight};
-        match xs {
+    pub def sequence(l: List[m[a]]): m[List[a]] with Applicative[m] =
+        def loop(xs, k) = match xs {
+            case Nil => k(Applicative.point(Nil))
+            case mx :: rs => loop(rs, ks -> k(consA(mx, ks)))
+        };
+        loop(l, ks -> ks)
+
+    pub def foreachM(f: a -> m[b] & ef, l: List[a]): m[Unit] & ef with Monad[m] =
+        def loop(xs, k) = match xs {
             case Nil => k(Applicative.point(()))
-            case mx :: rs => sequenceXHelper(rs, ka -> k(seqRight(mx, ka)))
-        }
-
-
-    pub def foreachM(f: a -> m[b] & ef, xs: List[a]): m[Unit] & ef with Monad[m] =
-        foreachMHelper(f, xs, ku -> ku as & ef)
-
-    pub def foreachMHelper(f: a -> m[b] & ef, xs: List[a], k: m[Unit] -> m[Unit] & ef): m[Unit] & ef with Monad[m] =
-        match xs {
-            case Nil => k(Applicative.point(()))
-            case x :: rs => foreachMHelper(f, rs, ku -> k(Monad.flatMap(_ -> ku, f(x))))
-        }
+            case x :: rs => loop(rs, ku -> k(Monad.flatMap(_ -> ku, f(x))))
+        };
+        loop(l, ku -> ku as & ef)
 
 }
 
@@ -301,40 +289,26 @@ namespace ChainHelper {
         ((xs, x) -> Chain.snoc(xs, x)) <&> mxs <*> mx
 
     pub def traverse(f: a -> m[b] & ef, c: Chain[a]): m[Chain[b]] & ef with Applicative[m] =
-        traverseHelper(f, Chain.viewLeft(c), point(Chain.empty()))
-
-    def traverseHelper(f: a -> m[b] & ef, v: Chain.ViewLeft[a], acc: m[Chain[b]]): m[Chain[b]] & ef with Applicative[m] =
-        match v {
+        def loop(v, acc) = match v {
             case Chain/ViewLeft.NoneLeft        => acc as & ef
-            case Chain/ViewLeft.SomeLeft(x, rs) => traverseHelper(f, Chain.viewLeft(rs), snocA(acc, f(x)))
-        }
+            case Chain/ViewLeft.SomeLeft(x, rs) => loop(Chain.viewLeft(rs), snocA(acc, f(x)))
+        };
+        loop(Chain.viewLeft(c), point(Chain.empty()))
 
     pub def sequence(c: Chain[m[a]]): m[Chain[a]] with Applicative[m] =
-        sequenceHelper(Chain.viewLeft(c), point(Chain.empty()))
-
-    def sequenceHelper(v: Chain.ViewLeft[m[a]], acc: m[Chain[a]]): m[Chain[a]] with Applicative[m] =
-        match v {
+        def loop(v, acc) = match v {
             case Chain/ViewLeft.NoneLeft        => acc
-            case Chain/ViewLeft.SomeLeft(x, rs) => sequenceHelper(Chain.viewLeft(rs), snocA(acc, x))
-        }
-
-    pub def mapM(f: a -> m[b] & ef, c: Chain[a]): m[Chain[b]] & ef with Monad[m] =
-        mapMHelper(f, Chain.viewLeft(c), point(Chain.empty()))
-
-    def mapMHelper(f: a -> m[b] & ef, v: Chain.ViewLeft[a], acc: m[Chain[b]]): m[Chain[b]] & ef with Monad[m] =
-        match v {
-            case Chain/ViewLeft.NoneLeft        => acc
-            case Chain/ViewLeft.SomeLeft(x, rs) => mapMHelper(f, Chain.viewLeft(rs), snocA(acc, f(x)))
-        }
+            case Chain/ViewLeft.SomeLeft(x, rs) => loop(Chain.viewLeft(rs), snocA(acc, x))
+        };
+        loop(Chain.viewLeft(c), point(Chain.empty()))
 
     pub def foreachM(f: a -> m[b] & ef, c: Chain[a]): m[Unit] & ef with Monad[m] =
-        foreachMHelper(f, Chain.viewLeft(c), point(()))
-
-    pub def foreachMHelper(f: a -> m[b] & ef, v: Chain.ViewLeft[a], acc: m[Unit]): m[Unit] & ef with Monad[m] =
-        match v {
+        def loop(v, acc) = match v {
             case Chain/ViewLeft.NoneLeft        => acc as & ef
-            case Chain/ViewLeft.SomeLeft(x, rs) => foreachMHelper(f, Chain.viewLeft(rs), Monad.flatMap(_ -> acc, f(x)))
-        }
+            case Chain/ViewLeft.SomeLeft(x, rs) => loop(Chain.viewLeft(rs), Monad.flatMap(_ -> acc, f(x)))
+        };
+        loop(Chain.viewLeft(c), point(()))
+
 }
 
 namespace RedBlackTreeHelper {
