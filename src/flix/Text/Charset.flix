@@ -56,7 +56,7 @@ namespace Text/Charset {
     use Text.Charset.{Charset};
 
     pub def forName(name: String): Option[Charset] =
-        import java.nio.charset.Charset:forName(String);
+        import static java.nio.charset.Charset.forName(String);
         try {
             Some(Charset(forName(name))) as & Pure
         } catch {
@@ -64,12 +64,12 @@ namespace Text/Charset {
         }
 
     pub def defaultCharset(): Charset & Impure =
-        import java.nio.charset.Charset:defaultCharset();
+        import static java.nio.charset.Charset.defaultCharset();
         Charset(defaultCharset())
 
 
     pub def isSupported(name: String): Bool =
-        import java.nio.charset.Charset:isSupported(String);
+        import static java.nio.charset.Charset.isSupported(String);
         try {
             isSupported(name) as & Pure
         } catch {
@@ -77,27 +77,27 @@ namespace Text/Charset {
         }
 
     pub def iso_8859_1(): Charset = 
-        import get java.nio.charset.StandardCharsets:ISO_8859_1 as get_iso_8859_1;
+        import static get java.nio.charset.StandardCharsets.ISO_8859_1 as get_iso_8859_1;
         Charset(get_iso_8859_1()) as & Pure
 
     pub def us_ascii(): Charset = 
-        import get java.nio.charset.StandardCharsets:US_ASCII as get_us_ascii;
+        import static get java.nio.charset.StandardCharsets.US_ASCII as get_us_ascii;
         Charset(get_us_ascii()) as & Pure
 
     pub def utf_16(): Charset = 
-        import get java.nio.charset.StandardCharsets:UTF_16 as get_utf_16;
+        import static get java.nio.charset.StandardCharsets.UTF_16 as get_utf_16;
         Charset(get_utf_16()) as & Pure
 
     pub def utf_16be(): Charset = 
-        import get java.nio.charset.StandardCharsets:UTF_16BE as get_utf_16be;
+        import static get java.nio.charset.StandardCharsets.UTF_16BE as get_utf_16be;
         Charset(get_utf_16be()) as & Pure
 
     pub def utf_16le(): Charset = 
-        import get java.nio.charset.StandardCharsets:UTF_16LE as get_utf_16le;
+        import static get java.nio.charset.StandardCharsets.UTF_16LE as get_utf_16le;
         Charset(get_utf_16le()) as & Pure
 
     pub def utf_8(): Charset = 
-        import get java.nio.charset.StandardCharsets:UTF_8 as get_utf_8;
+        import static get java.nio.charset.StandardCharsets.UTF_8 as get_utf_8;
         Charset(get_utf_8()) as & Pure
 
     pub def equals(x: Charset, y: Charset): Bool =

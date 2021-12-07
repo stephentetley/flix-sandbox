@@ -76,15 +76,15 @@ instance Neg[BigDecimal] {
 namespace BigDecimal {
 
     pub def one(): BigDecimal =
-        import get java.math.BigDecimal:ONE as getONE;
+        import static get java.math.BigDecimal.ONE as getONE;
         BigDecimal(getONE()) as & Pure
 
     pub def ten(): BigDecimal =
-        import get java.math.BigDecimal:TEN as getTEN;
+        import static get java.math.BigDecimal.TEN as getTEN;
         BigDecimal(getTEN()) as & Pure
 
     pub def zero(): BigDecimal =
-        import get java.math.BigDecimal:ZERO as getZERO;
+        import static get java.math.BigDecimal.ZERO as getZERO;
         BigDecimal(getZERO()) as & Pure
 
 

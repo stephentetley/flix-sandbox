@@ -36,7 +36,7 @@ namespace System/File/BufferedReader {
     use Text.Charset.{Charset};
 
     pub def new(path: System.FilePath, cs: Text.Charset): Result[BufferedReader, String] & Impure =
-        import java.nio.file.Files:newBufferedReader(##java.nio.file.Path, ##java.nio.charset.Charset);
+        import static java.nio.file.Files.newBufferedReader(##java.nio.file.Path, ##java.nio.charset.Charset);
         try {
             let FilePath(path1) = path;
             let Charset(cs1) = cs;
@@ -92,7 +92,7 @@ namespace System/File/BufferedReader {
     /// Closes the BufferedReader when done.
     ///
     pub def lines(x: BufferedReader): Cursor[String, String] & Impure =
-        import flix.runtime.spt.sandbox.system.LineIterator:newBufferedReaderlinesIterator(##java.io.BufferedReader);
+        import static flix.runtime.spt.sandbox.system.LineIterator.newBufferedReaderlinesIterator(##java.io.BufferedReader);
         import flix.runtime.spt.sandbox.system.LineIterator.hasNext();
         import flix.runtime.spt.sandbox.system.LineIterator.next();
         let BufferedReader(x1) = x;

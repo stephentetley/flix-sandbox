@@ -60,9 +60,9 @@ namespace System/IO {
 
 
     def writeModeToNative(x: WriteMode): ##java.nio.file.StandardOpenOption =
-        import get java.nio.file.StandardOpenOption:APPEND      as getAPPEND;
-        import get java.nio.file.StandardOpenOption:CREATE      as getCREATE;
-        import get java.nio.file.StandardOpenOption:CREATE_NEW  as getCREATE_NEW;
+        import static get java.nio.file.StandardOpenOption.APPEND      as getAPPEND;
+        import static get java.nio.file.StandardOpenOption.CREATE      as getCREATE;
+        import static get java.nio.file.StandardOpenOption.CREATE_NEW  as getCREATE_NEW;
         match x {
             case Append     => getAPPEND()
             case Create     => getCREATE()
@@ -72,7 +72,7 @@ namespace System/IO {
     /// # Queries
 
     pub def fileExists(path: FilePath): Result[Bool, String] & Impure =
-        import flix.runtime.spt.sandbox.system.IOWrapper:fileExistsFollowLinks(##java.nio.file.Path);
+        import static flix.runtime.spt.sandbox.system.IOWrapper.fileExistsFollowLinks(##java.nio.file.Path);
         try {
             let FilePath(p1) = path;
             Ok(fileExistsFollowLinks(p1))
@@ -81,7 +81,7 @@ namespace System/IO {
         }
 
     pub def isFile(path: FilePath): Result[Bool, String] & Impure =
-        import flix.runtime.spt.sandbox.system.IOWrapper:isRegularFileFollowLinks(##java.nio.file.Path);
+        import static flix.runtime.spt.sandbox.system.IOWrapper.isRegularFileFollowLinks(##java.nio.file.Path);
         try {
             let FilePath(path1) = path;
             Ok(isRegularFileFollowLinks(path1))
@@ -91,7 +91,7 @@ namespace System/IO {
 
 
     pub def isDirectory(path: FilePath): Result[Bool, String] & Impure =
-        import flix.runtime.spt.sandbox.system.IOWrapper:isDirectoryFollowLinks(##java.nio.file.Path);
+        import static flix.runtime.spt.sandbox.system.IOWrapper.isDirectoryFollowLinks(##java.nio.file.Path);
         try {
             let FilePath(path1) = path;
             Ok(isDirectoryFollowLinks(path1))
@@ -101,7 +101,7 @@ namespace System/IO {
 
 
     pub def isSymbolicLink(path: FilePath): Result[Bool, String] & Impure =
-        import java.nio.file.Files:isSymbolicLink(##java.nio.file.Path);
+        import static java.nio.file.Files.isSymbolicLink(##java.nio.file.Path);
         try {
             let FilePath(path1) = path;
             Ok(isSymbolicLink(path1))
@@ -110,7 +110,7 @@ namespace System/IO {
         }
 
     pub def isHidden(path: FilePath): Result[Bool, String] & Impure =
-        import java.nio.file.Files:isHidden(##java.nio.file.Path);
+        import static java.nio.file.Files.isHidden(##java.nio.file.Path);
         try {
             let FilePath(path1) = path;
             Ok(isHidden(path1))
@@ -122,7 +122,7 @@ namespace System/IO {
     /// #
 
     pub def readFile(cs: Text.Charset, path: FilePath): Result[String, String] & Impure =
-        import java.nio.file.Files:readString(##java.nio.file.Path, ##java.nio.charset.Charset);
+        import static java.nio.file.Files.readString(##java.nio.file.Path, ##java.nio.charset.Charset);
         try {
             let FilePath(path1) = path;
             let Charset(cs1) = cs;
@@ -138,7 +138,7 @@ namespace System/IO {
 
     pub def writeFileWith(opts: {path :: FilePath, charset :: Text.Charset, mode:: WriteMode},
                             content: String): Result[Unit, String] & Impure =
-        import flix.runtime.spt.sandbox.system.IOWrapper:writeString(##java.nio.file.Path, ##java.nio.charset.Charset, ##java.nio.file.StandardOpenOption, String);
+        import static flix.runtime.spt.sandbox.system.IOWrapper.writeString(##java.nio.file.Path, ##java.nio.charset.Charset, ##java.nio.file.StandardOpenOption, String);
         try {
             let FilePath(path1) = opts.path;
             let Charset(cs1) = opts.charset;
@@ -152,7 +152,7 @@ namespace System/IO {
 
     /// Note we are reading to a *signed* Int8.
     pub def readBytes(path: FilePath): Result[Array[Int8], String] & Impure =
-        import java.nio.file.Files:readAllBytes(##java.nio.file.Path);
+        import static java.nio.file.Files.readAllBytes(##java.nio.file.Path);
         try {
             let FilePath(path1) = path;
             Ok(readAllBytes(path1))
@@ -165,7 +165,7 @@ namespace System/IO {
         writeBytesWith({path = path, mode = Create}, bytes)
 
     pub def writeBytesWith(opts: {path :: FilePath, mode :: WriteMode}, bytes: Array[Int8]): Result[Unit, String] & Impure =
-        import flix.runtime.spt.sandbox.system.IOWrapper:writeBytes(##java.nio.file.Path, ##java.nio.file.StandardOpenOption, Array[Int8]);
+        import static flix.runtime.spt.sandbox.system.IOWrapper.writeBytes(##java.nio.file.Path, ##java.nio.file.StandardOpenOption, Array[Int8]);
         try {
             let FilePath(path1) = opts.path;
             let mode1 = writeModeToNative(opts.mode);
@@ -178,8 +178,8 @@ namespace System/IO {
 
     pub def foldableWriteBytesWith[t: Type -> Type](opts: {path :: FilePath, mode :: WriteMode},
                                                     bytes: t[Int8]): Result[Unit, String] & Impure with Foldable[t] =
-        import flix.runtime.spt.sandbox.system.IOWrapper:openFileOutputStream(##java.nio.file.Path, ##java.nio.file.StandardOpenOption);
-        import flix.runtime.spt.sandbox.system.IOWrapper:outputStreamWriteByte(##java.io.OutputStream, Int8);
+        import static flix.runtime.spt.sandbox.system.IOWrapper.openFileOutputStream(##java.nio.file.Path, ##java.nio.file.StandardOpenOption);
+        import static flix.runtime.spt.sandbox.system.IOWrapper.outputStreamWriteByte(##java.io.OutputStream, Int8);
         import java.io.OutputStream.close();
         try {
             let FilePath(path1) = opts.path;
@@ -219,7 +219,7 @@ namespace System/IO {
         X/Cursor.makeCursor(cursorAlg)
 
     pub def readLinesIterWith(opts: {charset :: Text.Charset}, path: FilePath): Cursor[String, String] & Impure =
-        import flix.runtime.spt.sandbox.system.LineIterator:newFileslinesIterator(##java.nio.file.Path, ##java.nio.charset.Charset);
+        import static flix.runtime.spt.sandbox.system.LineIterator.newFileslinesIterator(##java.nio.file.Path, ##java.nio.charset.Charset);
         import flix.runtime.spt.sandbox.system.LineIterator.hasNext();
         import flix.runtime.spt.sandbox.system.LineIterator.next();
         let FilePath(path1) = path;
@@ -238,7 +238,7 @@ namespace System/IO {
 
 
     pub def contentsIter(path: FilePath): Cursor[String, FilePath] & Impure =
-        import flix.runtime.spt.sandbox.system.PathIterator:newFileslistIterator(##java.nio.file.Path);
+        import static flix.runtime.spt.sandbox.system.PathIterator.newFileslistIterator(##java.nio.file.Path);
         import flix.runtime.spt.sandbox.system.PathIterator.hasNext();
         import flix.runtime.spt.sandbox.system.PathIterator.next();
         let FilePath(path1) = path;
@@ -255,7 +255,7 @@ namespace System/IO {
             |> X/Cursor.toList!
 
     pub def matchesIter(glob: String, path: FilePath): Cursor[String, FilePath] & Impure =
-        import flix.runtime.spt.sandbox.system.PathIterator:newFilesnewDirectoryStreamIterator(##java.nio.file.Path, String);
+        import static flix.runtime.spt.sandbox.system.PathIterator.newFilesnewDirectoryStreamIterator(##java.nio.file.Path, String);
         import flix.runtime.spt.sandbox.system.PathIterator.hasNext();
         import flix.runtime.spt.sandbox.system.PathIterator.next();
         let FilePath(path1) = path;
@@ -268,4 +268,3 @@ namespace System/IO {
         X/Cursor.makeCursor(cursorAlg)
 
 }
-

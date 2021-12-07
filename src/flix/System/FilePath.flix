@@ -79,7 +79,7 @@ namespace System/FilePath {
     /// Returns a new FilePath.
     ///
     pub def new(s: String): FilePath =
-        import flix.runtime.spt.sandbox.system.FilePathWrapper:get1(String) as get1;
+        import static flix.runtime.spt.sandbox.system.FilePathWrapper.get1(String) as get1;
         try {
             FilePath(get1(s)) as & Pure
         } catch {
@@ -87,7 +87,7 @@ namespace System/FilePath {
         }
 
     pub def tryNew(s: String): Result[FilePath, String] =
-        import flix.runtime.spt.sandbox.system.FilePathWrapper:get1(String) as get1;
+        import static flix.runtime.spt.sandbox.system.FilePathWrapper.get1(String) as get1;
         try {
             Ok(FilePath(get1(s))) as & Pure
         } catch {
@@ -95,7 +95,7 @@ namespace System/FilePath {
         }
 
     pub def empty(): FilePath =
-        import flix.runtime.spt.sandbox.system.FilePathWrapper:get1(String) as get1;
+        import static flix.runtime.spt.sandbox.system.FilePathWrapper.get1(String) as get1;
         try {
             FilePath(get1("")) as & Pure
         } catch {
@@ -415,7 +415,7 @@ namespace System/FilePath {
             }
 
     pub def isGlobMatch(path: FilePath, glob: String): Result[Bool, String] =
-        import flix.runtime.spt.sandbox.system.FilePathWrapper:globMatches(##java.nio.file.Path, String);
+        import static flix.runtime.spt.sandbox.system.FilePathWrapper.globMatches(##java.nio.file.Path, String);
         try {
             let FilePath(path1) = path;
             Ok(globMatches(path1, glob)) as & Pure
@@ -424,7 +424,7 @@ namespace System/FilePath {
         }
 
     pub def isRegexMatch(path: FilePath, glob: String): Result[Bool, String] =
-        import flix.runtime.spt.sandbox.system.FilePathWrapper:regexMatches(##java.nio.file.Path, String);
+        import static flix.runtime.spt.sandbox.system.FilePathWrapper.regexMatches(##java.nio.file.Path, String);
         try {
             let FilePath(path1) = path;
             Ok(regexMatches(path1, glob)) as & Pure

@@ -24,13 +24,13 @@ namespace System/Environment {
     use System.FilePath.{FilePath};
 
     pub def currentTimeMilliseconds(): Int64 & Impure =
-        import java.lang.System:currentTimeMillis();
+        import static java.lang.System.currentTimeMillis();
         currentTimeMillis()
 
 
     /// Get env var...
     pub def getEnvVar(name: String): Result[String, String] & Impure = try {
-        import java.lang.System:getenv(String);
+        import static java.lang.System.getenv(String);
         let ans = getenv(name);
         if (not Object.isNull(ans))
             Ok(ans)
@@ -71,7 +71,7 @@ namespace System/Environment {
 
 
     def getProperty(funName: String, propName: String): Result[String, String] & Impure =
-        import java.lang.System:getProperty(String);
+        import static java.lang.System.getProperty(String);
         try {
             let ans = getProperty(propName);
             if (not Object.isNull(ans))

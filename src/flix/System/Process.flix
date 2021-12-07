@@ -37,7 +37,7 @@ namespace System/Process {
     pub def newProcessBuilder (cmd: String, args: Array[String]): ProcessBuilder & Impure = 
         import new flix.runtime.spt.sandbox.system.marshal.MarshalStringArray() as newStringArray;
         import flix.runtime.spt.sandbox.system.marshal.MarshalStringArray.snoc(String);
-        import flix.runtime.spt.sandbox.system.ProcessWrapper:create(String, MarshalStringArray) as create;
+        import static flix.runtime.spt.sandbox.system.ProcessWrapper.create(String, MarshalStringArray) as create;
         let argArray = newStringArray();
         Array.foreach(x -> snoc(argArray, x), args);
         ProcessBuilder(create(cmd, argArray))
@@ -79,7 +79,7 @@ namespace System/Process {
         }
 
     pub def getInput(x:Process, cs: Text.Charset): Result[String, String] & Impure =
-        import flix.runtime.spt.sandbox.system.ProcessWrapper:getInput(##java.lang.Process, ##java.nio.charset.Charset);
+        import static flix.runtime.spt.sandbox.system.ProcessWrapper.getInput(##java.lang.Process, ##java.nio.charset.Charset);
         try {
             let Process(x1) = x;
             let Charset(cs1) = cs;
@@ -90,7 +90,7 @@ namespace System/Process {
         }
 
     pub def getError(x:Process, cs: Text.Charset): Result[String, String] & Impure =
-        import flix.runtime.spt.sandbox.system.ProcessWrapper:getError(##java.lang.Process, ##java.nio.charset.Charset);
+        import static flix.runtime.spt.sandbox.system.ProcessWrapper.getError(##java.lang.Process, ##java.nio.charset.Charset);
         try {
             let Process(x1) = x;
             let Charset(cs1) = cs;

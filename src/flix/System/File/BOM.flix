@@ -29,7 +29,7 @@ namespace System/File/BOM {
 
     /// Reads the File with the Charset identified by the BOM
     pub def readFileWithBOM(path: FilePath): Result[String, String] & Impure =
-        import flix.runtime.spt.sandbox.system.BOMWrapper:readFileWithBOM(##java.nio.file.Path);
+        import static flix.runtime.spt.sandbox.system.BOMWrapper.readFileWithBOM(##java.nio.file.Path);
         try {
             let FilePath(path1) = path;
             Ok(readFileWithBOM(path1))
@@ -39,7 +39,7 @@ namespace System/File/BOM {
         }
 
     pub def openBufferedReaderWithBOM(path: System.FilePath): Result[BufferedReader, String] & Impure =
-        import flix.runtime.spt.sandbox.system.BOMWrapper:openBufferedReaderWithBOM(##java.nio.file.Path);
+        import static flix.runtime.spt.sandbox.system.BOMWrapper.openBufferedReaderWithBOM(##java.nio.file.Path);
         try {
             let FilePath(path1) = path;
             Ok(BufferedReader(openBufferedReaderWithBOM(path1)))

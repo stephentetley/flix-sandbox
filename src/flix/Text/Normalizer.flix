@@ -34,10 +34,10 @@ namespace Text/Normalizer {
     use Text.NormalizerForm.{Nfc, Nfd, Nfkc, Nfkd};
 
     pub def marshal(x: NormalizerForm): ##java.text.Normalizer$Form =
-        import get java.text.Normalizer$Form:NFC as getNFC;
-        import get java.text.Normalizer$Form:NFD as getNFD;
-        import get java.text.Normalizer$Form:NFKC as getNFKC;
-        import get java.text.Normalizer$Form:NFKD as getNFKD;
+        import static get java.text.Normalizer$Form.NFC as getNFC;
+        import static get java.text.Normalizer$Form.NFD as getNFD;
+        import static get java.text.Normalizer$Form.NFKC as getNFKC;
+        import static get java.text.Normalizer$Form.NFKD as getNFKD;
         match x {
             case Nfc    => getNFC()
             case Nfd    => getNFD()
@@ -46,10 +46,10 @@ namespace Text/Normalizer {
         } as & Pure
 
     pub def unmarshal(x: ##java.text.Normalizer$Form): NormalizerForm =
-        import get java.text.Normalizer$Form:NFC as getNFC;
-        import get java.text.Normalizer$Form:NFD as getNFD;
-        import get java.text.Normalizer$Form:NFKC as getNFKC;
-        import get java.text.Normalizer$Form:NFKD as getNFKD;
+        import static get java.text.Normalizer$Form.NFC as getNFC;
+        import static get java.text.Normalizer$Form.NFD as getNFD;
+        import static get java.text.Normalizer$Form.NFKC as getNFKC;
+        import static get java.text.Normalizer$Form.NFKD as getNFKD;
         match x {
             case x1 if primEquals(x1, getNFC())    => Nfc
             case x1 if primEquals(x1, getNFD())    => Nfd
@@ -66,7 +66,7 @@ namespace Text/Normalizer {
 
 
     pub def normalize(nform: NormalizerForm, src: String): String =
-        import java.text.Normalizer:normalize(##java.lang.CharSequence, ##java.text.Normalizer$Form);
+        import static java.text.Normalizer.normalize(##java.lang.CharSequence, ##java.text.Normalizer$Form);
         try {
             let nform1 = marshal(nform);
             normalize(src as ##java.lang.CharSequence, nform1) as & Pure
@@ -75,7 +75,7 @@ namespace Text/Normalizer {
         }
 
     pub def isNormalized(nform: NormalizerForm, src: String): Bool =
-        import java.text.Normalizer:isNormalized(##java.lang.CharSequence, ##java.text.Normalizer$Form);
+        import static java.text.Normalizer.isNormalized(##java.lang.CharSequence, ##java.text.Normalizer$Form);
         try {
             let nform1 = marshal(nform);
             isNormalized(src as ##java.lang.CharSequence, nform1) as & Pure

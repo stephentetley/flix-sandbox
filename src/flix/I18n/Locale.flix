@@ -69,11 +69,11 @@ namespace I18n/Locale {
         Locale(newLocale(language, country, variant)) as & Pure
 
     pub def getDefault(): Locale & Impure = 
-        import java.util.Locale:getDefault();
+        import static java.util.Locale.getDefault();
         Locale(getDefault())
 
     pub def setJvmDefaultLocale!(x: Locale): Result[Unit, String] & Impure =
-        import java.util.Locale:setDefault(##java.util.Locale);
+        import static java.util.Locale.setDefault(##java.util.Locale);
         try { 
             let Locale(x1) = x;
             setDefault(x1);
@@ -90,18 +90,18 @@ namespace I18n/Locale {
 
 
     pub def getDefaultWithCategory(x: Category): Locale & Impure =
-        import java.util.Locale:getDefault(##java.util.Locale$Category);
-        import get java.util.Locale$Category:DISPLAY as getDisplay;
-        import get java.util.Locale$Category:FORMAT as getFormat;
+        import static java.util.Locale.getDefault(##java.util.Locale$Category);
+        import static get java.util.Locale$Category.DISPLAY as getDisplay;
+        import static get java.util.Locale$Category.FORMAT as getFormat;
         match x { 
             case Display => getDisplay() |> getDefault |> Locale
             case Format  => getFormat() |> getDefault |> Locale
         }
 
     pub def setJvmDefaultLocaleWithCategory!(category: Category, x: Locale): Result[Unit, String] & Impure =
-        import java.util.Locale:setDefault(##java.util.Locale$Category, ##java.util.Locale);
-        import get java.util.Locale$Category:DISPLAY as getDisplay;
-        import get java.util.Locale$Category:FORMAT as getFormat;
+        import static java.util.Locale.setDefault(##java.util.Locale$Category, ##java.util.Locale);
+        import static get java.util.Locale$Category.DISPLAY as getDisplay;
+        import static get java.util.Locale$Category.FORMAT as getFormat;
         try {
             let Locale(x1) = x;
             let category = match category {
@@ -131,91 +131,91 @@ namespace I18n/Locale {
         hashCode(x1) as & Pure
 
     pub def canada(): Locale = 
-        import get java.util.Locale:CANADA as getCANADA;
+        import static get java.util.Locale.CANADA as getCANADA;
         Locale(getCANADA()) as & Pure
 
     pub def canada_french(): Locale = 
-        import get java.util.Locale:CANADA_FRENCH as getCANADA_FRENCH;
+        import static get java.util.Locale.CANADA_FRENCH as getCANADA_FRENCH;
         Locale(getCANADA_FRENCH()) as & Pure
 
     pub def china(): Locale = 
-        import get java.util.Locale:CHINA as getCHINA;
+        import static get java.util.Locale.CHINA as getCHINA;
         Locale(getCHINA()) as & Pure
 
     pub def chinese(): Locale = 
-        import get java.util.Locale:CHINESE as getCHINESE;
+        import static get java.util.Locale.CHINESE as getCHINESE;
         Locale(getCHINESE()) as & Pure
 
     pub def english(): Locale = 
-        import get java.util.Locale:ENGLISH as getENGLISH;
+        import static get java.util.Locale.ENGLISH as getENGLISH;
         Locale(getENGLISH()) as & Pure
 
     pub def france(): Locale = 
-        import get java.util.Locale:FRANCE as getFrance;
+        import static get java.util.Locale.FRANCE as getFrance;
         Locale(getFrance()) as & Pure
     
     pub def french(): Locale = 
-        import get java.util.Locale:FRENCH as getFRENCH;
+        import static get java.util.Locale.FRENCH as getFRENCH;
         Locale(getFRENCH()) as & Pure
     
     pub def german(): Locale = 
-        import get java.util.Locale:GERMAN as getGERMAN;
+        import static get java.util.Locale.GERMAN as getGERMAN;
         Locale(getGERMAN()) as & Pure
  
     pub def germany(): Locale = 
-        import get java.util.Locale:GERMANY as getGERMANY;
+        import static get java.util.Locale.GERMANY as getGERMANY;
         Locale(getGERMANY()) as & Pure
  
     pub def italian(): Locale = 
-        import get java.util.Locale:ITALIAN as getITALIAN;
+        import static get java.util.Locale.ITALIAN as getITALIAN;
         Locale(getITALIAN()) as & Pure
  
     pub def italy(): Locale = 
-        import get java.util.Locale:ITALY as getITALY;
+        import static get java.util.Locale.ITALY as getITALY;
         Locale(getITALY()) as & Pure
  
     pub def japan(): Locale = 
-        import get java.util.Locale:JAPAN as getJAPAN;
+        import static get java.util.Locale.JAPAN as getJAPAN;
         Locale(getJAPAN()) as & Pure
     
     pub def japanese(): Locale = 
-        import get java.util.Locale:JAPANESE as getJAPANESE;
+        import static get java.util.Locale.JAPANESE as getJAPANESE;
         Locale(getJAPANESE()) as & Pure
 
     pub def korea(): Locale = 
-        import get java.util.Locale:KOREA as getKOREA;
+        import static get java.util.Locale.KOREA as getKOREA;
         Locale(getKOREA()) as & Pure
 
     pub def korean(): Locale = 
-        import get java.util.Locale:KOREAN as getKOREAN;
+        import static get java.util.Locale.KOREAN as getKOREAN;
         Locale(getKOREAN()) as & Pure
 
     pub def prc(): Locale = 
-        import get java.util.Locale:PRC as getPRC;
+        import static get java.util.Locale.PRC as getPRC;
         Locale(getPRC()) as & Pure
 
     pub def root(): Locale = 
-        import get java.util.Locale:ROOT as getROOT;
+        import static get java.util.Locale.ROOT as getROOT;
         Locale(getROOT()) as & Pure
 
     pub def simplified_chinese(): Locale = 
-        import get java.util.Locale:SIMPLIFIED_CHINESE as getSIMPLIFIED_CHINESE;
+        import static get java.util.Locale.SIMPLIFIED_CHINESE as getSIMPLIFIED_CHINESE;
         Locale(getSIMPLIFIED_CHINESE()) as & Pure
 
     pub def taiwan(): Locale = 
-        import get java.util.Locale:TAIWAN as getTAIWAN;
+        import static get java.util.Locale.TAIWAN as getTAIWAN;
         Locale(getTAIWAN()) as & Pure
 
     pub def traditional_chinese(): Locale = 
-        import get java.util.Locale:TRADITIONAL_CHINESE as getTRADITIONAL_CHINESE;
+        import static get java.util.Locale.TRADITIONAL_CHINESE as getTRADITIONAL_CHINESE;
         Locale(getTRADITIONAL_CHINESE()) as & Pure
 
     pub def uk(): Locale = 
-        import get java.util.Locale:UK as getUK;
+        import static get java.util.Locale.UK as getUK;
         Locale(getUK()) as & Pure
 
     pub def us(): Locale = 
-        import get java.util.Locale:US as getUS;
+        import static get java.util.Locale.US as getUS;
         Locale(getUS()) as & Pure
 
 
@@ -281,14 +281,14 @@ namespace I18n/Locale {
         toLanguageTag(x1) as & Pure
 
     pub def forLanguageTag(tag: String): Locale =
-        import java.util.Locale:forLanguageTag(String);
+        import static java.util.Locale.forLanguageTag(String);
         Locale(forLanguageTag(tag)) as & Pure
 
 
 
     /// This marshals okay...
     pub def getAvailableLocales(): Array[Locale] & Impure = 
-        import java.util.Locale:getAvailableLocales();
+        import static java.util.Locale.getAvailableLocales();
         let arr = getAvailableLocales();
         Array.map(Locale, arr)
 
@@ -299,9 +299,9 @@ namespace I18n/Locale {
     }
 
     pub def isoCountryCodeToNative(x: IsoCountryCode): ##java.util.Locale$IsoCountryCode =
-        import get java.util.Locale$IsoCountryCode:PART1_ALPHA2 as getPart1Alpha2;
-        import get java.util.Locale$IsoCountryCode:PART1_ALPHA3 as getPart1Alpha3;
-        import get java.util.Locale$IsoCountryCode:PART3 as getPart3;
+        import static get java.util.Locale$IsoCountryCode.PART1_ALPHA2 as getPart1Alpha2;
+        import static get java.util.Locale$IsoCountryCode.PART1_ALPHA3 as getPart1Alpha3;
+        import static get java.util.Locale$IsoCountryCode.PART3 as getPart3;
         match x {
             case Part1Alpha2    => getPart1Alpha2()
             case Part1Alpha3    => getPart1Alpha3()
@@ -310,7 +310,7 @@ namespace I18n/Locale {
 
 
     pub def getIsoCountries(): Result[List[String], String] & Impure =
-        import java.util.Locale:getISOCountries();
+        import static java.util.Locale.getISOCountries();
         try {
             let arr = getISOCountries();
             Ok(Array.toList(arr))
@@ -319,7 +319,7 @@ namespace I18n/Locale {
         }
 
     pub def getIsoCountriesWithIsoCountryCode(icc: IsoCountryCode): Result[Set[String], String] & Impure =
-        import java.util.Locale:getISOCountries(##java.util.Locale$IsoCountryCode);
+        import static java.util.Locale.getISOCountries(##java.util.Locale$IsoCountryCode);
         import java.util.Set.iterator();
         try {
             let icc1 = isoCountryCodeToNative(icc);
@@ -343,7 +343,7 @@ namespace I18n/Locale {
 
 
     pub def getIsoLanguages(): Result[List[String], String] & Impure =
-        import java.util.Locale:getISOLanguages();
+        import static java.util.Locale.getISOLanguages();
         try {
             let arr = getISOLanguages();
             Ok(Array.toList(arr))

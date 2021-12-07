@@ -41,9 +41,9 @@ namespace Text/Collator {
 
 
     def marshallDecompositionMode(x: DecompositionMode): Int32 =
-        import get java.text.Collator:NO_DECOMPOSITION as getNoDecomposition;
-        import get java.text.Collator:CANONICAL_DECOMPOSITION as getCanonicalDecomposition;
-        import get java.text.Collator:FULL_DECOMPOSITION as getFullDecomposition;
+        import static get java.text.Collator.NO_DECOMPOSITION as getNoDecomposition;
+        import static get java.text.Collator.CANONICAL_DECOMPOSITION as getCanonicalDecomposition;
+        import static get java.text.Collator.FULL_DECOMPOSITION as getFullDecomposition;
         match x {
             case NoDecomposition        => getNoDecomposition()
             case CanonicalDecomposition => getCanonicalDecomposition()
@@ -51,8 +51,8 @@ namespace Text/Collator {
         } as & Pure
 
    def unmarshallDecompositionMode(i: Int32): DecompositionMode =
-        import get java.text.Collator:CANONICAL_DECOMPOSITION as getCanonicalDecomposition;
-        import get java.text.Collator:FULL_DECOMPOSITION as getFullDecomposition;
+        import static get java.text.Collator.CANONICAL_DECOMPOSITION as getCanonicalDecomposition;
+        import static get java.text.Collator.FULL_DECOMPOSITION as getFullDecomposition;
         match i {
             case n if n == getCanonicalDecomposition() => CanonicalDecomposition
             case n if n == getFullDecomposition() => FullDecomposition
@@ -60,10 +60,10 @@ namespace Text/Collator {
         } as & Pure
 
     def marshallCollatorStrength(x: CollatorStrength): Int32 =
-        import get java.text.Collator:IDENTICAL as getIdentical;
-        import get java.text.Collator:PRIMARY as getPrimary;
-        import get java.text.Collator:SECONDARY as getSecondary;
-        import get java.text.Collator:TERTIARY as getTertiary;
+        import static get java.text.Collator.IDENTICAL as getIdentical;
+        import static get java.text.Collator.PRIMARY as getPrimary;
+        import static get java.text.Collator.SECONDARY as getSecondary;
+        import static get java.text.Collator.TERTIARY as getTertiary;
         match x {
             case Identical => getIdentical()
             case Primary   => getPrimary()
@@ -73,10 +73,10 @@ namespace Text/Collator {
 
     /// Warning - I am not sure each enum has a distinct int value in Java land...
     def unmarshallCollatorStrength(i: Int32): CollatorStrength =
-        import get java.text.Collator:IDENTICAL as getIdentical;
-        import get java.text.Collator:PRIMARY as getPrimary;
-        import get java.text.Collator:SECONDARY as getSecondary;
-        import get java.text.Collator:TERTIARY as getTertiary;
+        import static get java.text.Collator.IDENTICAL as getIdentical;
+        import static get java.text.Collator.PRIMARY as getPrimary;
+        import static get java.text.Collator.SECONDARY as getSecondary;
+        import static get java.text.Collator.TERTIARY as getTertiary;
         match i {
             case n if n == getIdentical() => Identical
             case n if n == getPrimary() => Primary
@@ -88,12 +88,12 @@ namespace Text/Collator {
     /// Uses a Collator to be accurate with the locale of the JVM.
     ///
     pub def getInstance(): Collator & Impure =
-        import java.text.Collator:getInstance();
+        import static java.text.Collator.getInstance();
         Collator(getInstance())
 
     /// TODO: Move to Locale?
     pub def getInstanceWithLocale(locale: I18n.Locale): Collator =
-        import java.text.Collator:getInstance(##java.util.Locale);
+        import static java.text.Collator.getInstance(##java.util.Locale);
         use I18n.Locale.{Locale};
         let Locale(locale1) = locale;
         Collator(getInstance(locale1)) as & Pure
