@@ -18,8 +18,17 @@
 namespace Data {
 
     pub enum RoseTree[a] {
-        case RoseTree(a, List[RoseTree[a]])
+        case Node(a, List[RoseTree[a]])
     }
+
+    instance Eq[RoseTree[a]] with Eq[a] {
+        pub def eq(t1: RoseTree[a], t2: RoseTree[a]): Bool = Data/RoseTree.equals(t1, t2)
+    }
+
+    instance Functor[RoseTree] {
+        pub def map(f: a -> b & ef, t: RoseTree[a]): RoseTree[b] & ef = Data/RoseTree.map(f, t)
+    }
+
 
     pub type alias RoseForest[a] = List[RoseTree[a]]
 }
@@ -27,8 +36,20 @@ namespace Data {
 namespace Data/RoseTree {
 
     use Data.{RoseTree, RoseForest};
-    use Data.RoseTree.{RoseTree};
+    use Data.RoseTree.{Node};
 
+    ///
+    /// Returns `true` if and only if `c1` and `c2` and equal.
+    ///
+    pub def equals(t1: RoseTree[a], t2: RoseTree[a]): Bool with Eq[a] = match (t1, t2) {
+        case (Node(a, xs), Node(b, ys)) => if (a == b) equalsHelper(xs, ys) else false
+    }
+
+    def equalsHelper(xs: RoseForest[a], ys: RoseForest[a]): Bool with Eq[a] = match (xs, ys) {
+            case (Nil, Nil)          => true
+            case (a :: rs1, b:: rs2) => if (a == b) equalsHelper(rs1, rs2) else false
+            case _                   => false
+        }
 
     pub def drawTree(x: RoseTree[String]): String = drawTree1(x, xs -> xs) |> String.unlines
 
@@ -55,7 +76,7 @@ namespace Data/RoseTree {
 
     def drawTree1(x: RoseTree[String], k: List[String] -> List[String]): List[String] = 
         match x {
-            case RoseTree(label, kids) => {
+            case Node(label, kids) => {
                 let xs = String.lines(label);
                 drawKids(kids, ys -> k(xs ::: ys))
             }
@@ -63,9 +84,9 @@ namespace Data/RoseTree {
 
     def drawKids(xs: List[RoseTree[String]], k: List[String] -> List[String]): List[String] = 
         match xs {
-            case Nil => k(Nil)
+            case Nil       => k(Nil)
             case t1 :: Nil => drawTree1(t1, ac1 -> shift1("`- ", "   ", ac1, ac2 -> k("|" :: ac2)))
-            case t1 :: rs =>  drawTree1(t1, ac1 -> shift1("+- ", "|  ", ac1, ac2 -> drawKids(rs, ac3 -> k("|" :: (ac2 ::: ac3)))))
+            case t1 :: rs  =>  drawTree1(t1, ac1 -> shift1("+- ", "|  ", ac1, ac2 -> drawKids(rs, ac3 -> k("|" :: (ac2 ::: ac3)))))
         }
 
 
@@ -76,12 +97,12 @@ namespace Data/RoseTree {
         preorderHelper(x, identity) |> Chain.toList
 
     def preorderHelper(x: RoseTree[a], k: Chain[a] -> Chain[a]): Chain[a] = match x {
-        case RoseTree(a, Nil) => k(Chain.singleton(a))
-        case RoseTree(a, xs) => preorderForest(xs, vs -> k(Chain.cons(a, vs)))
+        case Node(a, Nil) => k(Chain.singleton(a))
+        case Node(a, xs)  => preorderForest(xs, vs -> k(Chain.cons(a, vs)))
     }
 
     def preorderForest(xs: RoseForest[a], k: Chain[a] -> Chain[a]): Chain[a] = match xs {
-        case Nil => k(Chain.empty())
+        case Nil     => k(Chain.empty())
         case x :: rs => preorderHelper(x, vs1 -> preorderForest(rs, vs2 -> k(Chain.append(vs1, vs2))))
     }
 
@@ -90,8 +111,8 @@ namespace Data/RoseTree {
 
 
     def postorderHelper(x: RoseTree[a], k: Chain[a] -> Chain[a]): Chain[a] = match x {
-        case RoseTree(a, Nil) => k(Chain.singleton(a))
-        case RoseTree(a, xs) => postorderForest(xs, vs -> k(Chain.snoc(vs, a)))
+        case Node(a, Nil) => k(Chain.singleton(a))
+        case Node(a, xs)  => postorderForest(xs, vs -> k(Chain.snoc(vs, a)))
     }
 
     def postorderForest(xs: RoseForest[a], k: Chain[a] -> Chain[a]): Chain[a] = match xs {
@@ -110,7 +131,7 @@ namespace Data/RoseTree {
     /// Helper for `foldRoseTree` in CPS.
     ///
     def foldRoseTreeHelper(f: (a, List[b]) -> b, t: RoseTree[a], k: b -> b): b = match t {
-        case RoseTree(x,kids) => foldRoseForest(f, kids, vs -> k(f(x,vs)))
+        case Node(x,kids) => foldRoseForest(f, kids, vs -> k(f(x,vs)))
     }
 
     ///
@@ -121,21 +142,21 @@ namespace Data/RoseTree {
         case x :: rs => foldRoseTreeHelper(f, x, v -> foldRoseForest(f, rs, vs -> k(v :: vs)))
     }
 
-    pub def map(f: a -> b, t: RoseTree[a]): RoseTree[b] =
-        mapHelper(f, t, identity)
+    pub def map(f: a -> b & ef, t: RoseTree[a]): RoseTree[b] & ef =
+        mapHelper(f, t, k -> k as & ef)
 
-    def mapHelper(f: a -> b, t: RoseTree[a], k: RoseTree[b] -> RoseTree[b]): RoseTree[b] = match t {
-        case RoseTree(a,xs) => mapForest(f, xs, vs -> k(RoseTree(f(a), vs)))
+    def mapHelper(f: a -> b & ef, t: RoseTree[a], k: RoseTree[b] -> RoseTree[b] & ef): RoseTree[b] & ef = match t {
+        case Node(a,xs) => mapForest(f, xs, vs -> k(Node(f(a), vs)))
     }
 
-    def mapForest(f: a -> b, ts: RoseForest[a], k: RoseForest[b] -> RoseTree[b]): RoseTree[b] = match ts {
-        case Nil => k(Nil)
+    def mapForest(f: a -> b & ef, ts: RoseForest[a], k: RoseForest[b] -> RoseTree[b] & ef): RoseTree[b] & ef = match ts {
+        case Nil     => k(Nil)
         case x :: rs => mapHelper(f, x, v1 -> mapForest(f, rs, vs -> k(v1 :: vs)))
     }
 
     /// Traversal order is preorder (check...)
     pub def foreach(f: a -> Unit & ef, t: RoseTree[a]): Unit & ef =
-        let RoseTree(a,xs) = t;
+        let Node(a,xs) = t;
         f(a);
         foreachForest(f, xs)
 
@@ -150,7 +171,7 @@ namespace Data/RoseTree {
     /// CPS
     def unfoldTreeHelper(f: b -> (a, List[b]) & ef, st: b, k: RoseTree[a] -> RoseTree[a] & ef): RoseTree[a] & ef =
         let (a, bs) = f(st);
-        unfoldTreeListHelper(f, bs, ks -> k(RoseTree(a, ks)))
+        unfoldTreeListHelper(f, bs, ks -> k(Node(a, ks)))
 
     /// CPS
     def unfoldTreeListHelper(f: b -> (a, List[b]) & ef, ss: List[b], k: RoseForest[a] -> RoseTree[a] & ef): RoseTree[a] & ef =
@@ -165,5 +186,32 @@ namespace Data/RoseTree {
         List.map(unfoldTree(f), ss)
 
 
+    pub def traverse(f: a -> m[b] & ef, t: RoseTree[a]): m[RoseTree[b]] & ef with Applicative[m] =
+        traverseTree(f, t)
+
+    pub def sequence(t: RoseTree[m[a]]): m[RoseTree[a]] with Applicative[m] =
+        traverse(identity, t)
+
+    /// TODO cps transform...
+    def traverseTree(f: a -> m[b] & ef, t: RoseTree[a]): m[RoseTree[b]] & ef with Applicative[m] =
+        use ApplicativeExtras.{<*>};
+        use FunctorExtras.{<&>};
+        match t {
+            case Node(x, xs) => ((y, ys) -> Node(y, ys)) <&> f(x) <*> traverseForest(f, xs)
+        }
+
+
+    def consA(mx: f[a], mxs: f[List[a]]): f[List[a]] with Applicative[f] =
+        use ApplicativeExtras.{<*>};
+        use FunctorExtras.{<&>};
+        ((x, xs) -> x :: xs) <&> mx <*> mxs
+
+    /// TODO cps transform...
+    def traverseForest(f: a -> m[b] & ef, l: RoseForest[a]): m[RoseForest[b]] & ef with Applicative[m] =
+        def loop(xs, k) = match xs {
+            case Nil => k(Applicative.point(Nil))
+            case x :: rs => loop(rs, ks -> k(consA(traverseTree(f, x), ks)))
+        };
+        loop(l, ks -> ks as & ef)
 
 }
