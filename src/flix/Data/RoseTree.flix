@@ -30,12 +30,12 @@ namespace Data {
     }
 
     instance Applicative[RoseTree] {
-        pub def point(x: a) : RoseTree[a] = Data/RoseTree.singleton(x)
-        pub def ap(f: RoseTree[a -> b & ef], x: RoseTree[a]) : RoseTree[b] & ef = Data/RoseTree.ap(f, x)
+        pub def point(x: a): RoseTree[a] = Data/RoseTree.singleton(x)
+        pub def ap(f: RoseTree[a -> b & ef], x: RoseTree[a]): RoseTree[b] & ef = Data/RoseTree.ap(f, x)
     }
 
     instance Monad[RoseTree] {
-        pub def flatMap(f: a -> RoseTree[b] & ef, x: RoseTree[a]) : RoseTree[b] & ef = Data/RoseTree.flatMap(f, x)
+        pub def flatMap(f: a -> RoseTree[b] & ef, x: RoseTree[a]): RoseTree[b] & ef = Data/RoseTree.flatMap(f, x)
     }
 
     pub type alias RoseForest[a] = List[RoseTree[a]]
@@ -61,17 +61,57 @@ namespace Data/RoseTree {
             case _                   => false
         }
 
-    /// TODO make tail recursive / avoid (:::) ...
-    pub def ap(f: RoseTree[a -> b & ef], t: RoseTree[a]) : RoseTree[b] & ef =
+    /// TODO - for the time being keep this for testing/comparing the CPS version.
+    pub def apSimple(f: RoseTree[a -> b & ef], t: RoseTree[a]): RoseTree[b] & ef =
         let Node(f1, fs) = f;
         let Node(x1, ts) = t;
         Node(f1(x1), List.map(Functor.map(f1), ts) ::: List.map(flip(ap, t), fs))
 
-    /// TODO make tail recursive / avoid (:::) ...
-    pub def bind(t: RoseTree[a], f: a -> RoseTree[b] & ef) : RoseTree[b] & ef =
+    pub def ap(f: RoseTree[a -> b & ef], t: RoseTree[a]): RoseTree[b] & ef =
+        apHelper(f, t, kt -> kt as & ef)
+
+    def apHelper(f: RoseTree[a -> b & ef], t: RoseTree[a], k: RoseTree[b] -> RoseTree[b] & ef): RoseTree[b] & ef =
+        let Node(f1, fs) = f;
+        let Node(x1, ts) = t;
+        apHelperList1(f1, ts, ks1 ->
+            apHelperList2(t, fs, ks2 -> k(Node(f1(x1), ks1 ::: ks2))))
+
+    def apHelperList1(f1: a -> b & ef, ts: List[RoseTree[a]], k: List[RoseTree[b]] -> RoseTree[b] & ef): RoseTree[b] & ef =
+        match ts {
+            case Nil => k(Nil)
+            case t1 :: rs => apHelperList1(f1, rs, ks -> k(map(f1, t1) :: ks))
+        }
+
+    def apHelperList2(t: RoseTree[a], fs: List[RoseTree[a -> b & ef]], k: List[RoseTree[b]] -> RoseTree[b] & ef): RoseTree[b] & ef =
+        match fs {
+            case Nil => k(Nil)
+            case f1 :: rs => apHelperList2(t, rs, ks ->
+                                apHelper(f1, t, k1 ->
+                                    k(k1 :: ks)))
+        }
+
+    /// TODO - for the time being keep this for testing/comparing the CPS version.
+    pub def bindSimple(t: RoseTree[a], f: a -> RoseTree[b] & ef): RoseTree[b] & ef =
         let Node(x1, ts) = t;
         match f(x1) {
             case Node(x2, ts2) => Node(x2, ts2 ::: List.map(flip(bind, f), ts))
+        }
+
+    pub def bind(t: RoseTree[a], f: a -> RoseTree[b] & ef): RoseTree[b] & ef =
+        bindHelper(t, f, kt -> kt as & ef)
+
+    def bindHelper(t: RoseTree[a], f: a -> RoseTree[b] & ef, k: RoseTree[b] -> RoseTree[b] & ef): RoseTree[b] & ef =
+        let Node(x1, ts) = t;
+        match f(x1) {
+            case Node(x2, ts2) => bindHelperList(ts, f, ks -> k(Node(x2, ts2 ::: ks)))
+        }
+
+    def bindHelperList(l: List[RoseTree[a]], f: a -> RoseTree[b] & ef, k: List[RoseTree[b]] -> RoseTree[b] & ef): RoseTree[b] & ef =
+        match l {
+            case Nil => k(Nil)
+            case t1 :: rs => bindHelper(t1, f, k1 ->
+                                bindHelperList(rs, f, ks ->
+                                    k(k1 :: ks)))
         }
 
     pub def flatMap(f: a -> RoseTree[b] & ef, t: RoseTree[a]) : RoseTree[b] & ef = bind(t, f)
