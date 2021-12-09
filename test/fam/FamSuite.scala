@@ -20,6 +20,7 @@ import ca.uwaterloo.flix.util.{FlixTest, Options}
 import org.scalatest.Suites
 
 class FamSuite extends Suites(
+  new FlixTest("TestTraversable", "main/test/spt/fam/TestTraversable.flix")(Options.TestWithLibAll),
   new FlixTest("TestApplicative", "main/test/spt/fam/TestApplicative.flix")(Options.TestWithLibAll),
   new FlixTest("TestAlternative", "main/test/spt/fam/TestAlternative.flix")(Options.TestWithLibAll),
   new FlixTest("TestFunctor", "main/test/spt/fam/TestFunctor.flix")(Options.TestWithLibAll),
