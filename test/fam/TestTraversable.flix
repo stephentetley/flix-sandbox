@@ -276,4 +276,192 @@ namespace TestTraversable {
         let xs: Nel[Int] = Nel(1, 2 :: 3 :: Nil);
         Traversable.mapAccumRight((acc, x) -> (acc+1, x+acc), 10, xs) == (13, Nel(13, 13 :: 13 :: Nil))
 
+    /////////////////////////////////////////////////////////////////////////////
+    // sequence_Chain                                                          //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def sequence_Chain01(): Bool =
+        let xs: Chain[Option[Int]] = Chain.empty();
+        Traversable.sequence(xs) == Some(Chain.empty())
+
+    @test
+    def sequence_Chain02(): Bool =
+        let xs: Chain[Option[Int]] = Chain.singleton(None);
+        Traversable.sequence(xs) == None
+
+    @test
+    def sequence_Chain03(): Bool =
+        let xs = Chain.singleton(Some(1));
+        Traversable.sequence(xs) == Some(Chain.singleton(1))
+
+    @test
+    def sequence_Chain04(): Bool =
+        let xs = List.toChain(Some(1) :: None :: Nil);
+        Traversable.sequence(xs) == None
+
+    @test
+    def sequence_Chain05(): Bool =
+        let xs = List.toChain(Some(1) :: Some(2) :: Nil);
+        Traversable.sequence(xs) == Some(List.toChain(1 :: 2 :: Nil))
+
+    /////////////////////////////////////////////////////////////////////////////
+    // traverse_Chain                                                          //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def traverse_Chain01(): Bool =
+        let xs: Chain[Int] = Chain.empty();
+        Traversable.traverse(x -> Some(x+1), xs) == Some(Chain.empty())
+
+    @test
+    def traverse_Chain02(): Bool =
+        let xs: Chain[Int] = Chain.singleton(1);
+        Traversable.traverse(x -> Some(x+1), xs) == Some(Chain.singleton(2))
+
+    @test
+    def traverse_Chain03(): Bool =
+        let xs: Chain[Int] = List.toChain(1 :: 2 :: Nil);
+        Traversable.traverse(x -> Some(x+1), xs) == Some(List.toChain(2 :: 3 :: Nil))
+
+    @test
+    def traverse_Chain04(): Bool =
+        let xs: Chain[Int] = Chain.empty();
+        Traversable.traverse(_ -> None, xs) == Some(Chain.empty())
+
+    @test
+    def traverse_Chain05(): Bool =
+        let xs: Chain[Int] = Chain.singleton(1);
+        Traversable.traverse(_ -> None, xs) == None
+
+    @test
+    def traverse_Chain06(): Bool =
+        let xs: Chain[Int] = List.toChain(1 :: 2 :: Nil);
+        Traversable.traverse(_ -> None, xs) == None
+
+    /////////////////////////////////////////////////////////////////////////////
+    // mapAccumLeft_Chain                                                      //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def mapAccumLeft_Chain01(): Bool =
+        let xs: Chain[Int] = Chain.empty();
+        Traversable.mapAccumLeft((acc, x) -> (acc+1, x+acc), 10, xs) == (10, Chain.empty())
+
+    @test
+    def mapAccumLeft_Chain02(): Bool =
+        let xs: Chain[Int] = Chain.singleton(1);
+        Traversable.mapAccumLeft((acc, x) -> (acc+1, x+acc), 10, xs) == (11, Chain.singleton(11))
+
+    @test
+    def mapAccumLeft_Chain03(): Bool =
+        let xs: Chain[Int] = List.toChain(1 :: 2 :: Nil);
+        Traversable.mapAccumLeft((acc, x) -> (acc+1, x+acc), 10, xs) == (12, List.toChain(11 :: 13 :: Nil))
+
+    @test
+    def mapAccumLeft_Chain04(): Bool =
+        let xs: Chain[Int] = List.toChain(1 :: 2 :: 3 :: Nil);
+        Traversable.mapAccumLeft((acc, x) -> (acc+1, x+acc), 10, xs) == (13, List.toChain(11 :: 13 :: 15 :: Nil))
+
+    /////////////////////////////////////////////////////////////////////////////
+    // mapAccumRight_Chain                                                     //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def mapAccumRight_Chain01(): Bool =
+        let xs: Chain[Int] = Chain.empty();
+        Traversable.mapAccumRight((acc, x) -> (acc+1, x+acc), 10, xs) == (10, Chain.empty())
+
+    @test
+    def mapAccumRight_Chain02(): Bool =
+        let xs: Chain[Int] = Chain.singleton(1);
+        Traversable.mapAccumRight((acc, x) -> (acc+1, x+acc), 10, xs) == (11, Chain.singleton(11))
+
+    @test
+    def mapAccumRight_Chain03(): Bool =
+        let xs: Chain[Int] = List.toChain(1 :: 2 :: Nil);
+        Traversable.mapAccumRight((acc, x) -> (acc+1, x+acc), 10, xs) == (12, List.toChain(12 :: 12 :: Nil))
+
+    @test
+    def mapAccumRight_Chain04(): Bool =
+        let xs: Chain[Int] = List.toChain(1 :: 2 :: 3 :: Nil);
+        Traversable.mapAccumRight((acc, x) -> (acc+1, x+acc), 10, xs) == (13, List.toChain(13 :: 13 :: 13 :: Nil))
+
+
+    /////////////////////////////////////////////////////////////////////////////
+    // sequence_Map                                                            //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def sequence_Map01(): Bool =
+        let m: Map[Int, Option[Int]] = Map#{};
+        Traversable.sequence(m) == Some(Map#{})
+
+    @test
+    def sequence_Map02(): Bool =
+        let m: Map[Int, Option[Int]] = Map#{1 -> None};
+        Traversable.sequence(m) == None
+
+    @test
+    def sequence_Map03(): Bool =
+        let m = Map#{1 -> Some(1)};
+        Traversable.sequence(m) == Some(Map#{1 -> 1})
+
+    @test
+    def sequence_Map04(): Bool =
+        let m = Map#{1 -> Some(1), 2 -> None};
+        Traversable.sequence(m) == None
+
+    @test
+    def sequence_Map05(): Bool =
+        let m = Map#{1 -> Some(1), 2 -> Some(2)};
+        Traversable.sequence(m) == Some(Map#{1 -> 1, 2 -> 2})
+
+    /////////////////////////////////////////////////////////////////////////////
+    // traverse_Map                                                            //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def traverse_Map01(): Bool =
+        let m: Map[Int, Int] = Map#{};
+        Traversable.traverse(x -> Some(x+1), m) == Some(Map#{})
+
+    @test
+    def traverse_Map02(): Bool =
+        let m: Map[Int, Int] = Map#{1 -> 1};
+        Traversable.traverse(x -> Some(x+1), m) == Some(Map#{1 -> 2})
+
+    @test
+    def traverse_Map03(): Bool =
+        let m: Map[Int, Int] = Map#{1 -> 1, 2 -> 2};
+        Traversable.traverse(x -> Some(x+1), m) == Some(Map#{1 -> 2, 2 -> 3})
+
+    @test
+    def traverse_Map04(): Bool =
+        let m: Map[Int, Int] = Map#{};
+        Traversable.traverse(_ -> None, m) == Some(Map#{})
+
+    @test
+    def traverse_Map05(): Bool =
+        let m: Map[Int, Int] = Map#{1 -> 1};
+        Traversable.traverse(_ -> None, m) == None
+
+    @test
+    def traverse_Map06(): Bool =
+        let m: Map[Int, Int] = Map#{1 -> 1, 2 -> 2};
+        Traversable.traverse(_ -> None, m) == None
+
+    /////////////////////////////////////////////////////////////////////////////
+    // mapAccumLeft_Map                                                        //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def mapAccumLeft_Map01(): Bool =
+        let m: Map[Int, Int] = Map#{};
+        Traversable.mapAccumLeft((acc, x) -> (acc+1, x+acc), 10, m) == (10, Map#{})
+
+    @test
+    def mapAccumLeft_Map02(): Bool =
+        let m: Map[Int, Int] = Map#{1 -> 1};
+        Traversable.mapAccumLeft((acc, x) -> (acc+1, x+acc), 10, m) == (11, Map#{1 -> 11})
 }
