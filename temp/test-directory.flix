@@ -1,10 +1,10 @@
 
 
 def main(_args: Array[String]): Int32 & Impure = 
-    Console.printLine("Running ${Time/LocalTime.now()}...");
-    Console.printLine("test01...");
+    println("Running ${Time/LocalTime.now()}...");
+    println("test01...");
     test01();
-    Console.printLine("test02...");
+    println("test02...");
     test02();
     0
 

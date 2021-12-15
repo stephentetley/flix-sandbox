@@ -26,13 +26,13 @@ namespace Test/FlixCheck {
     def newRandom(): SplittableRandom & Impure =
         import new java.util.SplittableRandom() as newSplittableRandom;
         SplittableRandom(newSplittableRandom())
-        
-    // def nextInt(r: Random, max: Int32): Int32 & Impure = 
+
+    // def nextInt(r: Random, max: Int32): Int32 & Impure =
     //     import java.util.SplittableRandom.nextInt(Int32);
     //     let Random(r1) = r;
     //     nextInt(r1, max)
 
-    // def nextLong(r: Random, max: Int64): Int64 & Impure = 
+    // def nextLong(r: Random, max: Int64): Int64 & Impure =
     //     import java.util.SplittableRandom.nextLong(Int64);
     //     let Random(r1) = r;
     //     nextLong(r1, max)
@@ -67,7 +67,7 @@ namespace Test/FlixCheck {
             case (Nil, Nil)             => EqualTo
             case (Nil, _)               => LessThan
             case (_, Nil)               => GreaterThan
-            case (x :: xs1, y :: ys1)   => { 
+            case (x :: xs1, y :: ys1)   => {
                 let c = cmp(x,y);
                 if (c == EqualTo)
                     listCompareWith(cmp, xs1, ys1)
@@ -193,7 +193,7 @@ namespace Test/FlixCheck {
     }
 
 
-    pub def run(x: Gen[a], bounds: Int32): a & Impure = 
+    pub def run(x: Gen[a], bounds: Int32): a & Impure =
         let r1 = newRandom();
         apply1(x, bounds, r1)
 
@@ -205,7 +205,7 @@ namespace Test/FlixCheck {
         f(n, r)
 
     pub def map(f: a -> b & ef, x: Gen[a]): Gen[b] & ef =
-        Gen((b,r) -> 
+        Gen((b,r) ->
             let a = apply1(x, b, r);
             f(a) as & Impure
         ) as & ef
@@ -219,8 +219,8 @@ namespace Test/FlixCheck {
         ) as & ef
 
     pub def bind(x: Gen[a], k: a -> Gen[b] & ef): Gen[b] & ef=
-        Gen((b,r) -> 
-            let a = apply1(x, b, r); 
+        Gen((b,r) ->
+            let a = apply1(x, b, r);
             let y = k(a) as & Impure;
             apply1(y, b, r)
         ) as & ef
@@ -233,22 +233,22 @@ namespace Test/FlixCheck {
 
     pub def sequence(xs: List[Gen[a]]): Gen[List[a]] = sequenceHelper(xs, point)
 
-    pub def sequenceHelper(xs: List[Gen[a]], k: List[a]-> Gen[List[a]]): Gen[List[a]] = 
+    pub def sequenceHelper(xs: List[Gen[a]], k: List[a]-> Gen[List[a]]): Gen[List[a]] =
         match xs {
             case Nil => k(Nil)
-            case xf :: rs => { 
+            case xf :: rs => {
                 let* x = xf;
                 sequenceHelper(rs, xs -> k(x :: xs))
             }
         }
 
-    pub def sized(fgen: Int32 -> Gen[a]): Gen[a] = 
-        Gen((b,r) -> 
+    pub def sized(fgen: Int32 -> Gen[a]): Gen[a] =
+        Gen((b,r) ->
             let Gen(m) = fgen(b);
             m(b, r)
         )
 
-    pub def resize(bound: Int32, x:Gen[a]): Gen[a] = 
+    pub def resize(bound: Int32, x:Gen[a]): Gen[a] =
         Gen((_,r) -> apply1(x, bound, r))
 
     pub def rand(): Gen[SplittableRandom] =
@@ -271,7 +271,7 @@ namespace Test/FlixCheck {
         apply1(gen, size, rnd)
 
 
-    pub def choose(lo:Int32, hi: Int32): Gen[Int32] = 
+    pub def choose(lo:Int32, hi: Int32): Gen[Int32] =
         let* r1 = rand();
         let* v = liftAction(_ -> randomR(lo, hi, r1));
         point(v)
@@ -297,19 +297,19 @@ namespace Test/FlixCheck {
         }
 
 
-    def chooseInt64(lo:Int64, hi: Int64): Gen[Int64] = 
+    def chooseInt64(lo:Int64, hi: Int64): Gen[Int64] =
         let* r1 = rand();
         let* v = liftAction(_ -> randomR64(lo, hi, r1));
         point(v)
 
-    pub def elements(arr: Array[a]): Gen[a] = 
+    pub def elements(arr: Array[a]): Gen[a] =
         let hi = Array.length(arr);
         let* ix = choose(0, hi);
         let* v = liftAction(_ -> arr[ix]);
         point(v)
 
     pub def vector(n: Int32): Gen[Array[a]] with Arbitrary[a] =
-        Gen((b,r) -> 
+        Gen((b,r) ->
             let f = _ -> apply1(Test/FlixCheck/Arbitrary.arbitrary(), b, r);
             Array.init(f, n)
         )
@@ -317,11 +317,11 @@ namespace Test/FlixCheck {
     pub def list(n: Int32): Gen[List[a]] with Arbitrary[a] =
         if (n <= 0)
             point(Nil)
-        else 
+        else
             listHelper(Test/FlixCheck/Arbitrary.arbitrary(), n)
 
-    def listHelper(arb: Gen[a], n: Int32): Gen[List[a]] = 
-        Gen((b,r) -> 
+    def listHelper(arb: Gen[a], n: Int32): Gen[List[a]] =
+        Gen((b,r) ->
             let f = _ -> apply1(arb, b, r);
             let arr = Array.init(f, n);
             Array.toList(arr)
@@ -329,7 +329,7 @@ namespace Test/FlixCheck {
 
 
 
-    pub def oneof(arr: Array[Gen[a]]): Gen[a] = flatMap(x -> x, elements(arr)) 
+    pub def oneof(arr: Array[Gen[a]]): Gen[a] = flatMap(x -> x, elements(arr))
 
 
 
@@ -347,7 +347,7 @@ namespace Test/FlixCheck {
         use Int32.{toFloat32};
         toFloat32(a) + (toFloat32(b) / (absF32(toFloat32(c)) + 1.0f32))
 
-    pub def genFloat32(): Gen[Float32] = 
+    pub def genFloat32(): Gen[Float32] =
         let* a: Int32 = Test/FlixCheck/Arbitrary.arbitrary();
         let* b: Int32 = Test/FlixCheck/Arbitrary.arbitrary();
         let* c: Int32 = Test/FlixCheck/Arbitrary.arbitrary();
@@ -362,12 +362,12 @@ namespace Test/FlixCheck {
         else if (x == Float64.minValue())   -1.0f64
         else                                -x
     }
-    
+
     def fractionF64 (a: Int32, b: Int32, c: Int32): Float64 =
         use Int32.{toFloat64};
         toFloat64(a) + (toFloat64(b) / (absF64(toFloat64(c)) + 1.0f64))
 
-    pub def genFloat64(): Gen[Float64] = 
+    pub def genFloat64(): Gen[Float64] =
         let* a: Int32 = Test/FlixCheck/Arbitrary.arbitrary();
         let* b: Int32 = Test/FlixCheck/Arbitrary.arbitrary();
         let* c: Int32 = Test/FlixCheck/Arbitrary.arbitrary();
@@ -381,20 +381,20 @@ namespace Test/FlixCheck {
 
     pub opaque type Property = Gen[Answer]
 
-    pub def answer(ans: Answer): Property = 
+    pub def answer(ans: Answer): Property =
         let ma = point(ans);
         Property(ma)
 
-    pub def evaluate(testable: a -> Property, x: a): Gen[Answer] = 
+    pub def evaluate(testable: a -> Property, x: a): Gen[Answer] =
         let Property(ma) = testable(x);
         ma
 
     pub def testableUnit(): Property = answer(nothing())
-    
-    pub def testableBool(x: Bool): Property = 
+
+    pub def testableBool(x: Bool): Property =
         let ans = nothing();
         answer( {  okay = Some(x) | ans })
-    
+
     pub def testableAnswer(ans: Answer): Property = answer(ans)
 
     pub def testableProperty(x: Property): Property = x
@@ -404,9 +404,9 @@ namespace Test/FlixCheck {
         forall(dminus, dict.arbitrary, f)
 
     pub def forall(dict: {show :: a -> String, testable :: b -> Property}, gen: Gen[a], body: a -> b): Property =
-        let argument = (a,ans) -> { 
-            let show1 = dict.show; 
-            let args = show1(a) :: ans.arguments;             
+        let argument = (a,ans) -> {
+            let show1 = dict.show;
+            let args = show1(a) :: ans.arguments;
             { arguments = args | ans }
         };
         Property(
@@ -421,10 +421,10 @@ namespace Test/FlixCheck {
         case false => testableUnit()
     }
 
-    pub def label(testable: a -> Property, s: String, x:a): Property = 
-        let add = ans -> { 
-            let ss = ans.stamp; 
-            { stamp = s :: ss | ans } 
+    pub def label(testable: a -> Property, s: String, x:a): Property =
+        let add = ans -> {
+            let ss = ans.stamp;
+            { stamp = s :: ss | ans }
         };
         Property(add `map` evaluate(testable, x))
 
@@ -433,7 +433,7 @@ namespace Test/FlixCheck {
         case false => testable(x)
     }
 
-    pub def trivial(testable: a -> Property, b: Bool, x: a): Property = 
+    pub def trivial(testable: a -> Property, b: Bool, x: a): Property =
         classify(testable, b, "trivial", x)
 
     pub def collect(dict: {show :: a -> String, testable :: b -> Property}, v: a, x: b): Property =
@@ -441,32 +441,32 @@ namespace Test/FlixCheck {
         label(dict.testable, show1(v), x)
 
 
-    type alias Config = 
+    type alias Config =
         { configMaxTest :: Int32
         , configMaxFail :: Int32
         , configSize :: Int32 -> Int32
         , configEvery :: (Int32, List[String]) -> String
         }
 
-    pub def quick(): Config = 
+    pub def quick(): Config =
         { configMaxTest = 100
         , configMaxFail= 1000
         , configSize = x -> x / 2 + 3
         , configEvery = (_,_) -> ""
         }
 
-    pub def verbose(): Config = 
+    pub def verbose(): Config =
         let every = (n,args) -> { let x = Int32.toString(n) + ":"; String.unlines(x :: args)} ;
         { configEvery = every | quick() }
 
 
-    pub def quickCheck(testable: a -> Property, x: a): Unit & Impure = 
+    pub def quickCheck(testable: a -> Property, x: a): Unit & Impure =
         check(testable, quick(), x)
 
-    pub def verboseCheck(testable: a -> Property, x: a): Unit & Impure = 
+    pub def verboseCheck(testable: a -> Property, x: a): Unit & Impure =
         check(testable, verbose(), x)
 
-    pub def check(testable: a -> Property, config: Config, x: a): Unit & Impure = 
+    pub def check(testable: a -> Property, config: Config, x: a): Unit & Impure =
         let rnd = newRandom();
         let ans = evaluate(testable, x);
         tests(config, ans, rnd, 0, 0, Nil)
@@ -480,31 +480,31 @@ namespace Test/FlixCheck {
                 let getConfigSize = config.configSize;
                 let answer = generate(getConfigSize(ntest), rnd2, gen);
                 printEvery(config.configEvery, ntest, answer.arguments);
-                match answer.okay { 
+                match answer.okay {
                     case None => tests(config, gen, rnd1, ntest, nfail + 1, stamps)
                     case Some(true) => tests(config, gen, rnd1, ntest + 1, nfail, (answer.stamp :: stamps))
                     case Some(false) => {
-                        Console.printLine("Falsifiable after " + Int32.toString(ntest) + " tests:");
-                        List.foreach(Console.printLine, answer.arguments)
+                        println("Falsifiable after " + Int32.toString(ntest) + " tests:");
+                        List.foreach(println, answer.arguments)
                     }
                 }
             }
         }
 
-    def printEvery(showEvery: (Int32, List[String]) -> String, n: Int32, args: List[String]): Unit & Impure= 
+    def printEvery(showEvery: (Int32, List[String]) -> String, n: Int32, args: List[String]): Unit & Impure=
         match showEvery(n, args) {
             case "" => () as & Impure
-            case str => Console.printLine(str)
+            case str => println(str)
         }
 
-    def done(msg: String, ntest: Int, stamps: List[List[String]]): Unit & Impure = 
+    def done(msg: String, ntest: Int, stamps: List[List[String]]): Unit & Impure =
         let s = msg + " " + Int32.toString(ntest) + " tests" + makeTable(ntest, stamps);
-        Console.printLine(s)
-        
-    def makeTable(ntest: Int32, stamps: List[List[String]]): String = 
+        println(s)
+
+    def makeTable(ntest: Int32, stamps: List[List[String]]): String =
         let percentage = (n,m) -> { let x = (100 *n) / m; Int32.toString(x) + "%"};
         let entry = xy -> percentage(fst(xy), ntest) + " " + String.intercalate(", ", snd(xy));
-        stamps 
+        stamps
             |> List.filter(List.isEmpty)
             |> List.sortWith(listCompareWith(stringCompare))
             |> List.groupBy((s,t) -> s == t)
@@ -521,7 +521,7 @@ namespace Test/FlixCheck {
         case _          => String.intercalate(String.lineSeparator(), "." :: List.map(s -> s + ".", xs))
     }
 
-    def pairLength(xss: List[List[String]]): (Int32, List[String]) = match xss { 
+    def pairLength(xss: List[List[String]]): (Int32, List[String]) = match xss {
         case xs :: _ => (List.length(xss), xs)
         case Nil => (0, Nil)
     }

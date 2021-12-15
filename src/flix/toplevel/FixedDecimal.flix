@@ -38,7 +38,7 @@ instance ToString[FixedDecimal[a]] with HasResolution[a] {
             let* r1 = BigInt.tryToFloat64(res);
             Some(ToString.toString(d1 / r1))
         };
-        step() |> flip(Option.getWithDefault, "Error - ToString[FixedDecimal] failed")
+        step() |> Option.getWithDefault("Error - ToString[FixedDecimal] failed")
 }
 
 instance FromString[FixedDecimal[a]] with HasResolution[a] {

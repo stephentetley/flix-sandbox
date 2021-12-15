@@ -1,7 +1,7 @@
 
 
 def main(_args: Array[String]): Int32 & Impure = 
-    Console.printLine("Running... ${Time/LocalTime.now()}");
+    println("Running... ${Time/LocalTime.now()}");
     test01() |> println;
     foldablePrintBytesWith([48i8, 49i8, 50i8]) |> println;
     test02() |> println;
