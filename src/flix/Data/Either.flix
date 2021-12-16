@@ -60,14 +60,6 @@ instance Traversable[Either[e]] {
             case Left(e) => point(Left(e))
             case Right(ma) => Right <&> ma
         }
-
-    pub def foreachM(f: a -> m[b] & ef, t: Either[e, a]): m[Unit] & ef with Monad[m] =
-        use Applicative.{point};
-        match t {
-            case Left(_)  => point(())
-            case Right(a) => Monad.flatMap(_ -> point(()), f(a))
-        }
-
 }
 
 namespace Either {
