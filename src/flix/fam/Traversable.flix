@@ -94,6 +94,7 @@ namespace Traversable {
     pub def for(t: t[a], f: a -> m[b] & ef): m[t[b]] & ef with Applicative[m], Traversable[t] =
         Traversable.traverse(f, t)
 
+/*
     enum Either[l, r] {
         case Left(l)
         case Right(r)
@@ -134,10 +135,59 @@ namespace Traversable {
             case Right(a) => Ok(a)
         };
         traverse(step, t) |> final
+*/
 
+    pub def mapAccumLeftOld(f: acc -> a -> (acc, b), start: acc, t: t[a]): (acc, t[b]) with Traversable[t] =
+        runStateL(traverse(x1 -> StateL(s1 -> f(s1, x1)), t), start)
 
     pub def mapAccumLeft(f: acc -> a -> (acc, b), start: acc, t: t[a]): (acc, t[b]) with Traversable[t] =
-        runStateL(traverse(x1 -> StateL(flip(f, x1)), t), start)
+        runContState(traverse(x1 -> ContState((k, s) -> let (s1, b) = f(s, x1); k(b, s1)), t), start)
+
+    /// Old version bursts the stack, use ContState the CPS-State monad instead...
+    /// See - https://hackage.haskell.org/package/mtl-c-0.1.1
+    /// and Filinski slides
+
+    pub opaque type ContState[ka, s, a] = (a -> s -> ka) -> s -> ka
+
+    pub def apply1(ma: ContState[ka, s, a], st: s, cont: a -> s -> ka): ka =
+        let ContState(f) = ma;
+        f(cont, st)
+
+    pub def runContState(ma: ContState[(s, a), s, a], st: s): (s, a) =
+        let ContState(f) = ma;
+        let cont = (a, s) -> (s, a);
+        f(cont, st)
+
+    pub def ret(x: a): ContState[ka, s, a] =
+        ContState(k -> k(x))
+
+
+    pub def mapContState(f: a -> b & ef, ma: ContState[ka, s, a]): ContState[ka, s, b] & ef =
+        ContState((k, s) ->
+            apply1(ma, s, (a, s1) -> k(f(a) as & Pure, s1))
+        ) as & ef
+
+
+    instance Functor[ContState[ka, s]] {
+        pub def map(f: a -> b & ef, x: ContState[ka, s, a]): ContState[ka, s, b] & ef =
+            mapContState(f, x)
+    }
+
+    pub def apContState(mf: ContState[ka, s, a -> b & ef], ma: ContState[ka, s, a]): ContState[ka, s, b] & ef =
+        ContState((k, s) ->
+            apply1(mf, s, (f, s1) ->
+                apply1(ma, s1, (a, s2) ->
+                    k(f(a) as & Pure, s2)))
+        ) as & ef
+
+    instance Applicative[ContState[ka, s]] {
+        pub def point(x: a): ContState[ka, s, a] = ret(x)
+
+        pub def ap(f: ContState[ka, s, a -> b & ef], x: ContState[ka, s, a]): ContState[ka, s, b] & ef =
+            apContState(f, x)
+    }
+
+    /// Old - non-CPS - blows the stack...
 
     opaque type StateL[s, a] = s -> (s, a)
 
@@ -166,6 +216,8 @@ namespace Traversable {
     def runStateL(x: StateL[s, a], state: s): (s, a) =
         let StateL(x1) = x;
         x1(state)
+
+
 
     pub def mapAccumRight(f: acc -> a -> (acc, b), start: acc, t: t[a]): (acc, t[b]) with Traversable[t] =
         runStateR(traverse(x1 -> StateR(flip(f, x1)), t), start)
@@ -295,7 +347,7 @@ namespace RedBlackTreeHelper {
     }
 
     def nodeA(color: Color, left: m[RedBlackTree[k, v]], k: k, value: m[v], right: m[RedBlackTree[k, v]]): m[RedBlackTree[k, v]] with Applicative[m] =
-        (((l, v, r) -> Node(color, l, k, v, r)) <&> left <*> value) <*> right
+        ((((l, v, r) -> Node(color, l, k, v, r)) <&> left) <*> value) <*> right
 
     ///
     /// Returns a RedBlackTree with mappings `k -> f(v)` for every `k -> v` in `tree`.
