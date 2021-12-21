@@ -12,9 +12,13 @@ def main(_args: Array[String]): Int32 & Impure =
 def test01(): Unit & Impure =  
     let xs = makeList(2000000);
     match Traversable.traverse(x -> Some(x+1), xs) {
-        case Some(xs1) => println("length(xs1)= ${List.length(xs1)}")
+        case Some(xs1) => println("length(xs1): ${List.length(xs1)}")
         case None => println("None")
     };    
-    let (st, ys) = Traversable.mapAccumLeft((s, x) -> (s+1, x+s), 0, xs);
-    println("state: ${st}, length(ys)= ${List.length(ys)}");
+    let (sy, ys) = Traversable.mapAccumLeft((s, x) -> (s+1, x+s), 0, xs);
+    println("state: ${sy}, length(ys): ${List.length(ys)}, head(ys): ${List.head(ys)}");
+
+    let (sz, zs) = Traversable.mapAccumRight((s, x) -> (s+1, x+s), 0, xs);
+    println("state: ${sz}, length(zs): ${List.length(zs)}, head(zs): ${List.head(zs)}");
+
     ()

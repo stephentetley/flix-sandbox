@@ -137,119 +137,78 @@ namespace Traversable {
         traverse(step, t) |> final
 */
 
-    pub def mapAccumLeftOld(f: acc -> a -> (acc, b), start: acc, t: t[a]): (acc, t[b]) with Traversable[t] =
-        runStateL(traverse(x1 -> StateL(s1 -> f(s1, x1)), t), start)
-
     pub def mapAccumLeft(f: acc -> a -> (acc, b), start: acc, t: t[a]): (acc, t[b]) with Traversable[t] =
-        runContState(traverse(x1 -> ContState((k, s) -> let (s1, b) = f(s, x1); k(b, s1)), t), start)
+        runContStateLeft(traverse(x1 -> ContStateLeft((k, s) -> let (s1, b) = f(s, x1); k(b, s1)), t), start)
 
-    /// Old version bursts the stack, use ContState the CPS-State monad instead...
-    /// See - https://hackage.haskell.org/package/mtl-c-0.1.1
-    /// and Filinski slides
+    /// Simple implementation of a State monad bursts the stack, use ContState the CPS-State monad instead...
 
-    pub opaque type ContState[ka, s, a] = (a -> s -> ka) -> s -> ka
+    opaque type ContStateLeft[ka, s, a] = (a -> s -> ka) -> s -> ka
 
-    pub def apply1(ma: ContState[ka, s, a], st: s, cont: a -> s -> ka): ka =
-        let ContState(f) = ma;
+    def applyLeft1(ma: ContStateLeft[ka, s, a], st: s, cont: a -> s -> ka): ka =
+        let ContStateLeft(f) = ma;
         f(cont, st)
 
-    pub def runContState(ma: ContState[(s, a), s, a], st: s): (s, a) =
-        let ContState(f) = ma;
+    def runContStateLeft(ma: ContStateLeft[(s, a), s, a], st: s): (s, a) =
+        let ContStateLeft(f) = ma;
         let cont = (a, s) -> (s, a);
         f(cont, st)
 
-    pub def ret(x: a): ContState[ka, s, a] =
-        ContState(k -> k(x))
 
-
-    pub def mapContState(f: a -> b & ef, ma: ContState[ka, s, a]): ContState[ka, s, b] & ef =
-        ContState((k, s) ->
-            apply1(ma, s, (a, s1) -> k(f(a) as & Pure, s1))
-        ) as & ef
-
-
-    instance Functor[ContState[ka, s]] {
-        pub def map(f: a -> b & ef, x: ContState[ka, s, a]): ContState[ka, s, b] & ef =
-            mapContState(f, x)
-    }
-
-    pub def apContState(mf: ContState[ka, s, a -> b & ef], ma: ContState[ka, s, a]): ContState[ka, s, b] & ef =
-        ContState((k, s) ->
-            apply1(mf, s, (f, s1) ->
-                apply1(ma, s1, (a, s2) ->
-                    k(f(a) as & Pure, s2)))
-        ) as & ef
-
-    instance Applicative[ContState[ka, s]] {
-        pub def point(x: a): ContState[ka, s, a] = ret(x)
-
-        pub def ap(f: ContState[ka, s, a -> b & ef], x: ContState[ka, s, a]): ContState[ka, s, b] & ef =
-            apContState(f, x)
-    }
-
-    /// Old - non-CPS - blows the stack...
-
-    opaque type StateL[s, a] = s -> (s, a)
-
-    instance Functor[StateL[s]] {
-        pub def map(f: a -> b & ef, x: StateL[s, a]): StateL[s, b] & ef=
-            let StateL(x1) = x;
-            StateL(s ->
-                let (s1, v1) = x1(s);
-                (s1, f(v1) as & Pure)
+    instance Functor[ContStateLeft[ka, s]] {
+        pub def map(f: a -> b & ef, ma: ContStateLeft[ka, s, a]): ContStateLeft[ka, s, b] & ef =
+            ContStateLeft((k, s) ->
+                applyLeft1(ma, s, (a, s1) -> k(f(a) as & Pure, s1))
             ) as & ef
     }
 
-    instance Applicative[StateL[s]] {
-        pub def point(x: a): StateL[s, a] = StateL(s -> (s, x))
+    instance Applicative[ContStateLeft[ka, s]] {
+        pub def point(x: a): ContStateLeft[ka, s, a] =
+            ContStateLeft((k, s) -> k(x, s))
 
-        pub def ap(f: StateL[s, a -> b & ef], x: StateL[s, a]): StateL[s, b] & ef =
-            let StateL(f1) = f;
-            let StateL(x1) = x;
-            StateL(s ->
-                let (s1, f2) = f1(s);
-                let (s2, v) = x1(s1);
-                (s2, f2(v) as & Pure)
+        pub def ap(mf: ContStateLeft[ka, s, a -> b & ef], ma: ContStateLeft[ka, s, a]): ContStateLeft[ka, s, b] & ef =
+            ContStateLeft((k, s) ->
+                applyLeft1(mf, s, (f, s1) ->
+                    applyLeft1(ma, s1, (a, s2) ->
+                        k(f(a) as & Pure, s2)))
             ) as & ef
     }
-
-    def runStateL(x: StateL[s, a], state: s): (s, a) =
-        let StateL(x1) = x;
-        x1(state)
-
 
 
     pub def mapAccumRight(f: acc -> a -> (acc, b), start: acc, t: t[a]): (acc, t[b]) with Traversable[t] =
-        runStateR(traverse(x1 -> StateR(flip(f, x1)), t), start)
+        runContStateRight(traverse(x1 -> ContStateRight((k, s) -> let (s1, b) = f(s, x1); k(b, s1)), t), start)
 
-    opaque type StateR[s, a] = s -> (s, a)
+    /// ContStateRight is exactly the same as ContStateLeft except the evaluation order of `ap` is flipped.
 
-    instance Functor[StateR[s]] {
-        pub def map(f: a -> b & ef, x: StateR[s, a]): StateR[s, b] & ef =
-            let StateR(x1) = x;
-            StateR(s ->
-                let (s1, v1) = x1(s);
-                (s1, f(v1) as & Pure)
+    opaque type ContStateRight[ka, s, a] = (a -> s -> ka) -> s -> ka
+
+    def applyRight1(ma: ContStateRight[ka, s, a], st: s, cont: a -> s -> ka): ka =
+        let ContStateRight(f) = ma;
+        f(cont, st)
+
+    def runContStateRight(ma: ContStateRight[(s, a), s, a], st: s): (s, a) =
+        let ContStateRight(f) = ma;
+        let cont = (a, s) -> (s, a);
+        f(cont, st)
+
+
+    instance Functor[ContStateRight[ka, s]] {
+        pub def map(f: a -> b & ef, ma: ContStateRight[ka, s, a]): ContStateRight[ka, s, b] & ef =
+            ContStateRight((k, s) ->
+                applyRight1(ma, s, (a, s1) -> k(f(a) as & Pure, s1))
             ) as & ef
     }
 
-    instance Applicative[StateR[s]] {
-        pub def point(x: a): StateR[s, a] = StateR(s -> (s, x))
+    instance Applicative[ContStateRight[ka, s]] {
+        pub def point(x: a): ContStateRight[ka, s, a] = ContStateRight((k, s) -> k(x, s))
 
-        pub def ap(f: StateR[s, a -> b & ef], x: StateR[s, a]): StateR[s, b] & ef=
-            let StateR(f1) = f;
-            let StateR(x1) = x;
-            StateR(s ->
-                /// Eval order is reverse of StateL...
-                let (s1, v) = x1(s);
-                let (s2, f2) = f1(s1);
-                (s2, f2(v) as & Pure)
+        pub def ap(mf: ContStateRight[ka, s, a -> b & ef], ma: ContStateRight[ka, s, a]): ContStateRight[ka, s, b] & ef =
+            ContStateRight((k, s) ->
+                applyRight1(ma, s, (a, s1) ->
+                    applyRight1(mf, s1, (f, s2) ->
+                        k(f(a) as & Pure, s2)))
             ) as & ef
     }
 
-    def runStateR(x: StateR[s, a], state: s): (s, a) =
-        let StateR(x1) = x;
-        x1(state)
 
 }
 

@@ -37,12 +37,13 @@ instance PartialOrder[Set[a]] with Order[a] {
     pub def lessEqual(x: Set[a], y: Set[a]): Bool with Order[a] = x <= y
 }
 
-instance MeetLattice[Set[a]] with Order[a] {
-    /// /\
-    pub def greatestLowerBound(x: Set[a], y: Set[a]): Set[a] with Order[a] = Set.intersection(x, y)
-}
 
 instance JoinLattice[Set[a]] with Order[a] {
     /// \/
     pub def leastUpperBound(x: Set[a], y: Set[a]): Set[a] with Order[a] = Set.union(x, y)
+}
+
+instance MeetLattice[Set[a]] with Order[a] {
+    /// /\
+    pub def greatestLowerBound(x: Set[a], y: Set[a]): Set[a] with Order[a] = Set.intersection(x, y)
 }
