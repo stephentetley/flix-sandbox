@@ -140,7 +140,7 @@ namespace Traversable {
     pub def mapAccumLeft(f: acc -> a -> (acc, b), start: acc, t: t[a]): (acc, t[b]) with Traversable[t] =
         runContStateLeft(traverse(x1 -> ContStateLeft((k, s) -> let (s1, b) = f(s, x1); k(b, s1)), t), start)
 
-    /// Simple implementation of a State monad bursts the stack, use ContState the CPS-State monad instead...
+    /// A simple State monad implementation bursts the stack, use ContState the CPS-State monad instead...
 
     opaque type ContStateLeft[ka, s, a] = (a -> s -> ka) -> s -> ka
 

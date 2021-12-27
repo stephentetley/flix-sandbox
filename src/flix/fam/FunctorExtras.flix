@@ -28,7 +28,6 @@ instance Functor[Map[k]] {
 
 namespace FunctorExtras {
 
-    pub def ignore(ma: f[a]): f[Unit] with Functor[f] = ma `Functor.as` ()
 
     ///
     /// `<&>` is an infix synonym for `Functor.map`.
