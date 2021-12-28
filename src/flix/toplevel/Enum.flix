@@ -1,5 +1,5 @@
 /*
- *  Copyright 2020 Stephen Tetley
+ *  Copyright 2021 Stephen Tetley
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -17,36 +17,38 @@
 ///
 /// See PureScript: https://github.com/purescript/purescript-enums/blob/master/src/Data/Enum.purs
 ///
-pub lawless class Enum[a] {
+pub lawless class Enum[a] with Order[a] {
+
     ///
-    /// ...
+    /// `succ`
     ///
     pub def succ(x: a): Option[a]
 
     ///
-    /// `prec`
+    /// `pred`
     ///
-    pub def prec(x: a): Option[a]
+    pub def pred(x: a): Option[a]
+
+    ///
+    /// Retraction law
+    ///
+    law succRetractsPred: forall(x: a) with Order[a] . x |> (Enum.pred `Monad.kleisliLeft` Enum.succ `Monad.kleisliLeft` Enum.pred) == Enum.pred(x)
+
+    ///
+    /// Retraction law
+    ///
+    law predRetractsSucc: forall(x: a) with Order[a] . x |> (Enum.succ `Monad.kleisliLeft` Enum.pred `Monad.kleisliLeft` Enum.succ) == Enum.succ(x)
+
 }
 
 instance Enum[Unit] {
     pub def succ(_x: Unit): Option[Unit] = None
-    pub def prec(_x: Unit): Option[Unit] = None
+    pub def pred(_x: Unit): Option[Unit] = None
 }
 
 instance Enum[Bool] {
     pub def succ(x: Bool): Option[Bool] = if (x == false) Some(true) else None
-    pub def prec(x: Bool): Option[Bool] = if (x == true) Some(false) else None
+    pub def pred(x: Bool): Option[Bool] = if (x == true) Some(false) else None
 }
 
-/// pub class BoundedEnum[a] with [a : Enum] {
-    ///
-    /// ...
-    ///
-    /// pub def toEnum(x: Int32): Option[a]
 
-    ///
-    /// `prec`
-    ///
-    /// pub def fromEnum(x: a): Int32
-/// }

@@ -120,26 +120,26 @@ namespace Data/RoseTree {
 
     pub def drawForest(x: RoseForest[String]): String = String.unlines(List.map(drawTree, x))
 
-    def shift1(first: String, other: String, xs: List[String], k: List[String] -> List[String]): List[String] = 
-        match xs { 
+    def shift1(first: String, other: String, xs: List[String], k: List[String] -> List[String]): List[String] =
+        match xs {
             case Nil => k(Nil)
-            case x :: rs => { 
+            case x :: rs => {
                 let s1 = first + x;
                 shift2(other, rs, ss -> k(s1 :: ss))
             }
         }
-    
-    def shift2(other: String, xs: List[String], k: List[String] -> List[String]): List[String] = 
+
+    def shift2(other: String, xs: List[String], k: List[String] -> List[String]): List[String] =
         match xs {
             case Nil => k(Nil)
             case x :: rs => {
                 let s1 = other + x;
                 shift2(other, rs, ss -> k(s1 :: ss))
             }
-        }            
+        }
 
 
-    def drawTree1(x: RoseTree[String], k: List[String] -> List[String]): List[String] = 
+    def drawTree1(x: RoseTree[String], k: List[String] -> List[String]): List[String] =
         match x {
             case Node(label, kids) => {
                 let xs = String.lines(label);
@@ -147,7 +147,7 @@ namespace Data/RoseTree {
             }
         }
 
-    def drawKids(xs: List[RoseTree[String]], k: List[String] -> List[String]): List[String] = 
+    def drawKids(xs: List[RoseTree[String]], k: List[String] -> List[String]): List[String] =
         match xs {
             case Nil       => k(Nil)
             case t1 :: Nil => drawTree1(t1, ac1 -> shift1("`- ", "   ", ac1, ac2 -> k("|" :: ac2)))
@@ -261,22 +261,16 @@ namespace Data/RoseTree {
     /// TODO check the cps transform...
     /// Particulary, is `f(x)` performed at the right time.
     def traverseTree(f: a -> m[b] & ef, t: RoseTree[a], k: m[RoseTree[b]] -> m[RoseTree[b]] & ef): m[RoseTree[b]] & ef with Applicative[m] =
-        use ApplicativeExtras.{<*>};
-        use FunctorExtras.{<&>};
         match t {
             case Node(x, xs) => traverseForest(f, xs, ks -> k(nodeA(f(x), ks)))
         }
 
 
     pub def nodeA(mx: f[a], mxs: f[RoseForest[a]]): f[RoseTree[a]] with Applicative[f] =
-        use ApplicativeExtras.{<*>};
-        use FunctorExtras.{<&>};
-        ((x, xs) -> Node(x, xs)) <&> mx <*> mxs
+        (((x, xs) -> Node(x, xs)) `Functor.map` mx) `Applicative.ap` mxs
 
     def consA(mx: f[a], mxs: f[List[a]]): f[List[a]] with Applicative[f] =
-        use ApplicativeExtras.{<*>};
-        use FunctorExtras.{<&>};
-        ((x, xs) -> x :: xs) <&> mx <*> mxs
+        (((x, xs) -> x :: xs) `Functor.map` mx) `Applicative.ap` mxs
 
     /// TODO check the cps transform...
     def traverseForest(f: a -> m[b] & ef, l: RoseForest[a], k: m[RoseForest[b]] -> m[RoseTree[b]] & ef): m[RoseTree[b]] & ef with Applicative[m] =
