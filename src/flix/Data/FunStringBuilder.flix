@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-use Data.FunStringBuilder;
-use Data.FunStringBuilder.{Empty, Text, Char, Join};
 
 namespace Data {
+
+    // TODO use stdlib Chain
 
     ///
     /// Represents a functional StringBuilder.
@@ -32,15 +32,17 @@ namespace Data {
 
 namespace Data/FunStringBuilder {
 
+    use Data.FunStringBuilder;
+    use Data.FunStringBuilder.{Empty, Text, Char, Join};
 
     ///
     /// Returns an empty FunStringBuilder.
-    ///    
+    ///
     pub def new(): FunStringBuilder = Empty
 
     ///
     /// Returns `sb2` appended to `sb1`.
-    ///    
+    ///
     pub def append(sb1: FunStringBuilder, sb2: FunStringBuilder): FunStringBuilder = match (sb1, sb2) {
         case (Empty, _) => sb2
         case (_, Empty) => sb1
@@ -49,12 +51,12 @@ namespace Data/FunStringBuilder {
 
     ///
     /// Returns `sb` with the string `s` appended.
-    ///    
+    ///
     pub def appendString(sb: FunStringBuilder, s: String): FunStringBuilder = append(sb, Text(s))
 
     ///
     /// Returns `sb` with the char `c` appended.
-    ///    
+    ///
     pub def appendChar(sb: FunStringBuilder, c: Char): FunStringBuilder = append(sb, Char(c))
 
 
@@ -63,13 +65,13 @@ namespace Data/FunStringBuilder {
     ///
     pub def appendInt8(sb: FunStringBuilder, i: Int8): FunStringBuilder =
         appendString(sb, Int8.toString(i))
-        
+
     ///
     /// Returns `sb` with the Int16 `i` appended.
     ///
     pub def appendInt16(sb: FunStringBuilder, i: Int16): FunStringBuilder =
         appendString(sb, Int16.toString(i))
-    
+
     ///
     /// Returns `sb` with the Int32 `i` appended.
     ///
@@ -149,7 +151,7 @@ namespace Data/FunStringBuilder {
     /// Return `sb` converted  to a string.
     ///
     pub def toString(sb: FunStringBuilder): String = toStringHelper(sb) as & Pure
-    
+
     def toStringHelper(sb: FunStringBuilder): String & Impure =
         let x = StringBuilder.new();
         toStringHelperBody(x, sb, x1 -> x1 as & Impure);
@@ -157,8 +159,8 @@ namespace Data/FunStringBuilder {
 
     def toStringHelperBody(x: StringBuilder, src: FunStringBuilder, k: Unit -> Unit & Impure): Unit & Impure = match src {
         case Empty => k()
-        case Text(s) => {StringBuilder.appendString!(x, s); k()}
-        case Char(c) => {StringBuilder.appendChar!(x, c); k()}
+        case Text(s) => {StringBuilder.append!(x, s); k()}
+        case Char(c) => {StringBuilder.append!(x, c); k()}
         case Join(src1, src2) => {
             toStringHelperBody(x, src1, _ ->
             toStringHelperBody(x, src2, _ ->
