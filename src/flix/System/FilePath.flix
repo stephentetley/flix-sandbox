@@ -52,7 +52,7 @@ namespace System {
             import java.nio.file.Path.compareTo(##java.nio.file.Path);
             let FilePath(x1) = x;
             let FilePath(y1) = y;
-            compareTo(x1, y1) as & Pure |> Comparison.fromInt
+            compareTo(x1, y1) as & Pure |> Comparison.fromInt32
     }
 
     instance Hash[FilePath] {

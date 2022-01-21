@@ -497,7 +497,7 @@ namespace Test/FlixCheck {
             case str => println(str)
         }
 
-    def done(msg: String, ntest: Int, stamps: List[List[String]]): Unit & Impure =
+    def done(msg: String, ntest: Int32, stamps: List[List[String]]): Unit & Impure =
         let s = msg + " " + Int32.toString(ntest) + " tests" + makeTable(ntest, stamps);
         println(s)
 

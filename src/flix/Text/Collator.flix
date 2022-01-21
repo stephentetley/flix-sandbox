@@ -115,7 +115,7 @@ namespace Text/Collator {
     pub def compareWith(x: Collator, s1: String, s2: String): Comparison =
         import java.text.Collator.compare(String, String);
         let Collator(x1) = x;
-        (compare(x1, s1, s2) as & Pure) |> Comparison.fromInt
+        (compare(x1, s1, s2) as & Pure) |> Comparison.fromInt32
 
 
 

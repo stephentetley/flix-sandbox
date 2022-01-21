@@ -38,12 +38,12 @@ namespace Text  {
     }
 
     instance Hash[Charset] {
-        pub def hash(x: Charset): Int = Text/Charset.hashCode(x)
+        pub def hash(x: Charset): Int32 = Text/Charset.hashCode(x)
     }
 
     instance Order[Charset] {
         pub def compare(x: Charset, y: Charset): Comparison =
-            Text/Charset.compareTo(x, y) |> Comparison.fromInt
+            Text/Charset.compareTo(x, y) |> Comparison.fromInt32
     }
 
     instance Boxable[Charset]
