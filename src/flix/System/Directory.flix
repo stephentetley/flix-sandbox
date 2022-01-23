@@ -23,17 +23,22 @@ namespace System/Directory {
     use System.FilePath.{FilePath};
 
     pub def getCurrentDirectory(): Result[FilePath, String] & Impure =
-        System/Environment.getUserDirectory()
+        match (Environment.getCurrentWorkingDirectory() as & Impure) {
+            case None    => Err("Error - getCurrentDirectory")
+            case Some(s) =>
+                System/FilePath.new(s)
+                    |> System/FilePath.normalize
+                    |> System/FilePath.toAbsolutePath
+        }
 
     pub def getTempDirectory(): Result[FilePath, String] & Impure =
-        import static java.lang.System.getProperty(String);
-        let p1 = getProperty("java.io.tmpdir");
-        if (Object.isNull(p1))
-            Err("getTempDirectory")
-        else
-            System/FilePath.new(p1)
-                |> System/FilePath.normalize
-                |> System/FilePath.toAbsolutePath
+        match (Environment.getTemporaryDirectory() as & Impure) {
+            case None    => Err("Error - getTempDirectory")
+            case Some(s) =>
+                System/FilePath.new(s)
+                    |> System/FilePath.normalize
+                    |> System/FilePath.toAbsolutePath
+        }
 
 
     pub def contents(path: FilePath): Result[List[FilePath], String] & Impure =
