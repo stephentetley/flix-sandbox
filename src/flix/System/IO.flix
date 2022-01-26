@@ -218,6 +218,10 @@ namespace System/IO {
         };
         X/Cursor.makeCursor(cursorAlg)
 
+    pub def readLines(opts: {charset :: Text.Charset}, path: FilePath): Result[List[String], String] & Impure =
+        readLinesIterWith(opts, path) |> X/Cursor.toList!
+
+
     pub def readLinesIterWith(opts: {charset :: Text.Charset}, path: FilePath): Cursor[String, String] & Impure =
         import static flix.runtime.spt.sandbox.system.LineIterator.newFileslinesIterator(##java.nio.file.Path, ##java.nio.charset.Charset);
         import flix.runtime.spt.sandbox.system.LineIterator.hasNext();
