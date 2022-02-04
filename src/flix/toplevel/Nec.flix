@@ -27,11 +27,11 @@ pub enum Nec[t] {
     case NecOne(t)
     case Nec(Nec[t], Nec[t])
 }
-/*
+
 instance Eq[Nec[a]] with Eq[a] {
     pub def eq(c1: Nec[a], c2: Nec[a]): Bool = Nec.equals(c1, c2)
 }
-
+/*
 instance SemiGroup[Nec[a]] {
     pub def combine(c1: Nec[a], c2: Nec[a]): Nec[a] = Nec.append(c1, c2)
 }
@@ -52,17 +52,17 @@ instance Applicative[Nec] {
 instance Monad[Nec] {
     pub def flatMap(f: a -> Nec[b] & ef, x : Nec[a]) : Nec[b] & ef = Nec.flatMap(f, x)
 }
-
+*/
 instance Foldable[Nec] {
     pub def foldLeft(f: (b, a) -> b & ef, s: b, c: Nec[a]): b & ef = Nec.foldLeft(f, s, c)
     pub def foldRight(f: (a, b) -> b & ef, s: b, c: Nec[a]): b & ef = Nec.foldRight(f, s, c)
 }
-
+/*
 instance Traversable[Nec] {
     pub def traverse(f: a -> m[b] & ef, t: Nec[a]): m[Nec[b]] & ef with Applicative[m] = Nec.traverse(f, t)
     pub override def sequence(t: Nec[m[a]]): m[Nec[a]] with Applicative[m] = Nec.sequence(t)
 }
-
+*/
 instance ToString[Nec[a]] with ToString[a] {
     pub def toString(c: Nec[a]): String =
         let fn = () -> {
@@ -79,16 +79,16 @@ instance ToString[Nec[a]] with ToString[a] {
         };
         fn() as & Pure
 }
-*/
+
 
 namespace Nec {
 
     ///
     /// A datatype for pattern matching on a Nec (traversing left-to-right).
     ///
-    pub enum NecViewLeft[a] with Eq {
+    pub enum ViewLeft[a] with Eq {
         case OneLeft(a)
-        case NecSomeLeft(a, Nec[a])
+        case SomeLeft(a, Nec[a])
     }
 
     ///
@@ -96,14 +96,14 @@ namespace Nec {
     ///
     pub enum ViewRight[a] with Eq {
         case OneRight(a)
-        case NecSomeRight(Nec[a], a)
+        case SomeRight(Nec[a], a)
     }
 
     ///
     /// Return the singleton Nec with element `x`.
     ///
     pub def singleton(x: a): Nec[a] = NecOne(x)
-
+/*
     ///
     /// Apply every function from `f` to every argument from `x` and return a Nec with all results.
     /// For `f = f1, f2, ...` and `x = x1, x2, ...` the results appear in the order
@@ -116,10 +116,10 @@ namespace Nec {
     /// Helper function for `ap`.
     ///
     def apHelper(f: ViewLeft[a -> b & ef], c: Nec[a], acc: Nec[b]): Nec[b] & ef = match f {
-        case NoneLeft         => acc
+        case OneLeft(f1)      => acc `append` map(f1, c)
         case SomeLeft(f1, rs) => apHelper(viewLeft(rs), c, acc `append` map(f1, c))
     }
-
+*/
     ///
     /// Returns true if and only if `c` is a single element Nec.
     ///
@@ -131,32 +131,27 @@ namespace Nec {
     ///
     /// Add element `x` to the left end of Nec `c`.
     ///
-    pub def cons(x: a, c: Nec[a]): Nec[a] = match c {
-        case _     => Nec(Single(x), c)
-    }
+    pub def cons(x: a, c: Nec[a]): Nec[a] = Nec(NecOne(x), c)
 
     ///
     /// Add element `x` to the right end of Nec `c`.
     ///
-    pub def snoc(c: Nec[a], x: a): Nec[a] = match c {
-        case Empty => Single(x)
-        case _     => Nec(c, One(x))
-    }
+    pub def snoc(c: Nec[a], x: a): Nec[a] = Nec(c, NecOne(x))
 
     ///
     /// Returns the first element of `c`.
     ///
     pub def head(c: Nec[a]): a = match viewLeft(c) {
-        case NecSomeLeft(x, _) => x
-        case OneLeft(x)        => x
+        case OneLeft(x)     => x
+        case SomeLeft(x, _) => x
     }
 
     ///
     /// Returns the last element of `c`.
     ///
     pub def last(c: Nec[a]): a = match viewRight(c) {
-        case NecSomeRight(_, x) => x
-        case OneRight(x)        => x
+        case OneRight(x)     => x
+        case SomeRight(_, x) => x
     }
 
     ///
@@ -164,8 +159,8 @@ namespace Nec {
     /// Returns `None` if the Nec `c` has a single element.
     ///
     pub def init(c: Nec[a]): Option[Nec[a]] = match viewRight(c) {
-        case NecSomeRight(rs, _) => Some(rs)
-        case _                   => None
+        case OneRight(_)      => None
+        case SomeRight(rs, _) => Some(rs)
     }
 
     ///
@@ -176,11 +171,7 @@ namespace Nec {
     ///
     /// Returns a new Nec formed by appending the Necs `c1` and `c2`.
     ///
-    pub def append(c1: Nec[a], c2: Nec[a]): Nec[a] = match (c1, c2) {
-        case (Empty, c) => c
-        case (c, Empty) => c
-        case _          => Nec(c1, c2)
-    }
+    pub def append(c1: Nec[a], c2: Nec[a]): Nec[a] = Nec(c1, c2)
 
     ///
     /// Deconstruct a Nec from left-to-right.
@@ -190,7 +181,7 @@ namespace Nec {
     ///
     /// Returns `NoneLeft` if the Nec is empty.
     ///
-    pub def viewLeft(c: Nec[a]): ViewLeft[a] = viewLeftHelper(c, Empty, x -> x)
+    pub def viewLeft(c: Nec[a]): ViewLeft[a] = viewLeftHelper(c, None, x -> x)
 
     ///
     /// Helper function for `viewLeft`.
@@ -203,10 +194,11 @@ namespace Nec {
     /// This means that `Empty` can only be encountered on the first match and it
     /// can ignore the accumulator which is also `Empty` the first time this is called.
     ///
-    def viewLeftHelper(c: Nec[a], acc: Nec[a], k: ViewLeft[a] -> ViewLeft[a]): ViewLeft[a] = match c {
-        case Empty       => k(NoneLeft)
-        case One(x)      => k(SomeLeft(x, acc))
-        case Nec(l, r) => viewLeftHelper(l, append(r, acc),  k)
+    def viewLeftHelper(c: Nec[a], acc: Option[Nec[a]], k: ViewLeft[a] -> ViewLeft[a]): ViewLeft[a] = match (c, acc) {
+        case (NecOne(x), None)       => k(OneLeft(x))
+        case (NecOne(x), Some(acc1)) => k(SomeLeft(x, acc1))
+        case (Nec(l, r), None)       => viewLeftHelper(l, Some(r),  k)
+        case (Nec(l, r), Some(acc1)) => viewLeftHelper(l, Some(append(r, acc1)),  k)
     }
 
     ///
@@ -217,7 +209,7 @@ namespace Nec {
     ///
     /// Returns `NoneRight` if the Nec is empty.
     ///
-    pub def viewRight(c: Nec[a]): ViewRight[a] = viewRightHelper(c, Empty, x -> x)
+    pub def viewRight(c: Nec[a]): ViewRight[a] = viewRightHelper(c, None, x -> x)
 
     ///
     /// Helper function for `viewRight`.
@@ -230,10 +222,11 @@ namespace Nec {
     /// This means that `Empty` can only be encountered on the first match and it
     /// can ignore the accumulator which is also `Empty` the first time this is called.
     ///
-    def viewRightHelper(c: Nec[a], acc: Nec[a], k: ViewRight[a] -> ViewRight[a]): ViewRight[a] = match c {
-        case Empty       => k(NoneRight)
-        case One(x)      => k(SomeRight(acc, x))
-        case Nec(l, r) => viewRightHelper(r, append(acc, l),  k)
+    def viewRightHelper(c: Nec[a], acc: Option[Nec[a]], k: ViewRight[a] -> ViewRight[a]): ViewRight[a] = match (c, acc) {
+        case (NecOne(x), None)       => k(OneRight(x))
+        case (NecOne(x), Some(acc1)) => k(SomeRight(acc1, x))
+        case (Nec(l, r), None)       => viewRightHelper(r, Some(l),  k)
+        case (Nec(l, r), Some(acc1)) => viewRightHelper(r, Some(append(acc1, l)),  k)
     }
 
     ///
@@ -245,7 +238,7 @@ namespace Nec {
     /// Helper function for `memberOf`.
     ///
     def memberOfHelper(a: a, v: ViewLeft[a]): Bool with Eq[a] = match v {
-        case NoneLeft                 => false
+        case OneLeft(x)               => x == a
         case SomeLeft(x, _) if x == a => true
         case SomeLeft(_, c)           => memberOfHelper(a, viewLeft(c))
     }
@@ -261,7 +254,7 @@ namespace Nec {
     /// Helper function for `indexOf`.
     ///
     def indexOfHelper(a: a, acc: Int32, v: ViewLeft[a]): Int32 with Eq[a] = match v {
-        case NoneLeft       => -1
+        case OneLeft(x)     => if (x == a) acc else -1
         case SomeLeft(x, c) => if (x == a) acc else indexOfHelper(a, acc + 1, viewLeft(c))
     }
 
@@ -278,8 +271,8 @@ namespace Nec {
     /// The function `f` must be pure.
     ///
     pub def findLeft(f: a -> Bool, c: Nec[a]): Option[a] = match viewLeft(c) {
-        case OneLeft(x)         => f(x)
-        case NecSomeLeft(x, rs) => if (f(x)) Some(x) else findLeft(f, rs)
+        case OneLeft(x)      => if (f(x)) Some(x) else None
+        case SomeLeft(x, rs) => if (f(x)) Some(x) else findLeft(f, rs)
     }
 
     ///
@@ -288,10 +281,10 @@ namespace Nec {
     /// The function `f` must be pure.
     ///
     pub def findRight(f: a -> Bool, c: Nec[a]): Option[a] = match viewRight(c) {
-        case OneRight(x)         => f(x)
-        case NecSomeRight(rs, x) => if (f(x)) Some(x) else findRight(f, rs)
+        case OneRight(x)      => if (f(x)) Some(x) else None
+        case SomeRight(rs, x) => if (f(x)) Some(x) else findRight(f, rs)
     }
-
+/*
     ///
     /// Returns a list of all integers between `b` (inclusive) and `e` (exclusive).
     ///
@@ -357,21 +350,21 @@ namespace Nec {
         case NoneRight        => acc
         case SomeRight(rs, x) => {let a = f(x, s); scanRightHelper(f, a, rs, cons(a, acc))}
     }
-
+*/
     ///
     /// Returns the result of applying `f` to every element in `c`.
     ///
     /// That is, the result is of the form: `f(x1) :: f(x2) :: ...`.
     ///
     pub def map(f: a -> b & ef, c: Nec[a]): Nec[b] & ef =
-        mapHelper(f, c, Empty)
+        mapHelper(f, c, k -> k as & ef)
 
     ///
     /// Helper function for `map`.
     ///
-    def mapHelper(f: a -> b & ef, c: Nec[a], acc: Nec[b]): Nec[b] & ef = match viewLeft(c) {
-        case NoneLeft        => acc
-        case SomeLeft(a, rs) => mapHelper(f, rs, snoc(acc, f(a)))
+    def mapHelper(f: a -> b & ef, c: Nec[a], k: Nec[b] -> Nec[b] & ef): Nec[b] & ef = match viewLeft(c) {
+        case OneLeft(x)      => {let a = f(x); k(NecOne(a))}
+        case SomeLeft(x, rs) => mapHelper(f, rs, ks -> {let a = f(x); k(cons(a, ks))})
     }
 
     ///
@@ -380,40 +373,40 @@ namespace Nec {
     /// That is, the result is of the form: `f(x1, 0) :: f(x2, 1) :: ...`.
     ///
     pub def mapWithIndex(f: (a, Int32) -> b & ef, c: Nec[a]): Nec[b] & ef =
-        mapWithIndexHelper(f, c, 0, Empty)
+        mapWithIndexHelper(f, c, 0, k -> k as & ef)
 
     ///
     /// Helper function for `mapWithIndex`.
     ///
-    def mapWithIndexHelper(f: (a, Int32) -> b & ef, c: Nec[a], i: Int32, acc: Nec[b]): Nec[b] & ef = match viewLeft(c) {
-        case NoneLeft        => acc
-        case SomeLeft(x, rs) => {let a = f(x, i); mapWithIndexHelper(f, rs, i+1, snoc(acc, a))}
+    def mapWithIndexHelper(f: (a, Int32) -> b & ef, c: Nec[a], i: Int32, k: Nec[b] -> Nec[b] & ef): Nec[b] & ef = match viewLeft(c) {
+        case OneLeft(x)      => {let a = f(x, i); k(NecOne(a))}
+        case SomeLeft(x, rs) => mapWithIndexHelper(f, rs, i+1, ks -> {let a = f(x, i); k(snoc(ks, a))})
     }
 
     ///
     /// Returns the result of applying `f` to every element in `c` and concatenating the results.
     ///
-    pub def flatMap(f: a -> Nec[b] & ef, c: Nec[a]): Nec[b] & ef = flatMapHelper(f, c, Empty)
+    pub def flatMap(f: a -> Nec[b] & ef, c: Nec[a]): Nec[b] & ef = flatMapHelper(f, c, k -> k as & ef)
 
     ///
     /// Helper function for `flatMap`.
     ///
-    def flatMapHelper(f: a -> Nec[b] & ef, c: Nec[a], acc: Nec[b]): Nec[b] & ef = match viewLeft(c) {
-        case NoneLeft        => acc
-        case SomeLeft(x, rs) => flatMapHelper(f, rs, append(acc, f(x)))
+    def flatMapHelper(f: a -> Nec[b] & ef, c: Nec[a], k: Nec[b] -> Nec[b] & ef): Nec[b] & ef = match viewLeft(c) {
+        case OneLeft(x)      => {let a = f(x); k(a)}
+        case SomeLeft(x, rs) => flatMapHelper(f, rs, ks -> {let a = f(x); k(append(ks, a))})
     }
 
     ///
     /// Returns the reverse of `c`.
     ///
-    pub def reverse(c: Nec[a]): Nec[a] = reverseHelper(c, Empty)
+    pub def reverse(c: Nec[a]): Nec[a] = reverseHelper(c, k -> k)
 
     ///
     /// Helper function for `reverse`.
     ///
-    def reverseHelper(c: Nec[a], acc: Nec[a]): Nec[a] = match viewLeft(c) {
-        case OneLeft(x)         => cons(x, acc)
-        case NecSomeLeft(x, rs) => reverseHelper(rs, cons(x, acc))
+    def reverseHelper(c: Nec[a], k: Nec[a] -> Nec[a]): Nec[a] = match viewLeft(c) {
+        case OneLeft(x)      => k(NecOne(x))
+        case SomeLeft(x, rs) => reverseHelper(rs, ks -> snoc(ks, x))
     }
 
 /*
@@ -444,8 +437,8 @@ namespace Nec {
     /// Helper function for `count`.
     ///
     def countHelper(f: a -> Bool, c: Nec[a], acc: Int32): Int32 = match viewLeft(c) {
-        case OneLeft(_)         => acc + 1
-        case NecSomeLeft(x, rs) => if (f(x)) countHelper(f, rs, acc + 1) else countHelper(f, rs, acc)
+        case OneLeft(x)      => if (f(x)) acc + 1 else acc
+        case SomeLeft(x, rs) => if (f(x)) countHelper(f, rs, acc + 1) else countHelper(f, rs, acc)
     }
 /*
     ///
@@ -516,14 +509,14 @@ namespace Nec {
         case NoneLeft        => acc
         case SomeLeft(x, rs) => if (f(x)) filterHelper(f, rs, snoc(acc, x)) else filterHelper(f, rs, acc)
     }
-
+*/
     ///
     /// Applies `f` to a start value `s` and all elements in `c` going from left to right.
     ///
     /// That is, the result is of the form: `f(...f(f(s, x1), x2)..., xn)`.
     ///
     pub def foldLeft(f: (b, a) -> b & ef, acc: b, c: Nec[a]): b & ef = match viewLeft(c) {
-        case NoneLeft        => acc
+        case OneLeft(x)      => f(acc, x)
         case SomeLeft(x, rs) => {
             let b = f(acc, x);
             foldLeft(f, b, rs)
@@ -536,13 +529,13 @@ namespace Nec {
     /// That is, the result is of the form: `f(x1, ...f(xn-1, f(xn, s))...)`.
     ///
     pub def foldRight(f: (a, b) -> b & ef, acc: b, c: Nec[a]): b & ef = match viewRight(c) {
-        case NoneRight        => acc
+        case OneRight(x)      => f(x, acc)
         case SomeRight(rs, x) => {
             let b = f(x, acc);
             foldRight(f, b, rs)
         }
     }
-
+/*
     ///
     /// Returns `c` without the first `n` elements.
     ///
@@ -826,7 +819,7 @@ namespace Nec {
             foldLeft(f, 0, c);
             arr
         }
-
+*/
     ///
     /// Returns `true` if and only if `c1` and `c2` and equal.
     ///
@@ -841,11 +834,12 @@ namespace Nec {
     /// decide equality which imposes an order on the Nec.
     ///
     def equalsHelper(v1: ViewLeft[a], v2: ViewLeft[a]): Bool with Eq[a] = match (v1, v2) {
-        case (NoneLeft, NoneLeft)                           => true
+        case (OneLeft(x), OneLeft(y))                       => x == y
         case (SomeLeft(x, cx), SomeLeft(y, cy)) if (x == y) => equalsHelper(viewLeft(cx), viewLeft(cy))
         case _                                              => false
     }
 
+/*
     ///
     /// Sort Nec `c` so that elements are ordered from low to high according to their `Order` instance.
     ///
