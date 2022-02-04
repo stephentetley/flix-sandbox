@@ -15,7 +15,7 @@
  */
 
 ///
-/// The NonEmptyChain type.
+/// The NonEmpty Chain type.
 ///
 /// A chain is a list represented as an unbalanced binary tree.
 /// It supports efficient append and "snoc" - appending elements at the tail
@@ -31,13 +31,9 @@ pub enum Nec[t] {
 instance Eq[Nec[a]] with Eq[a] {
     pub def eq(c1: Nec[a], c2: Nec[a]): Bool = Nec.equals(c1, c2)
 }
-/*
+
 instance SemiGroup[Nec[a]] {
     pub def combine(c1: Nec[a], c2: Nec[a]): Nec[a] = Nec.append(c1, c2)
-}
-
-instance Monoid[Nec[a]] with Monoid[a] {
-    pub def empty(): Nec[a] = Nec.singleton(Monoid.empty())
 }
 
 instance Functor[Nec] {
@@ -52,7 +48,7 @@ instance Applicative[Nec] {
 instance Monad[Nec] {
     pub def flatMap(f: a -> Nec[b] & ef, x : Nec[a]) : Nec[b] & ef = Nec.flatMap(f, x)
 }
-*/
+
 instance Foldable[Nec] {
     pub def foldLeft(f: (b, a) -> b & ef, s: b, c: Nec[a]): b & ef = Nec.foldLeft(f, s, c)
     pub def foldRight(f: (a, b) -> b & ef, s: b, c: Nec[a]): b & ef = Nec.foldRight(f, s, c)
@@ -83,6 +79,9 @@ instance ToString[Nec[a]] with ToString[a] {
 
 namespace Nec {
 
+    use Functor.{<$>};
+    use Applicative.{<*>};
+
     ///
     /// A datatype for pattern matching on a Nec (traversing left-to-right).
     ///
@@ -103,23 +102,23 @@ namespace Nec {
     /// Return the singleton Nec with element `x`.
     ///
     pub def singleton(x: a): Nec[a] = NecOne(x)
-/*
+
     ///
     /// Apply every function from `f` to every argument from `x` and return a Nec with all results.
     /// For `f = f1, f2, ...` and `x = x1, x2, ...` the results appear in the order
     /// `f1(x1), f1(x2), ..., f2(x1), f2(x2), ...`.
     ///
     pub def ap(f: Nec[a -> b & ef], x: Nec[a]) : Nec[b] & ef =
-        apHelper(viewLeft(f), x, empty())
+        apHelper(viewLeft(f), x, k -> k as & ef)
 
     ///
     /// Helper function for `ap`.
     ///
-    def apHelper(f: ViewLeft[a -> b & ef], c: Nec[a], acc: Nec[b]): Nec[b] & ef = match f {
-        case OneLeft(f1)      => acc `append` map(f1, c)
-        case SomeLeft(f1, rs) => apHelper(viewLeft(rs), c, acc `append` map(f1, c))
+    def apHelper(f: ViewLeft[a -> b & ef], c: Nec[a], k: Nec[b] -> Nec[b] & ef): Nec[b] & ef = match f {
+        case OneLeft(f1)      => k(map(f1, c))
+        case SomeLeft(f1, rs) => apHelper(viewLeft(rs), c, ks -> k(map(f1, c) `append` ks))
     }
-*/
+
     ///
     /// Returns true if and only if `c` is a single element Nec.
     ///
@@ -440,7 +439,7 @@ namespace Nec {
         case OneLeft(x)      => if (f(x)) acc + 1 else acc
         case SomeLeft(x, rs) => if (f(x)) countHelper(f, rs, acc + 1) else countHelper(f, rs, acc)
     }
-/*
+
     ///
     /// Returns the sum of all elements in the Nec `c`.
     ///
@@ -468,8 +467,11 @@ namespace Nec {
     ///
     /// Returns the concatenation of the elements in `c`.
     ///
-    pub def flatten(c: Nec[Nec[a]]): Nec[a] =
-        foldLeft(append, empty(), c)
+    pub def flatten(c: Nec[Nec[a]]): Nec[a] = match viewLeft(c) {
+        case OneLeft(xs)       => xs
+        case SomeLeft(xs, xss) => foldLeft(append, xs, xss)
+    }
+        
 
     ///
     /// Returns `true` if and only if at least one element in `c` satisfies the predicate `f`.
@@ -479,7 +481,7 @@ namespace Nec {
     /// The function `f` must be pure.
     ///
     pub def exists(f: a -> Bool, c: Nec[a]): Bool = match viewLeft(c) {
-        case NoneLeft        => false
+        case OneLeft(x)      => f(x)
         case SomeLeft(x, rs) => if (f(x)) true else exists(f, rs)
     }
 
@@ -491,10 +493,10 @@ namespace Nec {
     /// The function `f` must be pure.
     ///
     pub def forall(f: a -> Bool, c: Nec[a]): Bool = match viewLeft(c) {
-        case NoneLeft        => true
+        case OneLeft(x)      => f(x)
         case SomeLeft(x, rs) => if (not f(x)) false else forall(f, rs)
     }
-
+/*
     ///
     /// Returns a list of every element in `c` that satisfies the predicate `f`.
     ///
@@ -685,23 +687,25 @@ namespace Nec {
         }
     }
 
-
+*/
     ///
     /// Returns a Nec where the element at index `i` is `(a, b)` where
     /// `a` is the element at index `i` in `c1` and `b` is the element at index `i` in `c2`.
     ///
     /// If either `c1` or `c2` becomes depleted, then no further elements are added to the resulting Nec.
     ///
-    pub def zip(c1: Nec[a], c2: Nec[b]): Nec[(a,b)] = zipHelper(c1, c2, Nec.empty())
+    pub def zip(c1: Nec[a], c2: Nec[b]): Nec[(a,b)] = zipHelper(viewLeft(c1), viewLeft(c2), k -> k)
 
     ///
     /// Helper function for `zip`.
     ///
-    def zipHelper(c1: Nec[a], c2: Nec[b], acc: Nec[(a,b)]): Nec[(a,b)] = match (viewLeft(c1), viewLeft(c2)) {
-        case (SomeLeft(x, rs), SomeLeft(y, qs)) => zipHelper(rs, qs, snoc(acc, (x, y)))
-        case _                                  => acc
+    def zipHelper(v1: ViewLeft[a], v2: ViewLeft[b], k: Nec[(a,b)] -> Nec[(a,b)]): Nec[(a,b)] = match (v1, v2) {
+        case (SomeLeft(x, rs), SomeLeft(y, qs)) => zipHelper(viewLeft(rs), viewLeft(qs), ks -> k(cons((x, y), ks)))
+        case (OneLeft(x), OneLeft(y))           => k(NecOne((x, y)))
+        case (SomeLeft(x, _), OneLeft(y))       => k(NecOne((x, y)))
+        case (OneLeft(x), SomeLeft(y, _))       => k(NecOne((x, y)))
     }
-
+/*
     ///
     /// Returns a Nec where the element at index `i` is `f(a, b)` where
     /// `a` is the element at index `i` in `c1` and `b` is the element at index `i` in `c2`.
@@ -772,12 +776,12 @@ namespace Nec {
                 mapAccumRightHelper(f, s2, rs, (s3, ks) -> k(s3, snoc(ks, x1)))
            }
         }
-
+*/
     ///
     /// Applies `f` to every element of `c`.
     ///
     pub def foreach(f: a -> Unit & ef, c: Nec[a]): Unit & ef = match viewLeft(c) {
-        case NoneLeft        => ()
+        case OneLeft(x)      => f(x)
         case SomeLeft(x, rs) => f(x); foreach(f, rs)
     }
 
@@ -807,19 +811,17 @@ namespace Nec {
     ///
     pub def toMap(c: Nec[(a, b)]): Map[a, b] with Order[a] = foldRight((x, m) -> Map.insert(fst(x), snd(x), m), Map.empty(), c)
 
-
     ///
     /// Returns the Nec `c` as an array.
     ///
-    pub def toArray(c: Nec[a]) : Array[a] & Impure = match head(c) {
-        case None => []
-        case Some(x) =>
-            let arr = Array.new(x, length(c));
-            let f = (i, b) -> { arr[i] = b; i + 1 };
-            foldLeft(f, 0, c);
-            arr
-        }
-*/
+    pub def toArray(c: Nec[a]) : Array[a] & Impure = 
+        let x = head(c);
+        let arr = Array.new(x, length(c));
+        let f = (i, b) -> { arr[i] = b; i + 1 };
+        foldLeft(f, 0, c);
+        arr
+        
+
     ///
     /// Returns `true` if and only if `c1` and `c2` and equal.
     ///
@@ -873,21 +875,20 @@ namespace Nec {
     ///
     /// Helper function for `traverse` and `sequence`.
     ///
-    /// Builds an "applicative Nec" from an applicative Nec of the front of the Nec
-    /// "snocing" a last element of one applictive action.
+    /// Builds an "applicative Nec".
     ///
-    def snocA(mxs: f[Nec[a]], mx: f[a]): f[Nec[a]] with Applicative[f] =
-        (((xs, x) -> snoc(xs, x)) `Functor.map` mxs) `Applicative.ap` mx
+    def consA(mx: f[a], mxs: f[Nec[a]]): f[Nec[a]] with Applicative[f] =
+        (cons <$> mx) <*> mxs
 
     ///
     /// Returns the result of running all the actions in the Nec `c`.
     ///
     pub def sequence(c: Nec[m[a]]): m[Nec[a]] with Applicative[m] =
-        def loop(v, acc) = match v {
-            case NoneLeft        => acc
-            case SomeLeft(x, rs) => loop(viewLeft(rs), snocA(acc, x))
+        def loop(v, k) = match v {
+            case OneLeft(x)      => k(NecOne(x))
+            case SomeLeft(x, rs) => loop(viewLeft(rs), ks -> k(consA(x, ks)))
         };
-        loop(viewLeft(c), Applicative.point(empty()))
+        loop(viewLeft(c), Applicative.point)
 
     ///
     /// Returns the result of applying the applicative mapping function `f` to all the elements of the
@@ -899,7 +900,7 @@ namespace Nec {
             case SomeLeft(x, rs) => loop(viewLeft(rs), snocA(acc, f(x)))
         };
         loop(viewLeft(c), Applicative.point(empty()))
-
+*/
     ///
     /// Returns the concatenation of the string representation
     /// of each element in `c` with `sep` inserted between each element.
@@ -913,5 +914,5 @@ namespace Nec {
     ///
     pub def joinWith(f: a -> String & ef, sep: String, c: Nec[a]): String =
         Foldable.joinWith(f, sep, c)
-*/
+
 }
