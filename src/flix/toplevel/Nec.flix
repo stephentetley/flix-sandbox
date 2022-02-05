@@ -59,6 +59,16 @@ instance Traversable[Nec] {
     pub override def sequence(t: Nec[m[a]]): m[Nec[a]] with Applicative[m] = Nec.sequence(t)
 }
 
+instance Reducible[Nec] {
+    pub def reduceLeftTo(f: (b, a) -> b & ef1, g: a -> b & ef2, l: Nec[a]): b & (ef1 and ef2) = Nec.reduceLeftTo(f, g, l)
+    pub def reduceRightTo(f: (a, b) -> b & ef1, g: a -> b & ef2, l: Nec[a]): b & (ef1 and ef2) = Nec.reduceRightTo(f, g, l)
+}
+
+instance Iterable[Nec] {
+    pub def iterator(t: Nec[a]): Iterator[a] & Impure =
+        Nec.toIterator(t)
+}
+
 instance ToString[Nec[a]] with ToString[a] {
     pub def toString(c: Nec[a]): String =
         let fn = () -> {
@@ -275,73 +285,7 @@ namespace Nec {
         case OneRight(x)      => if (f(x)) Some(x) else None
         case SomeRight(rs, x) => if (f(x)) Some(x) else findRight(f, rs)
     }
-/*
-    ///
-    /// Returns a list of all integers between `b` (inclusive) and `e` (exclusive).
-    ///
-    /// Returns `Nil` if `b >= e`.
-    ///
-    pub def range(b: Int32, e: Int32): Nec[Int32] = rangeHelper(b, e, Nec.empty())
 
-    ///
-    /// Helper function for `range`.
-    ///
-    def rangeHelper(b: Int32, e: Int32, acc: Nec[Int32]): Nec[Int32] =
-        if (b >= e) acc else rangeHelper(b + 1, e, snoc(acc, b))
-
-    ///
-    /// Returns a list with the element `a` repeated `n` times.
-    ///
-    /// Returns `Nil` if `n < 0`.
-    ///
-    pub def repeat(n: Int32, a: a): Nec[a] = repeatHelper(n, a, Empty)
-
-    ///
-    /// Helper function for `repeat`.
-    ///
-    def repeatHelper(n: Int32, a: a, acc: Nec[a]): Nec[a] =
-        if (n <= 0)
-            acc
-        else {
-            let ac1 = cons(a, acc);
-            repeatHelper(n-1, a, ac1)
-        }
-
-    ///
-    /// Alias for `scanLeft`.
-    ///
-    pub def scan(f: (b, a) -> b & ef, s: b, c: Nec[a]): Nec[b] & ef = scanLeft(f, s, c)
-
-    ///
-    /// Accumulates the result of applying `f` to `c` going left to right.
-    ///
-    /// That is, the result is of the form: `s :: f(s, x1) :: f(f(s, x1), x2)  ...`.
-    ///
-    pub def scanLeft(f: (b, a) -> b & ef, s: b, c: Nec[a]): Nec[b] & ef = scanLeftHelper(f, s, c, singleton(s))
-
-    ///
-    /// Helper function for `scanLeft`.
-    ///
-    def scanLeftHelper(f: (b, a) -> b & ef, s: b, c: Nec[a], acc: Nec[b]): Nec[b] & ef = match viewLeft(c) {
-        case NoneLeft        => acc
-        case SomeLeft(x, rs) => {let a = f(s, x); scanLeftHelper(f, a, rs, snoc(acc, a))}
-    }
-
-    ///
-    /// Accumulates the result of applying `f` to `c` going right to left.
-    ///
-    /// That is, the result is of the form: `... f(xn-1, f(xn, s)) :: f(xn, s) :: s`.
-    ///
-    pub def scanRight(f: (a, b) -> b & ef, s: b, c: Nec[a]): Nec[b] & ef = scanRightHelper(f, s, c, singleton(s))
-
-    ///
-    /// Helper function for `scanRight`.
-    ///
-    def scanRightHelper(f: (a, b) -> b & ef, s: b, c: Nec[a], acc: Nec[b]): Nec[b] & ef = match viewRight(c) {
-        case NoneRight        => acc
-        case SomeRight(rs, x) => {let a = f(x, s); scanRightHelper(f, a, rs, cons(a, acc))}
-    }
-*/
     ///
     /// Returns the result of applying `f` to every element in `c`.
     ///
@@ -400,23 +344,23 @@ namespace Nec {
         case SomeLeft(x, rs) => reverseHelper(rs, ks -> snoc(ks, x))
     }
 
-/*
+
     ///
     /// Returns `c` with `a` inserted between every two adjacent elements.
     ///
-    pub def intersperse(a: a, c: Nec[a]): Nec[a] = match viewLeft(c) {
-        case NoneLeft        => Empty
-        case SomeLeft(x, rs) => intersperseHelper(a, rs, singleton(x))
+    pub def intersperse(sep: a, c: Nec[a]): Nec[a] = match viewLeft(c) {
+        case OneLeft(x)      => singleton(x)
+        case SomeLeft(x, rs) => intersperseHelper(sep, rs, ks -> cons(x, ks))
     }
 
     ///
-    /// Helper function for `reverse`.
+    /// Helper function for `intersperse`.
     ///
-    def intersperseHelper(sep: a, c: Nec[a], acc: Nec[a]): Nec[a] = match viewLeft(c) {
-        case NoneLeft        => acc
-        case SomeLeft(x, rs) => intersperseHelper(sep, rs, acc `snoc` sep `snoc` x)
+    def intersperseHelper(sep: a, c: Nec[a], k: Nec[a] -> Nec[a]): Nec[a] = match viewLeft(c) {
+        case OneLeft(x)      => k(cons(sep, singleton(x)))
+        case SomeLeft(x, rs) => intersperseHelper(sep, rs, ks -> k(cons(sep, cons(x, ks))))
     }
-*/
+
     ///
     /// Returns the number of elements in `c` that satisfy the predicate `f`.
     ///
@@ -529,142 +473,22 @@ namespace Nec {
             foldRight(f, b, rs)
         }
     }
-/*
-    ///
-    /// Returns `c` without the first `n` elements.
-    ///
-    /// Returns `Nil` if `n > length(c)`.
-    /// Returns `c` if `n < 0`.
-    ///
-    pub def dropLeft(n: Int32, c: Nec[a]): Nec[a] =
-        if (n < 0)
-            c
-        else match (n, viewLeft(c)) {
-            case (_, NoneLeft)        => Empty
-            case (0, _)               => c
-            case (i, SomeLeft(_, rs)) => dropLeft(i - 1, rs)
-        }
-
-    ///
-    /// Returns `c` without the last `n` elements.
-    ///
-    /// Returns `Nil` if `n > length(c)`.
-    /// Returns `c` if `n < 0`.
-    ///
-    pub def dropRight(n: Int32, c: Nec[a]): Nec[a] =
-        if (n < 0)
-            c
-        else match (n, viewRight(c)) {
-            case (_, NoneRight)        => Empty
-            case (0, _)                => c
-            case (i, SomeRight(rs, _)) => dropRight(i - 1, rs)
-        }
-
-    ///
-    /// Returns `c` without the longest prefix that satisfies the predicate `f`.
-    ///
-    /// The function `f` must be pure.
-    ///
-    pub def dropWhileLeft(f: a -> Bool, c: Nec[a]): Nec[a] = match viewLeft(c) {
-        case SomeLeft(x, rs) if (f(x)) => dropWhileLeft(f, rs)
-        case _                         => c
-    }
-
-    ///
-    /// Returns `c` without the longest suffix that satisfies the predicate `f`.
-    ///
-    /// The function `f` must be pure.
-    ///
-    pub def dropWhileRight(f: a -> Bool, c: Nec[a]): Nec[a] = match viewRight(c) {
-        case SomeRight(rs, x) if (f(x)) => dropWhileRight(f, rs)
-        case _                          => c
-    }
-
-    ///
-    /// Returns the first `n` elements of `c`.
-    ///
-    /// Returns `c` if `n > length(c)`.
-    /// Returns `Nil` if `n < 0`.
-    ///
-    pub def takeLeft(n: Int32, c: Nec[a]): Nec[a] =
-        if (n < 0)
-            Empty
-        else
-            takeLeftHelper(n, c, Empty)
-
-    ///
-    /// Helper for function for `takeLeft`.
-    ///
-    /// Precondition n >= 0
-    ///
-    def takeLeftHelper(n: Int32, c: Nec[a], acc: Nec[a]): Nec[a] = match (n, viewLeft(c)) {
-        case (_, NoneLeft)        => acc
-        case (i, _) if i < 1      => acc
-        case (i, SomeLeft(x, rs)) => takeLeftHelper(i-1, rs, snoc(acc, x))
-    }
-
-    ///
-    /// Returns the last `n` elements of `c`.
-    ///
-    /// Returns `c` if `n > length(c)`.
-    /// Returns `Nil` if `n < 0`.
-    ///
-    pub def takeRight(n: Int32, c: Nec[a]): Nec[a] =
-        if (n < 0)
-            Empty
-        else
-            takeRightHelper(n, c, Empty)
-
-    ///
-    /// Helper for function for `takeRight`.
-    ///
-    /// Precodition: n >= 0
-    ///
-    def takeRightHelper(n: Int32, c: Nec[a], acc: Nec[a]): Nec[a] = match (n, viewRight(c)) {
-        case (_, NoneRight)        => acc
-        case (i, _)  if i < 1      => acc
-        case (i, SomeRight(rs, x)) => takeRightHelper(i-1, rs, cons(x, acc))
-    }
-
-    ///
-    /// Returns the longest prefix of `c` that satisfies the predicate `f`.
-    ///
-    /// The function `f` must be pure.
-    ///
-    pub def takeWhileLeft(f: a -> Bool, c: Nec[a]): Nec[a] = takeWhileLeftHelper(f, c, Empty)
-
-    ///
-    /// Helper for function for `takeWhileLeft`.
-    ///
-    def takeWhileLeftHelper(f: a -> Bool, c: Nec[a], acc: Nec[a]): Nec[a] = match viewLeft(c) {
-        case NoneLeft        => acc
-        case SomeLeft(x, rs) => if (f(x)) takeWhileLeftHelper(f, rs, snoc(acc, x)) else acc
-    }
-
-    ///
-    /// Returns the longest suffix of `c` that satisfies the predicate `f`.
-    ///
-    /// The function `f` must be pure.
-    ///
-    pub def takeWhileRight(f: a -> Bool, c: Nec[a]): Nec[a] = takeWhileRightHelper(f, c, Empty)
-
-    ///
-    /// Helper for function for `takeWhileRight`.
-    ///
-    def takeWhileRightHelper(f: a -> Bool, c: Nec[a], acc: Nec[a]): Nec[a] = match viewRight(c) {
-        case SomeRight(rs, x) if (f(x)) => takeWhileRightHelper(f, rs, cons(x, acc))
-        case _                          => acc
-    }
 
     ///
     /// Collects the results of applying the partial function `f` to every element in `c`.
     ///
-    pub def filterMap(f: a -> Option[b] & ef, c: Nec[a]): Nec[b] & ef =
-        let step = (acc, x) -> match f(x) {
-            case None    => acc
-            case Some(v) => snoc(acc, v)
+    pub def filterMap(f: a -> Option[b] & ef, c: Nec[a]): List[b] & ef =
+        def loop(l, k) = match viewLeft(l) {
+            case OneLeft(x)      => match (f(x)) {
+                case Some(a) => k(a :: Nil)
+                case None    => k(Nil)
+            }
+            case SomeLeft(x, rs) => match f(x) {
+                case Some(a) => loop(rs, ks -> k(a :: ks))
+                case None    => loop(rs, k)
+            }
         };
-        foldLeft(step, empty(), c)
+        loop(c, ks -> ks as & ef)
 
     ///
     /// Returns the first non-None result of applying the partial function `f` to each element of `c`.
@@ -672,14 +496,14 @@ namespace Nec {
     /// Returns `None` if every element of `c` is `None`.
     ///
     pub def findMap(f: a -> Option[b] & ef, c: Nec[a]): Option[b] & ef = match viewLeft(c) {
-        case NoneLeft        => None
+        case OneLeft(x)      => f(x)
         case SomeLeft(x, rs) => match f(x) {
-            case None    => findMap(f, rs)
             case Some(v) => Some(v)
+            case None    => findMap(f, rs)
         }
     }
 
-*/
+
     ///
     /// Returns a Nec where the element at index `i` is `(a, b)` where
     /// `a` is the element at index `i` in `c1` and `b` is the element at index `i` in `c2`.
@@ -698,53 +522,60 @@ namespace Nec {
             case (SomeLeft(x, _), OneLeft(y))       => k(NecOne((x, y)))
             case (OneLeft(x), SomeLeft(y, _))       => k(NecOne((x, y)))
         }
-/*
+
     ///
     /// Returns a Nec where the element at index `i` is `f(a, b)` where
     /// `a` is the element at index `i` in `c1` and `b` is the element at index `i` in `c2`.
     ///
     /// If either `c1` or `c2` becomes depleted, then no further elements are added to the resulting Nec.
     ///
-    pub def zipWith(f: (a, b) -> c & ef, c1: Nec[a], c2: Nec[b]): Nec[c] & ef = zipWithHelper(f, c1, c2, Nec.empty())
+    pub def zipWith(f: (a, b) -> c & ef, c1: Nec[a], c2: Nec[b]): Nec[c] & ef = zipWithHelper(f, c1, c2, ks -> ks as & ef)
 
     ///
     /// Helper function for `zipWith`.
     ///
-    def zipWithHelper(f: (a, b) -> c & ef, c1: Nec[a], c2: Nec[b], acc: Nec[c]): Nec[c] & ef = match (viewLeft(c1), viewLeft(c2)) {
+    def zipWithHelper(f: (a, b) -> c & ef, c1: Nec[a], c2: Nec[b], k: Nec[c] -> Nec[c] & ef): Nec[c] & ef = match (viewLeft(c1), viewLeft(c2)) {
+        case (OneLeft(x), OneLeft(y))           => {let a = f(x, y); k(singleton(a))}
+        case (OneLeft(x), SomeLeft(y, _))       => {let a = f(x, y); k(singleton(a))}
+        case (SomeLeft(x, _), OneLeft(y))       => {let a = f(x, y); k(singleton(a))}
         case (SomeLeft(x, rs), SomeLeft(y, qs)) => {
             let a = f(x, y);
-            zipWithHelper(f, rs, qs, snoc(acc, a))
+            zipWithHelper(f, rs, qs, ks -> k(cons(a, ks)))
         }
-        case _                                  => acc
+        
     }
 
     ///
     /// Returns a pair of Necs, the first containing all first components in `c`
     /// and the second containing all second components in `c`.
     ///
-    pub def unzip(c: Nec[(a, b)]): (Nec[a], Nec[b]) = unzipHelper(c, Nec.empty(), Nec.empty())
+    pub def unzip(c: Nec[(a, b)]): (Nec[a], Nec[b]) = unzipHelper(c, (ks, ls) -> (ks, ls))
 
     ///
     /// Helper function for `unzip`.
     ///
-    def unzipHelper(c: Nec[(a, b)], ac1: Nec[a], ac2: Nec[b]): (Nec[a], Nec[b]) = match viewLeft(c) {
-        case NoneLeft               => (ac1, ac2)
-        case SomeLeft((x1, x2), rs) => unzipHelper(rs, snoc(ac1, x1), snoc(ac2, x2))
+    def unzipHelper(c: Nec[(a, b)], k: (Nec[a], Nec[b]) -> (Nec[a], Nec[b])): (Nec[a], Nec[b]) = match viewLeft(c) {
+        case OneLeft((a, b))      => k(singleton(a), singleton(b))
+        case SomeLeft((a, b), rs) => unzipHelper(rs, (ks, ls) -> k(cons(a, ks), cons(b, ls)))
     }
+
 
     ///
     /// `mapAccumLeft` is a stateful version of `map`. The accumulating paramter `s` is updated at each
     /// step in a left-to-right traversal.
     ///
     pub def mapAccumLeft(f: (s, a) -> (s, b) & ef, start: s, c: Nec[a]): (s, Nec[b]) & ef =
-        mapAccumLeftHelper(f, start, c, (s1, ks) -> (s1, ks))
+        mapAccumLeftHelper(f, start, c, (s1, ks) -> (s1, ks) as & ef)
 
     ///
     /// Helper function for `mapAccumLeft`.
     ///
-    def mapAccumLeftHelper(f: (s, a) -> (s, b) & ef, s1: s, c: Nec[a], k: (s, Nec[b]) -> (s, Nec[b])): (s, Nec[b]) & ef =
+    def mapAccumLeftHelper(f: (s, a) -> (s, b) & ef, s1: s, c: Nec[a], k: (s, Nec[b]) -> (s, Nec[b]) & ef): (s, Nec[b]) & ef =
         match viewLeft(c) {
-            case NoneLeft        => k(s1, empty())
+            case OneLeft(x)      => { 
+                let (s2, x1) = f(s1, x);
+                k(s2, NecOne(x1))
+            }
             case SomeLeft(x, rs) => {
                 let (s2, x1) = f(s1, x);
                 mapAccumLeftHelper(f, s2, rs, (s3, ks) -> k(s3, cons(x1, ks)))
@@ -756,20 +587,23 @@ namespace Nec {
     /// step in a right-to-left traversal.
     ///
     pub def mapAccumRight(f: (s, a) -> (s, b) & ef, start: s, c: Nec[a]): (s, Nec[b]) & ef =
-        mapAccumRightHelper(f, start, c, (s1, ks) -> (s1, ks))
+        mapAccumRightHelper(f, start, c, (s1, ks) -> (s1, ks) as & ef)
 
     ///
     /// Helper function for `mapAccumRight`.
     ///
-    def mapAccumRightHelper(f: (s, a) -> (s, b) & ef, s1: s, c: Nec[a], k: (s, Nec[b]) -> (s, Nec[b])): (s, Nec[b]) & ef =
+    def mapAccumRightHelper(f: (s, a) -> (s, b) & ef, s1: s, c: Nec[a], k: (s, Nec[b]) -> (s, Nec[b]) & ef): (s, Nec[b]) & ef =
         match viewRight(c) {
-            case NoneRight        => k(s1, empty())
+            case OneRight(x)      => {
+                let (s2, x1) = f(s1, x);
+                k(s2, NecOne(x1))
+            }
             case SomeRight(rs, x) => {
                 let (s2, x1) = f(s1, x);
                 mapAccumRightHelper(f, s2, rs, (s3, ks) -> k(s3, snoc(ks, x1)))
            }
         }
-*/
+
     ///
     /// Applies `f` to every element of `c`.
     ///
@@ -934,5 +768,54 @@ namespace Nec {
     ///
     pub def joinWith(f: a -> String & ef, sep: String, c: Nec[a]): String =
         Foldable.joinWith(f, sep, c)
+
+    ///
+    /// Left-associative reduction of a structure.
+    /// Applies `g` to the initial element of `l` and combines it
+    /// with the remainder of `l` using `f` going from left to right.
+    ///
+    pub def reduceLeftTo(f: (b, a) -> b & ef1, g: a -> b & ef2, c: Nec[a]): b & (ef1 and ef2) = match viewLeft(c) {
+        case OneLeft(x)      => g(x)
+        case SomeLeft(x, xs) => foldLeft(f, g(x), xs)
+    }
+
+    ///
+    /// Right-associative reduction of a structure.
+    /// Applies `g` to the initial element of `l` and combines it
+    /// with the remainder of `l` using `f` going from right to left.
+    ///
+    pub def reduceRightTo(f: (a, b) -> b & ef1, g: a -> b & ef2, c: Nec[a]): b & (ef1 and ef2) = match viewRight(c) {
+        case OneRight(x)      => g(x)
+        case SomeRight(xs, x) => foldRight(f, g(x), xs)
+    }
+
+    ///
+    /// Returns an iterator over `c`.
+    ///
+    pub def toIterator(c: Nec[a]): Iterator[a] & Impure = toIteratorHelper(Some(viewLeft(c)))
+
+    ///
+    /// Returns an iterator over `l`.
+    ///
+    def toIteratorHelper(vl: Option[ViewLeft[a]]): Iterator[a] & Impure =
+        let cursor = ref vl;
+        let done = () -> match (deref cursor) {
+            case None    => true
+            case Some(_) => false
+        };
+        let next = () -> match (deref cursor) {
+            case None                 => bug!("Empty Iterator!")
+            case Some(OneLeft(x))     => {
+                cursor := None;
+                x
+            }            
+            case Some(SomeLeft(x, xs)) => {
+                cursor := Some(viewLeft(xs));
+                x
+            }
+        };
+        Iterator(done, next)
+
+
 
 }
