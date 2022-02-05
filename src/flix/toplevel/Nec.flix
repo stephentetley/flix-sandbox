@@ -53,12 +53,12 @@ instance Foldable[Nec] {
     pub def foldLeft(f: (b, a) -> b & ef, s: b, c: Nec[a]): b & ef = Nec.foldLeft(f, s, c)
     pub def foldRight(f: (a, b) -> b & ef, s: b, c: Nec[a]): b & ef = Nec.foldRight(f, s, c)
 }
-/*
+
 instance Traversable[Nec] {
     pub def traverse(f: a -> m[b] & ef, t: Nec[a]): m[Nec[b]] & ef with Applicative[m] = Nec.traverse(f, t)
     pub override def sequence(t: Nec[m[a]]): m[Nec[a]] with Applicative[m] = Nec.sequence(t)
 }
-*/
+
 instance ToString[Nec[a]] with ToString[a] {
     pub def toString(c: Nec[a]): String =
         let fn = () -> {
@@ -108,15 +108,15 @@ namespace Nec {
     /// For `f = f1, f2, ...` and `x = x1, x2, ...` the results appear in the order
     /// `f1(x1), f1(x2), ..., f2(x1), f2(x2), ...`.
     ///
-    pub def ap(f: Nec[a -> b & ef], x: Nec[a]) : Nec[b] & ef =
-        apHelper(viewLeft(f), x, k -> k as & ef)
+    pub def ap(f: Nec[a -> b & ef], c: Nec[a]) : Nec[b] & ef =
+        apHelper(f, c, k -> k as & ef)
 
     ///
     /// Helper function for `ap`.
     ///
-    def apHelper(f: ViewLeft[a -> b & ef], c: Nec[a], k: Nec[b] -> Nec[b] & ef): Nec[b] & ef = match f {
+    def apHelper(f: Nec[a -> b & ef], c: Nec[a], k: Nec[b] -> Nec[b] & ef): Nec[b] & ef = match viewLeft(f) {
         case OneLeft(f1)      => k(map(f1, c))
-        case SomeLeft(f1, rs) => apHelper(viewLeft(rs), c, ks -> k(map(f1, c) `append` ks))
+        case SomeLeft(f1, rs) => apHelper(rs, c, ks -> k(map(f1, c) `append` ks))
     }
 
     ///
@@ -186,12 +186,8 @@ namespace Nec {
     /// Helper function for `viewLeft`.
     ///
     /// This traverses the Nec from left-to-right, because the Nec is represented
-    /// by a binary tree, the function may have recursively descend the tree to find
-    /// the leftmost node.
-    ///
-    /// Precondition: `c` has been properly formed with no internal `Empty` nodes.
-    /// This means that `Empty` can only be encountered on the first match and it
-    /// can ignore the accumulator which is also `Empty` the first time this is called.
+    /// by a binary tree, the function may have to recursively descend the tree to 
+    /// find the leftmost node.
     ///
     def viewLeftHelper(c: Nec[a], acc: Option[Nec[a]], k: ViewLeft[a] -> ViewLeft[a]): ViewLeft[a] = match (c, acc) {
         case (NecOne(x), None)       => k(OneLeft(x))
@@ -214,12 +210,8 @@ namespace Nec {
     /// Helper function for `viewRight`.
     ///
     /// This traverses the Nec from right-to-left, because the Nec is represented
-    /// by a binary tree, the function may have recursively descend the tree to find
-    /// the rightmost node.
-    ///
-    /// Precondition: `c` has been properly formed with no internal `Empty` nodes.
-    /// This means that `Empty` can only be encountered on the first match and it
-    /// can ignore the accumulator which is also `Empty` the first time this is called.
+    /// by a binary tree, the function may have to recursively descend the tree to 
+    /// find the rightmost node.
     ///
     def viewRightHelper(c: Nec[a], acc: Option[Nec[a]], k: ViewRight[a] -> ViewRight[a]): ViewRight[a] = match (c, acc) {
         case (NecOne(x), None)       => k(OneRight(x))
@@ -231,15 +223,15 @@ namespace Nec {
     ///
     /// Returns `true` if and only if `c` contains the element `a`.
     ///
-    pub def memberOf(a: a, c: Nec[a]): Bool with Eq[a] = memberOfHelper(a, viewLeft(c))
+    pub def memberOf(a: a, c: Nec[a]): Bool with Eq[a] = memberOfHelper(a, c)
 
     ///
     /// Helper function for `memberOf`.
     ///
-    def memberOfHelper(a: a, v: ViewLeft[a]): Bool with Eq[a] = match v {
+    def memberOfHelper(a: a, c: Nec[a]): Bool with Eq[a] = match viewLeft(c) {
         case OneLeft(x)               => x == a
         case SomeLeft(x, _) if x == a => true
-        case SomeLeft(_, c)           => memberOfHelper(a, viewLeft(c))
+        case SomeLeft(_, c1)          => memberOfHelper(a, c1)
     }
 
     ///
@@ -247,14 +239,14 @@ namespace Nec {
     ///
     /// Returns `-1` if `a` does not exist in `c`.
     ///
-    pub def indexOf(a: a, c: Nec[a]): Int32 with Eq[a] = indexOfHelper(a, 0, viewLeft(c))
+    pub def indexOf(a: a, c: Nec[a]): Int32 with Eq[a] = indexOfHelper(a, 0, c)
 
     ///
     /// Helper function for `indexOf`.
     ///
-    def indexOfHelper(a: a, acc: Int32, v: ViewLeft[a]): Int32 with Eq[a] = match v {
-        case OneLeft(x)     => if (x == a) acc else -1
-        case SomeLeft(x, c) => if (x == a) acc else indexOfHelper(a, acc + 1, viewLeft(c))
+    def indexOfHelper(a: a, acc: Int32, c: Nec[a]): Int32 with Eq[a] = match viewLeft(c) {
+        case OneLeft(x)      => if (x == a) acc else -1
+        case SomeLeft(x, c1) => if (x == a) acc else indexOfHelper(a, acc + 1, c1)
     }
 
     ///
@@ -496,22 +488,22 @@ namespace Nec {
         case OneLeft(x)      => f(x)
         case SomeLeft(x, rs) => if (not f(x)) false else forall(f, rs)
     }
-/*
+
     ///
     /// Returns a list of every element in `c` that satisfies the predicate `f`.
     ///
     /// The function `f` must be pure.
     ///
-    pub def filter(f: a -> Bool & ef, c: Nec[a]): Nec[a] & ef = filterHelper(f, c, Empty)
+    pub def filter(f: a -> Bool & ef, c: Nec[a]): List[a] & ef = filterHelper(f, c, ks -> ks as & ef)
 
     ///
     /// Helper function for `filter`.
     ///
-    def filterHelper(f: a -> Bool & ef, c: Nec[a], acc: Nec[a]): Nec[a] & ef = match viewLeft(c) {
-        case NoneLeft        => acc
-        case SomeLeft(x, rs) => if (f(x)) filterHelper(f, rs, snoc(acc, x)) else filterHelper(f, rs, acc)
+    def filterHelper(f: a -> Bool & ef, c: Nec[a], k: List[a] -> List[a] & ef): List[a] & ef = match viewLeft(c) {
+        case OneLeft(x)      => if (f(x)) k(x :: Nil) else k(Nil)
+        case SomeLeft(x, rs) => if (f(x)) filterHelper(f, rs, ks -> k(x :: ks)) else filterHelper(f, rs, k)
     }
-*/
+
     ///
     /// Applies `f` to a start value `s` and all elements in `c` going from left to right.
     ///
@@ -694,17 +686,18 @@ namespace Nec {
     ///
     /// If either `c1` or `c2` becomes depleted, then no further elements are added to the resulting Nec.
     ///
-    pub def zip(c1: Nec[a], c2: Nec[b]): Nec[(a,b)] = zipHelper(viewLeft(c1), viewLeft(c2), k -> k)
+    pub def zip(c1: Nec[a], c2: Nec[b]): Nec[(a,b)] = zipHelper(c1, c2, k -> k)
 
     ///
     /// Helper function for `zip`.
     ///
-    def zipHelper(v1: ViewLeft[a], v2: ViewLeft[b], k: Nec[(a,b)] -> Nec[(a,b)]): Nec[(a,b)] = match (v1, v2) {
-        case (SomeLeft(x, rs), SomeLeft(y, qs)) => zipHelper(viewLeft(rs), viewLeft(qs), ks -> k(cons((x, y), ks)))
-        case (OneLeft(x), OneLeft(y))           => k(NecOne((x, y)))
-        case (SomeLeft(x, _), OneLeft(y))       => k(NecOne((x, y)))
-        case (OneLeft(x), SomeLeft(y, _))       => k(NecOne((x, y)))
-    }
+    def zipHelper(c1: Nec[a], c2: Nec[b], k: Nec[(a,b)] -> Nec[(a,b)]): Nec[(a,b)] = 
+        match (viewLeft(c1), viewLeft(c2)) {
+            case (SomeLeft(x, xs), SomeLeft(y, ys)) => zipHelper(xs, ys, ks -> k(cons((x, y), ks)))
+            case (OneLeft(x), OneLeft(y))           => k(NecOne((x, y)))
+            case (SomeLeft(x, _), OneLeft(y))       => k(NecOne((x, y)))
+            case (OneLeft(x), SomeLeft(y, _))       => k(NecOne((x, y)))
+        }
 /*
     ///
     /// Returns a Nec where the element at index `i` is `f(a, b)` where
@@ -825,7 +818,7 @@ namespace Nec {
     ///
     /// Returns `true` if and only if `c1` and `c2` and equal.
     ///
-    pub def equals(c1: Nec[a], c2: Nec[a]): Bool with Eq[a] = equalsHelper(viewLeft(c1), viewLeft(c2))
+    pub def equals(c1: Nec[a], c2: Nec[a]): Bool with Eq[a] = equalsHelper(c1, c2)
 
     ///
     /// Helper function for `equals`.
@@ -835,13 +828,27 @@ namespace Nec {
     /// Because they may have different shapes due to construction we use a view to
     /// decide equality which imposes an order on the Nec.
     ///
-    def equalsHelper(v1: ViewLeft[a], v2: ViewLeft[a]): Bool with Eq[a] = match (v1, v2) {
-        case (OneLeft(x), OneLeft(y))                       => x == y
-        case (SomeLeft(x, cx), SomeLeft(y, cy)) if (x == y) => equalsHelper(viewLeft(cx), viewLeft(cy))
-        case _                                              => false
-    }
+    def equalsHelper(c1: Nec[a], c2: Nec[a]): Bool with Eq[a] = 
+        match (viewLeft(c1), viewLeft(c2)) {
+            case (OneLeft(x), OneLeft(y))                       => x == y
+            case (SomeLeft(x, xs), SomeLeft(y, ys)) if (x == y) => equalsHelper(xs, ys)
+            case _                                              => false
+        }
 
-/*
+    ///
+    /// Helper for the `sort` functions.
+    ///
+    def fromArray(arr: Array[a]): Option[Nec[a]] & Impure =
+        def loop(ix, end, acc) = if (ix >= end) acc else {let x = arr[ix]; loop(ix+1, end, snoc(acc, x))};
+        let len = Array.length(arr);
+        if (len < 1)
+            None 
+        else {
+            let acc = singleton(arr[0]);
+            loop(1, len, acc) |> Some
+        }
+
+
     ///
     /// Sort Nec `c` so that elements are ordered from low to high according to their `Order` instance.
     ///
@@ -849,8 +856,13 @@ namespace Nec {
     ///
     /// The sort implementation is a Quicksort.
     ///
-    pub def sort(c: Nec[a]): Nec[a] with Order[a] =
-        (c |> toArray |> Array.sort |> Array.toNec) as & Pure
+    pub def sort(l: Nec[a]): Nec[a] with Order[a] =
+        let ans = (l |> toArray |> Array.sort |> fromArray) as & Pure;
+        match ans {
+            case Some(n1) => n1
+            case None     => unreachable!()
+        }
+
 
     /// Sort Nec `c` so that elements are ordered from low to high according to the `Order` instance
     /// for the values obtained by applying `f` to each element.
@@ -859,8 +871,12 @@ namespace Nec {
     ///
     /// The sort implementation is a Quicksort.
     ///
-    pub def sortBy(f: a -> b, c: Nec[a]): Nec[a] with Order[b] =
-        (c |> toArray |> Array.sortBy(f) |> Array.toNec) as & Pure
+    pub def sortBy(f: a -> b, l: Nec[a]): Nec[a] with Order[b] =
+        let ans = (l |> toArray |> Array.sortBy(f) |> fromArray) as & Pure;
+        match ans {
+            case Some(n1) => n1
+            case None     => unreachable!()
+        }
 
     ///
     /// Sort Nec `c` so that elements are ordered from low to high according to the comparison function `cmp`.
@@ -869,8 +885,12 @@ namespace Nec {
     ///
     /// The sort implementation is a Quicksort.
     ///
-    pub def sortWith(cmp: (a,a) -> Comparison, c: Nec[a]): Nec[a] =
-        (c |> toArray |> Array.sortWith(cmp) |> Array.toNec) as & Pure
+    pub def sortWith(cmp: (a, a) -> Comparison, l: Nec[a]): Nec[a] =
+        let ans = (l |> toArray |> Array.sortWith(cmp) |> fromArray) as & Pure;
+        match ans {
+            case Some(n1) => n1
+            case None     => unreachable!()
+        }
 
     ///
     /// Helper function for `traverse` and `sequence`.
@@ -878,29 +898,29 @@ namespace Nec {
     /// Builds an "applicative Nec".
     ///
     def consA(mx: f[a], mxs: f[Nec[a]]): f[Nec[a]] with Applicative[f] =
-        (cons <$> mx) <*> mxs
+        (((x, xs) -> cons(x, xs)) <$> mx) <*> mxs
 
     ///
     /// Returns the result of running all the actions in the Nec `c`.
     ///
     pub def sequence(c: Nec[m[a]]): m[Nec[a]] with Applicative[m] =
-        def loop(v, k) = match v {
-            case OneLeft(x)      => k(NecOne(x))
-            case SomeLeft(x, rs) => loop(viewLeft(rs), ks -> k(consA(x, ks)))
+        def loop(l2, k) = match viewLeft(l2) {
+            case OneLeft(x)      => k(NecOne <$> x)
+            case SomeLeft(x, rs) => loop(rs, ks -> k(consA(x, ks)))
         };
-        loop(viewLeft(c), Applicative.point)
+        loop(c, ks -> ks)
 
     ///
     /// Returns the result of applying the applicative mapping function `f` to all the elements of the
     /// Nec `c`.
     ///
     pub def traverse(f: a -> m[b] & ef, c: Nec[a]): m[Nec[b]] & ef with Applicative[m] =
-        def loop(v, acc) = match v {
-            case NoneLeft        => acc as & ef
-            case SomeLeft(x, rs) => loop(viewLeft(rs), snocA(acc, f(x)))
+        def loop(l2, k) = match viewLeft(l2) {
+            case OneLeft(x)      => k(NecOne <$> f(x))
+            case SomeLeft(x, rs) => loop(rs, ks -> k(consA(f(x), ks)))
         };
-        loop(viewLeft(c), Applicative.point(empty()))
-*/
+        loop(c, ks -> ks as & ef)
+
     ///
     /// Returns the concatenation of the string representation
     /// of each element in `c` with `sep` inserted between each element.
