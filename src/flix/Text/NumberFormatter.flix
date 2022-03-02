@@ -26,9 +26,9 @@ namespace Text/NumberFormatter {
     /// Helper function for `formatFloat64`.
     ///
     pub def formatFloat64Helper(decimalPlaces: Int32, x: Float64): String & Impure =
-        import new java.text.DecimalFormat() as newDecimalFormat;
-        import java.text.DecimalFormat.setMaximumFractionDigits(Int32);
-        import java.text.NumberFormat.format(Float64);
+        import new java.text.DecimalFormat(): ##java.text.DecimalFormat & Pure as newDecimalFormat;
+        import java.text.DecimalFormat.setMaximumFractionDigits(Int32): Unit & Impure;
+        import java.text.NumberFormat.format(Float64): String & Pure;
         let df = newDecimalFormat();
         setMaximumFractionDigits(df, decimalPlaces);
         let nf = df as ##java.text.NumberFormat;
@@ -40,21 +40,21 @@ namespace Text/NumberFormatter {
     ///
     /// The format of a decimal string is decided by the locale settings of the JVM.
     ///
-    pub def parseFloat64(s: String): Result[Float64, String] = parseFloat64Helper(s) as & Pure
+    pub def parseFloat64(s: String): Result[Float64, String] = parseFloat64Helper(s)
 
     ///
     /// Helper function for `parseFloat64`.
     ///
-    def parseFloat64Helper(s: String): Result[Float64, String] & Impure = try {
-        import new java.text.DecimalFormat() as newDecimalFormat;
-        import java.lang.String.strip();
-        import java.text.NumberFormat.parse(String);
-        import java.lang.Number.doubleValue();
+    def parseFloat64Helper(s: String): Result[Float64, String] & Pure = try {
+        import new java.text.DecimalFormat(): ##java.text.DecimalFormat & Pure as newDecimalFormat;
+        import java.lang.String.strip(): String & Pure;
+        import java.text.NumberFormat.parse(String): ##java.lang.Number & Pure;
+        import java.lang.Number.doubleValue(): Float64 & Pure;
         let nf = newDecimalFormat() as ##java.text.NumberFormat;
         let n1 = parse(nf, strip(s));
         Ok(doubleValue(n1))
     } catch {
-        case _: ##java.lang.NumberFormatException => Err("Float64.fromDecimalString")
+        case _: ##java.lang.NumberFormatException => Err("Float64.parseFloat64")
     }
 
 
@@ -68,12 +68,12 @@ namespace Text/NumberFormatter {
     /// Helper function for `formatInt64WithGrouping`.
     ///
     def formatInt64WithGroupingHelper(x: Int64): String & Impure =
-        import new java.text.DecimalFormat() as newDecimalFormat;
-        import java.text.DecimalFormat.setGroupingSize(Int32);
-        import java.text.DecimalFormat.setDecimalFormatSymbols(##java.text.DecimalFormatSymbols);
-        import new java.text.DecimalFormatSymbols() as newDecimalFormatSymbols;
-        import java.text.DecimalFormatSymbols.setGroupingSeparator(Char);
-        import java.text.NumberFormat.format(Int64);
+        import new java.text.DecimalFormat(): ##java.text.DecimalFormat & Impure as newDecimalFormat;
+        import java.text.DecimalFormat.setGroupingSize(Int32): Unit & Impure;
+        import java.text.DecimalFormat.setDecimalFormatSymbols(##java.text.DecimalFormatSymbols): Unit & Impure;
+        import new java.text.DecimalFormatSymbols(): ##java.text.DecimalFormatSymbols & Impure as newDecimalFormatSymbols;
+        import java.text.DecimalFormatSymbols.setGroupingSeparator(Char): Unit & Impure;
+        import java.text.NumberFormat.format(Int64): String & Pure;
         let format1 = newDecimalFormat();
         let symbols = newDecimalFormatSymbols();
         setGroupingSeparator(symbols, '_');

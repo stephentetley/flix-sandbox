@@ -34,51 +34,51 @@ namespace Text/Normalizer {
     use Text.NormalizerForm.{Nfc, Nfd, Nfkc, Nfkd};
 
     pub def marshal(x: NormalizerForm): ##java.text.Normalizer$Form =
-        import static get java.text.Normalizer$Form.NFC as getNFC;
-        import static get java.text.Normalizer$Form.NFD as getNFD;
-        import static get java.text.Normalizer$Form.NFKC as getNFKC;
-        import static get java.text.Normalizer$Form.NFKD as getNFKD;
+        import static get java.text.Normalizer$Form.NFC: ##java.text.Normalizer$Form & Pure as getNFC;
+        import static get java.text.Normalizer$Form.NFD: ##java.text.Normalizer$Form & Pure as getNFD;
+        import static get java.text.Normalizer$Form.NFKC: ##java.text.Normalizer$Form & Pure as getNFKC;
+        import static get java.text.Normalizer$Form.NFKD: ##java.text.Normalizer$Form & Pure as getNFKD;
         match x {
             case Nfc    => getNFC()
             case Nfd    => getNFD()
             case Nfkc   => getNFKC()
             case Nfkd   => getNFKD()
-        } as & Pure
+        }
 
     pub def unmarshal(x: ##java.text.Normalizer$Form): NormalizerForm =
-        import static get java.text.Normalizer$Form.NFC as getNFC;
-        import static get java.text.Normalizer$Form.NFD as getNFD;
-        import static get java.text.Normalizer$Form.NFKC as getNFKC;
-        import static get java.text.Normalizer$Form.NFKD as getNFKD;
+        import static get java.text.Normalizer$Form.NFC: ##java.text.Normalizer$Form & Pure as getNFC;
+        import static get java.text.Normalizer$Form.NFD: ##java.text.Normalizer$Form & Pure as getNFD;
+        import static get java.text.Normalizer$Form.NFKC: ##java.text.Normalizer$Form & Pure as getNFKC;
+        import static get java.text.Normalizer$Form.NFKD: ##java.text.Normalizer$Form & Pure as getNFKD;
         match x {
             case x1 if primEquals(x1, getNFC())    => Nfc
             case x1 if primEquals(x1, getNFD())    => Nfd
             case x1 if primEquals(x1, getNFKC())   => Nfkc
             case x1 if primEquals(x1, getNFKD())   => Nfkd
-        } as & Pure
+        }
 
     /// Warning - is this reference equality or value equality?
     def primEquals(x: ##java.text.Normalizer$Form, y: ##java.text.Normalizer$Form): Bool =
-        import java.lang.Object.equals(##java.lang.Object);
+        import java.lang.Object.equals(##java.lang.Object): Bool & Pure;
         let x1 = x as ##java.lang.Object;
         let y1 = y as ##java.lang.Object;
-        equals(x1, y1) as & Pure
+        equals(x1, y1)
 
 
     pub def normalize(nform: NormalizerForm, src: String): String =
-        import static java.text.Normalizer.normalize(##java.lang.CharSequence, ##java.text.Normalizer$Form);
+        import static java.text.Normalizer.normalize(##java.lang.CharSequence, ##java.text.Normalizer$Form): String & Pure;
         try {
             let nform1 = marshal(nform);
-            normalize(src as ##java.lang.CharSequence, nform1) as & Pure
+            normalize(src as ##java.lang.CharSequence, nform1)
         } catch {
             case _:##java.lang.Exception => ""
         }
 
     pub def isNormalized(nform: NormalizerForm, src: String): Bool =
-        import static java.text.Normalizer.isNormalized(##java.lang.CharSequence, ##java.text.Normalizer$Form);
+        import static java.text.Normalizer.isNormalized(##java.lang.CharSequence, ##java.text.Normalizer$Form): Bool & Pure;
         try {
             let nform1 = marshal(nform);
-            isNormalized(src as ##java.lang.CharSequence, nform1) as & Pure
+            isNormalized(src as ##java.lang.CharSequence, nform1)
         } catch {
             case _:##java.lang.Exception => false
         }

@@ -25,9 +25,9 @@ namespace System {
     /// Note formatting is system dependent.
     instance ToString[FilePath] {
         pub def toString(path: FilePath): String =
-            import java.nio.file.Path.toString();
+            import java.nio.file.Path.toString(): String & Pure;
             let FilePath(path1) = path;
-            toString(path1) as & Pure
+            toString(path1)
     }
 
     instance FromString[FilePath] {
@@ -37,10 +37,10 @@ namespace System {
 
     instance Eq[FilePath] {
         pub def eq(x: FilePath, y: FilePath): Bool =
-            import java.nio.file.Path.equals(##java.lang.Object);
+            import java.nio.file.Path.equals(##java.lang.Object): Bool & Pure;
             let FilePath(x1) = x;
             let FilePath(y1) = y;
-            equals(x1, y1 as ##java.lang.Object) as & Pure
+            equals(x1, y1 as ##java.lang.Object)
     }
 
     instance SemiGroup[FilePath] {
@@ -49,17 +49,17 @@ namespace System {
 
     instance Order[FilePath] {
         pub def compare(x: FilePath, y: FilePath): Comparison =
-            import java.nio.file.Path.compareTo(##java.nio.file.Path);
+            import java.nio.file.Path.compareTo(##java.nio.file.Path): Int32 & Pure;
             let FilePath(x1) = x;
             let FilePath(y1) = y;
-            compareTo(x1, y1) as & Pure |> Comparison.fromInt32
+            compareTo(x1, y1) |> Comparison.fromInt32
     }
 
     instance Hash[FilePath] {
         pub def hash(x: FilePath): Int32 =
-            import java.nio.file.Path.hashCode();
+            import java.nio.file.Path.hashCode(): Int32 & Pure;
             let FilePath(x1) = x;
-            hashCode(x1) as & Pure
+            hashCode(x1)
     }
 
     instance Boxable[FilePath]
@@ -79,76 +79,76 @@ namespace System/FilePath {
     /// Returns a new FilePath.
     ///
     pub def new(s: String): FilePath =
-        import static flix.runtime.spt.sandbox.system.FilePathWrapper.get1(String) as get1;
+        import static flix.runtime.spt.sandbox.system.FilePathWrapper.get1(String): ##java.nio.file.Path & Pure as get1;
         try {
-            FilePath(get1(s)) as & Pure
+            FilePath(get1(s))
         } catch {
             case _: ##java.lang.Exception => empty()
         }
 
     pub def tryNew(s: String): Result[FilePath, String] =
-        import static flix.runtime.spt.sandbox.system.FilePathWrapper.get1(String) as get1;
+        import static flix.runtime.spt.sandbox.system.FilePathWrapper.get1(String): ##java.nio.file.Path & Pure as get1;
         try {
-            Ok(FilePath(get1(s))) as & Pure
+            Ok(FilePath(get1(s)))
         } catch {
             case _: ##java.lang.Exception => Err("Invalid FilePath")
         }
 
     pub def empty(): FilePath =
-        import static flix.runtime.spt.sandbox.system.FilePathWrapper.get1(String) as get1;
+        import static flix.runtime.spt.sandbox.system.FilePathWrapper.get1(String): ##java.nio.file.Path & Pure as get1;
         try {
-            FilePath(get1("")) as & Pure
+            FilePath(get1(""))
         } catch {
             case _: ##java.lang.Exception => bug!("FilePath.empty")
         }
 
     pub def normalize(path: FilePath): FilePath =
-        import java.nio.file.Path.normalize();
+        import java.nio.file.Path.normalize(): ##java.nio.file.Path & Pure;
         let FilePath(p1) = path;
-        FilePath(normalize(p1)) as & Pure
+        FilePath(normalize(p1))
 
 
     /// If `path` is a relative path `toAbsolutePath` resolves the path in a system specific manner.
     /// Should this be Impure?
     pub def toAbsolutePath(path: FilePath): Result[FilePath, String] =
-        import java.nio.file.Path.toAbsolutePath();
+        import java.nio.file.Path.toAbsolutePath(): ##java.nio.file.Path & Pure;
         try {
             let FilePath(p1) = path;
-            Ok(FilePath(toAbsolutePath(p1))) as & Pure
+            Ok(FilePath(toAbsolutePath(p1)))
         } catch {
             case _: ##java.lang.Exception => Err("toAbsolutePath")
         }
 
 
     pub def isAbsolute(path: FilePath): Bool =
-        import java.nio.file.Path.isAbsolute();
+        import java.nio.file.Path.isAbsolute(): Bool & Pure;
         let FilePath(path1) = path;
-        isAbsolute(path1) as & Pure
+        isAbsolute(path1)
 
     pub def isRelative(path: FilePath): Bool = not isAbsolute(path)
 
     pub def getRoot(path: FilePath): Option[FilePath] =
-        import java.nio.file.Path.getRoot();
+        import java.nio.file.Path.getRoot(): ##java.nio.file.Path & Pure;
         let FilePath(path1) = path;
-        let root = getRoot(path1) as & Pure;
+        let root = getRoot(path1);
         if (Object.isNull(root))
             None
         else
             Some(FilePath(root))
 
     pub def getParent(path: FilePath): Option[FilePath] =
-        import java.nio.file.Path.getParent();
+        import java.nio.file.Path.getParent(): ##java.nio.file.Path & Pure;
         let FilePath(path1) = path;
-        let parent = getParent(path1) as & Pure;
+        let parent = getParent(path1);
         if (Object.isNull(parent))
             None
         else
             Some(FilePath(parent))
 
     pub def getFileName(path: FilePath): Option[FilePath] =
-        import java.nio.file.Path.getFileName();
+        import java.nio.file.Path.getFileName(): ##java.nio.file.Path & Pure;
         let FilePath(path1) = path;
-        let name = getFileName(path1) as & Pure;
+        let name = getFileName(path1);
         if (Object.isNull(name))
             None
         else
@@ -192,10 +192,10 @@ namespace System/FilePath {
 
 
     def resolve(path: FilePath, other: FilePath): FilePath =
-        import java.nio.file.Path.resolve(##java.nio.file.Path);
+        import java.nio.file.Path.resolve(##java.nio.file.Path): ##java.nio.file.Path & Pure;
         let FilePath(path1) = path;
         let FilePath(other1) = other;
-        FilePath(resolve(path1, other1)) as & Pure
+        FilePath(resolve(path1, other1))
 
     pub def append(path: FilePath, other: FilePath): FilePath =
         normalize(resolve(path, other))
@@ -217,19 +217,19 @@ namespace System/FilePath {
     /// Returns `path1` with the path name contracted relative to `path2`.
     ///
     pub def makeRelative(path1: FilePath, path2: FilePath): FilePath =
-        import java.nio.file.Path.relativize(##java.nio.file.Path);
+        import java.nio.file.Path.relativize(##java.nio.file.Path): ##java.nio.file.Path & Pure;
         let FilePath(p1) = path1;
         let FilePath(p2) = path2;
-        FilePath(relativize(p1, p2)) as & Pure
+        FilePath(relativize(p1, p2))
 
     ///
     /// Returns `true` if the filepath `path1` starts with the string `path2`.
     ///
     pub def startsWith(path1: FilePath, path2: FilePath): Bool =
-        import java.nio.file.Path.startsWith(##java.nio.file.Path);
+        import java.nio.file.Path.startsWith(##java.nio.file.Path): Bool & Pure;
         let FilePath(p1) = path1;
         let FilePath(p2) = path2;
-        startsWith(p1, p2) as & Pure
+        startsWith(p1, p2)
 
 
     pub def getNameCount(path: FilePath): Int32 =
@@ -240,9 +240,9 @@ namespace System/FilePath {
 
     /// Does not count root, if present.
     def getNameCountHelper(path: FilePath): Int32 =
-        import java.nio.file.Path.getNameCount();
+        import java.nio.file.Path.getNameCount(): Int32 & Pure;
         let FilePath(path1) = path;
-        getNameCount(path1) as & Pure
+        getNameCount(path1)
 
     pub def getNameAt(path: FilePath, ix: Int32): Option[FilePath] =
         if (ix < 0)
@@ -259,10 +259,10 @@ namespace System/FilePath {
     /// look at root, if present.
     ///
     def getNameAtHelper(path: FilePath, ix: Int32): Option[FilePath] =
-        import java.nio.file.Path.getName(Int32);
+        import java.nio.file.Path.getName(Int32): ##java.nio.file.Path & Pure;
         try {
             let FilePath(path1) = path;
-            let name1 = getName(path1, ix) as & Pure;
+            let name1 = getName(path1, ix);
             Some(FilePath(name1))
         } catch {
             case _: ##java.lang.Exception => None
@@ -415,19 +415,19 @@ namespace System/FilePath {
             }
 
     pub def isGlobMatch(path: FilePath, glob: String): Result[Bool, String] =
-        import static flix.runtime.spt.sandbox.system.FilePathWrapper.globMatches(##java.nio.file.Path, String);
+        import static flix.runtime.spt.sandbox.system.FilePathWrapper.globMatches(##java.nio.file.Path, String): Bool & Pure;
         try {
             let FilePath(path1) = path;
-            Ok(globMatches(path1, glob)) as & Pure
+            Ok(globMatches(path1, glob))
         } catch {
             case _: ##java.lang.Exception => Err("isGlobMatch")
         }
 
     pub def isRegexMatch(path: FilePath, glob: String): Result[Bool, String] =
-        import static flix.runtime.spt.sandbox.system.FilePathWrapper.regexMatches(##java.nio.file.Path, String);
+        import static flix.runtime.spt.sandbox.system.FilePathWrapper.regexMatches(##java.nio.file.Path, String): Bool & Pure;
         try {
             let FilePath(path1) = path;
-            Ok(regexMatches(path1, glob)) as & Pure
+            Ok(regexMatches(path1, glob))
         } catch {
             case _: ##java.lang.Exception => Err("isRegexMatch")
         }

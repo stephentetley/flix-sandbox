@@ -34,17 +34,17 @@ namespace System/Process {
 
     type alias MarshalStringArray = ##flix.runtime.spt.sandbox.system.marshal.MarshalStringArray
 
-    pub def newProcessBuilder (cmd: String, args: Array[String]): ProcessBuilder & Impure = 
-        import new flix.runtime.spt.sandbox.system.marshal.MarshalStringArray() as newStringArray;
-        import flix.runtime.spt.sandbox.system.marshal.MarshalStringArray.snoc(String);
-        import static flix.runtime.spt.sandbox.system.ProcessWrapper.create(String, MarshalStringArray) as create;
+    pub def newProcessBuilder (cmd: String, args: Array[String]): ProcessBuilder & Impure =
+        import new flix.runtime.spt.sandbox.system.marshal.MarshalStringArray(): ##flix.runtime.spt.sandbox.system.marshal.MarshalStringArray & Pure as newStringArray;
+        import flix.runtime.spt.sandbox.system.marshal.MarshalStringArray.snoc(String): Unit & Impure;
+        import static flix.runtime.spt.sandbox.system.ProcessWrapper.create(String, MarshalStringArray): ##java.lang.ProcessBuilder & Impure;
         let argArray = newStringArray();
         Array.foreach(x -> snoc(argArray, x), args);
         ProcessBuilder(create(cmd, argArray))
 
     pub def directory!(x: ProcessBuilder, path: System.FilePath): Unit & Impure =
-        import java.lang.ProcessBuilder.directory(##java.io.File);
-        import new java.io.File(String) as newFile;
+        import java.lang.ProcessBuilder.directory(##java.io.File): ##java.lang.ProcessBuilder & Impure;
+        import new java.io.File(String): ##java.io.File & Impure as newFile;
         let ProcessBuilder(x1) = x;
         let name = ToString.toString(path);
         let f1 = newFile(name);
@@ -52,14 +52,14 @@ namespace System/Process {
         ()
 
     pub def getDirectory(x: ProcessBuilder): System.FilePath & Impure =
-        import java.lang.ProcessBuilder.directory();
-        import java.io.File.toPath();
+        import java.lang.ProcessBuilder.directory(): ##java.io.File & Impure;
+        import java.io.File.toPath(): ##java.nio.file.Path & Impure;
         let ProcessBuilder(x1) = x;
         let p1 = directory(x1) |> toPath;
         FilePath(p1)
 
     pub def start(x: ProcessBuilder): Result[Process, String] & Impure =
-        import java.lang.ProcessBuilder.start();
+        import java.lang.ProcessBuilder.start(): ##java.lang.Process & Impure;
         try {
             let ProcessBuilder(x1) = x;
             let proc = start(x1);
@@ -69,7 +69,7 @@ namespace System/Process {
         }
 
     pub def waitFor(x: Process): Result[Int32, String] & Impure =
-        import java.lang.Process.waitFor();
+        import java.lang.Process.waitFor(): Int32 & Impure;
         try {
             let Process(x1) = x;
             let retcode = waitFor(x1);
@@ -79,7 +79,7 @@ namespace System/Process {
         }
 
     pub def getInput(x:Process, cs: Text.Charset): Result[String, String] & Impure =
-        import static flix.runtime.spt.sandbox.system.ProcessWrapper.getInput(##java.lang.Process, ##java.nio.charset.Charset);
+        import static flix.runtime.spt.sandbox.system.ProcessWrapper.getInput(##java.lang.Process, ##java.nio.charset.Charset): String & Impure;
         try {
             let Process(x1) = x;
             let Charset(cs1) = cs;
@@ -90,7 +90,7 @@ namespace System/Process {
         }
 
     pub def getError(x:Process, cs: Text.Charset): Result[String, String] & Impure =
-        import static flix.runtime.spt.sandbox.system.ProcessWrapper.getError(##java.lang.Process, ##java.nio.charset.Charset);
+        import static flix.runtime.spt.sandbox.system.ProcessWrapper.getError(##java.lang.Process, ##java.nio.charset.Charset): String & Impure;
         try {
             let Process(x1) = x;
             let Charset(cs1) = cs;

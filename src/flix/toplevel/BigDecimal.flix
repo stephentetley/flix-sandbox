@@ -18,17 +18,17 @@ pub opaque type BigDecimal = ##java.math.BigDecimal
 
 instance ToString[BigDecimal] {
     pub def toString(x: BigDecimal): String =
-        import java.math.BigDecimal.toString();
+        import java.math.BigDecimal.toString(): String & Pure;
         let BigDecimal(x1) = x;
-        toString(x1) as & Pure
+        toString(x1)
 }
 
 instance FromString[BigDecimal] {
     pub def fromString(x: String): Option[BigDecimal] =
-        import java.lang.String.strip();
-        import new java.math.BigDecimal(String) as parseBigDecimal;
+        import java.lang.String.strip(): String & Pure;
+        import new java.math.BigDecimal(String): ##java.math.BigDecimal & Pure as parseBigDecimal;
         try {
-            Some(BigDecimal(parseBigDecimal(strip(x)))) as & Pure
+            Some(BigDecimal(parseBigDecimal(strip(x))))
         } catch {
             case _: ##java.lang.NumberFormatException => None
         }
@@ -36,61 +36,61 @@ instance FromString[BigDecimal] {
 
 instance Add[BigDecimal] {
     pub def add(x: BigDecimal, y: BigDecimal): BigDecimal =
-        import java.math.BigDecimal.add(##java.math.BigDecimal);
+        import java.math.BigDecimal.add(##java.math.BigDecimal): ##java.math.BigDecimal & Pure;
         let BigDecimal(x1) = x;
         let BigDecimal(y1) = y;
-        BigDecimal(add(x1, y1)) as & Pure
+        BigDecimal(add(x1, y1))
 }
 
 instance Sub[BigDecimal] {
     pub def sub(x: BigDecimal, y: BigDecimal): BigDecimal =
-        import java.math.BigDecimal.subtract(##java.math.BigDecimal);
+        import java.math.BigDecimal.subtract(##java.math.BigDecimal): ##java.math.BigDecimal & Pure;
         let BigDecimal(x1) = x;
         let BigDecimal(y1) = y;
-        BigDecimal(subtract(x1, y1)) as & Pure
+        BigDecimal(subtract(x1, y1))
 }
 
 instance Mul[BigDecimal] {
     pub def mul(x: BigDecimal, y: BigDecimal): BigDecimal =
-        import java.math.BigDecimal.multiply(##java.math.BigDecimal);
+        import java.math.BigDecimal.multiply(##java.math.BigDecimal): ##java.math.BigDecimal & Pure;
         let BigDecimal(x1) = x;
         let BigDecimal(y1) = y;
-        BigDecimal(multiply(x1, y1)) as & Pure
+        BigDecimal(multiply(x1, y1))
 }
 
 instance Div[BigDecimal] {
     pub def div(x: BigDecimal, y: BigDecimal): BigDecimal =
-        import java.math.BigDecimal.divide(##java.math.BigDecimal);
+        import java.math.BigDecimal.divide(##java.math.BigDecimal): ##java.math.BigDecimal & Pure;
         let BigDecimal(x1) = x;
         let BigDecimal(y1) = y;
-        BigDecimal(divide(x1, y1)) as & Pure
+        BigDecimal(divide(x1, y1))
 }
 
 instance Neg[BigDecimal] {
     pub def neg(x: BigDecimal): BigDecimal =
-        import java.math.BigDecimal.negate();
+        import java.math.BigDecimal.negate(): ##java.math.BigDecimal & Pure;
         let BigDecimal(x1) = x;
-        BigDecimal(negate(x1)) as & Pure
+        BigDecimal(negate(x1))
 }
 
 namespace BigDecimal {
 
     pub def one(): BigDecimal =
-        import static get java.math.BigDecimal.ONE as getONE;
-        BigDecimal(getONE()) as & Pure
+        import static get java.math.BigDecimal.ONE: ##java.math.BigDecimal & Pure as getONE;
+        BigDecimal(getONE())
 
     pub def ten(): BigDecimal =
-        import static get java.math.BigDecimal.TEN as getTEN;
-        BigDecimal(getTEN()) as & Pure
+        import static get java.math.BigDecimal.TEN: ##java.math.BigDecimal & Pure as getTEN;
+        BigDecimal(getTEN())
 
     pub def zero(): BigDecimal =
-        import static get java.math.BigDecimal.ZERO as getZERO;
-        BigDecimal(getZERO()) as & Pure
+        import static get java.math.BigDecimal.ZERO: ##java.math.BigDecimal & Pure as getZERO;
+        BigDecimal(getZERO())
 
 
     pub def abs(x: BigDecimal): BigDecimal =
-        import java.math.BigDecimal.abs();
+        import java.math.BigDecimal.abs(): ##java.math.BigDecimal & Pure;
         let BigDecimal(x1) = x;
-        BigDecimal(abs(x1)) as & Pure
+        BigDecimal(abs(x1))
 
 }

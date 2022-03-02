@@ -21,17 +21,17 @@ namespace Data {
 
     instance ToString[MutBitSet] {
         pub def toString(x: MutBitSet): String =
-            import java.util.BitSet.toString();
+            import java.util.BitSet.toString(): String & Pure;
             let MutBitSet(x1) = x;
-            toString(x1) as & Pure
+            toString(x1)
     }
 
     instance Eq[MutBitSet] {
         pub def eq(x: MutBitSet, y: MutBitSet): Bool =
-            import java.util.BitSet.equals(##java.lang.Object);
+            import java.util.BitSet.equals(##java.lang.Object): Bool & Pure;
             let MutBitSet(x1) = x;
             let MutBitSet(y1) = y;
-            equals(x1, y1 as ##java.lang.Object) as & Pure
+            equals(x1, y1 as ##java.lang.Object)
     }
 
 }
@@ -42,7 +42,7 @@ namespace Data/MutBitSet {
     use Data.MutBitSet.{MutBitSet};
 
     pub def empty(): MutBitSet & Impure =
-        import new java.util.BitSet() as newBitSet;
+        import new java.util.BitSet(): ##java.util.BitSet & Impure as newBitSet;
         MutBitSet(newBitSet())
 
     pub def singleton(idx: Int32): MutBitSet & Impure =
@@ -51,28 +51,28 @@ namespace Data/MutBitSet {
         x
 
     pub def isEmpty(s: MutBitSet): Bool & Impure =
-        import java.util.BitSet.isEmpty();
+        import java.util.BitSet.isEmpty(): Bool & Impure;
         let MutBitSet(s1) = s;
         isEmpty(s1)
 
     pub def size(s: MutBitSet): Int32 & Impure =
-        import java.util.BitSet.size();
+        import java.util.BitSet.size(): Int32 & Impure;
         let MutBitSet(s1) = s;
         size(s1)
 
     pub def cardinality(s: MutBitSet): Int32 & Impure =
-        import java.util.BitSet.cardinality();
+        import java.util.BitSet.cardinality(): Int32 & Impure;
         let MutBitSet(s1) = s;
         cardinality(s1)
 
     pub def clone(s: MutBitSet): MutBitSet & Impure =
-        import java.util.BitSet.clone();
+        import java.util.BitSet.clone(): ##java.util.BitSet & Impure;
         let MutBitSet(s1) = s;
         let s2 = clone(s1) as ##java.util.BitSet;
         MutBitSet(s2)
 
     pub def union(x: MutBitSet, y: MutBitSet): MutBitSet & Impure =
-        import java.util.BitSet.and(##java.util.BitSet) as primAnd!;
+        import java.util.BitSet.and(##java.util.BitSet): Unit & Impure as primAnd!;
         let MutBitSet(x1) = clone(x);
         let MutBitSet(y1) = y;
         primAnd!(x1, y1);       /// Mutates x1
@@ -80,13 +80,13 @@ namespace Data/MutBitSet {
 
     /// Mutates x
     pub def union!(x: MutBitSet, y: MutBitSet): Unit & Impure =
-        import java.util.BitSet.and(##java.util.BitSet) as primAnd!;
+        import java.util.BitSet.and(##java.util.BitSet): Unit & Impure as primAnd!;
         let MutBitSet(x1) = x;
         let MutBitSet(y1) = y;
         primAnd!(x1, y1)
 
     pub def intersection(x: MutBitSet, y: MutBitSet): MutBitSet & Impure =
-        import java.util.BitSet.or(##java.util.BitSet) as primOr!;
+        import java.util.BitSet.or(##java.util.BitSet): Unit & Impure as primOr!;
         let MutBitSet(x1) = clone(x);
         let MutBitSet(y1) = y;
         primOr!(x1, y1);       /// Mutates x1
@@ -94,40 +94,40 @@ namespace Data/MutBitSet {
 
     /// Mutates x
     pub def intersection!(x: MutBitSet, y: MutBitSet): Unit & Impure =
-        import java.util.BitSet.or(##java.util.BitSet) as primOr!;
+        import java.util.BitSet.or(##java.util.BitSet): Unit & Impure as primOr!;
         let MutBitSet(x1) = x;
         let MutBitSet(y1) = y;
         primOr!(x1, y1)
 
     /// Set all bits to `false` imperatively.
     pub def clearAll!(s: MutBitSet): Unit & Impure =
-        import java.util.BitSet.clear();
+        import java.util.BitSet.clear(): Unit & Impure;
         let MutBitSet(s1) = s;
         clear(s1)
 
     pub def get(idx: Int32, s: MutBitSet): Bool & Impure =
-        import java.util.BitSet.get(Int32);
+        import java.util.BitSet.get(Int32): Bool & Impure;
         let MutBitSet(s1) = s;
         get(s1, idx)
 
     pub def set!(idx: Int32, s: MutBitSet): Unit & Impure =
-        import java.util.BitSet.set(Int32);
+        import java.util.BitSet.set(Int32): Unit & Impure;
         let MutBitSet(s1) = s;
         set(s1, idx)
 
 
     pub def clear!(idx: Int32, s: MutBitSet): Unit & Impure =
-        import java.util.BitSet.clear(Int32);
+        import java.util.BitSet.clear(Int32): Unit & Impure;
         let MutBitSet(s1) = s;
         clear(s1, idx)
 
     pub def flip!(idx: Int32, s: MutBitSet): Unit & Impure =
-        import java.util.BitSet.flip(Int32);
+        import java.util.BitSet.flip(Int32): Unit & Impure;
         let MutBitSet(s1) = s;
         flip(s1, idx)
 
     pub def nextSetBit(idx: Int32, s: MutBitSet): Option[Int32] & Impure =
-        import java.util.BitSet.nextSetBit(Int32);
+        import java.util.BitSet.nextSetBit(Int32): Int32 & Impure;
         try {
             let MutBitSet(s1) = s;
             let i = nextSetBit(s1, idx);
@@ -139,7 +139,7 @@ namespace Data/MutBitSet {
         }
 
     pub def nextClearBit(idx: Int32, s: MutBitSet): Option[Int32] & Impure =
-        import java.util.BitSet.nextClearBit(Int32);
+        import java.util.BitSet.nextClearBit(Int32): Int32 & Impure;
         try {
             let MutBitSet(s1) = s;
             let i = nextClearBit(s1, idx);
@@ -151,7 +151,7 @@ namespace Data/MutBitSet {
         }
 
     pub def previousSetBit(idx: Int32, s: MutBitSet): Option[Int32] & Impure =
-        import java.util.BitSet.previousSetBit(Int32);
+        import java.util.BitSet.previousSetBit(Int32): Int32 & Impure;
         try {
             let MutBitSet(s1) = s;
             let i = previousSetBit(s1, idx);
@@ -163,7 +163,7 @@ namespace Data/MutBitSet {
         }
 
     pub def previousClearBit(idx: Int32, s: MutBitSet): Option[Int32] & Impure =
-        import java.util.BitSet.previousClearBit(Int32);
+        import java.util.BitSet.previousClearBit(Int32): Int32 & Impure;
         try {
             let MutBitSet(s1) = s;
             let i = previousClearBit(s1, idx);

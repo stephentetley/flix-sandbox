@@ -36,7 +36,7 @@ namespace System/File/BufferedReader {
     use Text.Charset.{Charset};
 
     pub def new(path: System.FilePath, cs: Text.Charset): Result[BufferedReader, String] & Impure =
-        import static java.nio.file.Files.newBufferedReader(##java.nio.file.Path, ##java.nio.charset.Charset);
+        import static java.nio.file.Files.newBufferedReader(##java.nio.file.Path, ##java.nio.charset.Charset): ##java.io.BufferedReader & Impure;
         try {
             let FilePath(path1) = path;
             let Charset(cs1) = cs;
@@ -53,7 +53,7 @@ namespace System/File/BufferedReader {
     /// Returns -1 if the end of the stream has been reached.
     ///
     pub def read(x: BufferedReader): Result[Int32, String] & Impure =
-        import java.io.BufferedReader.read();
+        import java.io.BufferedReader.read(): Int32 & Impure;
         try {
             let BufferedReader(x1) = x;
             Ok(read(x1))
@@ -69,7 +69,7 @@ namespace System/File/BufferedReader {
         }
 
     pub def readLine(x: BufferedReader): Result[String, String] & Impure =
-        import java.io.BufferedReader.readLine();
+        import java.io.BufferedReader.readLine(): String & Impure;
         try {
             let BufferedReader(x1) = x;
             Ok(readLine(x1))
@@ -79,7 +79,7 @@ namespace System/File/BufferedReader {
         }
 
     pub def close(x: BufferedReader): Result[Unit, String] & Impure =
-        import java.io.Reader.close();
+        import java.io.Reader.close(): Unit & Impure;
         try {
             let BufferedReader(x1) = x;
             Ok(close(x1 as ##java.io.Reader))
@@ -88,13 +88,14 @@ namespace System/File/BufferedReader {
             case _: ##java.lang.Exception => Err("close")
         }
 
+
     ///
     /// Closes the BufferedReader when done.
     ///
     pub def lines(x: BufferedReader): Cursor[String, String] & Impure =
-        import static flix.runtime.spt.sandbox.system.LineIterator.newBufferedReaderlinesIterator(##java.io.BufferedReader);
-        import flix.runtime.spt.sandbox.system.LineIterator.hasNext();
-        import flix.runtime.spt.sandbox.system.LineIterator.next();
+        import static flix.runtime.spt.sandbox.system.LineIterator.newBufferedReaderlinesIterator(##java.io.BufferedReader): ##flix.runtime.spt.sandbox.system.LineIterator & Impure;
+        import flix.runtime.spt.sandbox.system.LineIterator.hasNext(): Bool & Impure;
+        import flix.runtime.spt.sandbox.system.LineIterator.next(): String & Impure;
         let BufferedReader(x1) = x;
         let primIter = newBufferedReaderlinesIterator(x1);
         let iterNext = () -> {
@@ -111,5 +112,6 @@ namespace System/File/BufferedReader {
             , finalize = () -> () as & Impure
         };
         X/Cursor.makeCursor(cursorAlg)
+
 
 }

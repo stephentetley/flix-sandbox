@@ -50,12 +50,12 @@ namespace Test/FlixCheck {
 
 
     def randomR(lo: Int32, hi: Int32, r: SplittableRandom): Int32 & Impure =
-        import java.util.SplittableRandom.nextInt(Int32, Int32);
+        import java.util.random.RandomGenerator.nextInt(Int32, Int32);
         let SplittableRandom(r1) = r;
         nextInt(r1, lo, hi)
 
     def randomR64(lo: Int64, hi: Int64, r: SplittableRandom): Int64 & Impure =
-        import java.util.SplittableRandom.nextLong(Int64, Int64);
+        import java.util.random.RandomGenerator.nextLong(Int64, Int64);
         let SplittableRandom(r1) = r;
         nextLong(r1, lo, hi)
 

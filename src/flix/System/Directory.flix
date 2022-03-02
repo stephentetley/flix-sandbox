@@ -47,9 +47,9 @@ namespace System/Directory {
 
 
     pub def contentsIter(path: FilePath): Cursor[String, FilePath] & Impure =
-        import static flix.runtime.spt.sandbox.system.PathIterator.newFileslistIterator(##java.nio.file.Path);
-        import flix.runtime.spt.sandbox.system.PathIterator.hasNext();
-        import flix.runtime.spt.sandbox.system.PathIterator.next();
+        import static flix.runtime.spt.sandbox.system.PathIterator.newFileslistIterator(##java.nio.file.Path): ##flix.runtime.spt.sandbox.system.PathIterator & Impure;
+        import flix.runtime.spt.sandbox.system.PathIterator.hasNext(): Bool & Impure;
+        import flix.runtime.spt.sandbox.system.PathIterator.next(): ##java.nio.file.Path & Impure;
         let FilePath(path1) = path;
         let primIter = newFileslistIterator(path1);
         let iterNext = () -> {
@@ -72,9 +72,9 @@ namespace System/Directory {
             |> X/Cursor.toList!
 
     pub def matchesIter(glob: String, path: FilePath): Cursor[String, FilePath] & Impure =
-        import static flix.runtime.spt.sandbox.system.PathIterator.newFilesnewDirectoryStreamIterator(##java.nio.file.Path, String);
-        import flix.runtime.spt.sandbox.system.PathIterator.hasNext();
-        import flix.runtime.spt.sandbox.system.PathIterator.next();
+        import static flix.runtime.spt.sandbox.system.PathIterator.newFilesnewDirectoryStreamIterator(##java.nio.file.Path, String): ##flix.runtime.spt.sandbox.system.PathIterator & Impure;
+        import flix.runtime.spt.sandbox.system.PathIterator.hasNext(): Bool & Impure;
+        import flix.runtime.spt.sandbox.system.PathIterator.next(): ##java.nio.file.Path & Impure;
         let FilePath(path1) = path;
         let primIter = newFilesnewDirectoryStreamIterator(path1, glob);
         let iterNext = () -> {
@@ -98,9 +98,9 @@ namespace System/Directory {
 
     /// All levels - recursive, uses a Iterator
     pub def contentsAllIter(followLinks: Bool, path: FilePath): Cursor[String, FilePath] & Impure =
-        import static flix.runtime.spt.sandbox.system.PathIterator.newFileswalkIterator(##java.nio.file.Path, Bool);
-        import flix.runtime.spt.sandbox.system.PathIterator.hasNext();
-        import flix.runtime.spt.sandbox.system.PathIterator.next();
+        import static flix.runtime.spt.sandbox.system.PathIterator.newFileswalkIterator(##java.nio.file.Path, Bool): ##flix.runtime.spt.sandbox.system.PathIterator & Impure;
+        import flix.runtime.spt.sandbox.system.PathIterator.hasNext(): Bool & Impure;
+        import flix.runtime.spt.sandbox.system.PathIterator.next(): ##java.nio.file.Path & Impure;
         let FilePath(path1) = path;
         let primIter = newFileswalkIterator(path1, followLinks);
         let iterNext = () -> {
@@ -120,13 +120,13 @@ namespace System/Directory {
 
 
     pub def createDirectory(path: FilePath): Unit & Impure =
-        import static flix.runtime.spt.sandbox.system.FilesWrapper.createDirectory(##java.nio.file.Path);
+        import static flix.runtime.spt.sandbox.system.FilesWrapper.createDirectory(##java.nio.file.Path): Unit & Impure;
         let FilePath(path1) = path;
         createDirectory(path1)
 
     /// Create any "missing" directories along the way...
     pub def createDirectoryAll(path: FilePath): Unit & Impure =
-        import static flix.runtime.spt.sandbox.system.FilesWrapper.createDirectories(##java.nio.file.Path);
+        import static flix.runtime.spt.sandbox.system.FilesWrapper.createDirectories(##java.nio.file.Path): Unit & Impure;
         let FilePath(path1) = path;
         createDirectories(path1)
 
@@ -135,7 +135,7 @@ namespace System/Directory {
     /// If `path` is a directory, the directory must be empty.
     /// If `path` does not exist, throw and error.
     pub def delete(path: FilePath): Result[Unit, String] & Impure =
-        import static java.nio.file.Files.delete(##java.nio.file.Path);
+        import static java.nio.file.Files.delete(##java.nio.file.Path): Unit & Impure;
         try {
             let FilePath(path1) = path;
             delete(path1);
@@ -146,7 +146,7 @@ namespace System/Directory {
 
     /// As `delete` but returns `Ok()` if the file does not exist.
     pub def deleteIfExists(path: FilePath): Result[Unit, String] & Impure =
-        import static java.nio.file.Files.deleteIfExists(##java.nio.file.Path);
+        import static java.nio.file.Files.deleteIfExists(##java.nio.file.Path): Unit & Impure;
         try {
             let FilePath(path1) = path;
             deleteIfExists(path1);
@@ -157,7 +157,7 @@ namespace System/Directory {
 
 
     pub def copy(source: FilePath, target: FilePath): Result[Unit, String] & Impure =
-        import static flix.runtime.spt.sandbox.system.FilesWrapper.copy(##java.nio.file.Path, ##java.nio.file.Path);
+        import static flix.runtime.spt.sandbox.system.FilesWrapper.copy(##java.nio.file.Path, ##java.nio.file.Path): ##java.nio.file.Path & Impure;
         try {
             let FilePath(source1) = source;
             let FilePath(target1) = target;

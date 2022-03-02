@@ -33,8 +33,8 @@ namespace System/File/FileInputStream {
     use Text.Charset.{Charset};
 
     pub def new(path: System.FilePath): Result[FileInputStream, String] & Impure =
-        import new java.io.FileInputStream(##java.io.File) as newFileInputStream;
-        import java.nio.file.Path.toFile();
+        import new java.io.FileInputStream(##java.io.File): ##java.io.FileInputStream & Impure as newFileInputStream;
+        import java.nio.file.Path.toFile(): ##java.io.File & Impure;
         try {
             let FilePath(path1) = path;
             let file1 = toFile(path1);
@@ -50,7 +50,7 @@ namespace System/File/FileInputStream {
     /// Returns -1 if the end of the stream has been reached.
     ///
     pub def read(x: FileInputStream): Result[Int32, String] & Impure =
-        import java.io.FileInputStream.read();
+        import java.io.FileInputStream.read(): Int32 & Impure;
         try {
             let FileInputStream(x1) = x;
             Ok(read(x1))
@@ -61,7 +61,7 @@ namespace System/File/FileInputStream {
 
 
     pub def close(x: FileInputStream): Result[Unit, String] & Impure =
-        import java.io.FileInputStream.close();
+        import java.io.FileInputStream.close(): Unit & Impure;
         try {
             let FileInputStream(x1) = x;
             Ok(close(x1))
