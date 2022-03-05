@@ -52,7 +52,7 @@ def normalize02(): Bool =
 def toAbsolutePath01(): Bool =
     let p1 = System/FilePath.new("c:/root/child1.txt") |> System/FilePath.toAbsolutePath;
     let p2 = System/FilePath.new("c:/root/child1.txt");
-    p1 == p2
+    p1 == Ok(p2)
 
 /////////////////////////////////////////////////////////////////////////////
 // getExtension                                                            //
@@ -112,7 +112,7 @@ def dropExtension01(): Bool =
 def addExtension01(): Bool =
     use System/FilePath.{addExtension, getFileName};
     let p1 = System/FilePath.new("archive.tar");
-    let p2 = p1.addExtension("gz");
+    let p2 = addExtension(p1, "gz");
     getFileName(p2) |> Option.map(ToString.toString) == Some("archive.tar.gz")
 
 /////////////////////////////////////////////////////////////////////////////
@@ -141,21 +141,21 @@ def dropExtensions02(): Bool =
 def stripExtension01(): Bool =
     use System/FilePath.{stripExtension, getFileName};
     let p1 = System/FilePath.new("c:/root/file1.txt");
-    let ans = p1.stripExtension("txt");
+    let ans = stripExtension(p1, "txt");
     ans |> Option.flatMap(getFileName) |> Option.map(ToString.toString) == Some("file1")
 
 @test
 def stripExtension02(): Bool =
     use System/FilePath.{stripExtension, getFileName};
     let p1 = System/FilePath.new("c:/root/archive.tar.gz");
-    let ans = p1.stripExtension("gz");
+    let ans = stripExtension(p1, "gz");
     ans |> Option.flatMap(getFileName) |> Option.map(ToString.toString) == Some("archive.tar")
 
 @test
 def stripExtension03(): Bool =
     use System/FilePath.{stripExtension, getFileName};
     let p1 = System/FilePath.new("c:/root/file1");
-    let ans = p1.stripExtension("txt");
+    let ans = stripExtension(p1, "txt");
     ans == None
 
 /////////////////////////////////////////////////////////////////////////////
@@ -166,21 +166,21 @@ def stripExtension03(): Bool =
 def stripExtensions01(): Bool =
     use System/FilePath.{stripExtensions, getFileName};
     let p1 = System/FilePath.new("c:/root/file1.txt");
-    let ans = p1.stripExtensions("txt");
+    let ans = stripExtensions(p1, "txt");
     ans |> Option.flatMap(getFileName) |> Option.map(ToString.toString) == Some("file1")
 
 @test
 def stripExtensions02(): Bool =
     use System/FilePath.{stripExtensions, getFileName};
     let p1 = System/FilePath.new("c:/root/archive.tar.gz");
-    let ans = p1.stripExtensions("tar.gz");
+    let ans = stripExtensions(p1, "tar.gz");
     ans |> Option.flatMap(getFileName) |> Option.map(ToString.toString) == Some("archive")
 
 @test
 def stripExtensions03(): Bool =
     use System/FilePath.{stripExtensions, getFileName};
     let p1 = System/FilePath.new("c:/root/file1");
-    let ans = p1.stripExtensions("txt");
+    let ans = stripExtensions(p1, "txt");
     ans == None
 
 /////////////////////////////////////////////////////////////////////////////
@@ -191,8 +191,8 @@ def stripExtensions03(): Bool =
 def putBaseName01(): Bool =
     use System/FilePath.{putBaseName, getFileName};
     let p1 = System/FilePath.new("c:/root/file1.txt");
-    let p2 = p1.putBaseName("file2");
-    p2.getFileName() |> Option.map(ToString.toString) == Some("file2.txt")
+    let p2 = putBaseName(p1, "file2");
+    p2 |> getFileName |> Option.map(ToString.toString) == Some("file2.txt")
 
 /////////////////////////////////////////////////////////////////////////////
 // split                                                                   //
@@ -202,7 +202,7 @@ def putBaseName01(): Bool =
 def split01(): Bool =
     use System/FilePath.{split};
     let p1 = System/FilePath.new("c:/root/file1.txt");
-    let xs = p1.split();
+    let xs = split(p1);
     List.length(xs) == 3
 
 }

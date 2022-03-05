@@ -14,20 +14,22 @@
  * limitations under the License.
  */
 
-namespace TestNormalizer {
+package flixspt.sandbox.marshal;
 
+public class TupleStringString {
+    private String s1;
+    private String s2;
 
-/////////////////////////////////////////////////////////////////////////////
-// normalize                                                               //
-/////////////////////////////////////////////////////////////////////////////
+    public TupleStringString(String str1, String str2) {
+        this.s1 = str1;
+        this.s2 = str2;
+    }
 
-@test
-def normalize01(): Bool =
-    use Text.NormalizerForm.{Nfd};
-    use Text/Normalizer.{normalize};
-    use String.{replaceMatches};
-    let s1 = normalize(Nfd, "César");
-    // Remove combining marks...
-    replaceMatches(regex = "\\p{M}", to = "", s1) == "Cesar"
+    public String get0() {
+        return s1;
+    }
 
+    public String get1() {
+        return s2;
+    }
 }
