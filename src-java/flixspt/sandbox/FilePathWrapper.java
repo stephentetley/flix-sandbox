@@ -22,17 +22,17 @@ import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
 
-/**
- * A wrapper class for java.nio.file.Path, java.nio.file.Paths and related functions.
- * `Paths.get` is a varargs function which causes problems if we pass an array from from Flix.
- * This class that provides concrete, non-overloaded methods.
- */
+// This is no longer required.
+// It will be removed the next time I build a package
+
 public class FilePathWrapper {
+
 
     /// Wrapper function for `Paths.get` as it is "varargs" in Java.
     public static Path get1(String path) {
         return Paths.get(path);
     }
+
 
     /// Wrapper function for `getPathMatcher` / `matches`.
     public static boolean globMatches(Path path, String glob) throws Exception {

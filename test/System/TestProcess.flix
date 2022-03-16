@@ -1,0 +1,41 @@
+/*
+ * Copyright 2020 Stephen Tetley
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+namespace System/TestProcess {
+
+
+
+    @test
+    def process01(): Unit & Impure =
+        match System/Process.process({cmd = "java", args = "--version" :: Nil, charset = Text/Charset.utf_8()}) {
+            case Err(msg) => println("Process Err: ${msg}")
+            case Ok(ans)  => println("${ans.processResponse}")
+        }
+
+    @test
+    def process02(): Unit & Impure =
+        match System/Process.process({cmd = "java", args = "--list-modules" :: Nil, charset = Text/Charset.utf_8()}) {
+            case Err(msg) => println("Process Err: ${msg}")
+            case Ok(ans)  => println("${ans.processResponse}")
+        }
+
+    @test
+    def process03(): Unit & Impure =
+        match System/Process.process({cmd = "java", args = "--BAD_ARGUMENT" :: Nil, charset = Text/Charset.utf_8()}) {
+            case Err(msg) => println("Process Err: ${msg}")
+            case Ok(ans)  => println("${ans.processResponse}")
+        }
+}

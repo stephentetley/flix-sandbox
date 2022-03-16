@@ -205,4 +205,10 @@ def split01(): Bool =
     let xs = split(p1);
     List.length(xs) == 3
 
+
+@test
+def isGlobMatch01(): Bool = 
+    let p1 = System/FilePath.new("file1.txt");
+    System/FilePath.isGlobMatch("*.txt", p1) == Ok(true)
+
 }

@@ -80,26 +80,26 @@ namespace System/FilePath {
     /// Returns a new FilePath.
     ///
     pub def new(s: String): FilePath =
-        import static flixspt.sandbox.FilePathWrapper.get1(String): ##java.nio.file.Path & Pure as get1;
+        import static java.nio.file.Path.of(String, Array[String]): ##java.nio.file.Path & Pure as of1;
         try {
-            FilePath(get1(s))
+            FilePath(of1(s, [] as & Pure))
         } catch {
             case _: ##java.lang.Exception => empty()
         }
 
 
     pub def tryNew(s: String): Result[FilePath, String] =
-        import static flixspt.sandbox.FilePathWrapper.get1(String): ##java.nio.file.Path & Pure as get1;
+        import static java.nio.file.Path.of(String, Array[String]): ##java.nio.file.Path & Pure as of1;
         try {
-            Ok(FilePath(get1(s)))
+            Ok(FilePath(of1(s, [] as & Pure)))
         } catch {
             case _: ##java.lang.Exception => Err("Invalid FilePath")
         }
 
     pub def empty(): FilePath =
-        import static flixspt.sandbox.FilePathWrapper.get1(String): ##java.nio.file.Path & Pure as get1;
+        import static java.nio.file.Path.of(String, Array[String]): ##java.nio.file.Path & Pure as of1;
         try {
-            FilePath(get1(""))
+            FilePath(of1("", [] as & Pure))
         } catch {
             case _: ##java.lang.Exception => bug!("FilePath.empty")
         }
@@ -214,6 +214,13 @@ namespace System/FilePath {
             case Ok(path1) => append(path, path1)
             case Err(_) => path
         }
+
+    pub def push(name1: String, path: FilePath): FilePath =
+        match tryNew(name1) {
+            case Ok(path1) => append(path, path1)
+            case Err(_) => path
+        }
+
 
     ///
     /// Returns `path1` with the path name contracted relative to `path2`.
@@ -416,21 +423,22 @@ namespace System/FilePath {
                 case None => k(Nil)
             }
 
-    pub def isGlobMatch(path: FilePath, glob: String): Result[Bool, String] =
-        import static flixspt.sandbox.FilePathWrapper.globMatches(##java.nio.file.Path, String): Bool & Pure;
+    def pathMatcherMatches(path: FilePath, syntaxAndPatt: String): Result[Bool, String] & Impure =
+        import static java.nio.file.FileSystems.getDefault(): ##java.nio.file.FileSystem & Impure;
+        import java.nio.file.FileSystem.getPathMatcher(String): ##java.nio.file.PathMatcher & Impure;
+        import java.nio.file.PathMatcher.matches(##java.nio.file.Path): Bool & Impure;
         try {
             let FilePath(path1) = path;
-            Ok(globMatches(path1, glob))
+            let fs = getDefault();
+            let m1 = getPathMatcher(fs, syntaxAndPatt);
+            Ok(matches(m1, path1))
         } catch {
-            case _: ##java.lang.Exception => Err("isGlobMatch")
+            case _: ##java.lang.Exception => Err("pathMatcherMatches")
         }
 
-    pub def isRegexMatch(path: FilePath, glob: String): Result[Bool, String] =
-        import static flixspt.sandbox.FilePathWrapper.regexMatches(##java.nio.file.Path, String): Bool & Pure;
-        try {
-            let FilePath(path1) = path;
-            Ok(regexMatches(path1, glob))
-        } catch {
-            case _: ##java.lang.Exception => Err("isRegexMatch")
-        }
+    pub def isGlobMatch(glob: String, path: FilePath): Result[Bool, String] =
+        pathMatcherMatches(path, "glob:" + glob) as & Pure
+
+    pub def isRegexMatch(patt: String, path: FilePath): Result[Bool, String] =
+        pathMatcherMatches(path, "regex:" + patt) as & Pure
 }
