@@ -158,6 +158,18 @@ namespace X/Marshal {
         loop(Map.empty())
 
 
+    pub def unmarshalIterator(downcast: ##java.lang.Object -> a & ef, javaIter: ##java.util.Iterator): Iterator[a] =
+        import java.util.Iterator.hasNext(): Bool & Impure;
+        import java.util.Iterator.next(): ##java.lang.Object & Impure;
+        let isDone = () -> { 
+            let ans = hasNext(javaIter);
+            not ans
+        };
+        let getNext = () -> {
+            let a1 = next(javaIter);
+            downcast(a1) as & Impure
+        };
+        Iterator(isDone, getNext)
 
-
+    /// TODO add unmarshalStream
 }

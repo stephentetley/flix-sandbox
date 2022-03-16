@@ -67,6 +67,29 @@ namespace System/Directory {
         };
         X/Cursor.makeCursor(cursorAlg)
 
+    //// Iterator<Path> iter1 = Files.list(dirpath).iterator();
+
+    pub def contentsIter2(path: FilePath): Result[Iterator[FilePath], String] & Impure = 
+        import static java.nio.file.Files.list(##java.nio.file.Path): ##java.util.stream.Stream & Impure;
+        import java.util.stream.BaseStream.iterator(): ##java.util.Iterator & Impure;
+        try {
+            let FilePath(path1) = path;
+            let strm = list(path1);
+            let bs = strm as ##java.util.stream.BaseStream;
+            let javaIter = iterator(bs);
+            let downcast = x1 -> FilePath(x1 as ##java.nio.file.Path);
+            let iter = X/Marshal.unmarshalIterator(downcast, javaIter);
+            Ok(iter)
+        } catch {
+            case _: ##java.lang.Exception => Err("contentsIter2")
+        }
+
+    pub def contents2(path: FilePath): Result[List[FilePath], String] & Impure =
+        contentsIter2(path)
+            |> Result.map(Iterator.toList)
+
+
+
     pub def matches(glob: String, path: FilePath): Result[List[FilePath], String] & Impure =
         matchesIter(glob, path)
             |> X/Cursor.toList!
