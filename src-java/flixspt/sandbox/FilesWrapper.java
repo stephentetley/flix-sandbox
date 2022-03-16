@@ -18,7 +18,6 @@ package flixspt.sandbox;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.InputStream;
 import java.nio.file.*;
 
 /**
