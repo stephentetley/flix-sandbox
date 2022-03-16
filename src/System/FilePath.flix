@@ -75,6 +75,7 @@ namespace System/FilePath {
 
     /// Note - current set of operations should be pure?
 
+
     ///
     /// Returns a new FilePath.
     ///
@@ -85,6 +86,7 @@ namespace System/FilePath {
         } catch {
             case _: ##java.lang.Exception => empty()
         }
+
 
     pub def tryNew(s: String): Result[FilePath, String] =
         import static flixspt.sandbox.FilePathWrapper.get1(String): ##java.nio.file.Path & Pure as get1;

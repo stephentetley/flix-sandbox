@@ -32,15 +32,12 @@ namespace System/Process {
     use System.ProcessBuilder;
     use System.ProcessBuilder.{ProcessBuilder};
 
-    type alias MarshalStringArray = ##flixspt.sandbox.marshal.MarshalStringArray
 
-    pub def newProcessBuilder (cmd: String, args: Array[String]): ProcessBuilder & Impure =
-        import new flixspt.sandbox.marshal.MarshalStringArray(): ##flixspt.sandbox.marshal.MarshalStringArray & Pure as newStringArray;
-        import flixspt.sandbox.marshal.MarshalStringArray.snoc(String): Unit & Impure;
-        import static flixspt.sandbox.ProcessWrapper.create(String, MarshalStringArray): ##java.lang.ProcessBuilder & Impure;
-        let argArray = newStringArray();
-        Array.foreach(x -> snoc(argArray, x), args);
-        ProcessBuilder(create(cmd, argArray))
+    pub def newProcessBuilder(cmd: String, args: List[String]): ProcessBuilder & Impure =
+        import new java.lang.ProcessBuilder(##java.util.List): ##java.lang.ProcessBuilder & Impure as new1;
+        let strs = X/Marshal.marshalList(x1 -> x1 as ##java.lang.Object, cmd :: args);
+        ProcessBuilder(new1(strs))
+
 
     pub def directory!(x: ProcessBuilder, path: System.FilePath): Unit & Impure =
         import java.lang.ProcessBuilder.directory(##java.io.File): ##java.lang.ProcessBuilder & Impure;
@@ -65,7 +62,9 @@ namespace System/Process {
             let proc = start(x1);
             Ok(Process(proc))
         } catch {
-            case _: ##java.io.IOException => Err("start")
+            case ex: ##java.io.IOException =>
+                import java.lang.Throwable.getMessage(): String & Impure;
+                Err(getMessage(ex))
         }
 
     pub def waitFor(x: Process): Result[Int32, String] & Impure =
@@ -78,24 +77,35 @@ namespace System/Process {
             case _: ##java.io.IOException => Err("waitFor")
         }
 
-    pub def getInput(x:Process, cs: Text.Charset): Result[String, String] & Impure =
-        import static flixspt.sandbox.ProcessWrapper.getInput(##java.lang.Process, ##java.nio.charset.Charset): String & Impure;
+
+    pub def getInput(x: Process, c: Text.Charset): Result[String, String] & Impure =
+        import java.lang.Process.getInputStream(): ##java.io.InputStream & Impure;
+        import java.io.InputStream.readAllBytes(): Array[Int8] & Impure;
+        import new java.lang.String(Array[Int8], ##java.nio.charset.Charset): String & Impure as new1;
         try {
             let Process(x1) = x;
-            let Charset(cs1) = cs;
-            let str = getInput(x1, cs1);
-            Ok(str)
+            let Charset(c1) = c;
+            let strm = getInputStream(x1);
+            let bytes = readAllBytes(strm);
+            let s1 = new1(bytes, c1);
+            Ok(s1)
         } catch {
             case _: ##java.lang.Exception => Err("getInput")
         }
 
-    pub def getError(x:Process, cs: Text.Charset): Result[String, String] & Impure =
-        import static flixspt.sandbox.ProcessWrapper.getError(##java.lang.Process, ##java.nio.charset.Charset): String & Impure;
+
+
+    pub def getError(x: Process, c: Text.Charset): Result[String, String] & Impure =        
+        import java.lang.Process.getErrorStream(): ##java.io.InputStream & Impure;
+        import java.io.InputStream.readAllBytes(): Array[Int8] & Impure;
+        import new java.lang.String(Array[Int8], ##java.nio.charset.Charset): String & Impure as new1;
         try {
             let Process(x1) = x;
-            let Charset(cs1) = cs;
-            let str = getError(x1, cs1);
-            Ok(str)
+            let Charset(c1) = c;
+            let strm = getErrorStream(x1);
+            let bytes = readAllBytes(strm);
+            let s1 = new1(bytes, c1);
+            Ok(s1)
         } catch {
             case _: ##java.lang.Exception => Err("getError")
         }
@@ -104,18 +114,33 @@ namespace System/Process {
 
     pub type alias ProcessArgs =
         { cmd :: String
-        , args :: Array[String]
+        , args :: List[String]
         , charset :: Text.Charset
         }
 
-
-    pub def process(args: ProcessArgs): Result[{exitCode :: Int32, processResponse :: String}, String] & Impure =
+    /// Return with an Exit Code
+    pub def processWithExitCode(args: ProcessArgs): Result[{exitCode :: Int32, processResponse :: String}, String] & Impure =
         use Result.flatMap;
-        let pb      = newProcessBuilder(args.cmd, args.args);
-        let* proc   = start(pb);
-        let* resp   = getInput(proc, args.charset);
-        let* code   = waitFor(proc);
-        Ok({exitCode = code, processResponse = resp})
+        let pb          = newProcessBuilder(args.cmd, args.args);
+        let* proc       = start(pb);
+        let* respGood   = getInput(proc, args.charset);
+        let* respBad    = getError(proc, args.charset);
+        let* code       = waitFor(proc);
+        Ok({exitCode = code, processResponse = if (code == 0) respGood else respBad})
+
+
+    pub def process(args: ProcessArgs): Result[{processResponse :: String}, String] & Impure =
+        use Result.flatMap;
+        let pb          = newProcessBuilder(args.cmd, args.args);
+        let* proc       = start(pb);
+        let* respGood   = getInput(proc, args.charset);
+        let* respBad    = getError(proc, args.charset);
+        let* code       = waitFor(proc);
+        if (code == 0) 
+            Ok({processResponse = respGood})
+        else 
+            Err(respBad)
+
 
 
 }
