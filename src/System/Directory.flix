@@ -71,14 +71,11 @@ namespace System/Directory {
 
     pub def contentsIter2(path: FilePath): Result[Iterator[FilePath], String] & Impure = 
         import static java.nio.file.Files.list(##java.nio.file.Path): ##java.util.stream.Stream & Impure;
-        import java.util.stream.BaseStream.iterator(): ##java.util.Iterator & Impure;
         try {
             let FilePath(path1) = path;
             let strm = list(path1);
-            let bs = strm as ##java.util.stream.BaseStream;
-            let javaIter = iterator(bs);
             let downcast = x1 -> FilePath(x1 as ##java.nio.file.Path);
-            let iter = X/Marshal.unmarshalIterator(downcast, javaIter);
+            let iter = X/Marshal.unmarshalStream(downcast, strm);
             Ok(iter)
         } catch {
             case _: ##java.lang.Exception => Err("contentsIter2")

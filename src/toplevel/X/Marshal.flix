@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+// TODO - reconcile with the version in `charset-locale`
 
 namespace X/Marshal {
 
@@ -172,4 +173,11 @@ namespace X/Marshal {
         Iterator(isDone, getNext)
 
     /// TODO add unmarshalStream
+
+    pub def unmarshalStream(downcast: ##java.lang.Object -> a & ef, strm: ##java.util.stream.Stream): Iterator[a] =
+        import java.util.stream.BaseStream.iterator(): ##java.util.Iterator & Pure;
+        let bs = strm as ##java.util.stream.BaseStream;
+        let javaIter = iterator(bs);
+        unmarshalIterator(downcast, javaIter)
+
 }
