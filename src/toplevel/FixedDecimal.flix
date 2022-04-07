@@ -16,7 +16,7 @@
 
 pub opaque type FixedDecimal[a] = (a, BigInt)
 
-pub lawless class HasResolution[a] {
+pub class HasResolution[a] {
     pub def resolution(x: FixedDecimal[a]): BigInt
     pub def zero(): FixedDecimal[a]
 }

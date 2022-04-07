@@ -17,7 +17,7 @@
 ///
 /// See PureScript: https://github.com/purescript/purescript-enums/blob/master/src/Data/Enum.purs
 ///
-pub lawless class Enum[a] with Order[a] {
+pub class Enum[a] with Order[a] {
 
     ///
     /// `succ`
