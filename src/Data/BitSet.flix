@@ -34,6 +34,34 @@ namespace Data/BitSet {
             (toJavaBitSet(s) |> hashCode) as & Pure
     }
 
+    instance LowerBound[BitSet] {
+        pub def minValue(): BitSet = empty()
+    }
+
+    instance PartialOrder[BitSet] {
+        pub def lessEqual(s1: BitSet, s2: BitSet): Bool = isSubsetOf(subset = s1, s2)
+    }
+
+    instance JoinLattice[BitSet] {
+        pub def leastUpperBound(s1: BitSet, s2: BitSet): BitSet = s1 `union` s2
+    }
+
+    instance MeetLattice[BitSet] {
+        pub def greatestLowerBound(s1: BitSet, s2: BitSet): BitSet = s1 `intersection` s2
+    }
+
+    instance SemiGroup[BitSet] {
+        pub def combine(s1: BitSet, s2: BitSet): BitSet = union(s1, s2)
+    }
+
+    instance CommutativeSemiGroup[BitSet]
+
+    instance Monoid[BitSet] {
+        pub def empty(): BitSet = empty()
+    }
+
+    instance CommutativeMonoid[BitSet]
+
     pub def empty(): BitSet =
         BitSet(0ii)
 
@@ -69,13 +97,13 @@ namespace Data/BitSet {
         (s1 &&& BigInt.setBit(0ii, i)) != 0ii
 
 
-    pub def isSubset(subset: {subset :: BitSet}, s: BitSet): Bool = 
+    pub def isSubsetOf(subset: {subset :: BitSet}, s: BitSet): Bool = 
         let BitSet(s1) = s;
         let BitSet(subset1) = subset.subset;
         (s1 ||| subset1) == s1
 
-    pub def isProperSubset(subset: {subset :: BitSet}, s: BitSet): Bool = 
-        isSubset(subset, s) and subset.subset != s
+    pub def isProperSubsetOf(subset: {subset :: BitSet}, s: BitSet): Bool = 
+        isSubsetOf(subset, s) and subset.subset != s
 
 
     def toJavaBitSet(s: BitSet): ##java.util.BitSet & Impure = 
@@ -121,13 +149,13 @@ namespace Data/BitSet {
         let BitSet(y1) = y;
         BitSet(x1 &&& BitwiseNot.not(y1))
 
-    /// toList should use Stream...
+
     pub def toArray(s: BitSet): Array[Int32] & Impure = 
         import java.util.stream.IntStream.toArray(): Array[Int32] & Impure;
         toJavaIntStream(s) |> toArray
 
     pub def toList(s: BitSet): List[Int32] = 
-        (toArray(s) |> Array.toList) as & Pure
+        foldLeft((k, i) -> ks -> k(i :: ks), ks -> ks, s) |> f -> f(Nil)
 
     pub def toIterator(s: BitSet): Iterator[Int32] & Impure = 
         let istrm = toJavaIntStream(s);

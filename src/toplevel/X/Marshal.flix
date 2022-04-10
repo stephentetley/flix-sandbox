@@ -18,6 +18,64 @@
 
 namespace X/Marshal {
 
+    pub def marshalInt8(i: Int8): ##java.lang.Byte = 
+        import static java.lang.Byte.valueOf(Int8): ##java.lang.Byte & Pure;
+        valueOf(i)
+
+    pub def unmarshalInt8(i: ##java.lang.Byte): Int8 = 
+        import java.lang.Byte.byteValue(): Int8 & Pure;
+        byteValue(i)
+
+    pub def marshalInt16(i: Int16): ##java.lang.Short = 
+        import static java.lang.Short.valueOf(Int16): ##java.lang.Short & Pure;
+        valueOf(i)
+
+    pub def unmarshalInt16(i: ##java.lang.Short): Int16 = 
+        import java.lang.Short.shortValue(): Int16 & Pure;
+        shortValue(i)
+
+
+    pub def marshalInt32(i: Int32): ##java.lang.Integer = 
+        import static java.lang.Integer.valueOf(Int32): ##java.lang.Integer & Pure;
+        valueOf(i)
+
+    pub def unmarshalInt32(i: ##java.lang.Integer): Int32 = 
+        import java.lang.Integer.intValue(): Int32 & Pure;
+        intValue(i)
+
+
+    pub def marshalInt64(i: Int64): ##java.lang.Long = 
+        import static java.lang.Long.valueOf(Int64): ##java.lang.Long & Pure;
+        valueOf(i)
+
+    pub def unmarshalInt64(i: ##java.lang.Long): Int64 = 
+        import java.lang.Long.longValue(): Int64 & Pure;
+        longValue(i)
+
+
+    pub def marshalFloat32(d: Float32): ##java.lang.Float = 
+        import static java.lang.Float.valueOf(Float32): ##java.lang.Float & Pure;
+        valueOf(d)
+
+    pub def unmarshalFloat32(d: ##java.lang.Float): Float32 = 
+        import java.lang.Float.floatValue(): Float32 & Pure;
+        floatValue(d)
+
+    pub def marshalFloat64(d: Float64): ##java.lang.Double = 
+        import static java.lang.Double.valueOf(Float64): ##java.lang.Double & Pure;
+        valueOf(d)
+
+    pub def unmarshalFloat64(d: ##java.lang.Double): Float64 = 
+        import java.lang.Double.doubleValue(): Float64 & Pure;
+        doubleValue(d)
+
+    pub def marshalChar(c: Char): ##java.lang.Character = 
+        import static java.lang.Character.valueOf(Char): ##java.lang.Character & Pure;
+        valueOf(c)
+
+    pub def unmarshalChar(c: ##java.lang.Character): Char = 
+        import java.lang.Character.charValue(): Char & Pure;
+        charValue(c)
 
     pub def marshalArray(upcast: a -> ##java.lang.Object & ef, arr: Array[a]): Array[##java.lang.Object] & Impure =
         import new java.util.ArrayList(): ##java.util.ArrayList & Impure as new1;
@@ -181,11 +239,24 @@ namespace X/Marshal {
         unmarshalIterator(downcast, javaIter)
 
     pub def unmarshalIntStream(strm: ##java.util.stream.IntStream): Iterator[Int32] =
-        import java.lang.Integer.intValue(): Int32 & Pure;
         import java.util.stream.BaseStream.iterator(): ##java.util.Iterator & Pure;
         let bs = strm as ##java.util.stream.BaseStream;
         let javaIter = iterator(bs);
-        let downcast = x -> intValue(x as ##java.lang.Integer);
+        let downcast = obj -> unmarshalInt32(obj as ##java.lang.Integer);
+        unmarshalIterator(downcast, javaIter)
+
+    pub def unmarshalLongStream(strm: ##java.util.stream.LongStream): Iterator[Int64] =
+        import java.util.stream.BaseStream.iterator(): ##java.util.Iterator & Pure;
+        let bs = strm as ##java.util.stream.BaseStream;
+        let javaIter = iterator(bs);
+        let downcast = obj -> unmarshalInt64(obj as ##java.lang.Long);
+        unmarshalIterator(downcast, javaIter)
+
+    pub def unmarshalDoubleStream(strm: ##java.util.stream.DoubleStream): Iterator[Float64] =
+        import java.util.stream.BaseStream.iterator(): ##java.util.Iterator & Pure;
+        let bs = strm as ##java.util.stream.BaseStream;
+        let javaIter = iterator(bs);
+        let downcast = obj -> unmarshalFloat64(obj as ##java.lang.Double);
         unmarshalIterator(downcast, javaIter)
 
 }
