@@ -25,7 +25,7 @@ namespace Data/BitSet {
     pub opaque type BitSet with Eq = BigInt
 
     instance ToString[BitSet] {
-        pub def toString(s: BitSet): String = internalToString(s) as & Pure
+        pub def toString(s: BitSet): String = ("BitSet#" + internalToString(s)) as & Pure
     }
 
     instance Hash[BitSet] {
@@ -116,14 +116,10 @@ namespace Data/BitSet {
         let BitSet(y1) = y;
         BitSet(x1 &&& y1)
 
-    /// pub def twosComplement(s: BitSet): List[Int8] = 
-    ///     import java.math.BigInteger.toByteArray(): Array[Int8] & Impure;
-    ///     let BitSet(x1) = x;
-    ///     (toByteArray(x1) |> Array.toList) as & Pure
-
-    /// pub def toLongList(s: BitSet): List[Int64] = 
-    ///     import java.util.BitSet.toLongArray(): Array[Int64] & Impure;
-    ///     (toJavaBitSet(s) |> toLongArray |> Array.toList) as & Pure
+    pub def difference(x: BitSet, y: BitSet): BitSet =
+        let BitSet(x1) = x;
+        let BitSet(y1) = y;
+        BitSet(x1 &&& BitwiseNot.not(y1))
 
     /// toList should use Stream...
     pub def toArray(s: BitSet): Array[Int32] & Impure = 
@@ -132,5 +128,22 @@ namespace Data/BitSet {
 
     pub def toList(s: BitSet): List[Int32] = 
         (toArray(s) |> Array.toList) as & Pure
+
+    pub def toIterator(s: BitSet): Iterator[Int32] & Impure = 
+        let istrm = toJavaIntStream(s);
+        X/Marshal.unmarshalIntStream(istrm)
+
+    pub def filter(f: Int32 -> Bool & ef, s: BitSet): BitSet & ef = 
+        foldLeft((ac, i) -> if (f(i)) insert(i, ac) else ac, empty(), s)        
+
+    pub def map(f: Int32 -> Int32 & ef, s: BitSet): BitSet & ef = 
+        foldLeft((ac, i) -> insert(f(i), ac), empty(), s)
+
+    pub def foldLeft(f: (ac, Int32) -> ac & ef, start: ac, s: BitSet): ac & ef = 
+        let step = () -> {
+            let iter = toIterator(s);
+            Iterator.foldLeft((ac, i) -> f(ac, i), start, iter)
+        };
+        step() as & ef
 
 }

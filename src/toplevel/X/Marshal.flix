@@ -180,4 +180,12 @@ namespace X/Marshal {
         let javaIter = iterator(bs);
         unmarshalIterator(downcast, javaIter)
 
+    pub def unmarshalIntStream(strm: ##java.util.stream.IntStream): Iterator[Int32] =
+        import java.lang.Integer.intValue(): Int32 & Pure;
+        import java.util.stream.BaseStream.iterator(): ##java.util.Iterator & Pure;
+        let bs = strm as ##java.util.stream.BaseStream;
+        let javaIter = iterator(bs);
+        let downcast = x -> intValue(x as ##java.lang.Integer);
+        unmarshalIterator(downcast, javaIter)
+
 }
