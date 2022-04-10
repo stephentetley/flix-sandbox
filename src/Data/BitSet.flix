@@ -86,15 +86,19 @@ namespace Data/BitSet {
         let arr1 = Array.reverse(arr);
         valueOf(arr1)
 
+    def toJavaIntStream(s: BitSet): ##java.util.stream.IntStream & Impure = 
+        import java.util.BitSet.stream(): ##java.util.stream.IntStream & Impure;
+        toJavaBitSet(s) |> stream
+
+
     def internalToString(s: BitSet): String & Impure = 
         let j1 = toJavaBitSet(s);
         Object.toString(j1)
 
 
-    /// "Wrong" - this is not the number of bits set to true...
-    pub def size(s: BitSet): Int32 =
-        import java.util.BitSet.size(): Int32 & Impure;
-        (toJavaBitSet(s) |> size) as & Pure
+    pub def size(s: BitSet): Int64 =
+        import java.util.stream.IntStream.count(): Int64 & Impure;
+        (toJavaIntStream(s) |> count) as & Pure
 
     pub def cardinality(s: BitSet): Int32 =
         import java.util.BitSet.cardinality(): Int32 & Impure;
@@ -112,16 +116,21 @@ namespace Data/BitSet {
         let BitSet(y1) = y;
         BitSet(x1 &&& y1)
 
-    pub def twosComplement(x: BitSet): List[Int8] = 
-        import java.math.BigInteger.toByteArray(): Array[Int8] & Impure;
-        let BitSet(x1) = x;
-        (toByteArray(x1) |> Array.toList) as & Pure
+    /// pub def twosComplement(s: BitSet): List[Int8] = 
+    ///     import java.math.BigInteger.toByteArray(): Array[Int8] & Impure;
+    ///     let BitSet(x1) = x;
+    ///     (toByteArray(x1) |> Array.toList) as & Pure
 
-    pub def toLongList(x: BitSet): List[Int64] = 
-        import java.util.BitSet.toLongArray(): Array[Int64] & Impure;
-        (toJavaBitSet(x) |> toLongArray |> Array.toList) as & Pure
+    /// pub def toLongList(s: BitSet): List[Int64] = 
+    ///     import java.util.BitSet.toLongArray(): Array[Int64] & Impure;
+    ///     (toJavaBitSet(s) |> toLongArray |> Array.toList) as & Pure
 
     /// toList should use Stream...
+    pub def toArray(s: BitSet): Array[Int32] & Impure = 
+        import java.util.stream.IntStream.toArray(): Array[Int32] & Impure;
+        toJavaIntStream(s) |> toArray
 
-    
+    pub def toList(s: BitSet): List[Int32] = 
+        (toArray(s) |> Array.toList) as & Pure
+
 }

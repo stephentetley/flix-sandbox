@@ -172,7 +172,7 @@ namespace X/Marshal {
         };
         Iterator(isDone, getNext)
 
-    /// TODO add unmarshalStream
+
 
     pub def unmarshalStream(downcast: ##java.lang.Object -> a & ef, strm: ##java.util.stream.Stream): Iterator[a] =
         import java.util.stream.BaseStream.iterator(): ##java.util.Iterator & Pure;
