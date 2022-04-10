@@ -19,162 +19,109 @@ namespace Data/BitSet {
 
     // https://stackoverflow.com/questions/29526985/java-from-biginteger-to-bitset-and-back
 
+
+    // Only use nonnegative ints!
+
     pub opaque type BitSet with Eq = BigInt
 
     instance ToString[BitSet] {
-        pub def toString(x: BitSet): String = internalToString(x) as & Pure
+        pub def toString(s: BitSet): String = internalToString(s) as & Pure
     }
 
+    instance Hash[BitSet] {
+        pub def hash(s: BitSet): Int32 = 
+            import java.util.BitSet.hashCode(): Int32 & Impure;
+            (toJavaBitSet(s) |> hashCode) as & Pure
+    }
 
     pub def empty(): BitSet =
         BitSet(0ii)
 
 
-    pub def singleton(idx: Int32): BitSet =
-        BitSet(BigInt.setBit(0ii, idx))
+    pub def singleton(i: Int32): BitSet =
+        BitSet(BigInt.setBit(0ii, i))
+
+    pub def range(b: Int32, e: Int32): BitSet =
+        def loop(i, s) = {
+            if (i >= e)
+                s
+            else
+                loop(i + 1, insert(i, s))
+        };
+        loop(b, empty())
 
 
-    pub def insert(idx: Int32, x: BitSet): BitSet =
-        let BitSet(x1) = x;
-        BitSet(BigInt.setBit(x1, idx))
+    pub def insert(i: Int32, s: BitSet): BitSet =
+        let BitSet(s1) = s;
+        BitSet(BigInt.setBit(s1, i))
+
+    pub def remove(i: Int32, s: BitSet): BitSet =
+        let BitSet(s1) = s;
+        BitSet(BigInt.clearBit(s1, i))
 
 
     pub def isEmpty(s: BitSet): Bool =
+        let BitSet(s1) = s;
+        s1 == 0ii
+
+    pub def memberOf(i: Int32, s: BitSet): Bool = 
+        let BitSet(s1) = s;
+        (s1 &&& BigInt.setBit(0ii, i)) != 0ii
+
+
+    pub def isSubset(subset: {subset :: BitSet}, s: BitSet): Bool = 
+        let BitSet(s1) = s;
+        let BitSet(subset1) = subset.subset;
+        (s1 ||| subset1) == s1
+
+    pub def isProperSubset(subset: {subset :: BitSet}, s: BitSet): Bool = 
+        isSubset(subset, s) and subset.subset != s
+
+
+    def toJavaBitSet(s: BitSet): ##java.util.BitSet & Impure = 
+        import java.math.BigInteger.toByteArray(): Array[Int8] & Impure;
+        import static java.util.BitSet.valueOf(Array[Int8]): ##java.util.BitSet & Impure;
         let BitSet(x) = s;
-        x == 0ii
+        let arr = toByteArray(x);
+        let arr1 = Array.reverse(arr);
+        valueOf(arr1)
 
     def internalToString(s: BitSet): String & Impure = 
         let j1 = toJavaBitSet(s);
         Object.toString(j1)
 
-    pub def toJavaBitSet(s: BitSet): ##java.util.BitSet & Impure = 
-        import java.math.BigInteger.toByteArray(): Array[Int8] & Impure;
-        import static java.util.BitSet.valueOf(Array[Int8]): ##java.util.BitSet & Impure;
-        let BitSet(x) = s;
-        let arr = toByteArray(x);
-        valueOf(arr)
 
-/*
-    pub def size(s: MutBitSet): Int32 & Impure =
+    /// "Wrong" - this is not the number of bits set to true...
+    pub def size(s: BitSet): Int32 =
         import java.util.BitSet.size(): Int32 & Impure;
-        let MutBitSet(s1) = s;
-        size(s1)
+        (toJavaBitSet(s) |> size) as & Pure
 
-    pub def cardinality(s: MutBitSet): Int32 & Impure =
+    pub def cardinality(s: BitSet): Int32 =
         import java.util.BitSet.cardinality(): Int32 & Impure;
-        let MutBitSet(s1) = s;
-        cardinality(s1)
-
-    pub def clone(s: MutBitSet): MutBitSet & Impure =
-        import java.util.BitSet.clone(): ##java.util.BitSet & Impure;
-        let MutBitSet(s1) = s;
-        let s2 = clone(s1) as ##java.util.BitSet;
-        MutBitSet(s2)
-
-    pub def union(x: MutBitSet, y: MutBitSet): MutBitSet & Impure =
-        import java.util.BitSet.and(##java.util.BitSet): Unit & Impure as primAnd!;
-        let MutBitSet(x1) = clone(x);
-        let MutBitSet(y1) = y;
-        primAnd!(x1, y1);       /// Mutates x1
-        MutBitSet(x1)
-
-    /// Mutates x
-    pub def union!(x: MutBitSet, y: MutBitSet): Unit & Impure =
-        import java.util.BitSet.and(##java.util.BitSet): Unit & Impure as primAnd!;
-        let MutBitSet(x1) = x;
-        let MutBitSet(y1) = y;
-        primAnd!(x1, y1)
-
-    pub def intersection(x: MutBitSet, y: MutBitSet): MutBitSet & Impure =
-        import java.util.BitSet.or(##java.util.BitSet): Unit & Impure as primOr!;
-        let MutBitSet(x1) = clone(x);
-        let MutBitSet(y1) = y;
-        primOr!(x1, y1);       /// Mutates x1
-        MutBitSet(x1)
-
-    /// Mutates x
-    pub def intersection!(x: MutBitSet, y: MutBitSet): Unit & Impure =
-        import java.util.BitSet.or(##java.util.BitSet): Unit & Impure as primOr!;
-        let MutBitSet(x1) = x;
-        let MutBitSet(y1) = y;
-        primOr!(x1, y1)
-
-    /// Set all bits to `false` imperatively.
-    pub def clearAll!(s: MutBitSet): Unit & Impure =
-        import java.util.BitSet.clear(): Unit & Impure;
-        let MutBitSet(s1) = s;
-        clear(s1)
-
-    pub def get(idx: Int32, s: MutBitSet): Bool & Impure =
-        import java.util.BitSet.get(Int32): Bool & Impure;
-        let MutBitSet(s1) = s;
-        get(s1, idx)
-
-    pub def set!(idx: Int32, s: MutBitSet): Unit & Impure =
-        import java.util.BitSet.set(Int32): Unit & Impure;
-        let MutBitSet(s1) = s;
-        set(s1, idx)
+        (toJavaBitSet(s) |> cardinality) as & Pure
 
 
-    pub def clear!(idx: Int32, s: MutBitSet): Unit & Impure =
-        import java.util.BitSet.clear(Int32): Unit & Impure;
-        let MutBitSet(s1) = s;
-        clear(s1, idx)
 
-    pub def flip!(idx: Int32, s: MutBitSet): Unit & Impure =
-        import java.util.BitSet.flip(Int32): Unit & Impure;
-        let MutBitSet(s1) = s;
-        flip(s1, idx)
+    pub def union(x: BitSet, y: BitSet): BitSet =
+        let BitSet(x1) = x;
+        let BitSet(y1) = y;
+        BitSet(x1 ||| y1)
 
-    pub def nextSetBit(idx: Int32, s: MutBitSet): Option[Int32] & Impure =
-        import java.util.BitSet.nextSetBit(Int32): Int32 & Impure;
-        try {
-            let MutBitSet(s1) = s;
-            let i = nextSetBit(s1, idx);
-            if (i < 0)
-                None
-            else Some(i)
-        } catch {
-            case _: ##java.lang.Exception => None
-        }
+    pub def intersection(x: BitSet, y: BitSet): BitSet =
+        let BitSet(x1) = x;
+        let BitSet(y1) = y;
+        BitSet(x1 &&& y1)
 
-    pub def nextClearBit(idx: Int32, s: MutBitSet): Option[Int32] & Impure =
-        import java.util.BitSet.nextClearBit(Int32): Int32 & Impure;
-        try {
-            let MutBitSet(s1) = s;
-            let i = nextClearBit(s1, idx);
-            if (i < 0)
-                None
-            else Some(i)
-        } catch {
-            case _: ##java.lang.Exception => None
-        }
+    pub def twosComplement(x: BitSet): List[Int8] = 
+        import java.math.BigInteger.toByteArray(): Array[Int8] & Impure;
+        let BitSet(x1) = x;
+        (toByteArray(x1) |> Array.toList) as & Pure
 
-    pub def previousSetBit(idx: Int32, s: MutBitSet): Option[Int32] & Impure =
-        import java.util.BitSet.previousSetBit(Int32): Int32 & Impure;
-        try {
-            let MutBitSet(s1) = s;
-            let i = previousSetBit(s1, idx);
-            if (i < 0)
-                None
-            else Some(i)
-        } catch {
-            case _: ##java.lang.Exception => None
-        }
+    pub def toLongList(x: BitSet): List[Int64] = 
+        import java.util.BitSet.toLongArray(): Array[Int64] & Impure;
+        (toJavaBitSet(x) |> toLongArray |> Array.toList) as & Pure
 
-    pub def previousClearBit(idx: Int32, s: MutBitSet): Option[Int32] & Impure =
-        import java.util.BitSet.previousClearBit(Int32): Int32 & Impure;
-        try {
-            let MutBitSet(s1) = s;
-            let i = previousClearBit(s1, idx);
-            if (i < 0)
-                None
-            else Some(i)
-        } catch {
-            case _: ##java.lang.Exception => None
-        }
+    /// toList should use Stream...
 
-    pub def minimum(s: MutBitSet): Option[Int32] & Impure =
-        nextSetBit(0, s)
-*/
+    
 }
