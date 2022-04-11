@@ -15,7 +15,7 @@
  */
 
 
-namespace System {
+namespace FlixSandbox/System {
 
     ///
     /// Represents a FilePath.
@@ -32,7 +32,7 @@ namespace System {
 
     instance FromString[FilePath] {
         pub def fromString(x: String): Option[FilePath] =
-            Some(System/FilePath.new(x))
+            Some(FlixSandbox/System/FilePath.new(x))
     }
 
     instance Eq[FilePath] {
@@ -44,7 +44,7 @@ namespace System {
     }
 
     instance SemiGroup[FilePath] {
-        pub def combine(x: FilePath, y: FilePath): FilePath = System/FilePath.append(x, y)
+        pub def combine(x: FilePath, y: FilePath): FilePath = FlixSandbox/System/FilePath.append(x, y)
     }
 
     instance Order[FilePath] {
@@ -66,12 +66,12 @@ namespace System {
 
 }
 
-namespace System/FilePath {
+namespace FlixSandbox/System/FilePath {
 
     use ToString.toString;
 
-    use System.FilePath;
-    use System.FilePath.{FilePath};
+    use FlixSandbox/System.FilePath;
+    use FlixSandbox/System.FilePath.{FilePath};
 
     /// Note - current set of operations should be pure?
 

@@ -14,27 +14,27 @@
  * limitations under the License.
  */
 
-namespace System/TestProcess {
+namespace TestProcess {
 
 
 
     @test
     def process01(): Unit & Impure =
-        match System/Process.process({cmd = "java", args = "--version" :: Nil, charset = FlixSandbox/Text/Charset.utf_8()}) {
+        match FlixSandbox/System/Process.process({cmd = "java", args = "--version" :: Nil, charset = FlixSandbox/Text/Charset.utf_8()}) {
             case Err(msg) => println("Process Err: ${msg}")
             case Ok(ans)  => println("${ans.processResponse}")
         }
 
     @test
     def process02(): Unit & Impure =
-        match System/Process.process({cmd = "java", args = "--list-modules" :: Nil, charset = FlixSandbox/Text/Charset.utf_8()}) {
+        match FlixSandbox/System/Process.process({cmd = "java", args = "--list-modules" :: Nil, charset = FlixSandbox/Text/Charset.utf_8()}) {
             case Err(msg) => println("Process Err: ${msg}")
             case Ok(ans)  => println("${ans.processResponse}")
         }
 
     @test
     def process03(): Unit & Impure =
-        match System/Process.process({cmd = "java", args = "--BAD_ARGUMENT" :: Nil, charset = FlixSandbox/Text/Charset.utf_8()}) {
+        match FlixSandbox/System/Process.process({cmd = "java", args = "--BAD_ARGUMENT" :: Nil, charset = FlixSandbox/Text/Charset.utf_8()}) {
             case Err(msg) => println("Process Err: ${msg}")
             case Ok(ans)  => println("${ans.processResponse}")
         }

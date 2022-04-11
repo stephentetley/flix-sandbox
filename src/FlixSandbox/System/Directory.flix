@@ -15,29 +15,29 @@
  */
 
 
-namespace System/Directory {
+namespace FlixSandbox/System/Directory {
 
     use FlixSandbox/Deprecated.Cursor;
     use FlixSandbox/Deprecated.Cursor.{Cursor};
-    use System.FilePath;
-    use System.FilePath.{FilePath};
+    use FlixSandbox/System.FilePath;
+    use FlixSandbox/System.FilePath.{FilePath};
 
     pub def getCurrentDirectory(): Result[FilePath, String] & Impure =
         match (Environment.getCurrentWorkingDirectory() as & Impure) {
             case None    => Err("Error - getCurrentDirectory")
             case Some(s) =>
-                System/FilePath.new(s)
-                    |> System/FilePath.normalize
-                    |> System/FilePath.toAbsolutePath
+                FlixSandbox/System/FilePath.new(s)
+                    |> FlixSandbox/System/FilePath.normalize
+                    |> FlixSandbox/System/FilePath.toAbsolutePath
         }
 
     pub def getTempDirectory(): Result[FilePath, String] & Impure =
         match (Environment.getTemporaryDirectory() as & Impure) {
             case None    => Err("Error - getTempDirectory")
             case Some(s) =>
-                System/FilePath.new(s)
-                    |> System/FilePath.normalize
-                    |> System/FilePath.toAbsolutePath
+                FlixSandbox/System/FilePath.new(s)
+                    |> FlixSandbox/System/FilePath.normalize
+                    |> FlixSandbox/System/FilePath.toAbsolutePath
         }
 
 

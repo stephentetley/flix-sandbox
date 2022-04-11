@@ -16,7 +16,7 @@
 
 /// For reading binary files...
 
-namespace System/File {
+namespace FlixSandbox/System/File {
 
     ///
     /// Represents a FileInputStream.
@@ -25,14 +25,13 @@ namespace System/File {
 
 }
 
-namespace System/File/FileInputStream {
+namespace FlixSandbox/System/File/FileInputStream {
 
-    use System/File.FileInputStream;
-    use System/File.FileInputStream.{FileInputStream};
-    use System.FilePath.{FilePath};
-    use Text.Charset.{Charset};
+    use FlixSandbox/System/File.FileInputStream;
+    use FlixSandbox/System/File.FileInputStream.{FileInputStream};
+    use FlixSandbox/System.FilePath.{FilePath};
 
-    pub def new(path: System.FilePath): Result[FileInputStream, String] & Impure =
+    pub def new(path: FlixSandbox/System.FilePath): Result[FileInputStream, String] & Impure =
         import new java.io.FileInputStream(##java.io.File): ##java.io.FileInputStream & Impure as newFileInputStream;
         import java.nio.file.Path.toFile(): ##java.io.File & Impure;
         try {

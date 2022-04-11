@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-namespace System/TestDirectory {
+namespace TestDirectory {
 
 
 
     @test
     def contents201(): Unit & Impure =
-        match System/FilePath.tryNew("E:/coding/flix/flix-sandbox/_old") {
-            case Ok(path) => System/Directory.contents2(path) |> println
+        match FlixSandbox/System/FilePath.tryNew("E:/coding/flix/flix-sandbox/_old") {
+            case Ok(path) => FlixSandbox/System/Directory.contents2(path) |> println
             case Err(msg) => println("contents201 Err: ${msg}")
         }
 

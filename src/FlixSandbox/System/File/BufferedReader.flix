@@ -16,7 +16,7 @@
 
 /// For reading text files...
 
-namespace System/File {
+namespace FlixSandbox/System/File {
 
     ///
     /// Represents a FilePath.
@@ -25,17 +25,17 @@ namespace System/File {
 
 }
 
-namespace System/File/BufferedReader {
+namespace FlixSandbox/System/File/BufferedReader {
 
     use FlixSandbox/Deprecated.Cursor;
     use FlixSandbox/Deprecated.Cursor.{Cursor};
-    use System/File.BufferedReader;
-    use System/File.BufferedReader.{BufferedReader};
-    use System.FilePath;
-    use System.FilePath.{FilePath};
+    use FlixSandbox/System/File.BufferedReader;
+    use FlixSandbox/System/File.BufferedReader.{BufferedReader};
+    use FlixSandbox/System.FilePath;
+    use FlixSandbox/System.FilePath.{FilePath};
     use FlixSandbox/Text.Charset.{Charset};
 
-    pub def new(path: System.FilePath, cs: FlixSandbox/Text.Charset): Result[BufferedReader, String] & Impure =
+    pub def new(path: FlixSandbox/System.FilePath, cs: FlixSandbox/Text.Charset): Result[BufferedReader, String] & Impure =
         import static java.nio.file.Files.newBufferedReader(##java.nio.file.Path, ##java.nio.charset.Charset): ##java.io.BufferedReader & Impure;
         try {
             let FilePath(path1) = path;

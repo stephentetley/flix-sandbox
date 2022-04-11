@@ -15,12 +15,12 @@
  */
 
 
-namespace System/IO {
+namespace FlixSandbox/System/IO {
 
     use FlixSandbox/Deprecated.Cursor;
     use FlixSandbox/Deprecated.Cursor.{Cursor};
-    use System.FilePath;
-    use System.FilePath.{FilePath};
+    use FlixSandbox/System.FilePath;
+    use FlixSandbox/System.FilePath.{FilePath};
     use FlixSandbox/Text.Charset;
     use FlixSandbox/Text.Charset.{Charset};
 

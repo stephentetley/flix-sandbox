@@ -18,13 +18,12 @@
 /// so it should provide extra functionality for existing modules / types
 /// (which shouldn't depend it it).
 
-namespace System/File/BOM {
+namespace FlixSandbox/System/File/BOM {
 
-    use System.FilePath;
-    use System.FilePath.{FilePath};
-    use System/File.BufferedReader;
-    use System/File.BufferedReader.{BufferedReader};
-    use Text.Charset.{Charset};
+    use FlixSandbox/System.FilePath;
+    use FlixSandbox/System.FilePath.{FilePath};
+    use FlixSandbox/System/File.BufferedReader;
+    use FlixSandbox/System/File.BufferedReader.{BufferedReader};
 
 
     /// Reads the File with the Charset identified by the BOM
@@ -38,7 +37,7 @@ namespace System/File/BOM {
             case _: ##java.lang.Exception => Err("readFileWithBOM")
         }
 
-    pub def openBufferedReaderWithBOM(path: System.FilePath): Result[BufferedReader, String] & Impure =
+    pub def openBufferedReaderWithBOM(path: FilePath): Result[BufferedReader, String] & Impure =
         import static flixspt.sandbox.BOMWrapper.openBufferedReaderWithBOM(##java.nio.file.Path): ##java.io.BufferedReader & Impure;
         try {
             let FilePath(path1) = path;

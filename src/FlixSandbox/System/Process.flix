@@ -15,22 +15,22 @@
  */
 
 
-namespace System {
+namespace FlixSandbox/System {
     pub opaque type ProcessBuilder = ##java.lang.ProcessBuilder
 
     pub opaque type Process = ##java.lang.Process
 }
 
 
-namespace System/Process {
+namespace FlixSandbox/System/Process {
 
     use FlixSandbox/Text.Charset.{Charset};
 
-    use System.Process;
-    use System.Process.{Process};
-    use System.FilePath.{FilePath};
-    use System.ProcessBuilder;
-    use System.ProcessBuilder.{ProcessBuilder};
+    use FlixSandbox/System.Process;
+    use FlixSandbox/System.Process.{Process};
+    use FlixSandbox/System.FilePath.{FilePath};
+    use FlixSandbox/System.ProcessBuilder;
+    use FlixSandbox/System.ProcessBuilder.{ProcessBuilder};
 
 
     pub def newProcessBuilder(cmd: String, args: List[String]): ProcessBuilder & Impure =
@@ -39,7 +39,7 @@ namespace System/Process {
         ProcessBuilder(new1(strs))
 
 
-    pub def directory!(x: ProcessBuilder, path: System.FilePath): Unit & Impure =
+    pub def directory!(x: ProcessBuilder, path: FlixSandbox/System.FilePath): Unit & Impure =
         import java.lang.ProcessBuilder.directory(##java.io.File): ##java.lang.ProcessBuilder & Impure;
         import new java.io.File(String): ##java.io.File & Impure as newFile;
         let ProcessBuilder(x1) = x;
@@ -48,7 +48,7 @@ namespace System/Process {
         directory(x1, f1);
         ()
 
-    pub def getDirectory(x: ProcessBuilder): System.FilePath & Impure =
+    pub def getDirectory(x: ProcessBuilder): FlixSandbox/System.FilePath & Impure =
         import java.lang.ProcessBuilder.directory(): ##java.io.File & Impure;
         import java.io.File.toPath(): ##java.nio.file.Path & Impure;
         let ProcessBuilder(x1) = x;
