@@ -35,7 +35,7 @@ namespace System/Process {
 
     pub def newProcessBuilder(cmd: String, args: List[String]): ProcessBuilder & Impure =
         import new java.lang.ProcessBuilder(##java.util.List): ##java.lang.ProcessBuilder & Impure as new1;
-        let strs = X/Marshal.marshalList(x1 -> x1 as ##java.lang.Object, cmd :: args);
+        let strs = FlixSandbox/Marshal.marshalList(x1 -> x1 as ##java.lang.Object, cmd :: args);
         ProcessBuilder(new1(strs))
 
 

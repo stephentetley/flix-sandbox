@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-// TODO - reconcile with the version in `charset-locale`
+// NOTE - keep reconciled with the version in `charset-locale`
 
-namespace X/Marshal {
+namespace FlixSandbox/Marshal {
 
     pub def marshalInt8(i: Int8): ##java.lang.Byte = 
         import static java.lang.Byte.valueOf(Int8): ##java.lang.Byte & Pure;

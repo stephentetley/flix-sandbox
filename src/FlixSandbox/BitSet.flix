@@ -15,12 +15,12 @@
  */
 
 
-namespace Data/BitSet {
+namespace FlixSandbox/BitSet {
 
     // https://stackoverflow.com/questions/29526985/java-from-biginteger-to-bitset-and-back
 
 
-    // Only use nonnegative ints!
+    // Only use non-negative ints!
 
     pub opaque type BitSet with Eq = BigInt
 
@@ -159,7 +159,11 @@ namespace Data/BitSet {
 
     pub def toIterator(s: BitSet): Iterator[Int32] & Impure = 
         let istrm = toJavaIntStream(s);
-        X/Marshal.unmarshalIntStream(istrm)
+        FlixSandbox/Marshal.unmarshalIntStream(istrm)
+
+    pub def toSet(s: BitSet): Set[Int32] = 
+        foldLeft((ac, i) -> Set.insert(i, ac), Set.empty(), s)
+
 
     pub def filter(f: Int32 -> Bool & ef, s: BitSet): BitSet & ef = 
         foldLeft((ac, i) -> if (f(i)) insert(i, ac) else ac, empty(), s)        

@@ -75,7 +75,7 @@ namespace System/Directory {
             let FilePath(path1) = path;
             let strm = list(path1);
             let downcast = x1 -> FilePath(x1 as ##java.nio.file.Path);
-            let iter = X/Marshal.unmarshalStream(downcast, strm);
+            let iter = FlixSandbox/Marshal.unmarshalStream(downcast, strm);
             Ok(iter)
         } catch {
             case _: ##java.lang.Exception => Err("contentsIter2")
