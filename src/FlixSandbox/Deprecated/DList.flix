@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-namespace Data {
+namespace FlixSandbox/Deprecated {
 
     ///
     /// A DList
@@ -23,10 +23,10 @@ namespace Data {
 
 }
 
-namespace Data/DList {
+namespace FlixSandbox/Deprecated/DList {
 
-    use Data.DList;
-    use Data.DList.{DList};
+    use FlixSandbox/Deprecated.DList;
+    use FlixSandbox/Deprecated.DList.{DList};
 
     ///
     /// Helper

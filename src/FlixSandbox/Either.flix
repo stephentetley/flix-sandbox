@@ -14,59 +14,72 @@
  * limitations under the License.
  */
 
-// Note - not in the Data namespace.
+namespace FlixSandbox {
 
-enum Either[a, b] {
-    case Left(a),
-    case Right(b)
-}
+    enum Either[a, b] {
+        case Left(a),
+        case Right(b)
+    }
 
-instance Functor[Either[e]] {
-    pub def map(f: a -> b & ef, x: Either[e, a]): Either[e, b] & ef = Either.mapRight(f, x)
-}
+    instance Functor[Either[e]] {
+        pub def map(f: a -> b & ef, x: Either[e, a]): Either[e, b] & ef = FlixSandbox/Either.mapRight(f, x)
+    }
 
-instance Applicative[Either[e]] {
-    pub def point(x: a): Either[e, a] = Right(x)
+    instance Applicative[Either[e]] {
+        pub def point(x: a): Either[e, a] = Right(x)
 
-    pub def ap(mf: Either[e, a -> b & ef], mx: Either[e, a]): Either[e, b] & ef = match mf {
-        case Right(f) => match mx {
-            case Right(x) => Right(f(x))
-            case Left(a1) => Left(a1)
+        pub def ap(mf: Either[e, a -> b & ef], mx: Either[e, a]): Either[e, b] & ef = match mf {
+            case Right(f) => match mx {
+                case Right(x) => Right(f(x))
+                case Left(a1) => Left(a1)
+            }
+            case Left(a) => Left(a)
         }
-        case Left(a) => Left(a)
+    }
+
+    instance Monad[Either[e]] {
+        pub def flatMap(k: a -> Either[e, b] & ef, ma: Either[e, a]): Either[e, b] & ef = match ma {
+            case Right(a) => k(a)
+            case Left(e) => Left(e) as & ef
+        }
+    }
+
+    instance Foldable[Either[e]] {
+        pub def foldLeft(f: (b, a) -> b & ef, s: b, t: Either[e, a]): b & ef = 
+            match t {
+                case Left(_) => s
+                case Right(a) => f(s, a)
+            }
+
+        pub def foldRight(f: (a, b) -> b & ef, s: b, t: Either[e, a]): b & ef = 
+            use Applicative.{point};
+            match t {
+                case Left(_) => s
+                case Right(a) => f(a, s)
+            }
+    }
+
+    instance Traversable[Either[e]] {
+        pub def traverse(f: a -> m[b] & ef, t: Either[e, a]): m[Either[e, b]] & ef with Applicative[m] =
+            use Applicative.{point};
+            match t {
+                case Left(e) => point(Left(e))
+                case Right(a) => Functor.map(Right, f(a))
+            }
+
+        pub override def sequence(t: Either[e, m[a]]): m[Either[e, a]] with Applicative[m] =
+            use Applicative.{point};
+            match t {
+                case Left(e) => point(Left(e))
+                case Right(ma) => Functor.map(Right, ma)
+            }
     }
 }
 
-instance Monad[Either[e]] {
-    pub def flatMap(k: a -> Either[e, b] & ef, ma: Either[e, a]): Either[e, b] & ef = match ma {
-        case Right(a) => k(a)
-        case Left(e) => Left(e) as & ef
-    }
-}
+namespace FlixSandbox/Either {
 
-/*
-
-/// Waiting for PR #2893...
-
-instance Traversable[Either[e]] {
-    pub def traverse(f: a -> m[b] & ef, t: Either[e, a]): m[Either[e, b]] & ef with Applicative[m] =
-        use Applicative.{point};
-        match t {
-            case Left(e) => point(Left(e))
-            case Right(a) => Functor.map(Right, f(a))
-        }
-
-    pub override def sequence(t: Either[e, m[a]]): m[Either[e, a]] with Applicative[m] =
-        use Applicative.{point};
-        match t {
-            case Left(e) => point(Left(e))
-            case Right(ma) => Functor.map(Right, ma)
-        }
-}
-*/
-
-namespace Either {
-
+    use FlixSandbox.Either;
+    use FlixSandbox.Either.{Left, Right};
 
     ///
     /// Returns `true` iff `x` is `Left(_)`.

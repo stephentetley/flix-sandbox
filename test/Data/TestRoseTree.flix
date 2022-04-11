@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-use Data.RoseTree;
-use Data.RoseTree.{Node};
+
 
 namespace TestRoseTree {
 
+use FlixSandbox.RoseTree;
+use FlixSandbox.RoseTree.{Node};
 
 /////////////////////////////////////////////////////////////////////////////
 // drawTree                                                                //
@@ -26,7 +27,7 @@ namespace TestRoseTree {
 
 @test
 def drawTree01(): String =
-    use Data/RoseTree.{drawTree};
+    use FlixSandbox/RoseTree.{drawTree};
     let t1 = Node("a", Nil);
     drawTree(t1)
 
@@ -36,25 +37,25 @@ def drawTree01(): String =
 
 @test
 def flatten01(): Bool =
-    use Data/RoseTree.{flatten};
+    use FlixSandbox/RoseTree.{flatten};
     let t1 = Node("a1", Nil);
     flatten(t1) == "a1" :: Nil
 
 @test
 def flatten02(): Bool =
-    use Data/RoseTree.{flatten};
+    use FlixSandbox/RoseTree.{flatten};
     let t1 = Node("a1", Node("b2", Nil) :: Nil);
     flatten(t1) == "a1" :: "b2" :: Nil
 
 @test
 def flatten03(): Bool =
-    use Data/RoseTree.{flatten};
+    use FlixSandbox/RoseTree.{flatten};
     let t1 = Node("a1", Node("b2", Nil) :: Node("c2", Nil) :: Nil);
     flatten(t1) == "a1" :: "b2" :: "c2" :: Nil
 
 @test
 def flatten04(): Bool =
-    use Data/RoseTree.{flatten};
+    use FlixSandbox/RoseTree.{flatten};
     let t1 = Node("a1", Node("b2", Node("c3", Nil) :: Nil) :: Node("d2", Nil) :: Nil);
     flatten(t1) == "a1" :: "b2" :: "c3" :: "d2" :: Nil
 
@@ -64,7 +65,7 @@ def flatten04(): Bool =
 
 @test
 def preorder01(): Bool =
-    use Data/RoseTree.{preorder};
+    use FlixSandbox/RoseTree.{preorder};
     let t1 = Node(1, Node(2, Node(4, Nil) :: Node(5, Nil) :: Nil) :: Node(3, Nil) :: Nil);
     preorder(t1) == 1 :: 2 :: 4 :: 5 :: 3 :: Nil
 
@@ -74,7 +75,7 @@ def preorder01(): Bool =
 
 @test
 def postorder01(): Bool =
-    use Data/RoseTree.{postorder};
+    use FlixSandbox/RoseTree.{postorder};
     let t1 = Node(1, Node(2, Node(4, Nil) :: Node(5, Nil) :: Nil) :: Node(3, Nil) :: Nil);
     postorder(t1) == 4 :: 5 :: 2 :: 3 :: 1 :: Nil
 
@@ -86,25 +87,25 @@ def sum(xs: List[Int32]): Int32 = List.foldRight((x,y) -> x + y, 0, xs)
 
 @test
 def foldRoseTree01(): Bool =
-    use Data/RoseTree.{foldRoseTree};
+    use FlixSandbox/RoseTree.{foldRoseTree};
     let t1 = Node(1, Nil);
     foldRoseTree((x,xs) -> x + sum(xs), t1) == 1
 
 @test
 def foldRoseTree02(): Bool =
-    use Data/RoseTree.{foldRoseTree};
+    use FlixSandbox/RoseTree.{foldRoseTree};
     let t1 = Node(1, Node(2, Nil) :: Nil);
     foldRoseTree((x,xs) -> x + sum(xs), t1) == 3
 
 @test
 def foldRoseTree03(): Bool =
-    use Data/RoseTree.{foldRoseTree};
+    use FlixSandbox/RoseTree.{foldRoseTree};
     let t1 = Node(1, Node(2, Nil) :: Node(3, Nil) :: Nil);
     foldRoseTree((x,xs) -> x + sum(xs), t1) == 6
 
 @test
 def foldRoseTree04(): Bool =
-    use Data/RoseTree.{foldRoseTree};
+    use FlixSandbox/RoseTree.{foldRoseTree};
     let t1 = Node(1, Node(2, Node(3, Nil) :: Nil) :: Node(4, Nil) :: Nil);
     foldRoseTree((x,xs) -> x + sum(xs), t1) == 10
 
@@ -114,26 +115,26 @@ def foldRoseTree04(): Bool =
 
 @test
 def map01(): Bool =
-    use Data/RoseTree.{map, foldRoseTree};
+    use FlixSandbox/RoseTree.{map, foldRoseTree};
     let t1 = Node(1, Nil) |> map(x -> x + 1);
     foldRoseTree((x,xs) -> x + sum(xs), t1) == 2
 
 @test
 def map02(): Bool =
-    use Data/RoseTree.{map, foldRoseTree};
+    use FlixSandbox/RoseTree.{map, foldRoseTree};
     let t1 = Node(1, Node(2, Nil) :: Nil) |> map(x -> x + 1);
     foldRoseTree((x,xs) -> x + sum(xs), t1) == 5
 
 
 @test
 def map03(): Bool =
-    use Data/RoseTree.{map, foldRoseTree};
+    use FlixSandbox/RoseTree.{map, foldRoseTree};
     let t1 = Node(1, Node(2, Nil) :: Node(3, Nil) :: Nil) |> map(x -> x + 1);
     foldRoseTree((x,xs) -> x + sum(xs), t1) == 9
 
 @test
 def map04(): Bool =
-    use Data/RoseTree.{map, foldRoseTree};
+    use FlixSandbox/RoseTree.{map, foldRoseTree};
     let t1 = Node(1, Node(2, Node(3, Nil) :: Nil) :: Node(4, Nil) :: Nil) |> map(x -> x + 1);
     foldRoseTree((x,xs) -> x + sum(xs), t1) == 14
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-namespace Data {
+namespace FlixSandbox/Doodle {
 
     ///
     /// "Beautiful Folds" style folding
@@ -25,10 +25,10 @@ namespace Data {
 
 }
 
-namespace Data/FoldL {
+namespace FlixSandbox/Doodle/FoldL {
     
-    use Data.FoldL;
-    use Data.FoldL.{FoldL};
+    use FlixSandbox/Doodle.FoldL;
+    use FlixSandbox/Doodle.FoldL.{FoldL};
 
 
     pub def foldLeft(alg: FoldL[xa, a, b], t: f[a]): b with Foldable[f] = 

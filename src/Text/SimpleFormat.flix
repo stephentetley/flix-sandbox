@@ -20,7 +20,7 @@ namespace Text/SimpleFormat {
     ///
     /// Represents a FilePath.
     ///
-    pub opaque type Doc = Data.FunStringBuilder
+    pub opaque type Doc = FlixSandbox/Deprecated.FunStringBuilder
 
 
     ///
@@ -28,34 +28,34 @@ namespace Text/SimpleFormat {
     ///
     pub def toString(d: Doc): String =
         let Doc(sb) = d;
-        Data/FunStringBuilder.toString(sb)
+        FlixSandbox/Deprecated/FunStringBuilder.toString(sb)
     
     pub def empty(): Doc =         
-        Doc(Data/FunStringBuilder.new())
+        Doc(FlixSandbox/Deprecated/FunStringBuilder.new())
 
 
     pub def text(s: String): Doc = 
-        use Data/FunStringBuilder.appendString;
-        let sb = Data/FunStringBuilder.new();
+        use FlixSandbox/Deprecated/FunStringBuilder.appendString;
+        let sb = FlixSandbox/Deprecated/FunStringBuilder.new();
         Doc(appendString(s, sb))
 
     pub def char(c: Char): Doc = 
-        use Data/FunStringBuilder.appendChar;
-        let sb = Data/FunStringBuilder.new();
+        use FlixSandbox/Deprecated/FunStringBuilder.appendChar;
+        let sb = FlixSandbox/Deprecated/FunStringBuilder.new();
         Doc(appendChar(c, sb))
 
     ///
     /// Concatenate two documents horizontally (no separating space).
     ///
     pub def beside(d1: Doc, d2: Doc): Doc = 
-        use Data/FunStringBuilder.append;
+        use FlixSandbox/Deprecated/FunStringBuilder.append;
         let Doc(sb1) = d1;
         let Doc(sb2) = d2;
         Doc(append(sb1, sb2))
 
     pub def line(): Doc = 
-        use Data/FunStringBuilder.appendLineSeparator;
-        let sb = Data/FunStringBuilder.new();
+        use FlixSandbox/Deprecated/FunStringBuilder.appendLineSeparator;
+        let sb = FlixSandbox/Deprecated/FunStringBuilder.new();
         Doc(appendLineSeparator(sb))
 
     ///

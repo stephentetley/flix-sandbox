@@ -15,7 +15,7 @@
  */
 
 
-namespace Data {
+namespace FlixSandbox/Deprecated {
 
     // TODO use stdlib Chain
 
@@ -30,10 +30,10 @@ namespace Data {
     }
 }
 
-namespace Data/FunStringBuilder {
+namespace FlixSandbox/Deprecated/FunStringBuilder {
 
-    use Data.FunStringBuilder;
-    use Data.FunStringBuilder.{Empty, Text, Char, Join};
+    use FlixSandbox/Deprecated.FunStringBuilder;
+    use FlixSandbox/Deprecated.FunStringBuilder.{Empty, Text, Char, Join};
 
     ///
     /// Returns an empty FunStringBuilder.

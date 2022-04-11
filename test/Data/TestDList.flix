@@ -16,7 +16,7 @@
 
 namespace TestDList {
 
-use Data.DList;
+use FlixSandbox/Deprecated.DList;
 
 /////////////////////////////////////////////////////////////////////////////
 // empty                                                                   //
@@ -24,7 +24,7 @@ use Data.DList;
 
 @test
 def empty01(): Bool =
-    use Data/DList.{toList, empty};
+    use FlixSandbox/Deprecated/DList.{toList, empty};
     let xs = empty(): DList[Int32];
     toList(xs) == Nil
 
@@ -34,13 +34,13 @@ def empty01(): Bool =
 
 @test
 def singleton01(): Bool =
-    use Data/DList.{toList, singleton};
+    use FlixSandbox/Deprecated/DList.{toList, singleton};
     let xs = singleton(1);
     toList(xs) == 1 :: Nil
 
 @test
 def singleton02(): Bool =
-    use Data/DList.{toList, singleton};
+    use FlixSandbox/Deprecated/DList.{toList, singleton};
     let xs: DList[Option[Int32]] = singleton(None);
     toList(xs) == None :: Nil
 
@@ -50,25 +50,25 @@ def singleton02(): Bool =
 
 @test
 def concat01(): Bool =
-    use Data/DList.{toList, concat};
+    use FlixSandbox/Deprecated/DList.{toList, concat};
     let xs = concat(Nil): DList[Int32];
     toList(xs) == Nil
 
 @test
 def concat02(): Bool =
-    use Data/DList.{toList, concat, singleton};
+    use FlixSandbox/Deprecated/DList.{toList, concat, singleton};
     let xs = concat(singleton(1) :: Nil);
     toList(xs) == 1 :: Nil
 
 @test
 def concat03(): Bool =
-    use Data/DList.{toList, concat, singleton};
+    use FlixSandbox/Deprecated/DList.{toList, concat, singleton};
     let xs = concat(singleton(1) :: singleton(2) :: Nil);
     toList(xs) == 1 :: 2 :: Nil
 
 @test
 def concat04(): Bool =
-    use Data/DList.{toList, concat, singleton, fromList};
+    use FlixSandbox/Deprecated/DList.{toList, concat, singleton, fromList};
     let xs = concat(fromList(1 :: 2 :: Nil) :: singleton(3) :: Nil);
     toList(xs) == 1 :: 2 :: 3 :: Nil
 

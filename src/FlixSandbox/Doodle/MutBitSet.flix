@@ -15,7 +15,7 @@
  */
 
 
-namespace Data {
+namespace FlixSandbox/Doodle {
 
     pub opaque type MutBitSet = ##java.util.BitSet
 
@@ -36,10 +36,10 @@ namespace Data {
 
 }
 
-namespace Data/MutBitSet {
+namespace FlixSandbox/Doodle/MutBitSet {
 
-    use Data.MutBitSet;
-    use Data.MutBitSet.{MutBitSet};
+    use FlixSandbox/Doodle.MutBitSet;
+    use FlixSandbox/Doodle.MutBitSet.{MutBitSet};
 
     pub def empty(): MutBitSet & Impure =
         import new java.util.BitSet(): ##java.util.BitSet & Impure as newBitSet;
