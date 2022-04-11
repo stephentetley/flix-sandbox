@@ -27,15 +27,15 @@ namespace System/File {
 
 namespace System/File/BufferedReader {
 
-    use X.Cursor;
-    use X.Cursor.{Cursor};
+    use FlixSandbox/Deprecated.Cursor;
+    use FlixSandbox/Deprecated.Cursor.{Cursor};
     use System/File.BufferedReader;
     use System/File.BufferedReader.{BufferedReader};
     use System.FilePath;
     use System.FilePath.{FilePath};
-    use Text.Charset.{Charset};
+    use FlixSandbox/Text.Charset.{Charset};
 
-    pub def new(path: System.FilePath, cs: Text.Charset): Result[BufferedReader, String] & Impure =
+    pub def new(path: System.FilePath, cs: FlixSandbox/Text.Charset): Result[BufferedReader, String] & Impure =
         import static java.nio.file.Files.newBufferedReader(##java.nio.file.Path, ##java.nio.charset.Charset): ##java.io.BufferedReader & Impure;
         try {
             let FilePath(path1) = path;
@@ -106,12 +106,12 @@ namespace System/File/BufferedReader {
                 case _: ##java.lang.Exception => Err("lines[next]")
             }
         };
-        let cursorAlg: X.CursorAlg[String, String] =  {
+        let cursorAlg: FlixSandbox/Deprecated.CursorAlg[String, String] =  {
               hasNext = () -> hasNext(primIter)
             , next = iterNext
             , finalize = () -> () as & Impure
         };
-        X/Cursor.makeCursor(cursorAlg)
+        FlixSandbox/Deprecated/Cursor.makeCursor(cursorAlg)
 
 
 }

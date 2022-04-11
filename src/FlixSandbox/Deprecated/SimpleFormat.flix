@@ -15,7 +15,7 @@
  */
 
 
-namespace Text/SimpleFormat {
+namespace FlixSandbox/Deprecated/SimpleFormat {
 
     ///
     /// Represents a FilePath.

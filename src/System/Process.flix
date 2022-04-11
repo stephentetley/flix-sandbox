@@ -24,7 +24,7 @@ namespace System {
 
 namespace System/Process {
 
-    use Text.Charset.{Charset};
+    use FlixSandbox/Text.Charset.{Charset};
 
     use System.Process;
     use System.Process.{Process};
@@ -78,7 +78,7 @@ namespace System/Process {
         }
 
 
-    pub def getInput(x: Process, c: Text.Charset): Result[String, String] & Impure =
+    pub def getInput(x: Process, c: FlixSandbox/Text.Charset): Result[String, String] & Impure =
         import java.lang.Process.getInputStream(): ##java.io.InputStream & Impure;
         import java.io.InputStream.readAllBytes(): Array[Int8] & Impure;
         import new java.lang.String(Array[Int8], ##java.nio.charset.Charset): String & Impure as new1;
@@ -95,7 +95,7 @@ namespace System/Process {
 
 
 
-    pub def getError(x: Process, c: Text.Charset): Result[String, String] & Impure =        
+    pub def getError(x: Process, c: FlixSandbox/Text.Charset): Result[String, String] & Impure =        
         import java.lang.Process.getErrorStream(): ##java.io.InputStream & Impure;
         import java.io.InputStream.readAllBytes(): Array[Int8] & Impure;
         import new java.lang.String(Array[Int8], ##java.nio.charset.Charset): String & Impure as new1;
@@ -115,7 +115,7 @@ namespace System/Process {
     pub type alias ProcessArgs =
         { cmd :: String
         , args :: List[String]
-        , charset :: Text.Charset
+        , charset :: FlixSandbox/Text.Charset
         }
 
     /// Return with an Exit Code

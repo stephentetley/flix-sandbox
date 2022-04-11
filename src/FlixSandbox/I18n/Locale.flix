@@ -16,12 +16,12 @@
 
 
 
-namespace I18n {
+namespace FlixSandbox/I18n {
 
     pub opaque type Locale = ##java.util.Locale
 
     instance ToString[Locale] {
-        pub def toString(x: Locale): String = I18n/Locale.toString(x)
+        pub def toString(x: Locale): String = FlixSandbox/I18n/Locale.toString(x)
     }
 
     instance FromString[Locale] {
@@ -35,23 +35,22 @@ namespace I18n {
     }
 
     instance Eq[Locale] {
-        pub def eq(x: Locale, y: Locale): Bool = I18n/Locale.equals(x, y)
+        pub def eq(x: Locale, y: Locale): Bool = FlixSandbox/I18n/Locale.equals(x, y)
     }
 
     instance Hash[Locale] {
-        pub def hash(x: Locale): Int32 = I18n/Locale.hashCode(x)
+        pub def hash(x: Locale): Int32 = FlixSandbox/I18n/Locale.hashCode(x)
     }
 
     /// No Order, so no Boxable
 
 }
 
-namespace I18n/Locale {
+namespace FlixSandbox/I18n/Locale {
 
-    use X.Cursor;
-    use X.Cursor.{Cursor};
-    use I18n.Locale;
-    use I18n.Locale.{Locale};
+
+    use FlixSandbox/I18n.Locale;
+    use FlixSandbox/I18n.Locale.{Locale};
 
     /// `new` functions should not return Result as there isn't a tangible notion of failure.
     /// Unrecognized locales can be built - operations on them just don't produce results.

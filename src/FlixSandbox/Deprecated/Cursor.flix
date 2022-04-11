@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-/// UNDEPRECATED - use this until Flix has a canonical iterator.
+/// DEPRECATED AGAIN - change code to use Iterator in the stdlib.
 
-namespace X {
+namespace FlixSandbox/Deprecated {
 
-    pub opaque type Cursor[e, a] = X/Cursor.CursorImpl[e, a]
+    pub opaque type Cursor[e, a] = FlixSandbox/Deprecated/Cursor.CursorImpl[e, a]
 
     pub type alias CursorAlg[e, a] = { hasNext :: Unit -> Bool & Impure, next :: Unit -> Result[a, e] & Impure, finalize :: Unit -> Unit & Impure }
 }
 
-namespace X/Cursor {
+namespace FlixSandbox/Deprecated/Cursor {
 
-    use X.Cursor;
-    use X.CursorAlg;
-    use X.Cursor.{Cursor};
+    use FlixSandbox/Deprecated.Cursor;
+    use FlixSandbox/Deprecated.CursorAlg;
+    use FlixSandbox/Deprecated.Cursor.{Cursor};
 
     pub type alias CursorImpl[e, a] = { hasNext :: Unit -> Bool & Impure, next :: Unit -> Step[e, a] & Impure, finalize :: Unit -> Unit & Impure}
 

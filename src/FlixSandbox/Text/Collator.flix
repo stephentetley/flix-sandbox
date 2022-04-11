@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-namespace Text {
+namespace FlixSandbox/Text {
     ///
     /// Represents a Collator.
     ///
     pub opaque type Collator = ##java.text.Collator
 }
 
-namespace Text/Collator {
+namespace FlixSandbox/Text/Collator {
 
-    use Text.Collator;
-    use Text.Collator.{Collator};
+    use FlixSandbox/Text.Collator;
+    use FlixSandbox/Text.Collator.{Collator};
 
     pub enum DecompositionMode with Eq, Order, ToString {
         case NoDecomposition
@@ -92,9 +92,9 @@ namespace Text/Collator {
         Collator(getInstance())
 
     /// TODO: Move to Locale?
-    pub def getInstanceWithLocale(locale: I18n.Locale): Collator =
+    pub def getInstanceWithLocale(locale: FlixSandbox/I18n.Locale): Collator =
         import static java.text.Collator.getInstance(##java.util.Locale): ##java.text.Collator & Pure;
-        use I18n.Locale.{Locale};
+        use FlixSandbox/I18n.Locale.{Locale};
         let Locale(locale1) = locale;
         Collator(getInstance(locale1))
 

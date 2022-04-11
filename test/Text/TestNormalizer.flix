@@ -23,8 +23,8 @@ namespace TestNormalizer {
 
 @test
 def normalize01(): Bool =
-    use Text.NormalizerForm.{Nfd};
-    use Text/Normalizer.{normalize};
+    use FlixSandbox/Text/Normalizer.NormalizerForm.{Nfd};
+    use FlixSandbox/Text/Normalizer.{normalize};
     use String.{replaceMatches};
     let s1 = normalize(Nfd, "César");
     // Remove combining marks...

@@ -17,12 +17,12 @@
 
 namespace System/IO {
 
-    use X.Cursor;
-    use X.Cursor.{Cursor};
+    use FlixSandbox/Deprecated.Cursor;
+    use FlixSandbox/Deprecated.Cursor.{Cursor};
     use System.FilePath;
     use System.FilePath.{FilePath};
-    use Text.Charset;
-    use Text.Charset.{Charset};
+    use FlixSandbox/Text.Charset;
+    use FlixSandbox/Text.Charset.{Charset};
 
     /// See: https://github.com/flix/flix/issues/2040
 
@@ -103,7 +103,7 @@ namespace System/IO {
 
     /// #
 
-    pub def readFile(cs: Text.Charset, path: FilePath): Result[String, String] & Impure =
+    pub def readFile(cs: FlixSandbox/Text.Charset, path: FilePath): Result[String, String] & Impure =
         import static java.nio.file.Files.readString(##java.nio.file.Path, ##java.nio.charset.Charset): String & Impure;
         try {
             let FilePath(path1) = path;
@@ -116,9 +116,9 @@ namespace System/IO {
 
     /// Write as UTF_8...
     pub def writeFile(path: FilePath, content: String): Result[Unit, String] & Impure =
-        writeFileWith({path = path, charset = Text/Charset.utf_8(), mode = Create}, content)
+        writeFileWith({path = path, charset = FlixSandbox/Text/Charset.utf_8(), mode = Create}, content)
 
-    pub def writeFileWith(opts: {path :: FilePath, charset :: Text.Charset, mode:: WriteMode},
+    pub def writeFileWith(opts: {path :: FilePath, charset :: FlixSandbox/Text.Charset, mode:: WriteMode},
                             content: String): Result[Unit, String] & Impure =
         import static flixspt.sandbox.IOWrapper.writeString(##java.nio.file.Path, ##java.nio.charset.Charset, ##java.nio.file.StandardOpenOption, String): Unit & Impure;
         try {
@@ -193,34 +193,34 @@ namespace System/IO {
                 case _: ##java.lang.Exception => Err("readChunks[next]")
             }
         };
-        let cursorAlg: X.CursorAlg[String, Array[Int8]] =  {
+        let cursorAlg: FlixSandbox/Deprecated.CursorAlg[String, Array[Int8]] =  {
               hasNext = () -> hasNext(primIter)
             , next = iterNext
             , finalize = () -> () as & Impure
         };
-        X/Cursor.makeCursor(cursorAlg)
+        FlixSandbox/Deprecated/Cursor.makeCursor(cursorAlg)
 
-    pub def readLines(opts: {charset :: Text.Charset}, path: FilePath): Result[List[String], String] & Impure =
-        readLinesIterWith(opts, path) |> X/Cursor.toList!
+    pub def readLines(opts: {charset :: FlixSandbox/Text.Charset}, path: FilePath): Result[List[String], String] & Impure =
+        readLinesIterWith(opts, path) |> FlixSandbox/Deprecated/Cursor.toList!
 
 
-    pub def readLinesIterWith(opts: {charset :: Text.Charset}, path: FilePath): Cursor[String, String] & Impure =
+    pub def readLinesIterWith(opts: {charset :: FlixSandbox/Text.Charset}, path: FilePath): Cursor[String, String] & Impure =
         import static flixspt.sandbox.LineIterator.newFileslinesIterator(##java.nio.file.Path, ##java.nio.charset.Charset): ##flixspt.sandbox.LineIterator & Impure;
         import flixspt.sandbox.LineIterator.hasNext(): Bool & Impure;
         import flixspt.sandbox.LineIterator.next(): String & Impure;
         let FilePath(path1) = path;
         let Charset(charset1) = opts.charset;
         let primIter = newFileslinesIterator(path1, charset1);
-        let cursorAlg: X.CursorAlg[String, String] =  {
+        let cursorAlg: FlixSandbox/Deprecated.CursorAlg[String, String] =  {
               hasNext = () -> hasNext(primIter)
-            , next = X/Cursor.guardThunk(_ -> next(primIter), "next failed")
+            , next = FlixSandbox/Deprecated/Cursor.guardThunk(_ -> next(primIter), "next failed")
             , finalize = () -> () as & Impure
         };
-        X/Cursor.makeCursor(cursorAlg)
+        FlixSandbox/Deprecated/Cursor.makeCursor(cursorAlg)
 
     pub def contents(path: FilePath): Result[List[FilePath], String] & Impure =
         contentsIter(path)
-            |> X/Cursor.toList!
+            |> FlixSandbox/Deprecated/Cursor.toList!
 
 
     pub def contentsIter(path: FilePath): Cursor[String, FilePath] & Impure =
@@ -229,16 +229,16 @@ namespace System/IO {
         import flixspt.sandbox.PathIterator.next(): ##java.nio.file.Path & Impure;
         let FilePath(path1) = path;
         let primIter = newFileslistIterator(path1);
-        let cursorAlg: X.CursorAlg[String, FilePath] =  {
+        let cursorAlg: FlixSandbox/Deprecated.CursorAlg[String, FilePath] =  {
               hasNext = () -> hasNext(primIter)
-            , next = X/Cursor.guardThunk(_ -> FilePath(next(primIter)), "next failed")
+            , next = FlixSandbox/Deprecated/Cursor.guardThunk(_ -> FilePath(next(primIter)), "next failed")
             , finalize = () -> () as & Impure
         };
-        X/Cursor.makeCursor(cursorAlg)
+        FlixSandbox/Deprecated/Cursor.makeCursor(cursorAlg)
 
     pub def matches(glob: String, path: FilePath): Result[List[FilePath], String] & Impure =
         matchesIter(glob, path)
-            |> X/Cursor.toList!
+            |> FlixSandbox/Deprecated/Cursor.toList!
 
     pub def matchesIter(glob: String, path: FilePath): Cursor[String, FilePath] & Impure =
         import static flixspt.sandbox.PathIterator.newFilesnewDirectoryStreamIterator(##java.nio.file.Path, String): ##flixspt.sandbox.PathIterator & Impure;
@@ -246,11 +246,11 @@ namespace System/IO {
         import flixspt.sandbox.PathIterator.next(): ##java.nio.file.Path & Impure;
         let FilePath(path1) = path;
         let primIter = newFilesnewDirectoryStreamIterator(path1, glob);
-        let cursorAlg: X.CursorAlg[String, FilePath] =  {
+        let cursorAlg: FlixSandbox/Deprecated.CursorAlg[String, FilePath] =  {
               hasNext = () -> hasNext(primIter)
-            , next = X/Cursor.guardThunk(_ -> FilePath(next(primIter)), "next failed")
+            , next = FlixSandbox/Deprecated/Cursor.guardThunk(_ -> FilePath(next(primIter)), "next failed")
             , finalize = () -> () as & Impure
         };
-        X/Cursor.makeCursor(cursorAlg)
+        FlixSandbox/Deprecated/Cursor.makeCursor(cursorAlg)
 
 }

@@ -19,7 +19,7 @@
 
 /*
 
-namespace Test/FlixCheck {
+namespace FlixSandbox/Test/FlixCheck {
 
     ///
     /// Represents a random number generator.

@@ -15,7 +15,7 @@
  */
 
 
-namespace Text {
+namespace FlixSandbox/Text/Normalizer {
 
     ///
     pub enum NormalizerForm with Eq, Order, ToString {
@@ -24,14 +24,6 @@ namespace Text {
         case Nfkc
         case Nfkd
     }
-
-}
-
-
-namespace Text/Normalizer {
-
-    use Text.NormalizerForm;
-    use Text.NormalizerForm.{Nfc, Nfd, Nfkc, Nfkd};
 
     pub def marshal(x: NormalizerForm): ##java.text.Normalizer$Form =
         import static get java.text.Normalizer$Form.NFC: ##java.text.Normalizer$Form & Pure as getNFC;

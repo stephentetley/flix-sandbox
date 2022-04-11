@@ -15,7 +15,7 @@
  */
 
 
-namespace Text  {
+namespace FlixSandbox/Text  {
     ///
     /// Represents a Charset.
     ///
@@ -30,30 +30,30 @@ namespace Text  {
 
     instance FromString[Charset] {
         pub def fromString(x: String): Option[Charset] =
-            Text/Charset.forName(x)
+            FlixSandbox/Text/Charset.forName(x)
     }
 
     instance Eq[Charset] {
-        pub def eq(x: Charset, y: Charset): Bool = Text/Charset.equals(x, y)
+        pub def eq(x: Charset, y: Charset): Bool = FlixSandbox/Text/Charset.equals(x, y)
     }
 
     instance Hash[Charset] {
-        pub def hash(x: Charset): Int32 = Text/Charset.hashCode(x)
+        pub def hash(x: Charset): Int32 = FlixSandbox/Text/Charset.hashCode(x)
     }
 
     instance Order[Charset] {
         pub def compare(x: Charset, y: Charset): Comparison =
-            Text/Charset.compareTo(x, y) |> Comparison.fromInt32
+            FlixSandbox/Text/Charset.compareTo(x, y) |> Comparison.fromInt32
     }
 
     instance Boxable[Charset]
 
 }
 
-namespace Text/Charset {
+namespace FlixSandbox/Text/Charset {
 
-    use Text.Charset;
-    use Text.Charset.{Charset};
+    use FlixSandbox/Text.Charset;
+    use FlixSandbox/Text.Charset.{Charset};
 
     pub def forName(name: String): Option[Charset] =
         import static java.nio.charset.Charset.forName(String): ##java.nio.charset.Charset & Pure;
@@ -127,8 +127,8 @@ namespace Text/Charset {
         let Charset(cs1) = cs;
         displayName(cs1)
 
-    pub def displayNameWithLocale(cs: Charset, locale: I18n.Locale): String =
-        use I18n.Locale.{Locale};
+    pub def displayNameWithLocale(cs: Charset, locale: FlixSandbox/I18n.Locale): String =
+        use FlixSandbox/I18n.Locale.{Locale};
         import java.nio.charset.Charset.displayName(##java.util.Locale): String & Pure;
         let Charset(cs1) = cs;
         let Locale(locale1) = locale;

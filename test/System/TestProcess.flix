@@ -20,21 +20,21 @@ namespace System/TestProcess {
 
     @test
     def process01(): Unit & Impure =
-        match System/Process.process({cmd = "java", args = "--version" :: Nil, charset = Text/Charset.utf_8()}) {
+        match System/Process.process({cmd = "java", args = "--version" :: Nil, charset = FlixSandbox/Text/Charset.utf_8()}) {
             case Err(msg) => println("Process Err: ${msg}")
             case Ok(ans)  => println("${ans.processResponse}")
         }
 
     @test
     def process02(): Unit & Impure =
-        match System/Process.process({cmd = "java", args = "--list-modules" :: Nil, charset = Text/Charset.utf_8()}) {
+        match System/Process.process({cmd = "java", args = "--list-modules" :: Nil, charset = FlixSandbox/Text/Charset.utf_8()}) {
             case Err(msg) => println("Process Err: ${msg}")
             case Ok(ans)  => println("${ans.processResponse}")
         }
 
     @test
     def process03(): Unit & Impure =
-        match System/Process.process({cmd = "java", args = "--BAD_ARGUMENT" :: Nil, charset = Text/Charset.utf_8()}) {
+        match System/Process.process({cmd = "java", args = "--BAD_ARGUMENT" :: Nil, charset = FlixSandbox/Text/Charset.utf_8()}) {
             case Err(msg) => println("Process Err: ${msg}")
             case Ok(ans)  => println("${ans.processResponse}")
         }

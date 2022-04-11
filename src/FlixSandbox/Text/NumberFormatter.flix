@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-namespace Text/NumberFormatter {
+namespace FlixSandbox/Text/NumberFormatter {
 
     ///
     /// Return a decimal representation of `x`.
