@@ -40,12 +40,12 @@ namespace FlixSandbox/System/Directory {
                     |> FlixSandbox/System/FilePath.toAbsolutePath
         }
 
-
+    /// Use File.list
     pub def contents(path: FilePath): Result[List[FilePath], String] & Impure =
         contentsIter(path)
             |> FlixSandbox/Deprecated/Cursor.toList!
 
-
+    /// Use File.listWithIter
     pub def contentsIter(path: FilePath): Cursor[String, FilePath] & Impure =
         import static flixspt.sandbox.PathIterator.newFileslistIterator(##java.nio.file.Path): ##flixspt.sandbox.PathIterator & Impure;
         import flixspt.sandbox.PathIterator.hasNext(): Bool & Impure;
@@ -116,6 +116,7 @@ namespace FlixSandbox/System/Directory {
         contentsAllIter(followLinks, path)
             |> FlixSandbox/Deprecated/Cursor.toList!
 
+    /// Use `files.walk`...
     /// All levels - recursive, uses a Iterator
     pub def contentsAllIter(followLinks: Bool, path: FilePath): Cursor[String, FilePath] & Impure =
         import static flixspt.sandbox.PathIterator.newFileswalkIterator(##java.nio.file.Path, Bool): ##flixspt.sandbox.PathIterator & Impure;
@@ -138,12 +139,13 @@ namespace FlixSandbox/System/Directory {
         };
         FlixSandbox/Deprecated/Cursor.makeCursor(cursorAlg)
 
-
+    /// Use File.mkdir...
     pub def createDirectory(path: FilePath): Unit & Impure =
         import static flixspt.sandbox.FilesWrapper.createDirectory(##java.nio.file.Path): Unit & Impure;
         let FilePath(path1) = path;
         createDirectory(path1)
 
+    /// Use File.mkdirs...
     /// Create any "missing" directories along the way...
     pub def createDirectoryAll(path: FilePath): Unit & Impure =
         import static flixspt.sandbox.FilesWrapper.createDirectories(##java.nio.file.Path): Unit & Impure;
@@ -175,7 +177,7 @@ namespace FlixSandbox/System/Directory {
             case _: ##java.lang.Exception => Err("deleteIfExists")
         }
 
-
+    /// Use Files.copy...
     pub def copy(source: FilePath, target: FilePath): Result[Unit, String] & Impure =
         import static flixspt.sandbox.FilesWrapper.copy(##java.nio.file.Path, ##java.nio.file.Path): ##java.nio.file.Path & Impure;
         try {
