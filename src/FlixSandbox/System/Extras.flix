@@ -18,14 +18,14 @@
 
 namespace FlixSandbox/System/Extras {
 
+    /// Do we want a Regex version filtering with PathMatcher... ?
+
+    pub def globList(glob: {glob :: String}, f: String): Result[List[String], String] & Impure =
+        globListWithIter(glob, f) |> Result.map(Iterator.toList)
 
 
-    pub def matches(glob: String, f: String): Result[List[String], String] & Impure =
-        matchesWithIter(glob, f) |> Result.map(Iterator.toList)
 
-
-
-    pub def matchesWithIter(glob: String, f: String): Result[Iterator[String], String] & Impure =
+    pub def globListWithIter(glob: {glob :: String}, f: String): Result[Iterator[String], String] & Impure =
         try {
             import new java.io.File(String): ##java.io.File & Impure as newFile;
             import java.io.File.toPath(): ##java.nio.file.Path & Impure;
@@ -35,7 +35,7 @@ namespace FlixSandbox/System/Extras {
 
             let javaFile = newFile(f);
             let javaPath = toPath(javaFile);
-            let javaStream = newDirectoryStream(javaPath, glob);
+            let javaStream = newDirectoryStream(javaPath, glob.glob);
             let javaIter = iterator(javaStream);
 
             let iter = FlixSandbox/Marshal.unmarshalIterator(obj -> pathToString(obj as ##java.nio.file.Path), javaIter);
@@ -45,6 +45,37 @@ namespace FlixSandbox/System/Extras {
                 import java.lang.Throwable.getMessage(): String & Impure;
                 Err(getMessage(ex))
         }
+
+
+    pub def regexList(regex: {regex :: String}, f: String): Result[List[String], String] & Impure =
+        regexListWithIter(regex, f) |> Result.map(Iterator.toList)
+
+    pub def regexListWithIter(regex: {regex :: String}, f: String): Result[Iterator[String], String] & Impure =
+        try {
+            import new java.io.File(String): ##java.io.File & Impure as newFile;
+            import java.io.File.toPath(): ##java.nio.file.Path & Impure;
+            import static java.nio.file.Files.newDirectoryStream(##java.nio.file.Path): ##java.nio.file.DirectoryStream & Impure;
+            import java.nio.file.DirectoryStream.iterator(): ##java.util.Iterator & Impure;
+            import java.nio.file.Path.toString(): String & Pure as pathToString;
+            import static java.nio.file.FileSystems.getDefault(): ##java.nio.file.FileSystem & Impure;
+            import java.nio.file.FileSystem.getPathMatcher(String): ##java.nio.file.PathMatcher & Impure;
+            import java.nio.file.PathMatcher.matches(##java.nio.file.Path): Bool & Impure;
+            let javaFile = newFile(f);
+            let javaPath = toPath(javaFile) as & Pure;
+            let javaStream = newDirectoryStream(javaPath);
+            let javaIter = iterator(javaStream);
+            let currentFS = getDefault();
+            let matcher = getPathMatcher(currentFS, "regex:${regex.regex}");            
+            let test = path -> matches(matcher, path) as & Pure;
+            let iter = FlixSandbox/Marshal.unmarshalIterator(obj -> obj as ##java.nio.file.Path, javaIter);
+            let iter1 = iter |> Iterator.filterL(test) |>  Iterator.mapL(pathToString);
+            Ok(iter1)
+        } catch {
+            case ex: ##java.io.IOException =>
+                import java.lang.Throwable.getMessage(): String & Impure;
+                Err(getMessage(ex))
+        }
+
 
 
 }

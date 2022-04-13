@@ -6,6 +6,8 @@ import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.stream.Stream;
 
+/// DEPRECATED
+
 public class PathIterator {
 
     private Iterator<Path> iter;

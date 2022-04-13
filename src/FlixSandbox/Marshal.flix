@@ -77,6 +77,15 @@ namespace FlixSandbox/Marshal {
         import java.lang.Character.charValue(): Char & Pure;
         charValue(c)
 
+    pub def unmarshalException(ex: ##java.lang.Exception): Result[a, String] & Impure = 
+        import java.lang.Throwable.getMessage(): String & Impure;
+        Err(getMessage(ex as ##java.lang.Throwable))
+
+    pub def unmarshalIOException(ex: ##java.io.IOException): Result[a, String] & Impure = 
+        import java.lang.Throwable.getMessage(): String & Impure;
+        Err(getMessage(ex as ##java.lang.Throwable))
+
+
     pub def marshalArray(upcast: a -> ##java.lang.Object & ef, arr: Array[a]): Array[##java.lang.Object] & Impure =
         import new java.util.ArrayList(): ##java.util.ArrayList & Impure as new1;
         import java.util.ArrayList.add(##java.lang.Object): Bool & Impure; 
@@ -258,5 +267,6 @@ namespace FlixSandbox/Marshal {
         let javaIter = iterator(bs);
         let downcast = obj -> unmarshalFloat64(obj as ##java.lang.Double);
         unmarshalIterator(downcast, javaIter)
+
 
 }
