@@ -16,6 +16,8 @@
 
 // NOTE - keep reconciled with the version in `charset-locale`
 
+// BIG TODO - give proper thought to Pure/Impure...
+
 namespace FlixSandbox/Marshal {
 
     pub def marshalInt8(i: Int8): ##java.lang.Byte = 
@@ -77,13 +79,16 @@ namespace FlixSandbox/Marshal {
         import java.lang.Character.charValue(): Char & Pure;
         charValue(c)
 
-    pub def unmarshalException(ex: ##java.lang.Exception): Result[a, String] & Impure = 
-        import java.lang.Throwable.getMessage(): String & Impure;
-        Err(getMessage(ex as ##java.lang.Throwable))
 
-    pub def unmarshalIOException(ex: ##java.io.IOException): Result[a, String] & Impure = 
+    /// NOTE caller decides whether to wrap with Err...
+    
+    pub def unmarshalExceptionMessage(ex: ##java.lang.Exception): String & Impure = 
         import java.lang.Throwable.getMessage(): String & Impure;
-        Err(getMessage(ex as ##java.lang.Throwable))
+        getMessage(ex as ##java.lang.Throwable)
+
+    pub def unmarshalIOExceptionMessage(ex: ##java.io.IOException): String & Impure = 
+        import java.lang.Throwable.getMessage(): String & Impure;
+        getMessage(ex as ##java.lang.Throwable)
 
 
     pub def marshalArray(upcast: a -> ##java.lang.Object & ef, arr: Array[a]): Array[##java.lang.Object] & Impure =
@@ -166,23 +171,27 @@ namespace FlixSandbox/Marshal {
         Map.foreach(addElem, m);
         javam as ##java.util.Map
 
-    pub def unmarshalMap(downcastKey: ##java.lang.Object -> k & ef, downcastValue: ##java.lang.Object -> v & ef, javam: ##java.util.Map): Map[k, v] & Impure with Order[k] =
+    pub def unmarshalMapEntry(downcastKey: ##java.lang.Object -> k & ef, downcastValue: ##java.lang.Object -> v & ef, entry: ##java.util.Map$Entry): (k, v) & Impure =
+        import java.util.Map$Entry.getKey(): ##java.lang.Object & Impure;
+        import java.util.Map$Entry.getValue(): ##java.lang.Object & Impure;        
+        let k = getKey(entry);
+        let v = getValue(entry);                
+        let k1 = downcastKey(k) as & Impure;
+        let v1 = downcastValue(v) as & Impure;
+        (k1, v1)
+
+    pub def unmarshalMap(downcastEntry: ##java.util.Map$Entry -> (k, v) & ef, javam: ##java.util.Map): Map[k, v] & Impure with Order[k] =
         import java.util.Map.entrySet(): ##java.util.Set & Impure;
         import java.util.Set.iterator(): ##java.util.Iterator & Impure;
         import java.util.Iterator.hasNext(): Bool & Impure;
         import java.util.Iterator.next(): ##java.lang.Object & Impure;
-        import java.util.Map$Entry.getKey(): ##java.lang.Object & Impure;
-        import java.util.Map$Entry.getValue(): ##java.lang.Object & Impure;        
         let set1 = entrySet(javam);
         let iter = iterator(set1);
         def loop(acc: Map[k, v]) = {
             if (hasNext(iter)) {
                 let entry = next(iter) as ##java.util.Map$Entry;
-                let k = getKey(entry);
-                let v = getValue(entry);                
-                let k1 = downcastKey(k) as & Impure;
-                let v1 = downcastValue(v) as & Impure;
-                loop(Map.insert(k1, v1, acc))
+                let (k, v) = downcastEntry(entry) as & Impure;
+                loop(Map.insert(k, v, acc))
             } else
                 acc
         };
@@ -268,5 +277,22 @@ namespace FlixSandbox/Marshal {
         let downcast = obj -> unmarshalFloat64(obj as ##java.lang.Double);
         unmarshalIterator(downcast, javaIter)
 
+    /// Unmarshal a Java set to a Flix list - elements in the list will be unique (order is arbitrary).
+    /// Unlike Flix Sets, Java Sets are not limited to ordered types, for unordered types we cannot unmarshal 
+    /// Java.Set to Flix Set instead we unmarshal to a List.
+    pub def unmarshalSetToList(downcast: ##java.lang.Object -> a & ef, javas: ##java.util.Set): List[a] & Impure =
+        import java.util.Set.iterator(): ##java.util.Iterator & Impure;
+        import java.util.Iterator.hasNext(): Bool & Impure;
+        import java.util.Iterator.next(): ##java.lang.Object & Impure;
+        let iter = iterator(javas);                
+        def loop(k: List[a] -> List[a]) = {
+            if (hasNext(iter)) {
+                let jObj  = next(iter);
+                let x1 = downcast(jObj) as & Impure;
+                loop(ks -> k(x1 :: ks))
+            } else
+                k(Nil)
+        };
+        loop(ks -> ks)
 
 }

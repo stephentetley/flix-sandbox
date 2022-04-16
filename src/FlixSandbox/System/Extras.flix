@@ -18,7 +18,6 @@
 
 namespace FlixSandbox/System/Extras {
 
-    /// Do we want a Regex version filtering with PathMatcher... ?
 
     pub def globList(glob: {glob :: String}, f: String): Result[List[String], String] & Impure =
         globListWithIter(glob, f) |> Result.map(Iterator.toList)
