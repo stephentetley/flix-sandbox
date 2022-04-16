@@ -277,6 +277,20 @@ namespace FlixSandbox/Marshal {
         let downcast = obj -> unmarshalFloat64(obj as ##java.lang.Double);
         unmarshalIterator(downcast, javaIter)
 
+
+    pub def marshalListToSet(upcast: a -> ##java.lang.Object & ef, l: List[a]): ##java.util.Set & Impure =
+        import new java.util.HashSet(): ##java.util.HashSet & Impure as new1;
+        import java.util.HashSet.add(##java.lang.Object): Bool & Impure; 
+        let javas = new1();
+        let addElem = x -> {
+            let x1 = upcast(x) as & Impure;
+            let _ = add(javas, x1);
+            ()
+        };
+        List.foreach(addElem, l);
+        javas as ##java.util.Set
+
+
     /// Unmarshal a Java set to a Flix list - elements in the list will be unique (order is arbitrary).
     /// Unlike Flix Sets, Java Sets are not limited to ordered types, for unordered types we cannot unmarshal 
     /// Java.Set to Flix Set instead we unmarshal to a List.
