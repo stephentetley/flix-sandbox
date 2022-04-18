@@ -80,6 +80,17 @@ namespace FlixSandbox/Marshal {
         charValue(c)
 
 
+    /// This is useful but (a) what to call it, (b) are there similar functions
+    /// to make including it worthwile otherwise it doesn't really pass the Fairbairn 
+    /// threshold.
+    ///
+    /// pub def unmarshalString(o: ##java.lang.Object): String = 
+    ///     if (Object.isNull(o))
+    ///         ""
+    ///     else
+    ///         o as String
+
+
     /// NOTE caller decides whether to wrap with Err...
     
     pub def unmarshalExceptionMessage(ex: ##java.lang.Exception): String & Impure = 
@@ -198,7 +209,7 @@ namespace FlixSandbox/Marshal {
         loop(Map.empty())
 
 
-    pub def marshalSortedMap(upcastKey: k -> ##java.lang.Object & ef, upcastValue: v -> ##java.lang.Object & ef,  m: Map[k, v]): ##java.util.SortedMap & Impure =
+    pub def marshalSortedMap(upcastKey: k -> ##java.lang.Object & ef, upcastValue: v -> ##java.lang.Object & ef, m: Map[k, v]): ##java.util.SortedMap & Impure =
         import new java.util.TreeMap(): ##java.util.TreeMap & Impure as new1;
         import java.util.TreeMap.put(##java.lang.Object, ##java.lang.Object): ##java.lang.Object & Impure; 
         let javam = new1();
@@ -304,6 +315,37 @@ namespace FlixSandbox/Marshal {
                 let jObj  = next(iter);
                 let x1 = downcast(jObj) as & Impure;
                 loop(ks -> k(x1 :: ks))
+            } else
+                k(Nil)
+        };
+        loop(ks -> ks)
+
+
+    pub def marshalListToMap(upcastKey: k -> ##java.lang.Object & ef, upcastValue: v -> ##java.lang.Object & ef, l: List[(k, v)]): ##java.util.Map & Impure =
+        import new java.util.HashMap(): ##java.util.HashMap & Impure as new1;
+        import java.util.HashMap.put(##java.lang.Object, ##java.lang.Object): ##java.lang.Object & Impure; 
+        let javam = new1();
+        let addElem = match (k, v) -> {
+            let k1 = upcastKey(k) as & Impure;
+            let v1 = upcastValue(v) as & Impure;
+            let _ = put(javam, k1, v1);
+            ()
+        };
+        List.foreach(addElem, l);
+        javam as ##java.util.Map
+
+    pub def unmarshalMapToList(downcastEntry: ##java.util.Map$Entry -> (k, v) & ef, javam: ##java.util.Map): List[(k, v)] & Impure =
+        import java.util.Map.entrySet(): ##java.util.Set & Impure;
+        import java.util.Set.iterator(): ##java.util.Iterator & Impure;
+        import java.util.Iterator.hasNext(): Bool & Impure;
+        import java.util.Iterator.next(): ##java.lang.Object & Impure;
+        let set1 = entrySet(javam);
+        let iter = iterator(set1);
+        def loop(k: List[(k, v)] -> List[(k, v)]) = {
+            if (hasNext(iter)) {
+                let entry = next(iter) as ##java.util.Map$Entry;
+                let kv = downcastEntry(entry) as & Impure;
+                loop(ks -> k(kv :: ks))
             } else
                 k(Nil)
         };
