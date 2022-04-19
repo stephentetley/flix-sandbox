@@ -16,7 +16,8 @@
 
 // NOTE - keep reconciled with the version in `charset-locale`
 
-// BIG TODO - give proper thought to Pure/Impure...
+// TODO - do we want a set of `show` functions for the java collection types to 
+// aid debugging / testing... ?
 
 namespace FlixSandbox/Marshal {
 
@@ -103,143 +104,94 @@ namespace FlixSandbox/Marshal {
 
 
     pub def marshalArray(upcast: a -> ##java.lang.Object & ef, arr: Array[a]): Array[##java.lang.Object] & Impure =
-        import new java.util.ArrayList(): ##java.util.ArrayList & Impure as new1;
-        import java.util.ArrayList.add(##java.lang.Object): Bool & Impure; 
-        import java.util.ArrayList.toArray(): Array[##java.lang.Object] & Impure; 
-        let javaarr = new1();
-        let addElem = x -> {
-            let x1 = upcast(x) as & Impure;
-            let _ = add(javaarr, x1);
-            ()
+        import java.util.ArrayList.toArray(): Array[##java.lang.Object] & Impure;    
+        let step = iter -> match Iterator.next(iter) {
+            case Some(x)    => Some((upcast(x), iter))
+            case None       => None
         };
-        Array.foreach(addElem, arr);
-        toArray(javaarr)      
+        unfoldArrayList(step, Array.toIterator(arr)) |> toArray
 
-    pub def marshalSet(upcast: a -> ##java.lang.Object & ef, s: Set[a]): ##java.util.Set & Impure =
-        import new java.util.HashSet(): ##java.util.HashSet & Impure as new1;
-        import java.util.HashSet.add(##java.lang.Object): Bool & Impure; 
-        let javas = new1();
-        let addElem = x -> {
-            let x1 = upcast(x) as & Impure;
-            let _ = add(javas, x1);
-            ()
+    pub def marshalSet(upcast: a -> ##java.lang.Object & ef, s: Set[a]): ##java.util.Set & ef =
+        let step = iter -> match Iterator.next(iter) {
+            case Some(x)    => Some((upcast(x), iter))
+            case None       => None
         };
-        Set.foreach(addElem, s);
-        javas as ##java.util.Set
+        unfoldHashSet(step, Set.toIterator(s)) as ##java.util.Set & ef
 
-
-    pub def unmarshalSet(downcast: ##java.lang.Object -> a & ef, javas: ##java.util.Set): Set[a] & Impure with Order[a] =
-        import java.util.Set.iterator(): ##java.util.Iterator & Impure;
-        import java.util.Iterator.hasNext(): Bool & Impure;
-        import java.util.Iterator.next(): ##java.lang.Object & Impure;
-        let iter = iterator(javas);                
-        def loop(acc: Set[a]) = {
-            if (hasNext(iter)) {
-                let jObj  = next(iter);
-                let x1 = downcast(jObj) as & Impure;
-                loop(Set.insert(x1, acc))
-            } else
-                acc
+    pub def unmarshalSet(downcast: ##java.lang.Object -> a & ef, javas: ##java.util.Set): Set[a] & ef with Order[a] =
+        let step = (acc, obj) -> {
+            let x1 = downcast(obj);
+            Set.insert(x1, acc)
         };
-        loop(Set.empty())
+        foldSet(step, Set.empty(), javas)
 
-    pub def marshalList(upcast: a -> ##java.lang.Object & ef, l: List[a]): ##java.util.List & Impure =
-        import new java.util.LinkedList(): ##java.util.LinkedList & Impure as new1;
-        import java.util.LinkedList.add(##java.lang.Object): Bool & Impure; 
-        let javal = new1();
-        let addElem = x -> {
-            let x1 = upcast(x) as & Impure;
-            let _ = add(javal, x1);
-            ()
+    pub def marshalList(upcast: a -> ##java.lang.Object & ef, l: List[a]): ##java.util.List & ef =
+        let step = xs -> match xs {
+            case x :: rs    => Some((upcast(x), rs))
+            case Nil        => None
         };
-        List.foreach(addElem, l);
-        javal as ##java.util.List
+        unfoldArrayList(step, l) as ##java.util.List
 
-    pub def unmarshalList(downcast: ##java.lang.Object -> a & ef, javal: ##java.util.List): List[a] & Impure =
-        import java.util.List.iterator(): ##java.util.Iterator & Impure;
-        import java.util.Iterator.hasNext(): Bool & Impure;
-        import java.util.Iterator.next(): ##java.lang.Object & Impure;
-        let iter = iterator(javal);                
-        def loop(k: List[a] -> List[a]) = {
-            if (hasNext(iter)) {
-                let jObj  = next(iter);
-                let x1 = downcast(jObj) as & Impure;
-                loop(ks -> k(x1 :: ks))
-            } else
-                k(Nil)
-        };
-        loop(ks -> ks)
 
-    pub def marshalMap(upcastKey: k -> ##java.lang.Object & ef, upcastValue: v -> ##java.lang.Object & ef,  m: Map[k, v]): ##java.util.Map & Impure =
-        import new java.util.HashMap(): ##java.util.HashMap & Impure as new1;
-        import java.util.HashMap.put(##java.lang.Object, ##java.lang.Object): ##java.lang.Object & Impure; 
-        let javam = new1();
-        let addElem = (k, v) -> {
-            let k1 = upcastKey(k) as & Impure;
-            let v1 = upcastValue(v) as & Impure;
-            let _ = put(javam, k1, v1);
-            ()
+    pub def unmarshalList(downcast: ##java.lang.Object -> a & ef, javal: ##java.util.List): List[a] & ef =
+        let step = (k, obj) -> {
+            let x1 = downcast(obj);
+            (ks -> k(x1 :: ks))
         };
-        Map.foreach(addElem, m);
-        javam as ##java.util.Map
+        foldList(step, ks -> ks, javal)  |> f -> f(Nil)
+
+
+    pub def marshalMap(upcastKey: k -> ##java.lang.Object & ef1, 
+                        upcastValue: v -> ##java.lang.Object & ef2,  
+                        m: Map[k, v]): ##java.util.Map & (ef1 and ef2) =
+        let step = iter -> match Iterator.next(iter) {
+            case Some(k, v)   => Some((upcastKey(k), upcastValue(v), iter))
+            case None         => None
+        };
+        unfoldHashMap(step, Map.toIterator(m)) as ##java.util.Map & (ef1 and ef2)
 
     ///
     /// We don't need the inverse function `marshalMapEntry` because Java's API for building maps is `m.put(k, v)`
+    /// so we never need to create a MapEntry.
     ///
-    pub def unmarshalMapEntry(downcastKey: ##java.lang.Object -> k & ef, downcastValue: ##java.lang.Object -> v & ef, entry: ##java.util.Map$Entry): (k, v) & Impure =
-        import java.util.Map$Entry.getKey(): ##java.lang.Object & Impure;
-        import java.util.Map$Entry.getValue(): ##java.lang.Object & Impure;        
+    pub def unmarshalMapEntry(downcastKey: ##java.lang.Object -> k & ef1, 
+                                downcastValue: ##java.lang.Object -> v & ef2, 
+                                entry: ##java.util.Map$Entry): (k, v) & (ef1 and ef2) =
+        import java.util.Map$Entry.getKey(): ##java.lang.Object & Pure;
+        import java.util.Map$Entry.getValue(): ##java.lang.Object & Pure;        
         let k = getKey(entry);
         let v = getValue(entry);                
-        let k1 = downcastKey(k) as & Impure;
-        let v1 = downcastValue(v) as & Impure;
+        let k1 = downcastKey(k);
+        let v1 = downcastValue(v);
         (k1, v1)
 
-    pub def unmarshalMap(downcastKey: ##java.lang.Object -> k & ef, downcastValue: ##java.lang.Object -> v & ef, javam: ##java.util.Map): Map[k, v] & Impure with Order[k] =
+    pub def unmarshalMap(downcastKey: ##java.lang.Object -> k & ef1, 
+                            downcastValue: ##java.lang.Object -> v & ef2, 
+                            javam: ##java.util.Map): Map[k, v] & (ef1 and ef2) with Order[k] =
         let step = (acc, entry) -> {
             let (k, v) = unmarshalMapEntry(downcastKey, downcastValue, entry);
             Map.insert(k, v, acc)
         };
         foldMap(step, Map.empty(), javam as ##java.util.Map) 
 
-    pub def marshalSortedMap(upcastKey: k -> ##java.lang.Object & ef, upcastValue: v -> ##java.lang.Object & ef, m: Map[k, v]): ##java.util.SortedMap & Impure =
-        import new java.util.TreeMap(): ##java.util.TreeMap & Impure as new1;
-        import java.util.TreeMap.put(##java.lang.Object, ##java.lang.Object): ##java.lang.Object & Impure; 
-        let javam = new1();
-        let addElem = (k, v) -> {
-            let k1 = upcastKey(k) as & Impure;
-            let v1 = upcastValue(v) as & Impure;
-            let _ = put(javam, k1, v1);
-            ()
+    pub def marshalSortedMap(upcastKey: k -> ##java.lang.Object & ef1,
+                                upcastValue: v -> ##java.lang.Object & ef2, 
+                                m: Map[k, v]): ##java.util.SortedMap & (ef1 and ef2) =
+        let step = iter -> match Iterator.next(iter) {
+            case Some(k, v)   => Some((upcastKey(k), upcastValue(v), iter))
+            case None         => None
         };
-        Map.foreach(addElem, m);
-        javam as ##java.util.SortedMap
+        unfoldTreeMap(step, Map.toIterator(m)) as ##java.util.SortedMap & (ef1 and ef2)
 
 
-    pub def unmarshalSortedMap(downcastKey: ##java.lang.Object -> k & ef, downcastValue: ##java.lang.Object -> v & ef, javam: ##java.util.SortedMap): Map[k, v] & Impure with Order[k] =
-        import java.util.SortedMap.entrySet(): ##java.util.Set & Impure;
-        import java.util.Set.iterator(): ##java.util.Iterator & Impure;
-        import java.util.Iterator.hasNext(): Bool & Impure;
-        import java.util.Iterator.next(): ##java.lang.Object & Impure;
-        import java.util.Map$Entry.getKey(): ##java.lang.Object & Impure;
-        import java.util.Map$Entry.getValue(): ##java.lang.Object & Impure;        
-        let set1 = entrySet(javam);
-        let iter = iterator(set1);
-        def loop(acc: Map[k, v]) = {
-            if (hasNext(iter)) {
-                let entry = next(iter) as ##java.util.Map$Entry;
-                let k = getKey(entry);
-                let v = getValue(entry);                
-                let k1 = downcastKey(k) as & Impure;
-                let v1 = downcastValue(v) as & Impure;
-                loop(Map.insert(k1, v1, acc))
-            } else
-                acc
+    pub def unmarshalSortedMap(downcastKey: ##java.lang.Object -> k & ef, 
+                                downcastValue: ##java.lang.Object -> v & ef, 
+                                javam: ##java.util.SortedMap): Map[k, v] & ef with Order[k] =
+        let step = (acc, entry) -> {
+            let (k, v) = unmarshalMapEntry(downcastKey, downcastValue, entry);
+            Map.insert(k, v, acc)
         };
-        loop(Map.empty())
-
-
-
+        foldMap(step, Map.empty(), javam as ##java.util.Map)
 
 
     pub def unmarshalIterator(downcast: ##java.lang.Object -> a & ef, javaIter: ##java.util.Iterator): Iterator[a] =
@@ -304,20 +256,17 @@ namespace FlixSandbox/Marshal {
         foldSet(step, ks -> ks, javas) |> f -> f(Nil)
 
 
-    pub def marshalListToMap(upcastKey: k -> ##java.lang.Object & ef, upcastValue: v -> ##java.lang.Object & ef, l: List[(k, v)]): ##java.util.Map & Impure =
-        import new java.util.HashMap(): ##java.util.HashMap & Impure as new1;
-        import java.util.HashMap.put(##java.lang.Object, ##java.lang.Object): ##java.lang.Object & Impure; 
-        let javam = new1();
-        let addElem = match (k, v) -> {
-            let k1 = upcastKey(k) as & Impure;
-            let v1 = upcastValue(v) as & Impure;
-            let _ = put(javam, k1, v1);
-            ()
+    pub def marshalAssocListToMap(upcastKey: k -> ##java.lang.Object & ef, 
+                                    upcastValue: v -> ##java.lang.Object & ef, 
+                                    l: List[(k, v)]): ##java.util.Map & ef =
+        let step = xs -> match xs {
+            case (k, v) :: rs => Some((upcastKey(k), upcastValue(v), rs))
+            case Nil          => None
         };
-        List.foreach(addElem, l);
-        javam as ##java.util.Map
+        unfoldHashMap(step, l) as ##java.util.Map
 
-    pub def unmarshalMapToList(downcastEntry: ##java.util.Map$Entry -> (k, v) & ef, javam: ##java.util.Map): List[(k, v)] & ef =
+
+    pub def unmarshalMapToAssocList(downcastEntry: ##java.util.Map$Entry -> (k, v) & ef, javam: ##java.util.Map): List[(k, v)] & ef =
         let step = (k, entry) -> {
             let kv = downcastEntry(entry);
             (ks -> k(kv :: ks))
@@ -442,6 +391,18 @@ namespace FlixSandbox/Marshal {
     def unfoldHashMapHelper(f: s -> Option[(##java.lang.Object, ##java.lang.Object, s)] & ef, st: s): ##java.util.HashMap & Impure =
         import new java.util.HashMap(): ##java.util.HashMap & Impure as new1;
         import java.util.HashMap.put(##java.lang.Object, ##java.lang.Object): ##java.lang.Object & Impure as put!; 
+        def loop(st1, ac) = match f(st1) {
+            case None         => ac
+            case Some(k, v, st2) => { let _ = put!(ac, k, v); loop(st2, ac) }
+        };
+        loop(st, new1())
+
+    pub def unfoldTreeMap(f: s -> Option[(##java.lang.Object, ##java.lang.Object, s)] & ef, st: s): ##java.util.TreeMap & ef =
+        unfoldTreeMapHelper(f, st) as & ef
+
+    def unfoldTreeMapHelper(f: s -> Option[(##java.lang.Object, ##java.lang.Object, s)] & ef, st: s): ##java.util.TreeMap & Impure =
+        import new java.util.TreeMap(): ##java.util.TreeMap & Impure as new1;
+        import java.util.TreeMap.put(##java.lang.Object, ##java.lang.Object): ##java.lang.Object & Impure as put!; 
         def loop(st1, ac) = match f(st1) {
             case None         => ac
             case Some(k, v, st2) => { let _ = put!(ac, k, v); loop(st2, ac) }
