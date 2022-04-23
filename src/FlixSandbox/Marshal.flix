@@ -81,8 +81,8 @@ namespace FlixSandbox/Marshal {
         charValue(c)
 
 
-    /// This is useful but (a) what to call it, (b) are there similar functions
-    /// to make including it worthwile otherwise it doesn't really pass the Fairbairn 
+    /// This is useful but (a) what to call it? (b) are there similar functions
+    /// to make including it worthwile? Otherwise it doesn't really pass the Fairbairn 
     /// threshold.
     ///
     /// pub def unmarshalString(o: ##java.lang.Object): String = 

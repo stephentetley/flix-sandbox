@@ -67,7 +67,7 @@ namespace FlixSandbox/Deprecated/DList {
         List.foldLeft(append, empty(), xss)
 
     pub def foldRight(f: (a,b) -> b, ac: b, xs: DList[a]): b =
-        List.foldRight(f, ac, toList(xs))
+        List.foldRight((a, f1) -> f(a, f1()), ac, toList(xs))
 
     pub def map(f: a -> b, xs: DList[a]): DList[b] =
         foldRight((x,ac) -> cons(f(x), ac), empty(), xs)

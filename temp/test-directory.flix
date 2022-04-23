@@ -1,12 +1,12 @@
 
 
-def main(_args: Array[String]): Int32 & Impure = 
-    println("Running ${Time/LocalTime.now()}...");
+def main(): Unit & Impure = 
+    println("Running...");
     println("test01...");
     test01();
     println("test02...");
     test02();
-    0
+    ()
 
 def test01(): Unit & Impure = 
     let path = System/FilePath.new("E://coding//flix//flix-sandbox");

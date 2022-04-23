@@ -4,10 +4,10 @@
 def makeList(size: Int32): List[Int32] = 
     List.repeat(size, 1)
 
-def main(_args: Array[String]): Int32 & Impure = 
+def main(): Unit & Impure = 
     println("Running...");
     test01();
-    0
+    ())
 
 def test01(): Unit & Impure =  
     let xs = makeList(2000000);

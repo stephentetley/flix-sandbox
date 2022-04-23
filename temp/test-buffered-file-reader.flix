@@ -1,13 +1,13 @@
 
 /// This indicates Cursor working correctly, but we have a problem in sheetio...
 
-def main(_args: Array[String]): Int32 & Impure = 
+def main(): Unit & Impure = 
     println("Running ${Time/LocalTime.now()}...");
     println("test01... head!");
     test01();
     println("test02... drop!");
     test02();
-    0
+    ()
 
 def test01(): Result[Unit, String] & Impure = 
     use Result.{flatMap};

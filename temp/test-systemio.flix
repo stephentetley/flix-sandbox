@@ -1,6 +1,6 @@
 
 
-def main(_args: Array[String]): Int32 & Impure = 
+def main(): Unit & Impure = 
     println("Running... ${Time/LocalTime.now()}");
     test01() |> println;
     foldablePrintBytesWith([48i8, 49i8, 50i8]) |> println;
@@ -8,7 +8,7 @@ def main(_args: Array[String]): Int32 & Impure =
     test03() |> println;
     test04() |> println;
     test05() |> println;
-    0
+    ()
 
 def test01(): Result[Unit, String] & Impure = 
     use Result.{flatMap};
