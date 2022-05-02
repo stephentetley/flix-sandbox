@@ -31,8 +31,13 @@ namespace FlixSandbox/System {
     }
 
     instance FromString[FilePath] {
-        pub def fromString(x: String): Option[FilePath] =
-            Some(FlixSandbox/System/FilePath.new(x))
+        pub def fromString(s: String): Option[FilePath] =
+            import static java.nio.file.Path.of(String, Array[String]): ##java.nio.file.Path & Pure as of1;
+            try {
+                Some(FilePath(of1(s, [] as & Pure)))
+            } catch {
+                case _: ##java.lang.Exception => None
+            }
     }
 
     instance Eq[FilePath] {
@@ -79,7 +84,7 @@ namespace FlixSandbox/System/FilePath {
     ///
     /// Returns a new FilePath.
     ///
-    pub def new(s: String): FilePath =
+    pub def filePath(s: String): FilePath =
         import static java.nio.file.Path.of(String, Array[String]): ##java.nio.file.Path & Pure as of1;
         try {
             FilePath(of1(s, [] as & Pure))
@@ -160,7 +165,7 @@ namespace FlixSandbox/System/FilePath {
         (getParent(path), getFileName(path))
 
     pub def replaceFileName(path: FilePath, name: String): FilePath =
-        let file = new(name);
+        let file = filePath(name);
         match getParent(path) {
             case Some(dir) => append(dir, file)
             case None => file
@@ -175,8 +180,8 @@ namespace FlixSandbox/System/FilePath {
 
     pub def putBaseName(path: FilePath, name: String): FilePath =
         match (getParent(path), getExtensions(path)) {
-            case (Some(root), Some(exts)) => append(root, new(name + "." + exts))
-            case (None, Some(exts)) => new(name + "." + exts)
+            case (Some(root), Some(exts)) => append(root, filePath(name + "." + exts))
+            case (None, Some(exts)) => filePath(name + "." + exts)
             case (_, _) => path
         }
 
@@ -300,7 +305,7 @@ namespace FlixSandbox/System/FilePath {
             case Some(ext0) => {
                 let str = toString(path);
                 let lhs = String.dropRight(String.length(ext0), str);
-                new(lhs + ext)
+                filePath(lhs + ext)
             }
             case None => path
         }
@@ -313,7 +318,7 @@ namespace FlixSandbox/System/FilePath {
         case Some(ext) => {
             let str = toString(path);
             let lhs = String.dropRight(String.length(ext) + 1, str);
-            new(lhs)
+            filePath(lhs)
         }
         case None => path
     }
@@ -348,7 +353,7 @@ namespace FlixSandbox/System/FilePath {
             path
         else {
             let str = toString(path);
-            new(str + "." + ext)
+            filePath(str + "." + ext)
         }
 
     ///
@@ -369,7 +374,7 @@ namespace FlixSandbox/System/FilePath {
         case Some(ext) => {
             let str = toString(path);
             let lhs = String.dropRight(String.length(ext) + 1, str);
-            new(lhs)
+            filePath(lhs)
         }
         case None => path
     }
@@ -379,7 +384,7 @@ namespace FlixSandbox/System/FilePath {
             case Some(ext0) => {
                 let str = toString(path);
                 let lhs = String.dropRight(String.length(ext0), str);
-                new(lhs + ext)
+                filePath(lhs + ext)
             }
             case None => path
         }

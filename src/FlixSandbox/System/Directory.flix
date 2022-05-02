@@ -26,7 +26,7 @@ namespace FlixSandbox/System/Directory {
         match (Environment.getCurrentWorkingDirectory() as & Impure) {
             case None    => Err("Error - getCurrentDirectory")
             case Some(s) =>
-                FlixSandbox/System/FilePath.new(s)
+                FlixSandbox/System/FilePath.filePath(s)
                     |> FlixSandbox/System/FilePath.normalize
                     |> FlixSandbox/System/FilePath.toAbsolutePath
         }
@@ -35,7 +35,7 @@ namespace FlixSandbox/System/Directory {
         match (Environment.getTemporaryDirectory() as & Impure) {
             case None    => Err("Error - getTempDirectory")
             case Some(s) =>
-                FlixSandbox/System/FilePath.new(s)
+                FlixSandbox/System/FilePath.filePath(s)
                     |> FlixSandbox/System/FilePath.normalize
                     |> FlixSandbox/System/FilePath.toAbsolutePath
         }

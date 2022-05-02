@@ -38,7 +38,7 @@ namespace FlixSandbox/Deprecated/FunStringBuilder {
     ///
     /// Returns an empty FunStringBuilder.
     ///
-    pub def new(): FunStringBuilder = Empty
+    pub def funStringBuilder(): FunStringBuilder = Empty
 
     ///
     /// Returns `sb2` appended to `sb1`.

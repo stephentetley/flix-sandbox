@@ -23,7 +23,7 @@ namespace TestFilePath {
 
 @test
 def toString01(): Bool =
-    let p1 = FlixSandbox/System/FilePath.new("src.flix");
+    let p1 = FlixSandbox/System/FilePath.filePath("src.flix");
     ToString.toString(p1) == "src.flix"
 
 
@@ -34,14 +34,14 @@ def toString01(): Bool =
 
 @test
 def normalize01(): Bool =
-    let p1 = FlixSandbox/System/FilePath.new("c:/root/../root2") |> FlixSandbox/System/FilePath.normalize;
-    let p2 = FlixSandbox/System/FilePath.new("c:/root2");
+    let p1 = FlixSandbox/System/FilePath.filePath("c:/root/../root2") |> FlixSandbox/System/FilePath.normalize;
+    let p2 = FlixSandbox/System/FilePath.filePath("c:/root2");
     p1 == p2
 
 @test
 def normalize02(): Bool =
-    let p1 = FlixSandbox/System/FilePath.new("c:/root/child1/..") |> FlixSandbox/System/FilePath.normalize;
-    let p2 = FlixSandbox/System/FilePath.new("c:/root/");
+    let p1 = FlixSandbox/System/FilePath.filePath("c:/root/child1/..") |> FlixSandbox/System/FilePath.normalize;
+    let p2 = FlixSandbox/System/FilePath.filePath("c:/root/");
     p1 == p2
 
 /////////////////////////////////////////////////////////////////////////////
@@ -50,8 +50,8 @@ def normalize02(): Bool =
 
 @test
 def toAbsolutePath01(): Bool =
-    let p1 = FlixSandbox/System/FilePath.new("c:/root/child1.txt") |> FlixSandbox/System/FilePath.toAbsolutePath;
-    let p2 = FlixSandbox/System/FilePath.new("c:/root/child1.txt");
+    let p1 = FlixSandbox/System/FilePath.filePath("c:/root/child1.txt") |> FlixSandbox/System/FilePath.toAbsolutePath;
+    let p2 = FlixSandbox/System/FilePath.filePath("c:/root/child1.txt");
     p1 == Ok(p2)
 
 /////////////////////////////////////////////////////////////////////////////
@@ -61,25 +61,25 @@ def toAbsolutePath01(): Bool =
 @test
 def getExtension01(): Bool =
     use FlixSandbox/System/FilePath.{getExtension};
-    let p1 = FlixSandbox/System/FilePath.new("c:/root/child1.txt");
+    let p1 = FlixSandbox/System/FilePath.filePath("c:/root/child1.txt");
     getExtension(p1) == Some("txt")
 
 @test
 def getExtension02(): Bool =
     use FlixSandbox/System/FilePath.{getExtension};
-    let p1 = FlixSandbox/System/FilePath.new("file.txt");
+    let p1 = FlixSandbox/System/FilePath.filePath("file.txt");
     getExtension(p1) == Some("txt")
 
 @test
 def getExtension03(): Bool =
     use FlixSandbox/System/FilePath.{getExtension};
-    let p1 = FlixSandbox/System/FilePath.new("c:/root");
+    let p1 = FlixSandbox/System/FilePath.filePath("c:/root");
     getExtension(p1) == None
 
 @test
 def getExtension04(): Bool =
     use FlixSandbox/System/FilePath.{getExtension};
-    let p1 = FlixSandbox/System/FilePath.new("c:/root/file.001.txt");
+    let p1 = FlixSandbox/System/FilePath.filePath("c:/root/file.001.txt");
     getExtension(p1) == Some("txt")
 
 /////////////////////////////////////////////////////////////////////////////
@@ -89,7 +89,7 @@ def getExtension04(): Bool =
 @test
 def putExtension01(): Bool =
     use FlixSandbox/System/FilePath.{putExtension, getFileName};
-    let p1 = FlixSandbox/System/FilePath.new("c:/root/file1.txt");
+    let p1 = FlixSandbox/System/FilePath.filePath("c:/root/file1.txt");
     let p2 = putExtension(p1, "md");
     getFileName(p2) |> Option.map(ToString.toString) == Some("file1.md")
 
@@ -100,7 +100,7 @@ def putExtension01(): Bool =
 @test
 def dropExtension01(): Bool =
     use FlixSandbox/System/FilePath.{dropExtension, getFileName};
-    let p1 = FlixSandbox/System/FilePath.new("c:/root/file1.txt");
+    let p1 = FlixSandbox/System/FilePath.filePath("c:/root/file1.txt");
     let p2 = dropExtension(p1);
     getFileName(p2) |> Option.map(ToString.toString) == Some("file1")
 
@@ -111,7 +111,7 @@ def dropExtension01(): Bool =
 @test
 def addExtension01(): Bool =
     use FlixSandbox/System/FilePath.{addExtension, getFileName};
-    let p1 = FlixSandbox/System/FilePath.new("archive.tar");
+    let p1 = FlixSandbox/System/FilePath.filePath("archive.tar");
     let p2 = addExtension(p1, "gz");
     getFileName(p2) |> Option.map(ToString.toString) == Some("archive.tar.gz")
 
@@ -122,14 +122,14 @@ def addExtension01(): Bool =
 @test
 def dropExtensions01(): Bool =
     use FlixSandbox/System/FilePath.{dropExtensions, getFileName};
-    let p1 = FlixSandbox/System/FilePath.new("c:/root/file1.txt");
+    let p1 = FlixSandbox/System/FilePath.filePath("c:/root/file1.txt");
     let p2 = dropExtensions(p1);
     getFileName(p2) |> Option.map(ToString.toString) == Some("file1")
 
 @test
 def dropExtensions02(): Bool =
     use FlixSandbox/System/FilePath.{dropExtensions, getFileName};
-    let p1 = FlixSandbox/System/FilePath.new("c:/root/archive.tar.gz");
+    let p1 = FlixSandbox/System/FilePath.filePath("c:/root/archive.tar.gz");
     let p2 = dropExtensions(p1);
     getFileName(p2) |> Option.map(ToString.toString) == Some("archive")
 
@@ -140,21 +140,21 @@ def dropExtensions02(): Bool =
 @test
 def stripExtension01(): Bool =
     use FlixSandbox/System/FilePath.{stripExtension, getFileName};
-    let p1 = FlixSandbox/System/FilePath.new("c:/root/file1.txt");
+    let p1 = FlixSandbox/System/FilePath.filePath("c:/root/file1.txt");
     let ans = stripExtension(p1, "txt");
     ans |> Option.flatMap(getFileName) |> Option.map(ToString.toString) == Some("file1")
 
 @test
 def stripExtension02(): Bool =
     use FlixSandbox/System/FilePath.{stripExtension, getFileName};
-    let p1 = FlixSandbox/System/FilePath.new("c:/root/archive.tar.gz");
+    let p1 = FlixSandbox/System/FilePath.filePath("c:/root/archive.tar.gz");
     let ans = stripExtension(p1, "gz");
     ans |> Option.flatMap(getFileName) |> Option.map(ToString.toString) == Some("archive.tar")
 
 @test
 def stripExtension03(): Bool =
     use FlixSandbox/System/FilePath.{stripExtension, getFileName};
-    let p1 = FlixSandbox/System/FilePath.new("c:/root/file1");
+    let p1 = FlixSandbox/System/FilePath.filePath("c:/root/file1");
     let ans = stripExtension(p1, "txt");
     ans == None
 
@@ -165,21 +165,21 @@ def stripExtension03(): Bool =
 @test
 def stripExtensions01(): Bool =
     use FlixSandbox/System/FilePath.{stripExtensions, getFileName};
-    let p1 = FlixSandbox/System/FilePath.new("c:/root/file1.txt");
+    let p1 = FlixSandbox/System/FilePath.filePath("c:/root/file1.txt");
     let ans = stripExtensions(p1, "txt");
     ans |> Option.flatMap(getFileName) |> Option.map(ToString.toString) == Some("file1")
 
 @test
 def stripExtensions02(): Bool =
     use FlixSandbox/System/FilePath.{stripExtensions, getFileName};
-    let p1 = FlixSandbox/System/FilePath.new("c:/root/archive.tar.gz");
+    let p1 = FlixSandbox/System/FilePath.filePath("c:/root/archive.tar.gz");
     let ans = stripExtensions(p1, "tar.gz");
     ans |> Option.flatMap(getFileName) |> Option.map(ToString.toString) == Some("archive")
 
 @test
 def stripExtensions03(): Bool =
     use FlixSandbox/System/FilePath.{stripExtensions, getFileName};
-    let p1 = FlixSandbox/System/FilePath.new("c:/root/file1");
+    let p1 = FlixSandbox/System/FilePath.filePath("c:/root/file1");
     let ans = stripExtensions(p1, "txt");
     ans == None
 
@@ -190,7 +190,7 @@ def stripExtensions03(): Bool =
 @test
 def putBaseName01(): Bool =
     use FlixSandbox/System/FilePath.{putBaseName, getFileName};
-    let p1 = FlixSandbox/System/FilePath.new("c:/root/file1.txt");
+    let p1 = FlixSandbox/System/FilePath.filePath("c:/root/file1.txt");
     let p2 = putBaseName(p1, "file2");
     p2 |> getFileName |> Option.map(ToString.toString) == Some("file2.txt")
 
@@ -201,14 +201,14 @@ def putBaseName01(): Bool =
 @test
 def split01(): Bool =
     use FlixSandbox/System/FilePath.{split};
-    let p1 = FlixSandbox/System/FilePath.new("c:/root/file1.txt");
+    let p1 = FlixSandbox/System/FilePath.filePath("c:/root/file1.txt");
     let xs = split(p1);
     List.length(xs) == 3
 
 
 @test
 def isGlobMatch01(): Bool = 
-    let p1 = FlixSandbox/System/FilePath.new("file1.txt");
+    let p1 = FlixSandbox/System/FilePath.filePath("file1.txt");
     FlixSandbox/System/FilePath.isGlobMatch("*.txt", p1) == Ok(true)
 
 }

@@ -33,7 +33,7 @@ namespace FlixSandbox/System/Process {
     use FlixSandbox/System.ProcessBuilder.{ProcessBuilder};
 
 
-    pub def newProcessBuilder(cmd: String, args: List[String]): ProcessBuilder & Impure =
+    pub def processBuilder(cmd: String, args: List[String]): ProcessBuilder & Impure =
         import new java.lang.ProcessBuilder(##java.util.List): ##java.lang.ProcessBuilder & Impure as new1;
         let strs = FlixSandbox/Marshal.marshalList(x1 -> x1 as ##java.lang.Object, cmd :: args);
         ProcessBuilder(new1(strs))
@@ -121,7 +121,7 @@ namespace FlixSandbox/System/Process {
     /// Return with an Exit Code
     pub def processWithExitCode(args: ProcessArgs): Result[{exitCode :: Int32, processResponse :: String}, String] & Impure =
         use Result.flatMap;
-        let pb          = newProcessBuilder(args.cmd, args.args);
+        let pb          = processBuilder(args.cmd, args.args);
         let* proc       = start(pb);
         let* respGood   = getInput(proc, args.charset);
         let* respBad    = getError(proc, args.charset);
@@ -131,7 +131,7 @@ namespace FlixSandbox/System/Process {
 
     pub def process(args: ProcessArgs): Result[{processResponse :: String}, String] & Impure =
         use Result.flatMap;
-        let pb          = newProcessBuilder(args.cmd, args.args);
+        let pb          = processBuilder(args.cmd, args.args);
         let* proc       = start(pb);
         let* respGood   = getInput(proc, args.charset);
         let* respBad    = getError(proc, args.charset);

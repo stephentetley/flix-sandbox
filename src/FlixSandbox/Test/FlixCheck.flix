@@ -26,7 +26,7 @@ namespace FlixSandbox/Test/FlixCheck {
     ///
     pub opaque type SplittableRandom = ##java.util.SplittableRandom
 
-    def newRandom(): SplittableRandom & Impure =
+    def splittableRandom(): SplittableRandom & Impure =
         import new java.util.SplittableRandom() as newSplittableRandom;
         SplittableRandom(newSplittableRandom())
 

@@ -1,6 +1,6 @@
 
 
-def main(_args: Array[String]): Int32 & Impure = 
+def main(): Unit & Impure = 
     println("Running...");
     println("test01...");
     test01();
@@ -10,7 +10,7 @@ def main(_args: Array[String]): Int32 & Impure =
     test03();
     println("test04...");
     test04();
-    0
+    ()
 
 def test01(): Unit & Impure = 
     match I18n/Locale.getIsoCountries() {

@@ -31,7 +31,7 @@ namespace FlixSandbox/System/File/FileInputStream {
     use FlixSandbox/System/File.FileInputStream.{FileInputStream};
     use FlixSandbox/System.FilePath.{FilePath};
 
-    pub def new(path: FlixSandbox/System.FilePath): Result[FileInputStream, String] & Impure =
+    pub def fileInputStream(path: FlixSandbox/System.FilePath): Result[FileInputStream, String] & Impure =
         import new java.io.FileInputStream(##java.io.File): ##java.io.FileInputStream & Impure as newFileInputStream;
         import java.nio.file.Path.toFile(): ##java.io.File & Impure;
         try {

@@ -55,15 +55,15 @@ namespace FlixSandbox/I18n/Locale {
     /// `new` functions should not return Result as there isn't a tangible notion of failure.
     /// Unrecognized locales can be built - operations on them just don't produce results.
 
-    pub def new(language: String): Locale =
+    pub def locale(language: String): Locale =
         import new java.util.Locale(String): ##java.util.Locale & Pure as newLocale;
         Locale(newLocale(language))
 
-    pub def newWithCountry(language: String, country: String): Locale =
+    pub def localeWithCountry(language: String, country: String): Locale =
         import new java.util.Locale(String, String): ##java.util.Locale & Pure as newLocale;
         Locale(newLocale(language, country))
 
-    pub def newWithVariant(language: String, country: String, variant: String): Locale =
+    pub def localeWithVariant(language: String, country: String, variant: String): Locale =
         import new java.util.Locale(String, String, String): ##java.util.Locale & Pure as newLocale;
         Locale(newLocale(language, country, variant))
 

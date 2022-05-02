@@ -31,17 +31,17 @@ namespace FlixSandbox/Deprecated/SimpleFormat {
         FlixSandbox/Deprecated/FunStringBuilder.toString(sb)
     
     pub def empty(): Doc =         
-        Doc(FlixSandbox/Deprecated/FunStringBuilder.new())
+        Doc(FlixSandbox/Deprecated/FunStringBuilder.funStringBuilder())
 
 
     pub def text(s: String): Doc = 
         use FlixSandbox/Deprecated/FunStringBuilder.appendString;
-        let sb = FlixSandbox/Deprecated/FunStringBuilder.new();
+        let sb = FlixSandbox/Deprecated/FunStringBuilder.funStringBuilder();
         Doc(appendString(s, sb))
 
     pub def char(c: Char): Doc = 
         use FlixSandbox/Deprecated/FunStringBuilder.appendChar;
-        let sb = FlixSandbox/Deprecated/FunStringBuilder.new();
+        let sb = FlixSandbox/Deprecated/FunStringBuilder.funStringBuilder();
         Doc(appendChar(c, sb))
 
     ///
@@ -55,7 +55,7 @@ namespace FlixSandbox/Deprecated/SimpleFormat {
 
     pub def line(): Doc = 
         use FlixSandbox/Deprecated/FunStringBuilder.appendLineSeparator;
-        let sb = FlixSandbox/Deprecated/FunStringBuilder.new();
+        let sb = FlixSandbox/Deprecated/FunStringBuilder.funStringBuilder();
         Doc(appendLineSeparator(sb))
 
     ///

@@ -35,7 +35,7 @@ namespace FlixSandbox/System/File/BufferedReader {
     use FlixSandbox/System.FilePath.{FilePath};
     use FlixSandbox/Text.Charset.{Charset};
 
-    pub def new(path: FlixSandbox/System.FilePath, cs: FlixSandbox/Text.Charset): Result[BufferedReader, String] & Impure =
+    pub def bufferedReader(path: FlixSandbox/System.FilePath, cs: FlixSandbox/Text.Charset): Result[BufferedReader, String] & Impure =
         import static java.nio.file.Files.newBufferedReader(##java.nio.file.Path, ##java.nio.charset.Charset): ##java.io.BufferedReader & Impure;
         try {
             let FilePath(path1) = path;
