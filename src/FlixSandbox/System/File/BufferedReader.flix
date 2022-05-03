@@ -27,8 +27,7 @@ namespace FlixSandbox/System/File {
 
 namespace FlixSandbox/System/File/BufferedReader {
 
-    use FlixSandbox/Deprecated.Cursor;
-    use FlixSandbox/Deprecated.Cursor.{Cursor};
+
     use FlixSandbox/System/File.BufferedReader;
     use FlixSandbox/System/File.BufferedReader.{BufferedReader};
     use FlixSandbox/System.FilePath;
@@ -90,28 +89,17 @@ namespace FlixSandbox/System/File/BufferedReader {
 
 
     ///
-    /// Closes the BufferedReader when done.
+    /// Assumes the garbage collector closes the BufferedReader when done...
     ///
-    pub def lines(x: BufferedReader): Cursor[String, String] & Impure =
+    pub def lines(x: BufferedReader): Iterator[String] & Impure =
         import static flixspt.sandbox.LineIterator.newBufferedReaderlinesIterator(##java.io.BufferedReader): ##flixspt.sandbox.LineIterator & Impure;
         import flixspt.sandbox.LineIterator.hasNext(): Bool & Impure;
         import flixspt.sandbox.LineIterator.next(): String & Impure;
         let BufferedReader(x1) = x;
         let primIter = newBufferedReaderlinesIterator(x1);
-        let iterNext = () -> {
-            try {
-                let s1 = next(primIter);
-                Ok(s1)
-            } catch {
-                case _: ##java.lang.Exception => Err("lines[next]")
-            }
-        };
-        let cursorAlg: FlixSandbox/Deprecated.CursorAlg[String, String] =  {
-              hasNext = () -> hasNext(primIter)
-            , next = iterNext
-            , finalize = () -> () as & Impure
-        };
-        FlixSandbox/Deprecated/Cursor.makeCursor(cursorAlg)
+        let done1 = () -> not hasNext(primIter);
+        let next1 = () -> next(primIter);
+        Iterator(done1, next1)
 
 
 }
