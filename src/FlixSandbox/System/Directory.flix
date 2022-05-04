@@ -17,8 +17,7 @@
 
 namespace FlixSandbox/System/Directory {
 
-    use FlixSandbox/Deprecated.Cursor;
-    use FlixSandbox/Deprecated.Cursor.{Cursor};
+
     use FlixSandbox/System.FilePath;
     use FlixSandbox/System.FilePath.{FilePath};
 
@@ -43,31 +42,22 @@ namespace FlixSandbox/System/Directory {
     /// Use File.list
     pub def contents(path: FilePath): Result[List[FilePath], String] & Impure =
         contentsIter(path)
-            |> FlixSandbox/Deprecated/Cursor.toList!
+            |> Result.map(Iterator.toList)
 
     /// Use File.listWithIter
-    pub def contentsIter(path: FilePath): Cursor[String, FilePath] & Impure =
+    pub def contentsIter(path: FilePath): Result[Iterator[FilePath], String] & Impure =
         import static flixspt.sandbox.PathIterator.newFileslistIterator(##java.nio.file.Path): ##flixspt.sandbox.PathIterator & Impure;
         import flixspt.sandbox.PathIterator.hasNext(): Bool & Impure;
         import flixspt.sandbox.PathIterator.next(): ##java.nio.file.Path & Impure;
-        let FilePath(path1) = path;
-        let primIter = newFileslistIterator(path1);
-        let iterNext = () -> {
-            try {
-                let p1 = next(primIter);
-                Ok(FilePath(p1))
-            } catch {
-                case _: ##java.lang.Exception => Err("contentsIter[next]")
-            }
-        };
-        let cursorAlg: FlixSandbox/Deprecated.CursorAlg[String, FilePath] =  {
-              hasNext = () -> hasNext(primIter)
-            , next = iterNext
-            , finalize = () -> () as & Impure
-        };
-        FlixSandbox/Deprecated/Cursor.makeCursor(cursorAlg)
-
-    //// Iterator<Path> iter1 = Files.list(dirpath).iterator();
+        try {
+            let FilePath(path1) = path;
+            let primIter = newFileslistIterator(path1);
+            let done1 = () -> not hasNext(primIter);
+            let next1 = () -> FilePath(next(primIter));
+            Ok(Iterator(done1, next1))
+        } catch {
+            case _: ##java.lang.Exception => Err("contentsIter")
+        }
 
     pub def contentsIter2(path: FilePath): Result[Iterator[FilePath], String] & Impure = 
         import static java.nio.file.Files.list(##java.nio.file.Path): ##java.util.stream.Stream & Impure;
@@ -89,55 +79,41 @@ namespace FlixSandbox/System/Directory {
 
     pub def matches(glob: String, path: FilePath): Result[List[FilePath], String] & Impure =
         matchesIter(glob, path)
-            |> FlixSandbox/Deprecated/Cursor.toList!
+            |> Result.map(Iterator.toList)
 
-    pub def matchesIter(glob: String, path: FilePath): Cursor[String, FilePath] & Impure =
+    pub def matchesIter(glob: String, path: FilePath): Result[Iterator[FilePath], String] & Impure =
         import static flixspt.sandbox.PathIterator.newFilesnewDirectoryStreamIterator(##java.nio.file.Path, String): ##flixspt.sandbox.PathIterator & Impure;
         import flixspt.sandbox.PathIterator.hasNext(): Bool & Impure;
         import flixspt.sandbox.PathIterator.next(): ##java.nio.file.Path & Impure;
-        let FilePath(path1) = path;
-        let primIter = newFilesnewDirectoryStreamIterator(path1, glob);
-        let iterNext = () -> {
-            try {
-                let p1 = next(primIter);
-                Ok(FilePath(p1))
-            } catch {
-                case _: ##java.lang.Exception => Err("matchesIter[next]")
-            }
-        };
-        let cursorAlg: FlixSandbox/Deprecated.CursorAlg[String, FilePath] =  {
-              hasNext = () -> hasNext(primIter)
-            , next = iterNext
-            , finalize = () -> () as & Impure
-        };
-        FlixSandbox/Deprecated/Cursor.makeCursor(cursorAlg)
+        try {
+            let FilePath(path1) = path;
+            let primIter = newFilesnewDirectoryStreamIterator(path1, glob);
+            let done1 = () -> not hasNext(primIter);
+            let next1 = () -> FilePath(next(primIter));
+            Ok(Iterator(done1, next1))
+        } catch {
+            case _: ##java.lang.Exception => Err("matchesIter")
+        }
 
     pub def contentsAll(followLinks: Bool, path: FilePath): Result[List[FilePath], String] & Impure =
         contentsAllIter(followLinks, path)
-            |> FlixSandbox/Deprecated/Cursor.toList!
+            |> Result.map(Iterator.toList)
 
     /// Use `files.walk`...
     /// All levels - recursive, uses a Iterator
-    pub def contentsAllIter(followLinks: Bool, path: FilePath): Cursor[String, FilePath] & Impure =
+    pub def contentsAllIter(followLinks: Bool, path: FilePath): Result[Iterator[FilePath], String] & Impure =
         import static flixspt.sandbox.PathIterator.newFileswalkIterator(##java.nio.file.Path, Bool): ##flixspt.sandbox.PathIterator & Impure;
         import flixspt.sandbox.PathIterator.hasNext(): Bool & Impure;
         import flixspt.sandbox.PathIterator.next(): ##java.nio.file.Path & Impure;
-        let FilePath(path1) = path;
-        let primIter = newFileswalkIterator(path1, followLinks);
-        let iterNext = () -> {
-            try {
-                let p1 = next(primIter);
-                Ok(FilePath(p1))
-            } catch {
-                case _: ##java.lang.Exception => Err("contentsAllIter[next]")
-            }
-        };
-        let cursorAlg: FlixSandbox/Deprecated.CursorAlg[String, FilePath] =  {
-              hasNext = () -> hasNext(primIter)
-            , next = iterNext
-            , finalize = () -> () as & Impure
-        };
-        FlixSandbox/Deprecated/Cursor.makeCursor(cursorAlg)
+        try {
+            let FilePath(path1) = path;
+            let primIter = newFileswalkIterator(path1, followLinks);
+            let done1 = () -> not hasNext(primIter);
+            let next1 = () -> FilePath(next(primIter));
+            Ok(Iterator(done1, next1))
+        } catch {
+            case _: ##java.lang.Exception => Err("contentsAllIter")
+        }
 
     /// Use File.mkdir...
     pub def createDirectory(path: FilePath): Unit & Impure =
