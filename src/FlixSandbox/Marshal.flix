@@ -237,6 +237,7 @@ namespace FlixSandbox/Marshal {
         unmarshalIterator(downcast, javaIter)
 
 
+
     pub def marshalListToSet(upcast: a -> ##java.lang.Object & ef, l: List[a]): ##java.util.Set & ef =
         let step = xs -> match xs {
             case x :: rs => Some((upcast(x), rs))
@@ -273,6 +274,22 @@ namespace FlixSandbox/Marshal {
         };
         foldMap(step, ks -> ks, javam) |> f -> f(Nil)
 
+
+    pub def marshalListToArray(upcast: a -> ##java.lang.Object & ef, l: List[a]): Array[##java.lang.Object] & Impure =
+        import java.util.ArrayList.toArray(): Array[##java.lang.Object] & Impure;    
+        let step = iter -> match Iterator.next(iter) {
+            case Some(x)    => Some((upcast(x), iter))
+            case None       => None
+        };
+        unfoldArrayList(step, List.toIterator(l)) |> toArray
+
+    pub def marshalSetToArray(upcast: a -> ##java.lang.Object & ef, s: Set[a]): Array[##java.lang.Object] & Impure =
+        import java.util.ArrayList.toArray(): Array[##java.lang.Object] & Impure;    
+        let step = iter -> match Iterator.next(iter) {
+            case Some(x)    => Some((upcast(x), iter))
+            case None       => None
+        };
+        unfoldArrayList(step, Set.toIterator(s)) |> toArray
 
     /// Folds
 
