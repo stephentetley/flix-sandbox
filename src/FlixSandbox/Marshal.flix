@@ -426,5 +426,17 @@ namespace FlixSandbox/Marshal {
         };
         loop(st, new1())
 
-       
+    /// Special function to avoid Flix marshal bug:
+    /// https://github.com/flix/flix/issues/3332
+
+    pub def runVaragsOfString(l: List[String], k: Array[String] -> a & Impure): a & Impure =
+        import static flixspt.sandbox.MarshalArrayList.arrayListOfStringToStringArray(##java.util.ArrayList): Array[String] & Impure;
+        let step = iter -> match Iterator.next(iter) {
+            case Some(x)    => Some((x as ##java.lang.Object, iter))
+            case None       => None
+        };
+        let arrlist = unfoldArrayList(step, List.toIterator(l));
+        k(arrayListOfStringToStringArray(arrlist))
+        
+
 }

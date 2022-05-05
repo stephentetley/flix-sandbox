@@ -26,7 +26,20 @@ def toString01(): Bool =
     let p1 = FlixSandbox/System/FilePath.filePath("src.flix");
     ToString.toString(p1) == "src.flix"
 
+/////////////////////////////////////////////////////////////////////////////
+// filePathConcat
+/////////////////////////////////////////////////////////////////////////////
 
+@test
+def filePathConcat01(): Bool =
+    let p1 = FlixSandbox/System/FilePath.filePathConcat("src.flix" :: Nil);
+    ToString.toString(p1) == "src.flix"
+
+@test
+def filePathConcat02(): Bool & Impure =
+    let p1 = FlixSandbox/System/FilePath.filePathConcat("home" :: "coding" :: "src.flix" :: Nil);
+    println("filePathConcat02: ${p1}");
+    FlixSandbox/System/FilePath.getFileName(p1) == Some(FlixSandbox/System/FilePath.filePath("src.flix"))
 
 /////////////////////////////////////////////////////////////////////////////
 // normalize                                                               //

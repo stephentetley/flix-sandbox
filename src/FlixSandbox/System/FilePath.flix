@@ -92,6 +92,17 @@ namespace FlixSandbox/System/FilePath {
             case _: ##java.lang.Exception => empty()
         }
 
+    pub def filePathConcat(l: List[String]): FilePath =
+        import static java.nio.file.Path.of(String, Array[String]): ##java.nio.file.Path & Impure as of1;
+        try {
+            match l { 
+                case x :: rs => FilePath(FlixSandbox/Marshal.runVaragsOfString(rs, of1(x)))  as & Pure
+                case Nil     => empty()
+            }
+        } catch {
+            case _: ##java.lang.Exception => empty()
+        }
+
 
     pub def tryNew(s: String): Result[FilePath, String] =
         import static java.nio.file.Path.of(String, Array[String]): ##java.nio.file.Path & Pure as of1;
