@@ -52,11 +52,17 @@ namespace FlixSandbox {
             }
 
         pub def foldRight(f: (a, b) -> b & ef, s: b, t: Either[e, a]): b & ef = 
-            use Applicative.{point};
             match t {
                 case Left(_) => s
                 case Right(a) => f(a, s)
             }
+
+        pub def foldRightWithCont(f: (a, Unit -> b & ef) -> b & ef, s: b, t: Either[e, a]): b & ef = 
+            match t {
+                case Left(_) => s
+                case Right(a) => f(a, _ -> s as & ef)
+            }
+
     }
 
     instance Traversable[Either[e]] {

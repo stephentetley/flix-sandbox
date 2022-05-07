@@ -83,7 +83,7 @@ def postorder01(): Bool =
 // foldRoseTree                                                            //
 /////////////////////////////////////////////////////////////////////////////
 
-def sum(xs: List[Int32]): Int32 = List.foldRight((x, fy) -> x + fy(), 0, xs)
+def sum(xs: List[Int32]): Int32 = List.foldRightWithCont((x, fy) -> x + fy(), 0, xs)
 
 @test
 def foldRoseTree01(): Bool =
