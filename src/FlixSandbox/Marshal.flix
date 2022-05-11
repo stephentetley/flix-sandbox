@@ -370,61 +370,61 @@ namespace FlixSandbox/Marshal {
         unfoldHashSetHelper(f, st) as & ef
 
     def unfoldHashSetHelper(f: s -> Option[(##java.lang.Object, s)] & ef, st: s): ##java.util.HashSet & Impure =
-        import new java.util.HashSet(): ##java.util.HashSet & Impure as new1;
-        import java.util.HashSet.add(##java.lang.Object): Bool & Impure as add!; 
+        import new java.util.HashSet(): ##java.util.HashSet & Impure as newHashSet;
+        import java.util.HashSet.add(##java.lang.Object): Bool & Impure as add; 
         def loop(st1, ac) = match f(st1) {
             case None         => ac
-            case Some(a, st2) => { let _ = add!(ac, a); loop(st2, ac) }
+            case Some(a, st2) => { let _ = add(ac, a); loop(st2, ac) }
         };
-        loop(st, new1())
+        loop(st, newHashSet())
 
     pub def unfoldLinkedList(f: s -> Option[(##java.lang.Object, s)] & ef, st: s): ##java.util.LinkedList & ef =
         unfoldLinkedListHelper(f, st) as & ef
 
     def unfoldLinkedListHelper(f: s -> Option[(##java.lang.Object, s)] & ef, st: s): ##java.util.LinkedList & Impure =
-        import new java.util.LinkedList(): ##java.util.LinkedList & Impure as new1;
-        import java.util.LinkedList.add(##java.lang.Object): Bool & Impure as add!;
+        import new java.util.LinkedList(): ##java.util.LinkedList & Impure as newLinkedList;
+        import java.util.LinkedList.add(##java.lang.Object): Bool & Impure as add;
         def loop(st1, ac) = match f(st1) {
             case None         => ac
-            case Some(a, st2) => { let _ = add!(ac, a); loop(st2, ac) }
+            case Some(a, st2) => { let _ = add(ac, a); loop(st2, ac) }
         };
-        loop(st, new1())
+        loop(st, newLinkedList())
 
     pub def unfoldArrayList(f: s -> Option[(##java.lang.Object, s)] & ef, st: s): ##java.util.ArrayList & ef =
         unfoldArrayListHelper(f, st) as & ef
 
     def unfoldArrayListHelper(f: s -> Option[(##java.lang.Object, s)] & ef, st: s): ##java.util.ArrayList & Impure =
-        import new java.util.ArrayList(): ##java.util.ArrayList & Impure as new1;
-        import java.util.ArrayList.add(##java.lang.Object): Bool & Impure as add!;
+        import new java.util.ArrayList(): ##java.util.ArrayList & Impure as newArrayList;
+        import java.util.ArrayList.add(##java.lang.Object): Bool & Impure as add;
         def loop(st1, ac) = match f(st1) {
             case None         => ac
-            case Some(a, st2) => { let _ = add!(ac, a); loop(st2, ac) }
+            case Some(a, st2) => { let _ = add(ac, a); loop(st2, ac) }
         };
-        loop(st, new1())
+        loop(st, newArrayList())
 
     pub def unfoldHashMap(f: s -> Option[(##java.lang.Object, ##java.lang.Object, s)] & ef, st: s): ##java.util.HashMap & ef =
         unfoldHashMapHelper(f, st) as & ef
 
     def unfoldHashMapHelper(f: s -> Option[(##java.lang.Object, ##java.lang.Object, s)] & ef, st: s): ##java.util.HashMap & Impure =
-        import new java.util.HashMap(): ##java.util.HashMap & Impure as new1;
-        import java.util.HashMap.put(##java.lang.Object, ##java.lang.Object): ##java.lang.Object & Impure as put!; 
+        import new java.util.HashMap(): ##java.util.HashMap & Impure as newHashMap;
+        import java.util.HashMap.put(##java.lang.Object, ##java.lang.Object): ##java.lang.Object & Impure as put; 
         def loop(st1, ac) = match f(st1) {
             case None         => ac
-            case Some(k, v, st2) => { let _ = put!(ac, k, v); loop(st2, ac) }
+            case Some(k, v, st2) => { let _ = put(ac, k, v); loop(st2, ac) }
         };
-        loop(st, new1())
+        loop(st, newHashMap())
 
     pub def unfoldTreeMap(f: s -> Option[(##java.lang.Object, ##java.lang.Object, s)] & ef, st: s): ##java.util.TreeMap & ef =
         unfoldTreeMapHelper(f, st) as & ef
 
     def unfoldTreeMapHelper(f: s -> Option[(##java.lang.Object, ##java.lang.Object, s)] & ef, st: s): ##java.util.TreeMap & Impure =
-        import new java.util.TreeMap(): ##java.util.TreeMap & Impure as new1;
-        import java.util.TreeMap.put(##java.lang.Object, ##java.lang.Object): ##java.lang.Object & Impure as put!; 
+        import new java.util.TreeMap(): ##java.util.TreeMap & Impure as newTreeMap;
+        import java.util.TreeMap.put(##java.lang.Object, ##java.lang.Object): ##java.lang.Object & Impure as put; 
         def loop(st1, ac) = match f(st1) {
             case None         => ac
-            case Some(k, v, st2) => { let _ = put!(ac, k, v); loop(st2, ac) }
+            case Some(k, v, st2) => { let _ = put(ac, k, v); loop(st2, ac) }
         };
-        loop(st, new1())
+        loop(st, newTreeMap())
 
     /// Special function to avoid Flix marshal bug:
     /// https://github.com/flix/flix/issues/3332

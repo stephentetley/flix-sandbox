@@ -71,7 +71,7 @@ namespace FlixSandbox/I18n/Locale {
         import static java.util.Locale.getDefault(): ##java.util.Locale & Impure;
         Locale(getDefault())
 
-    pub def setJvmDefaultLocale!(x: Locale): Result[Unit, String] & Impure =
+    pub def setJvmDefaultLocale(x: Locale): Result[Unit, String] & Impure =
         import static java.util.Locale.setDefault(##java.util.Locale): Unit & Impure;
         try {
             let Locale(x1) = x;

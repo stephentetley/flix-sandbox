@@ -32,82 +32,89 @@ namespace FlixSandbox/System/Process {
     use FlixSandbox/System.ProcessBuilder;
     use FlixSandbox/System.ProcessBuilder.{ProcessBuilder};
 
+    /// TODO need a ProcessBuilder module...
 
     pub def processBuilder(cmd: String, args: List[String]): ProcessBuilder & Impure =
-        import new java.lang.ProcessBuilder(##java.util.List): ##java.lang.ProcessBuilder & Impure as new1;
+        import new java.lang.ProcessBuilder(##java.util.List): ##java.lang.ProcessBuilder & Impure as newProcessBuilder;
         let strs = FlixSandbox/Marshal.marshalList(x1 -> x1 as ##java.lang.Object, cmd :: args);
-        ProcessBuilder(new1(strs))
+        ProcessBuilder(newProcessBuilder(strs))
 
 
-    pub def directory!(x: ProcessBuilder, path: FlixSandbox/System.FilePath): Unit & Impure =
+    pub def setDirectory(path: FlixSandbox/System.FilePath, pb: ProcessBuilder): Unit & Impure =
         import java.lang.ProcessBuilder.directory(##java.io.File): ##java.lang.ProcessBuilder & Impure;
         import new java.io.File(String): ##java.io.File & Impure as newFile;
-        let ProcessBuilder(x1) = x;
+        let ProcessBuilder(pb1) = pb;
         let name = ToString.toString(path);
         let f1 = newFile(name);
-        directory(x1, f1);
+        directory(pb1, f1);
         ()
 
-    pub def getDirectory(x: ProcessBuilder): FlixSandbox/System.FilePath & Impure =
+    pub def getDirectory(pb: ProcessBuilder): FlixSandbox/System.FilePath & Impure =
         import java.lang.ProcessBuilder.directory(): ##java.io.File & Impure;
         import java.io.File.toPath(): ##java.nio.file.Path & Impure;
-        let ProcessBuilder(x1) = x;
-        let p1 = directory(x1) |> toPath;
+        let ProcessBuilder(pb1) = pb;
+        let p1 = directory(pb1) |> toPath;
         FilePath(p1)
 
-    pub def start(x: ProcessBuilder): Result[Process, String] & Impure =
+    pub def start(pb: ProcessBuilder): Result[Process, String] & Impure =
         import java.lang.ProcessBuilder.start(): ##java.lang.Process & Impure;
         try {
-            let ProcessBuilder(x1) = x;
-            let proc = start(x1);
+            let ProcessBuilder(pb1) = pb;
+            let proc = start(pb1);
             Ok(Process(proc))
         } catch {
-            case ex: ##java.io.IOException =>
+            case ex: ##java.lang.Exception =>
                 import java.lang.Throwable.getMessage(): String & Impure;
                 Err(getMessage(ex))
         }
 
-    pub def waitFor(x: Process): Result[Int32, String] & Impure =
+    pub def waitFor(p: Process): Result[Int32, String] & Impure =
         import java.lang.Process.waitFor(): Int32 & Impure;
         try {
-            let Process(x1) = x;
-            let retcode = waitFor(x1);
+            let Process(p1) = p;
+            let retcode = waitFor(p1);
             Ok(retcode)
         } catch {
-            case _: ##java.io.IOException => Err("waitFor")
+            case ex: ##java.lang.Exception =>
+                import java.lang.Throwable.getMessage(): String & Impure;
+                Err(getMessage(ex))
         }
 
 
-    pub def getInput(x: Process, c: FlixSandbox/Text.Charset): Result[String, String] & Impure =
+    pub def getInput(cs: FlixSandbox/Text.Charset, p: Process): Result[String, String] & Impure =
         import java.lang.Process.getInputStream(): ##java.io.InputStream & Impure;
         import java.io.InputStream.readAllBytes(): Array[Int8] & Impure;
-        import new java.lang.String(Array[Int8], ##java.nio.charset.Charset): String & Impure as new1;
+        import new java.lang.String(Array[Int8], ##java.nio.charset.Charset): String & Impure as newString;
         try {
-            let Process(x1) = x;
-            let Charset(c1) = c;
-            let strm = getInputStream(x1);
+            let Process(p1) = p;
+            let Charset(cs1) = cs;
+            let strm = getInputStream(p1);
             let bytes = readAllBytes(strm);
-            let s1 = new1(bytes, c1);
+            let s1 = newString(bytes, cs1);
             Ok(s1)
         } catch {
-            case _: ##java.lang.Exception => Err("getInput")
+            case ex: ##java.lang.Exception =>
+                import java.lang.Throwable.getMessage(): String & Impure;
+                Err(getMessage(ex))
         }
 
 
 
-    pub def getError(x: Process, c: FlixSandbox/Text.Charset): Result[String, String] & Impure =        
+    pub def getError(cs: FlixSandbox/Text.Charset, p: Process): Result[String, String] & Impure =        
         import java.lang.Process.getErrorStream(): ##java.io.InputStream & Impure;
         import java.io.InputStream.readAllBytes(): Array[Int8] & Impure;
-        import new java.lang.String(Array[Int8], ##java.nio.charset.Charset): String & Impure as new1;
+        import new java.lang.String(Array[Int8], ##java.nio.charset.Charset): String & Impure as newString;
         try {
-            let Process(x1) = x;
-            let Charset(c1) = c;
-            let strm = getErrorStream(x1);
+            let Process(p1) = p;
+            let Charset(cs1) = cs;
+            let strm = getErrorStream(p1);
             let bytes = readAllBytes(strm);
-            let s1 = new1(bytes, c1);
+            let s1 = newString(bytes, cs1);
             Ok(s1)
         } catch {
-            case _: ##java.lang.Exception => Err("getError")
+            case ex: ##java.lang.Exception =>
+                import java.lang.Throwable.getMessage(): String & Impure;
+                Err(getMessage(ex))
         }
 
 
@@ -123,8 +130,8 @@ namespace FlixSandbox/System/Process {
         use Result.flatMap;
         let pb          = processBuilder(args.cmd, args.args);
         let* proc       = start(pb);
-        let* respGood   = getInput(proc, args.charset);
-        let* respBad    = getError(proc, args.charset);
+        let* respGood   = getInput(args.charset, proc);
+        let* respBad    = getError(args.charset, proc);
         let* code       = waitFor(proc);
         Ok({exitCode = code, processResponse = if (code == 0) respGood else respBad})
 
@@ -133,8 +140,8 @@ namespace FlixSandbox/System/Process {
         use Result.flatMap;
         let pb          = processBuilder(args.cmd, args.args);
         let* proc       = start(pb);
-        let* respGood   = getInput(proc, args.charset);
-        let* respBad    = getError(proc, args.charset);
+        let* respGood   = getInput(args.charset, proc);
+        let* respBad    = getError(args.charset, proc);
         let* code       = waitFor(proc);
         if (code == 0) 
             Ok({processResponse = respGood})
