@@ -16,7 +16,6 @@
 
 
 namespace FlixSandbox/System {
-    pub opaque type ProcessBuilder = ##java.lang.ProcessBuilder
 
     pub opaque type Process = ##java.lang.Process
 }
@@ -32,41 +31,10 @@ namespace FlixSandbox/System/Process {
     use FlixSandbox/System.ProcessBuilder;
     use FlixSandbox/System.ProcessBuilder.{ProcessBuilder};
 
-    /// TODO need a ProcessBuilder module...
 
-    pub def processBuilder(cmd: String, args: List[String]): ProcessBuilder & Impure =
-        import new java.lang.ProcessBuilder(##java.util.List): ##java.lang.ProcessBuilder & Impure as newProcessBuilder;
-        let strs = FlixSandbox/Marshal.marshalList(x1 -> x1 as ##java.lang.Object, cmd :: args);
-        ProcessBuilder(newProcessBuilder(strs))
+    pub def processBuilder(cmd: String, args: List[String]): ProcessBuilder[ka, Unit] =
+        FlixSandbox/System/ProcessBuilder.command(cmd, args)
 
-
-    pub def setDirectory(path: FlixSandbox/System.FilePath, pb: ProcessBuilder): Unit & Impure =
-        import java.lang.ProcessBuilder.directory(##java.io.File): ##java.lang.ProcessBuilder & Impure;
-        import new java.io.File(String): ##java.io.File & Impure as newFile;
-        let ProcessBuilder(pb1) = pb;
-        let name = ToString.toString(path);
-        let f1 = newFile(name);
-        directory(pb1, f1);
-        ()
-
-    pub def getDirectory(pb: ProcessBuilder): FlixSandbox/System.FilePath & Impure =
-        import java.lang.ProcessBuilder.directory(): ##java.io.File & Impure;
-        import java.io.File.toPath(): ##java.nio.file.Path & Impure;
-        let ProcessBuilder(pb1) = pb;
-        let p1 = directory(pb1) |> toPath;
-        FilePath(p1)
-
-    pub def start(pb: ProcessBuilder): Result[Process, String] & Impure =
-        import java.lang.ProcessBuilder.start(): ##java.lang.Process & Impure;
-        try {
-            let ProcessBuilder(pb1) = pb;
-            let proc = start(pb1);
-            Ok(Process(proc))
-        } catch {
-            case ex: ##java.lang.Exception =>
-                import java.lang.Throwable.getMessage(): String & Impure;
-                Err(getMessage(ex))
-        }
 
     pub def waitFor(p: Process): Result[Int32, String] & Impure =
         import java.lang.Process.waitFor(): Int32 & Impure;
@@ -129,7 +97,7 @@ namespace FlixSandbox/System/Process {
     pub def processWithExitCode(args: ProcessArgs): Result[{exitCode :: Int32, processResponse :: String}, String] & Impure =
         use Result.flatMap;
         let pb          = processBuilder(args.cmd, args.args);
-        let* proc       = start(pb);
+        let* proc       = FlixSandbox/System/ProcessBuilder.start(pb);
         let* respGood   = getInput(args.charset, proc);
         let* respBad    = getError(args.charset, proc);
         let* code       = waitFor(proc);
@@ -139,7 +107,7 @@ namespace FlixSandbox/System/Process {
     pub def process(args: ProcessArgs): Result[{processResponse :: String}, String] & Impure =
         use Result.flatMap;
         let pb          = processBuilder(args.cmd, args.args);
-        let* proc       = start(pb);
+        let* proc       = FlixSandbox/System/ProcessBuilder.start(pb);
         let* respGood   = getInput(args.charset, proc);
         let* respBad    = getError(args.charset, proc);
         let* code       = waitFor(proc);

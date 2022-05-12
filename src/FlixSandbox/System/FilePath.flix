@@ -80,6 +80,10 @@ namespace FlixSandbox/System/FilePath {
 
     /// Note - current set of operations should be pure?
 
+    /// Unwrap
+    pub def getPath(p: FilePath): ##java.nio.file.Path = 
+        let FilePath(p1) = p;
+        p1
 
     ///
     /// Returns a new FilePath.
