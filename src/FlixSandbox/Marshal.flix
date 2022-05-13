@@ -92,6 +92,23 @@ namespace FlixSandbox/Marshal {
     ///         o as String
 
 
+    pub def unmarshalOptional(downcast: ##java.lang.Object -> a & ef, opt: ##java.util.Optional): Option[a] & ef = 
+        import java.util.Optional.isPresent(): Bool & Pure;
+        import java.util.Optional.get(): ##java.lang.Object & Pure;
+        if (isPresent(opt))
+            get(opt) |> downcast |> Some
+        else 
+            None
+
+    pub def marshalOptional(upcast: a -> ##java.lang.Object & ef, o: Option[a]): ##java.util.Optional & ef =
+        import static java.util.Optional.of(##java.lang.Object): ##java.util.Optional & Pure;
+        import static java.util.Optional.empty(): ##java.util.Optional & Pure;
+        match o { 
+            case Some(a) => of(upcast(a))
+            case None    => empty()
+        }
+
+        
     /// NOTE caller decides whether to wrap with Err...
     
     pub def unmarshalExceptionMessage(ex: ##java.lang.Exception): String & Impure = 
