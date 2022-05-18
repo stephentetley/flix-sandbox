@@ -16,85 +16,85 @@
 
 
 ///
-/// The MultiMap type.
+/// The BagMultiMap type.
 ///
-pub enum MultiMap[k, v] {
-    case MultiMap(Map[k, Nec[v]])
+pub enum BagMultiMap[k, v] {
+    case BagMultiMap(Map[k, Nec[v]])
 }
 
-instance Boxable[MultiMap[k, v]] with Boxable[k], Boxable[v]
+instance Boxable[BagMultiMap[k, v]] with Boxable[k], Boxable[v]
 
-instance ToString[MultiMap[k, v]] with ToString[k], ToString[v] {
-    pub def toString(m: MultiMap[k, v]): String =
-        let MultiMap(m1) = m;
+instance ToString[BagMultiMap[k, v]] with ToString[k], ToString[v] {
+    pub def toString(m: BagMultiMap[k, v]): String =
+        let BagMultiMap(m1) = m;
         let s = Map.foldRightWithKey((k, v, acc) -> "${k} => ${v}, ${acc}", "", m1);
-        "MultiMap#{${String.dropRight(2, s)}}"
+        "BagMultiMap#{${String.dropRight(2, s)}}"
 }
 
-instance Hash[MultiMap[k, v]] with Hash[k], Hash[v] {
-    pub def hash(m: MultiMap[k, v]): Int32 =
-        let MultiMap(m1) = m;
+instance Hash[BagMultiMap[k, v]] with Hash[k], Hash[v] {
+    pub def hash(m: BagMultiMap[k, v]): Int32 =
+        let BagMultiMap(m1) = m;
         Map.foldLeftWithKey((acc, k, v) -> acc * 17 + Hash.hash(k) + 19 * Hash.hash(v), 7937, m1)
 }
 
-instance Eq[MultiMap[k, v]] with Eq[k], Eq[v] {
-    pub def eq(m1: MultiMap[k, v], m2: MultiMap[k, v]): Bool =
-        MultiMap.toList(m1) == MultiMap.toList(m2)
+instance Eq[BagMultiMap[k, v]] with Eq[k], Eq[v] {
+    pub def eq(m1: BagMultiMap[k, v], m2: BagMultiMap[k, v]): Bool =
+        BagMultiMap.toList(m1) == BagMultiMap.toList(m2)
 
 }
 
-instance Order[MultiMap[k, v]] with Order[k], Order[v] {
+instance Order[BagMultiMap[k, v]] with Order[k], Order[v] {
 
-    pub def compare(x: MultiMap[k, v], y: MultiMap[k, v]): Comparison =
-        MultiMap.toList(x) <=> MultiMap.toList(y)
+    pub def compare(x: BagMultiMap[k, v], y: BagMultiMap[k, v]): Comparison =
+        BagMultiMap.toList(x) <=> BagMultiMap.toList(y)
 
 }
 
-instance Functor[MultiMap[k]] {
-    pub def map(f: v1 -> v2 & ef, m: MultiMap[k, v1]): MultiMap[k, v2] & ef = MultiMap.map(f, m)
+instance Functor[BagMultiMap[k]] {
+    pub def map(f: v1 -> v2 & ef, m: BagMultiMap[k, v1]): BagMultiMap[k, v2] & ef = BagMultiMap.map(f, m)
 }
 
-instance Foldable[MultiMap[k]] {
-    pub def foldLeft(f: (b, v) -> b & ef, s: b, m: MultiMap[k, v]): b & ef = MultiMap.foldLeft((acc, v) -> f(acc, v), s, m)
-    pub def foldRight(f: (v, b) -> b & ef, s: b, m: MultiMap[k, v]): b & ef = MultiMap.foldRight(f, s, m)
-    pub def foldRightWithCont(f: (v, Unit -> b & ef) -> b & ef, s: b, m: MultiMap[k, v]): b & ef = MultiMap.foldRightWithCont(f, s, m)
+instance Foldable[BagMultiMap[k]] {
+    pub def foldLeft(f: (b, v) -> b & ef, s: b, m: BagMultiMap[k, v]): b & ef = BagMultiMap.foldLeft((acc, v) -> f(acc, v), s, m)
+    pub def foldRight(f: (v, b) -> b & ef, s: b, m: BagMultiMap[k, v]): b & ef = BagMultiMap.foldRight(f, s, m)
+    pub def foldRightWithCont(f: (v, Unit -> b & ef) -> b & ef, s: b, m: BagMultiMap[k, v]): b & ef = BagMultiMap.foldRightWithCont(f, s, m)
 }
 
-instance Traversable[MultiMap[k]] {
-    pub def traverse(f: a -> m[b] & ef, t: MultiMap[k, a]): m[MultiMap[k, b]] & ef with Applicative[m] = MultiMap.traverse(f, t)
-    pub override def sequence(t: MultiMap[k, m[a]]): m[MultiMap[k, a]] with Applicative[m] = MultiMap.sequence(t)
+instance Traversable[BagMultiMap[k]] {
+    pub def traverse(f: a -> m[b] & ef, t: BagMultiMap[k, a]): m[BagMultiMap[k, b]] & ef with Applicative[m] = BagMultiMap.traverse(f, t)
+    pub override def sequence(t: BagMultiMap[k, m[a]]): m[BagMultiMap[k, a]] with Applicative[m] = BagMultiMap.sequence(t)
 }
 
-instance SemiGroup[MultiMap[k,v]] with Order[k], SemiGroup[v] {
-    pub def combine(x: MultiMap[k,v], y: MultiMap[k,v]): MultiMap[k,v] = MultiMap.union(x, y)
+instance SemiGroup[BagMultiMap[k,v]] with Order[k], SemiGroup[v] {
+    pub def combine(x: BagMultiMap[k,v], y: BagMultiMap[k,v]): BagMultiMap[k,v] = BagMultiMap.union(x, y)
 }
 
-instance CommutativeSemiGroup[MultiMap[k,v]] with Order[k], CommutativeSemiGroup[v]
+instance CommutativeSemiGroup[BagMultiMap[k,v]] with Order[k], CommutativeSemiGroup[v]
 
-instance Monoid[MultiMap[k, v]] with Order[k], Monoid[v] {
-    pub def empty(): MultiMap[k, v] = MultiMap.empty()
+instance Monoid[BagMultiMap[k, v]] with Order[k], Monoid[v] {
+    pub def empty(): BagMultiMap[k, v] = BagMultiMap.empty()
 }
 
-instance CommutativeMonoid[MultiMap[k, v]] with Order[k], CommutativeMonoid[v]
+instance CommutativeMonoid[BagMultiMap[k, v]] with Order[k], CommutativeMonoid[v]
 
 
-namespace MultiMap {
+namespace BagMultiMap {
 
     ///
     /// Returns the empty map.
     ///
-    pub def empty(): MultiMap[k, v] = MultiMap(Map.empty())
+    pub def empty(): BagMultiMap[k, v] = BagMultiMap(Map.empty())
 
     ///
     /// Returns the singleton multimap where key `k` is mapped to value `v`.
     ///
-    pub def singleton(k: k, v: v): MultiMap[k, v] with Order[k] = MultiMap(Map.singleton(k, Nec.singleton(v)))
+    pub def singleton(k: k, v: v): BagMultiMap[k, v] with Order[k] = BagMultiMap(Map.singleton(k, Nec.singleton(v)))
 
     ///
     /// Returns `true` if and only if `m` is the empty multimap.
     ///
-    pub def isEmpty(m: MultiMap[k, v]): Bool =
-        let MultiMap(m1) = m;
+    pub def isEmpty(m: BagMultiMap[k, v]): Bool =
+        let BagMultiMap(m1) = m;
         Map.isEmpty(m1)
 
     ///
@@ -102,30 +102,30 @@ namespace MultiMap {
     ///
     /// Otherwise returns `Nil`.
     ///
-    pub def get(k: k, m: MultiMap[k, v]): List[v] with Order[k] =
-        let MultiMap(t) = m;
+    pub def get(k: k, m: BagMultiMap[k, v]): List[v] with Order[k] =
+        let BagMultiMap(t) = m;
         Map.get(k, t) |> Option.map(Nec.toList) |> Option.getWithDefault(Nil)
 
     ///
     /// Returns `true` if and only if `m` contains the key `k`.
     ///
-    pub def memberOf(k: k, m: MultiMap[k, v]): Bool with Order[k] =
-        let MultiMap(m1) = m;
+    pub def memberOf(k: k, m: BagMultiMap[k, v]): Bool with Order[k] =
+        let BagMultiMap(m1) = m;
         Map.memberOf(k, m1)
 
     ///
     /// Returns the keys of `m`.
     ///
-    pub def keysOf(m: MultiMap[k, v]): Set[k] with Order[k] =
-        let MultiMap(m1) = m;
+    pub def keysOf(m: BagMultiMap[k, v]): Set[k] with Order[k] =
+        let BagMultiMap(m1) = m;
         Map.keysOf(m1)
 
     ///
     /// Updates `m` with `k => v`.
     ///
-    pub def insert(k: k, v: v, m: MultiMap[k, v]): MultiMap[k, v] with Order[k] =
-        let MultiMap(m1) = m;
-        MultiMap(Map.insertWith((v1, v2) -> Nec.append(v1, v2), k, Nec.singleton(v), m1))
+    pub def insert(k: k, v: v, m: BagMultiMap[k, v]): BagMultiMap[k, v] with Order[k] =
+        let BagMultiMap(m1) = m;
+        BagMultiMap(Map.insertWith((v1, v2) -> Nec.append(v1, v2), k, Nec.singleton(v), m1))
 
 
 
@@ -134,51 +134,51 @@ namespace MultiMap {
     ///
     /// Otherwise, returns `m`.
     ///
-    pub def adjust(f: v -> v & ef, k: k, m: MultiMap[k, v]): MultiMap[k, v] & ef with Order[k] =
+    pub def adjust(f: v -> v & ef, k: k, m: BagMultiMap[k, v]): BagMultiMap[k, v] & ef with Order[k] =
         adjustWithKey((_, v1) -> f(v1), k, m)
 
     ///
     /// Updates `m` with `k => map(f(k), vs)` if `k => vs` is in `m`. Otherwise, returns `m`.
     ///
-    pub def adjustWithKey(f: (k, v) -> v & ef, k: k, m: MultiMap[k, v]): MultiMap[k, v] & ef with Order[k] =
+    pub def adjustWithKey(f: (k, v) -> v & ef, k: k, m: BagMultiMap[k, v]): BagMultiMap[k, v] & ef with Order[k] =
         updateWithKey((k1, v) -> Some(f(k1, v)), k, m)
 
 
     ///
     /// Updates `m` with `k => v1` if `k => v` is in `m` and `f(v) = Some(v1)`. Otherwise, returns `m`.
     ///
-    pub def update(f: v -> Option[v] & ef, k: k, m: MultiMap[k, v]): MultiMap[k, v] & ef with Order[k] =
+    pub def update(f: v -> Option[v] & ef, k: k, m: BagMultiMap[k, v]): BagMultiMap[k, v] & ef with Order[k] =
         updateWithKey((_, v1) -> f(v1), k, m)
 
     ///
     /// Updates `m` with `k => v1` if `k => v` is in `m` and `f(k, v) = Some(v1)`. Otherwise, returns `m`.
     ///
-    pub def updateWithKey(f: (k, v) -> Option[v] & ef, k: k, m: MultiMap[k, v]): MultiMap[k, v] & ef with Order[k] =
-        let MultiMap(m1) = m;
+    pub def updateWithKey(f: (k, v) -> Option[v] & ef, k: k, m: BagMultiMap[k, v]): BagMultiMap[k, v] & ef with Order[k] =
+        let BagMultiMap(m1) = m;
         let f1 = (k1, vs) -> Nec.filterMap(f(k1), vs) |> List.toNec;
-        MultiMap(Map.updateWithKey(f1, k, m1))
+        BagMultiMap(Map.updateWithKey(f1, k, m1))
 
     ///
     /// Removes the mapping `k` from the map `m`.
     ///
-    pub def remove(k: k, m: MultiMap[k, v]): MultiMap[k, v] with Order[k] =
-        let MultiMap(m1) = m;
-        MultiMap(Map.remove(k, m1))
+    pub def remove(k: k, m: BagMultiMap[k, v]): BagMultiMap[k, v] with Order[k] =
+        let BagMultiMap(m1) = m;
+        BagMultiMap(Map.remove(k, m1))
 
     ///
     /// Alias for `findLeft`.
     ///
     /// The function `f` must be pure.
     ///
-    pub def find(f: (k, v) -> Bool, m: MultiMap[k, v]): Option[(k, v)] = findLeft(f, m)
+    pub def find(f: (k, v) -> Bool, m: BagMultiMap[k, v]): Option[(k, v)] = findLeft(f, m)
 
     ///
     /// Optionally returns the first mapping of `m` that satisfies the predicate `f` when searching from left to right.
     ///
     /// The function `f` must be pure.
     ///
-    pub def findLeft(f: (k, v) -> Bool, m: MultiMap[k, v]): Option[(k, v)] =
-        let MultiMap(m1) = m;
+    pub def findLeft(f: (k, v) -> Bool, m: BagMultiMap[k, v]): Option[(k, v)] =
+        let BagMultiMap(m1) = m;
         let findGroup = (k, vs) -> Nec.exists(f(k), vs);
         let findItem = (k, vs) -> Nec.findLeft(f(k), vs) |> Option.map(v1 -> (k, v1));
         match Map.findLeft(findGroup, m1) {
@@ -191,8 +191,8 @@ namespace MultiMap {
     ///
     /// The function `f` must be pure.
     ///
-    pub def findRight(f: (k, v) -> Bool, m: MultiMap[k, v]): Option[(k, v)] =
-        let MultiMap(m1) = m;
+    pub def findRight(f: (k, v) -> Bool, m: BagMultiMap[k, v]): Option[(k, v)] =
+        let BagMultiMap(m1) = m;
         let findGroup = (k, vs: Nec[v]) -> Nec.exists(f(k), vs);
         let findItem = (k, vs: Nec[v]) -> Nec.findRight(f(k), vs) |> Option.map(v1 -> (k, v1));
         match Map.findRight(findGroup, m1) {
@@ -205,14 +205,14 @@ namespace MultiMap {
     ///
     /// The function `f` must be pure.
     ///
-    pub def filter(f: v -> Bool, m: MultiMap[k, v]): MultiMap[k, v] with Order[k] = filterWithKey((_, v) -> f(v), m)
+    pub def filter(f: v -> Bool, m: BagMultiMap[k, v]): BagMultiMap[k, v] with Order[k] = filterWithKey((_, v) -> f(v), m)
 
     ///
     /// Returns a map of all mappings `k => v` in `m` where `(k, v)` satisfies the predicate `f`.
     ///
     /// The function `f` must be pure.
     ///
-    pub def filterWithKey(f: (k, v) -> Bool, m: MultiMap[k, v]): MultiMap[k, v] with Order[k] =
+    pub def filterWithKey(f: (k, v) -> Bool, m: BagMultiMap[k, v]): BagMultiMap[k, v] with Order[k] =
         foldLeftWithKey((acc, k, v) -> if (f(k, v)) insert(k, v, acc) else acc, empty(), m)
 
     ///
@@ -220,30 +220,30 @@ namespace MultiMap {
     ///
     /// Purity reflective: Runs in parallel when given a pure function `f`.
     ///
-    pub def map(f: v1 -> v2 & ef, m: MultiMap[k, v1]): MultiMap[k, v2] & ef = mapWithKey((_, v) -> f(v), m)
+    pub def map(f: v1 -> v2 & ef, m: BagMultiMap[k, v1]): BagMultiMap[k, v2] & ef = mapWithKey((_, v) -> f(v), m)
 
     ///
     /// Returns a map with mappings `k => f(k, v)` for every `k => v` in `m`.
     ///
     /// Purity reflective: Runs in parallel when given a pure function `f`.
     ///
-    pub def mapWithKey(f: (k, v1) -> v2 & ef, m: MultiMap[k, v1]): MultiMap[k, v2] & ef =
-        let MultiMap(m1) = m;
+    pub def mapWithKey(f: (k, v1) -> v2 & ef, m: BagMultiMap[k, v1]): BagMultiMap[k, v2] & ef =
+        let BagMultiMap(m1) = m;
         let outer = (k, vs) -> Nec.map(f(k), vs);
-        MultiMap(Map.mapWithKey(outer, m1))
+        BagMultiMap(Map.mapWithKey(outer, m1))
 
 
     ///
     /// Alias for `foldLeftWithKey`.
     ///
-    pub def foldWithKey(f: (b, k, v) -> b & ef, s: b, m: MultiMap[k, v]): b & ef = foldLeftWithKey(f, s, m)
+    pub def foldWithKey(f: (b, k, v) -> b & ef, s: b, m: BagMultiMap[k, v]): b & ef = foldLeftWithKey(f, s, m)
 
     ///
     /// Applies `f` to a start value `s` and all values in `m` going from left to right.
     ///
     /// That is, the result is of the form: `f(...f(f(s, v1), v2)..., vn)`.
     ///
-    pub def foldLeft(f: (b, v) -> b & ef, s: b, m: MultiMap[k, v]): b & ef =
+    pub def foldLeft(f: (b, v) -> b & ef, s: b, m: BagMultiMap[k, v]): b & ef =
         foldLeftWithKey((acc, _, v) -> f(acc, v), s, m)
 
     ///
@@ -251,8 +251,8 @@ namespace MultiMap {
     ///
     /// That is, the result is of the form: `f(...f(f(s, k1, v1), k2, v2)..., vn)`.
     ///
-    pub def foldLeftWithKey(f: (b, k, v) -> b & ef, s: b, m: MultiMap[k, v]): b & ef =
-        let MultiMap(m1) = m;
+    pub def foldLeftWithKey(f: (b, k, v) -> b & ef, s: b, m: BagMultiMap[k, v]): b & ef =
+        let BagMultiMap(m1) = m;
         let outer = (acc, k, vs) -> Nec.foldLeft((acc1, v1) -> f(acc1, k, v1), acc, vs);
         Map.foldLeftWithKey(outer, s, m1)
 
@@ -261,7 +261,7 @@ namespace MultiMap {
     ///
     /// That is, the result is of the form: `f(v1, ...f(vn-1, f(vn, s)))`.
     ///
-    pub def foldRight(f: (v, b) -> b & ef, s: b, m: MultiMap[k, v]): b & ef =
+    pub def foldRight(f: (v, b) -> b & ef, s: b, m: BagMultiMap[k, v]): b & ef =
         foldRightWithKey((_, v, acc) -> f(v, acc), s, m)
 
     ///
@@ -269,8 +269,8 @@ namespace MultiMap {
     ///
     /// That is, the result is of the form: `f(k1, v1, ...f(kn-1, vn-1, f(kn, vn, s)))`.
     ///
-    pub def foldRightWithKey(f: (k, v, b) -> b & ef, s: b, m: MultiMap[k, v]): b & ef =
-        let MultiMap(m1) = m;
+    pub def foldRightWithKey(f: (k, v, b) -> b & ef, s: b, m: BagMultiMap[k, v]): b & ef =
+        let BagMultiMap(m1) = m;
         let outer = (k, vs, acc) -> Nec.foldRight((v1, acc1) -> f(k, v1, acc1), acc, vs);
         Map.foldRightWithKey(outer, s, m1)
 
@@ -280,7 +280,7 @@ namespace MultiMap {
     /// That is, the result is of the form: `f(v1, ...f(vn-1, f(vn, z)))`.
     /// A `foldRightWithCont` allows early termination by not calling the continuation.
     ///
-    pub def foldRightWithCont(f: (v, Unit -> b & ef) -> b & ef, z: b, m: MultiMap[k, v]): b & ef =
+    pub def foldRightWithCont(f: (v, Unit -> b & ef) -> b & ef, z: b, m: BagMultiMap[k, v]): b & ef =
         foldRightWithKeyCont((_, v, c) -> f(v, c), z, m)
 
     ///
@@ -289,8 +289,8 @@ namespace MultiMap {
     /// That is, the result is of the form: `f(k1, v1, ...f(kn-1, vn-1, f(kn, vn, z)))`.
     /// A `foldRightWithKeyCont` allows early termination by not calling the continuation.
     ///
-    pub def foldRightWithKeyCont(f: (k, v, Unit -> b & ef) -> b & ef, z: b, m: MultiMap[k, v]): b & ef =
-        let MultiMap(m1) = m;
+    pub def foldRightWithKeyCont(f: (k, v, Unit -> b & ef) -> b & ef, z: b, m: BagMultiMap[k, v]): b & ef =
+        let BagMultiMap(m1) = m;
         Map.foldRightWithKeyCont((k, vs, b1) -> Nec.foldRightWithCont((v1, fac) -> f(k, v1, fac), b1(), vs), z, m1)
 
         /// ??? We call the outer continuation `b1` - is this correct?
@@ -302,7 +302,7 @@ namespace MultiMap {
     ///
     /// Returns `None` if `m` is the empty map.
     ///
-    pub def reduceLeft(f: (v, v) -> v & ef, m: MultiMap[k, v]): Option[v] & ef =
+    pub def reduceLeft(f: (v, v) -> v & ef, m: BagMultiMap[k, v]): Option[v] & ef =
         reduceLeftWithKey((k, v1, _, v2) -> (k, f(v1, v2)), m) |> Option.map(snd)
 
     ///
@@ -312,8 +312,8 @@ namespace MultiMap {
     ///
     /// Returns `None` if `m` is the empty multimap.
     ///
-    pub def reduceLeftWithKey(f: (k, v, k, v) -> (k, v) & ef, m: MultiMap[k, v]): Option[(k, v)] & ef =
-        let MultiMap(m1) = m;
+    pub def reduceLeftWithKey(f: (k, v, k, v) -> (k, v) & ef, m: BagMultiMap[k, v]): Option[(k, v)] & ef =
+        let BagMultiMap(m1) = m;
         let inner = (k, acc, v) -> match acc {
             case None           => Some((k, v))
             case Some((k1, v1)) => Some(f(k, v, k1, v1))
@@ -328,7 +328,7 @@ namespace MultiMap {
     ///
     /// Returns `None` if `m` is the empty multimap.
     ///
-    pub def reduceRight(f: (v, v) -> v & ef, m: MultiMap[k, v]): Option[v] & ef =
+    pub def reduceRight(f: (v, v) -> v & ef, m: BagMultiMap[k, v]): Option[v] & ef =
         reduceRightWithKey((k, v1, _, v2) -> (k, f(v1, v2)), m) |> Option.map(snd)
 
     ///
@@ -338,8 +338,8 @@ namespace MultiMap {
     ///
     /// Returns `None` if `m` is the empty map.
     ///
-    pub def reduceRightWithKey(f: (k, v, k, v) -> (k, v) & ef, m: MultiMap[k, v]): Option[(k, v)] & ef =
-        let MultiMap(m1) = m;
+    pub def reduceRightWithKey(f: (k, v, k, v) -> (k, v) & ef, m: BagMultiMap[k, v]): Option[(k, v)] & ef =
+        let BagMultiMap(m1) = m;
         let inner = (k, v, acc) -> match acc {
             case None           => Some((k, v))
             case Some((k1, v1)) => Some(f(k1, v1, k, v))
@@ -353,19 +353,19 @@ namespace MultiMap {
     /// Purity reflective: Runs in parallel when given a pure function `f`.
     ///
     @ParallelWhenPure
-    pub def count(f: (k, v) -> Bool & ef, m: MultiMap[k, v]): Int32 & ef =
+    pub def count(f: (k, v) -> Bool & ef, m: BagMultiMap[k, v]): Int32 & ef =
         sumWith((k, v) -> if (f(k,v)) 1 else 0, m)
 
     ///
     /// Returns the sum of all keys in the map `m`.
     ///
-    pub def sumKeys(m: MultiMap[Int32, v]): Int32 =
+    pub def sumKeys(m: BagMultiMap[Int32, v]): Int32 =
         sumWith((k, _) -> k, m)
 
     ///
     /// Returns the sum of all values in the map `m`.
     ///
-    pub def sumValues(m: MultiMap[k, Int32]): Int32 =
+    pub def sumValues(m: BagMultiMap[k, Int32]): Int32 =
         sumWith((_, v) -> v, m)
 
     ///
@@ -374,21 +374,21 @@ namespace MultiMap {
     /// Purity reflective: Runs in parallel when given a pure function `f`.
     ///
     @ParallelWhenPure
-    pub def sumWith(f: (k, v) -> Int32 & ef, m: MultiMap[k, v]): Int32 & ef =
-        let MultiMap(m1) = m;
+    pub def sumWith(f: (k, v) -> Int32 & ef, m: BagMultiMap[k, v]): Int32 & ef =
+        let BagMultiMap(m1) = m;
         let outer = (k, vs) -> Nec.sumWith(v -> f(k, v), vs);
         Map.sumWith(outer, m1)
 
     ///
     /// Returns the product of all keys in the map `m`.
     ///
-    pub def productKeys(m: MultiMap[Int32, v]): Int32 =
+    pub def productKeys(m: BagMultiMap[Int32, v]): Int32 =
         productWith((k, _) -> k, m)
 
     ///
     /// Returns the product of all values in the map `m`.
     ///
-    pub def productValues(m: MultiMap[k, Int32]): Int32 =
+    pub def productValues(m: BagMultiMap[k, Int32]): Int32 =
         productWith((_, v) -> v, m)
 
     ///
@@ -397,8 +397,8 @@ namespace MultiMap {
     /// Purity reflective: Runs in parallel when given a pure function `f`.
     ///
     @ParallelWhenPure
-    pub def productWith(f: (k, v) -> Int32 & ef, m: MultiMap[k, v]): Int32 & ef =
-        let MultiMap(m1) = m;
+    pub def productWith(f: (k, v) -> Int32 & ef, m: BagMultiMap[k, v]): Int32 & ef =
+        let BagMultiMap(m1) = m;
         let outer = (k, vs) -> Nec.productWith(v -> f(k, v), vs);
         Map.productWith(outer, m1)
         
@@ -410,8 +410,8 @@ namespace MultiMap {
     /// Purity reflective: Runs in parallel when given a pure function `f`.
     ///
     @ParallelWhenPure
-    pub def exists(f: (k, v) -> Bool & ef, m: MultiMap[k, v]): Bool & ef =
-        let MultiMap(m1) = m;
+    pub def exists(f: (k, v) -> Bool & ef, m: BagMultiMap[k, v]): Bool & ef =
+        let BagMultiMap(m1) = m;
         let outer = (k, vs) -> Nec.exists(v -> f(k, v), vs);
         Map.exists(outer, m1)
 
@@ -423,8 +423,8 @@ namespace MultiMap {
     /// Purity reflective: Runs in parallel when given a pure function `f`.
     ///
     @ParallelWhenPure
-    pub def forall(f: (k, v) -> Bool & ef, m: MultiMap[k, v]): Bool & ef =
-        let MultiMap(m1) = m;
+    pub def forall(f: (k, v) -> Bool & ef, m: BagMultiMap[k, v]): Bool & ef =
+        let BagMultiMap(m1) = m;
         let outer = (k, vs) -> Nec.forall(v -> f(k, v), vs);
         Map.forall(outer, m1)
 
@@ -433,17 +433,17 @@ namespace MultiMap {
     ///
     /// Duplicate keys are concatenated.
     ///
-    pub def union(m1: MultiMap[k, v], m2: MultiMap[k, v]): MultiMap[k, v] with Order[k] =
-        let MultiMap(mm1) = m1;
-        let MultiMap(mm2) = m2;
-        MultiMap(Map.unionWith((n1, n2) -> Nec.append(n1, n2), mm1, mm2))
+    pub def union(m1: BagMultiMap[k, v], m2: BagMultiMap[k, v]): BagMultiMap[k, v] with Order[k] =
+        let BagMultiMap(mm1) = m1;
+        let BagMultiMap(mm2) = m2;
+        BagMultiMap(Map.unionWith((n1, n2) -> Nec.append(n1, n2), mm1, mm2))
 
     ///
     /// Returns the intersection of `m1` and `m2`.
     ///
-    pub def intersection(m1: MultiMap[k, v], m2: MultiMap[k, v]): MultiMap[k, v] with Order[k], Eq[v] =
-        let MultiMap(mm1) = m1;
-        let MultiMap(mm2) = m2;
+    pub def intersection(m1: BagMultiMap[k, v], m2: BagMultiMap[k, v]): BagMultiMap[k, v] with Order[k], Eq[v] =
+        let BagMultiMap(mm1) = m1;
+        let BagMultiMap(mm2) = m2;
         let step = (acc, k, vs) -> match Map.get(k, mm2) {
             case None => acc
             case Some(vs1) => match intersectionNec(vs, vs1) {
@@ -451,7 +451,7 @@ namespace MultiMap {
                 case Some(vs2) => Map.insert(k, vs2, acc)
             }
         };
-        MultiMap(Map.foldLeftWithKey(step, Map.empty(), mm1))
+        BagMultiMap(Map.foldLeftWithKey(step, Map.empty(), mm1))
 
     def intersectionNec(n1: Nec[v], n2: Nec[v]): Option[Nec[v]] with Eq[v] =
         Nec.foldLeft((acc, v) -> if (Nec.memberOf(v, n2) and not Chain.memberOf(v, acc)) Chain.snoc(acc, v) else acc, Chain.empty(), n1) 
@@ -468,7 +468,7 @@ namespace MultiMap {
     ///
     /// Returns the map `m` as a list of singleton key-value pairs.
     ///
-    pub def toList(m: MultiMap[k, v]): List[(k, v)] =
+    pub def toList(m: BagMultiMap[k, v]): List[(k, v)] =
         foldRightWithKey((k, v, acc) -> (k, v) :: acc, Nil, m)
 
 
@@ -476,24 +476,24 @@ namespace MultiMap {
     ///
     /// Returns the result of running all the actions in the map `m`.
     ///
-    pub def sequence(m: MultiMap[k, m[v]]): m[MultiMap[k, v]] with Applicative[m] =
+    pub def sequence(m: BagMultiMap[k, m[v]]): m[BagMultiMap[k, v]] with Applicative[m] =
         traverse(identity, m)
 
     ///
     /// Returns the result of applying the applicative mapping function `f` to all the values of the
     /// map `m`.
     ///
-    pub def traverse(f: v1 -> m[v2] & ef, m: MultiMap[k, v1]): m[MultiMap[k, v2]] & ef with Applicative[m] =
-        let MultiMap(m1) = m;
-        Functor.map(MultiMap, Map.traverse(Traversable.traverse(f), m1))
+    pub def traverse(f: v1 -> m[v2] & ef, m: BagMultiMap[k, v1]): m[BagMultiMap[k, v2]] & ef with Applicative[m] =
+        let BagMultiMap(m1) = m;
+        Functor.map(BagMultiMap, Map.traverse(Traversable.traverse(f), m1))
 
     ///
     /// Returns the result of applying the applicative mapping function `f` to all the key-value pairs
     /// of the multimap `m`.
     ///
-    pub def traverseWithKey(f: (k, v1) -> m[v2] & ef, m: MultiMap[k, v1]): m[MultiMap[k, v2]] & ef with Applicative[m] =
-        let MultiMap(m1) = m;
-        Functor.map(MultiMap, Map.traverseWithKey((k, vs) -> Traversable.traverse(f(k), vs), m1))
+    pub def traverseWithKey(f: (k, v1) -> m[v2] & ef, m: BagMultiMap[k, v1]): m[BagMultiMap[k, v2]] & ef with Applicative[m] =
+        let BagMultiMap(m1) = m;
+        Functor.map(BagMultiMap, Map.traverseWithKey((k, vs) -> Traversable.traverse(f(k), vs), m1))
 
 
 }
