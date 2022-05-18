@@ -299,4 +299,94 @@ namespace TestBagMultiMap {
         BagMultiMap.updateWithKey((k, v) -> if (isOdd(k)) Some(k+v) else None, 2, BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 4) |> BagMultiMap.insert(1, 5))
             |> BagMultiMap.toList |> List.sort == (1, 4) :: (1, 5) :: (2, 4) :: Nil
 
+    /////////////////////////////////////////////////////////////////////////////
+    // remove                                                                  //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def remove01(): Bool = BagMultiMap.remove(1, BagMultiMap.empty(): BagMultiMap[Int32, Int32]) == BagMultiMap.empty()
+
+    @test
+    def remove02(): Bool = 
+        BagMultiMap.remove(1, BagMultiMap.singleton(1, 4))
+            |> BagMultiMap.toList |> List.sort == Nil
+
+    @test
+    def remove03(): Bool = 
+        BagMultiMap.remove(3, BagMultiMap.singleton(1, 4))
+            |> BagMultiMap.toList |> List.sort == (1, 4) :: Nil
+
+    @test
+    def remove04(): Bool = 
+        BagMultiMap.remove(1, BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 4) |> BagMultiMap.insert(1, 5))
+            |> BagMultiMap.toList |> List.sort == (2, 4) :: Nil
+
+    @test
+    def remove05(): Bool = 
+        BagMultiMap.remove(2, BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 4) |> BagMultiMap.insert(1, 5))
+            |> BagMultiMap.toList |> List.sort == (1, 4) :: (1, 5) :: Nil
+
+    /////////////////////////////////////////////////////////////////////////////
+    // find                                                                    //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def find01(): Bool = BagMultiMap.find((k, v) -> k == v, BagMultiMap.empty(): BagMultiMap[Int32, Int32]) == None
+
+    @test
+    def find02(): Bool = BagMultiMap.find((k, v) -> k == v, BagMultiMap.singleton(1, 2)) == None
+
+    @test
+    def find03(): Bool = BagMultiMap.find((k, v) -> k == v, BagMultiMap.singleton(1, 1)) == Some((1, 1))
+
+    @test
+    def find04(): Bool = 
+        BagMultiMap.find((k, v) -> k == v, BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 4) |> BagMultiMap.insert(1, 5)) == None
+
+    @test
+    def find05(): Bool = 
+        BagMultiMap.find((k, v) -> k == v, BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 2) |> BagMultiMap.insert(3, 3)) == Some((2,2))
+
+    /////////////////////////////////////////////////////////////////////////////
+    // findLeft                                                                //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def findLeft01(): Bool = BagMultiMap.findLeft((k, v) -> k == v, BagMultiMap.empty(): BagMultiMap[Int32, Int32]) == None
+
+    @test
+    def findLeft02(): Bool = BagMultiMap.findLeft((k, v) -> k == v, BagMultiMap.singleton(1, 2)) == None
+
+    @test
+    def findLeft03(): Bool = BagMultiMap.findLeft((k, v) -> k == v, BagMultiMap.singleton(1, 1)) == Some((1, 1))
+
+    @test
+    def findLeft04(): Bool = 
+        BagMultiMap.findLeft((k, v) -> k == v, BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 4) |> BagMultiMap.insert(1, 5)) == None
+
+    @test
+    def findLeft05(): Bool = 
+        BagMultiMap.findLeft((k, v) -> k == v, BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 2) |> BagMultiMap.insert(3, 3)) == Some((2, 2))
+
+    /////////////////////////////////////////////////////////////////////////////
+    // findRight                                                               //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def findRight01(): Bool = BagMultiMap.findRight((k, v) -> k == v, BagMultiMap.empty(): BagMultiMap[Int32, Int32]) == None
+
+    @test
+    def findRight02(): Bool = BagMultiMap.findRight((k, v) -> k == v, BagMultiMap.singleton(1, 2)) == None
+
+    @test
+    def findRight03(): Bool = BagMultiMap.findRight((k, v) -> k == v, BagMultiMap.singleton(1, 1)) == Some((1, 1))
+
+    @test
+    def findRight04(): Bool = 
+        BagMultiMap.findRight((k, v) -> k == v, BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 4) |> BagMultiMap.insert(1, 5)) == None
+
+    @test
+    def findRight05(): Bool = 
+        BagMultiMap.findRight((k, v) -> k == v, BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 2) |> BagMultiMap.insert(3, 3)) == Some((3, 3))
+
 }

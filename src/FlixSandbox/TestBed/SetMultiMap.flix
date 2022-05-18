@@ -133,49 +133,36 @@ namespace SetMultiMap {
     pub def insert(k: k, v: v, m: SetMultiMap[k, v]): SetMultiMap[k, v] with Order[k], Order[v] =
         let SetMultiMap(m1) = m;
         SetMultiMap(Map.insertWith((v1, v2) -> Set.union(v1, v2), k, Set.singleton(v), m1))
-/*
+
     ///
     /// Updates `m` with `k => map(f, vs)` if `k => vs` is in `m`.
     ///
     /// Otherwise, returns `m`.
     ///
-    pub def adjust(f: v -> v & ef, k: k, m: SetMultiMap[k, v]): SetMultiMap[k, v] & ef with Order[k] =
+    pub def adjust(f: v -> v & ef, k: k, m: SetMultiMap[k, v]): SetMultiMap[k, v] & ef with Order[k], Order[v] =
         adjustWithKey((_, v1) -> f(v1), k, m)
 
     ///
     /// Updates `m` with `k => map(f(k), vs)` if `k => vs` is in `m`. Otherwise, returns `m`.
     ///
-    pub def adjustWithKey(f: (k, v) -> v & ef, k: k, m: SetMultiMap[k, v]): SetMultiMap[k, v] & ef with Order[k] =
+    pub def adjustWithKey(f: (k, v) -> v & ef, k: k, m: SetMultiMap[k, v]): SetMultiMap[k, v] & ef with Order[k], Order[v] =
         updateWithKey((k1, v) -> Some(f(k1, v)), k, m)
 
 
     ///
     /// Updates `m` with `k => v1` if `k => v` is in `m` and `f(v) = Some(v1)`. Otherwise, returns `m`.
     ///
-    pub def update(f: v -> Option[v] & ef, k: k, m: SetMultiMap[k, v]): SetMultiMap[k, v] & ef with Order[k] =
+    pub def update(f: v -> Option[v] & ef, k: k, m: SetMultiMap[k, v]): SetMultiMap[k, v] & ef with Order[k], Order[v] =
         updateWithKey((_, v1) -> f(v1), k, m)
 
     ///
     /// Updates `m` with `k => v1` if `k => v` is in `m` and `f(k, v) = Some(v1)`. Otherwise, returns `m`.
     ///
-    pub def updateWithKey(f: (k, v) -> Option[v] & ef, k: k, m: SetMultiMap[k, v]): SetMultiMap[k, v] & ef with Order[k] =
+    pub def updateWithKey(f: (k, v) -> Option[v] & ef, k: k, m: SetMultiMap[k, v]): SetMultiMap[k, v] & ef with Order[k], Order[v] =
         let SetMultiMap(m1) = m;
-        let f1 = (k1, vs) -> sfilterMap(f(k1), vs);
-        SetMultiMap(Map.updateWithKey(f1, k, m1))
+        let outer = (k1, s) -> if (k1 == k) Set.map(v1 -> Option.getWithDefault(v1, f(k1, v1)), s) else s;
+        SetMultiMap(Map.mapWithKey(outer, m1))
 
-
-    /// Add to stdlib Set
-    pub def sFilterMap(f: a -> Option[b] & ef, s: Set[a]): Set[a] & ef with Order[a] =
-        let step = (acc, x) -> match f(x) {
-            case None    => acc
-            case Some(b) => Set.insert(b, acc)
-        };
-        Set.foldLeft(step, Set.empty(), s)
-
-    /// Add to stdlib Set
-    pub def sUpdate(f: a -> Option[a] & ef, s: Set[a]): Set[a] & ef with Order[a] =
-        Set.foldLeft(step, Set.empty(), s)
-*/
 
     ///
     /// Removes the mapping `k` from the map `m`.
