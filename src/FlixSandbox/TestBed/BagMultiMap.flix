@@ -472,6 +472,7 @@ namespace BagMultiMap {
         Nec.foldLeft((acc, v) -> if (Nec.memberOf(v, n2) and not Chain.memberOf(v, acc)) Chain.snoc(acc, v) else acc, Chain.empty(), n1) 
             |> ctoNec
 
+    /// To add to Chain.flix
     pub def ctoNec(c: Chain[a]): Option[Nec[a]] = 
         use Chain.ViewLeft.{NoneLeft, SomeLeft};
         match Chain.viewLeft(c) {

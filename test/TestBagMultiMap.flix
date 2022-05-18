@@ -389,4 +389,190 @@ namespace TestBagMultiMap {
     def findRight05(): Bool = 
         BagMultiMap.findRight((k, v) -> k == v, BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 2) |> BagMultiMap.insert(3, 3)) == Some((3, 3))
 
+    /////////////////////////////////////////////////////////////////////////////
+    // filter                                                                  //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def filter01(): Bool = 
+        BagMultiMap.filter(isEven, BagMultiMap.empty(): BagMultiMap[Int32, Int32]) == BagMultiMap.empty()
+
+    @test
+    def filter02(): Bool = 
+        BagMultiMap.filter(isEven, BagMultiMap.singleton(1, 2))
+            |> BagMultiMap.toList |> List.sort == (1, 2) :: Nil
+
+    @test
+    def filter03(): Bool = 
+        BagMultiMap.filter(isEven, BagMultiMap.singleton(1, 1)) == BagMultiMap.empty()
+
+    @test
+    def filter04(): Bool = 
+        BagMultiMap.filter(isEven, BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 4))
+            |> BagMultiMap.toList |> List.sort == (1, 4) :: (2, 4) :: Nil
+
+    @test
+    def filter05(): Bool = 
+        BagMultiMap.filter(isEven, BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 2) |> BagMultiMap.insert(1, 3)) 
+            |> BagMultiMap.toList |> List.sort == (1, 4) :: (2, 2) :: Nil
+
+
+    /////////////////////////////////////////////////////////////////////////////
+    // filterWithKey                                                           //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def filterWithKey01(): Bool = 
+        BagMultiMap.filterWithKey((k, v) -> k == v, BagMultiMap.empty(): BagMultiMap[Int32, Int32]) == BagMultiMap.empty()
+
+    @test
+    def filterWithKey02(): Bool = 
+        BagMultiMap.filterWithKey((k, v) -> k == v, BagMultiMap.singleton(1, 2)) == BagMultiMap.empty()
+
+    @test
+    def filterWithKey03(): Bool = 
+        BagMultiMap.filterWithKey((k, v) -> k == v, BagMultiMap.singleton(1, 1)) 
+            |> BagMultiMap.toList |> List.sort == (1, 1) :: Nil
+
+    @test
+    def filterWithKey04(): Bool = 
+        BagMultiMap.filterWithKey((k, v) -> k == v, BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 4)) == BagMultiMap.empty()
+
+    @test
+    def filterWithKey05(): Bool = 
+        BagMultiMap.filterWithKey((k, v) -> k == v, BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 2) |> BagMultiMap.insert(1, 1)) 
+            |> BagMultiMap.toList |> List.sort == (1, 1) :: (2, 2) :: Nil
+
+    /////////////////////////////////////////////////////////////////////////////
+    // map                                                                     //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def map01(): Bool = 
+        BagMultiMap.map(v -> v*3, BagMultiMap.empty(): BagMultiMap[Int32, Int32]) == BagMultiMap.empty()
+
+    @test
+    def map02(): Bool = 
+        BagMultiMap.map(v -> v*3, BagMultiMap.singleton(1, 2))
+            |> BagMultiMap.toList |> List.sort == (1, 6) :: Nil
+
+    @test
+    def map03(): Bool = 
+        BagMultiMap.map(v -> v*3, BagMultiMap.singleton(1, 1)) 
+            |> BagMultiMap.toList |> List.sort == (1, 3) :: Nil
+
+    @test
+    def map04(): Bool = 
+        BagMultiMap.map(v -> v*3, BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 4))
+            |> BagMultiMap.toList |> List.sort == (1, 12) :: (2, 12) :: Nil
+
+    @test
+    def map05(): Bool = 
+        BagMultiMap.map(v -> v*3, BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 2) |> BagMultiMap.insert(1, 1)) 
+            |> BagMultiMap.toList |> List.sort == (1, 3) :: (1, 12) :: (2, 6) :: Nil
+
+
+    /////////////////////////////////////////////////////////////////////////////
+    // mapWithKey                                                              //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def mapWithKey01(): Bool = 
+        BagMultiMap.mapWithKey((k, v) -> v*3+k, BagMultiMap.empty(): BagMultiMap[Int32, Int32]) == BagMultiMap.empty()
+
+    @test
+    def mapWithKey02(): Bool = 
+        BagMultiMap.mapWithKey((k, v) -> v*3+k, BagMultiMap.singleton(1, 2))
+            |> BagMultiMap.toList |> List.sort == (1, 7) :: Nil
+
+    @test
+    def mapWithKey03(): Bool = 
+        BagMultiMap.mapWithKey((k, v) -> v*3+k, BagMultiMap.singleton(1, 1)) 
+            |> BagMultiMap.toList |> List.sort == (1, 4) :: Nil
+
+    @test
+    def mapWithKey04(): Bool = 
+        BagMultiMap.mapWithKey((k, v) -> v*3+k, BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 4))
+            |> BagMultiMap.toList |> List.sort == (1, 13) :: (2, 14) :: Nil
+
+    @test
+    def mapWithKey05(): Bool = 
+        BagMultiMap.mapWithKey((k, v) -> v*3+k, BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 2) |> BagMultiMap.insert(1, 1)) 
+            |> BagMultiMap.toList |> List.sort == (1, 4) :: (1, 13) :: (2, 8) :: Nil
+
+    /////////////////////////////////////////////////////////////////////////////
+    // foldWithKey                                                             //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def foldWithKey01(): Bool = 
+        BagMultiMap.foldWithKey((acc, k, v) -> acc + k + v, 0, BagMultiMap.empty(): BagMultiMap[Int32, Int32]) == 0
+
+    @test
+    def foldWithKey02(): Bool = 
+        BagMultiMap.foldWithKey((acc, k, v) -> acc + k + v, 0, BagMultiMap.singleton(1, 2)) == 3
+
+    @test
+    def foldWithKey03(): Bool = 
+        BagMultiMap.foldWithKey((acc, k, v) -> acc + k + v, 0, BagMultiMap.singleton(1, 1)) == 2
+
+    @test
+    def foldWithKey04(): Bool = 
+        BagMultiMap.foldWithKey((acc, k, v) -> acc + k + v, 0, BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 4)) == 11
+
+    @test
+    def foldWithKey05(): Bool = 
+        BagMultiMap.foldWithKey((acc, k, v) -> acc + k + v, 0, 
+            BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 2) |> BagMultiMap.insert(1, 1)) == 11
+
+    /////////////////////////////////////////////////////////////////////////////
+    // foldLeft                                                             //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def foldLeft01(): Bool = 
+        BagMultiMap.foldLeft((acc, v) -> acc + v, 0, BagMultiMap.empty(): BagMultiMap[Int32, Int32]) == 0
+
+    @test
+    def foldLeft02(): Bool = 
+        BagMultiMap.foldLeft((acc, v) -> acc + v, 0, BagMultiMap.singleton(1, 2)) == 2
+
+    @test
+    def foldLeft03(): Bool = 
+        BagMultiMap.foldLeft((acc, v) -> acc + v, 0, BagMultiMap.singleton(1, 1)) == 1
+
+    @test
+    def foldLeft04(): Bool = 
+        BagMultiMap.foldLeft((acc, v) -> acc + v, 0, BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 4)) == 8
+
+    @test
+    def foldLeft05(): Bool = 
+        BagMultiMap.foldLeft((acc, v) -> acc + v, 0, 
+            BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 2) |> BagMultiMap.insert(1, 1)) == 7
+
+    /////////////////////////////////////////////////////////////////////////////
+    // foldLeftWithKey                                                         //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def foldLeftWithKey01(): Bool = 
+        BagMultiMap.foldLeftWithKey((acc, k, v) -> acc + k + v, 0, BagMultiMap.empty(): BagMultiMap[Int32, Int32]) == 0
+
+    @test
+    def foldLeftWithKey02(): Bool = 
+        BagMultiMap.foldLeftWithKey((acc, k, v) -> acc + k + v, 0, BagMultiMap.singleton(1, 2)) == 3
+
+    @test
+    def foldLeftWithKey03(): Bool = 
+        BagMultiMap.foldLeftWithKey((acc, k, v) -> acc + k + v, 0, BagMultiMap.singleton(1, 1)) == 2
+
+    @test
+    def foldLeftWithKey04(): Bool = 
+        BagMultiMap.foldLeftWithKey((acc, k, v) -> acc + k + v, 0, BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 4)) == 11
+
+    @test
+    def foldLeftWithKey05(): Bool = 
+        BagMultiMap.foldLeftWithKey((acc, k, v) -> acc + k + v, 0, 
+            BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 2) |> BagMultiMap.insert(1, 1)) == 11
+
 }
