@@ -460,11 +460,14 @@ namespace SetMultiMap {
         SetMultiMap(Map.foldLeftWithKey(step, Map.empty(), mm1))
 
 
+    ///
+    /// Returns the map `m` as a list of singleton key-value pairs.
+    ///
+    pub def toList(m: SetMultiMap[k, v]): List[(k, v)] = toAscList(m)
 
     ///
     /// Returns the map `m` as a list of singleton key-value pairs.
     ///
-    pub def toList(m: SetMultiMap[k, v]): List[(k, v)] =
+    pub def toAscList(m: SetMultiMap[k, v]): List[(k, v)] =
         foldRightWithKey((k, v, acc) -> (k, v) :: acc, Nil, m)
-
 }
