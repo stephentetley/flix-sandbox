@@ -113,6 +113,16 @@ namespace SetMultiMap {
         Map.keysOf(m1)
 
     ///
+    /// Returns the values of `m`.
+    ///
+    /// Answer may contain duplicates where values were ascribed to multiple keys.
+    ///
+    pub def valuesOf(m: SetMultiMap[k, v]): List[v] with Order[k] =
+        let SetMultiMap(m1) = m;
+        Map.valuesOf(m1) |> List.map(Set.toList) |> List.flatten
+
+
+    ///
     /// Updates `m` with `k => v`.
     ///
     pub def insert(k: k, v: v, m: SetMultiMap[k, v]): SetMultiMap[k, v] with Order[k], Order[v] =
@@ -203,22 +213,23 @@ namespace SetMultiMap {
             case None          => None
             case Some((k, vs)) => findItem(k, vs)
         }
-/*
+
     ///
     /// Returns a map of all mappings `k => v` in `m` where `v` satisfies the predicate `f`.
     ///
     /// The function `f` must be pure.
     ///
-    pub def filter(f: v -> Bool, m: SetMultiMap[k, v]): SetMultiMap[k, v] with Order[k] = filterWithKey((_, v) -> f(v), m)
+    pub def filter(f: v -> Bool, m: SetMultiMap[k, v]): SetMultiMap[k, v] with Order[k], Order[v] = 
+        filterWithKey((_, v) -> f(v), m)
 
     ///
     /// Returns a map of all mappings `k => v` in `m` where `(k, v)` satisfies the predicate `f`.
     ///
     /// The function `f` must be pure.
     ///
-    pub def filterWithKey(f: (k, v) -> Bool, m: SetMultiMap[k, v]): SetMultiMap[k, v] with Order[k] =
+    pub def filterWithKey(f: (k, v) -> Bool, m: SetMultiMap[k, v]): SetMultiMap[k, v] with Order[k], Order[v] =
         foldLeftWithKey((acc, k, v) -> if (f(k, v)) insert(k, v, acc) else acc, empty(), m)
-*/
+
     ///
     /// Returns a map with mappings `k => f(v)` for every `k => v` in `m`.
     ///
@@ -432,33 +443,24 @@ namespace SetMultiMap {
         let SetMultiMap(mm1) = m1;
         let SetMultiMap(mm2) = m2;
         SetMultiMap(Map.unionWith((s1, s2) -> Set.union(s1, s2), mm1, mm2))
-/*
+
     ///
     /// Returns the intersection of `m1` and `m2`.
     ///
-    pub def intersection(m1: SetMultiMap[k, v], m2: SetMultiMap[k, v]): SetMultiMap[k, v] with Order[k], Eq[v] =
+    pub def intersection(m1: SetMultiMap[k, v], m2: SetMultiMap[k, v]): SetMultiMap[k, v] with Order[k], Order[v] =
         let SetMultiMap(mm1) = m1;
         let SetMultiMap(mm2) = m2;
-        let step = (acc, k, vs) -> match Map.get(k, mm2) {
+        let step = (acc, k, s) -> match Map.get(k, mm2) {
             case None => acc
-            case Some(vs1) => match intersectionNec(vs, vs1) {
-                case None      => acc
-                case Some(vs2) => Map.insert(k, vs2, acc)
+            case Some(s1) => match Set.intersection(s, s1) {
+                case s2 if Set.isEmpty(s2) => acc
+                case s2                    => Map.insert(k, s2, acc)
             }
         };
         SetMultiMap(Map.foldLeftWithKey(step, Map.empty(), mm1))
 
-    def intersectionNec(n1: Nec[v], n2: Nec[v]): Option[Nec[v]] with Eq[v] =
-        Nec.foldLeft((acc, v) -> if (Nec.memberOf(v, n2) and not Chain.memberOf(v, acc)) Chain.snoc(acc, v) else acc, Chain.empty(), n1) 
-            |> ctoNec
 
-    pub def ctoNec(c: Chain[a]): Option[Nec[a]] = 
-        use Chain.ViewLeft.{NoneLeft, SomeLeft};
-        match Chain.viewLeft(c) {
-            case NoneLeft        => None
-            case SomeLeft(x, rs) => Chain.foldLeft(Nec.snoc, Nec.singleton(x), rs) |> Some
-        }
-*/
+
     ///
     /// Returns the map `m` as a list of singleton key-value pairs.
     ///

@@ -98,7 +98,7 @@ namespace BagMultiMap {
         Map.isEmpty(m1)
 
     ///
-    /// Returns `Some(vs)` if `k => vs` is in `m`.
+    /// Returns the list `vs` if `k => vs` is in `m`.
     ///
     /// Otherwise returns `Nil`.
     ///
@@ -119,6 +119,17 @@ namespace BagMultiMap {
     pub def keysOf(m: BagMultiMap[k, v]): Set[k] with Order[k] =
         let BagMultiMap(m1) = m;
         Map.keysOf(m1)
+
+    ///
+    /// Returns the values of `m`.
+    ///
+    pub def valuesOf(m: BagMultiMap[k, v]): List[v] with Order[k] =
+        let BagMultiMap(m1) = m;
+        match Map.valuesOf(m1) { 
+            case Nil     => Nil
+            case x :: rs => List.foldLeft(Nec.append, x, rs) |> Nec.toList
+        }
+
 
     ///
     /// Updates `m` with `k => v`.
@@ -468,9 +479,13 @@ namespace BagMultiMap {
     ///
     /// Returns the map `m` as a list of singleton key-value pairs.
     ///
-    pub def toList(m: BagMultiMap[k, v]): List[(k, v)] =
-        foldRightWithKey((k, v, acc) -> (k, v) :: acc, Nil, m)
+    pub def toList(m: BagMultiMap[k, v]): List[(k, v)] = toAscList(m)
 
+    ///
+    /// Returns the map `m` as a list of singleton key-value pairs.
+    ///
+    pub def toAscList(m: BagMultiMap[k, v]): List[(k, v)] =
+        foldRightWithKey((k, v, acc) -> (k, v) :: acc, Nil, m)
 
 
     ///
