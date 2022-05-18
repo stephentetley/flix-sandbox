@@ -91,6 +91,11 @@ namespace BagMultiMap {
     pub def singleton(k: k, v: v): BagMultiMap[k, v] with Order[k] = BagMultiMap(Map.singleton(k, Nec.singleton(v)))
 
     ///
+    /// Returns a multimap where key `k` is mapped to the singleton bag containing `v`.
+    ///
+    pub def fromMap(m: Map[k, v]): BagMultiMap[k, v] with Order[k] = BagMultiMap(Map.map(Nec.singleton, m))
+
+    ///
     /// Returns `true` if and only if `m` is the empty multimap.
     ///
     pub def isEmpty(m: BagMultiMap[k, v]): Bool =
@@ -130,7 +135,6 @@ namespace BagMultiMap {
             case x :: rs => List.foldLeft(Nec.append, x, rs) |> Nec.toList
         }
 
-
     ///
     /// Updates `m` with `k => v`.
     ///
@@ -166,8 +170,8 @@ namespace BagMultiMap {
     ///
     pub def updateWithKey(f: (k, v) -> Option[v] & ef, k: k, m: BagMultiMap[k, v]): BagMultiMap[k, v] & ef with Order[k] =
         let BagMultiMap(m1) = m;
-        let f1 = (k1, vs) -> Nec.filterMap(f(k1), vs) |> List.toNec;
-        BagMultiMap(Map.updateWithKey(f1, k, m1))
+        let outer = (k1, vs) -> if (k1 == k) Nec.map(v1 -> Option.getWithDefault(v1, f(k1, v1)), vs) else vs;
+        BagMultiMap(Map.mapWithKey(outer, m1))
 
     ///
     /// Removes the mapping `k` from the map `m`.
@@ -479,12 +483,7 @@ namespace BagMultiMap {
     ///
     /// Returns the map `m` as a list of singleton key-value pairs.
     ///
-    pub def toList(m: BagMultiMap[k, v]): List[(k, v)] = toAscList(m)
-
-    ///
-    /// Returns the map `m` as a list of singleton key-value pairs.
-    ///
-    pub def toAscList(m: BagMultiMap[k, v]): List[(k, v)] =
+    pub def toList(m: BagMultiMap[k, v]): List[(k, v)] =
         foldRightWithKey((k, v, acc) -> (k, v) :: acc, Nil, m)
 
 

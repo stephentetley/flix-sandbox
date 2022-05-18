@@ -83,6 +83,11 @@ namespace SetMultiMap {
     pub def singleton(k: k, v: v): SetMultiMap[k, v] with Order[k], Order[v] = SetMultiMap(Map.singleton(k, Set.singleton(v)))
 
     ///
+    /// Returns a multimap where key `k` is mapped to the singleton set containing `v`.
+    ///
+    pub def fromMap(m: Map[k, v]): SetMultiMap[k, v] with Order[k], Order[v] = SetMultiMap(Map.map(Set.singleton, m))
+
+    ///
     /// Returns `true` if and only if `m` is the empty multimap.
     ///
     pub def isEmpty(m: SetMultiMap[k, v]): Bool =
@@ -463,11 +468,6 @@ namespace SetMultiMap {
     ///
     /// Returns the map `m` as a list of singleton key-value pairs.
     ///
-    pub def toList(m: SetMultiMap[k, v]): List[(k, v)] = toAscList(m)
-
-    ///
-    /// Returns the map `m` as a list of singleton key-value pairs.
-    ///
-    pub def toAscList(m: SetMultiMap[k, v]): List[(k, v)] =
+    pub def toList(m: SetMultiMap[k, v]): List[(k, v)] =
         foldRightWithKey((k, v, acc) -> (k, v) :: acc, Nil, m)
 }

@@ -35,7 +35,24 @@ namespace TestSetMultiMap {
 
     @test
     def singleton01(): Bool = 
-        SetMultiMap.singleton(1, 'a') |> SetMultiMap.toAscList == (1, 'a') :: Nil
+        SetMultiMap.singleton(1, 'a') |> SetMultiMap.toList |> List.sort == (1, 'a') :: Nil
+
+    /////////////////////////////////////////////////////////////////////////////
+    // fromMap                                                                 //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def fromMap01(): Bool = 
+        SetMultiMap.fromMap(Map#{}: Map[Int32, Char]) |> SetMultiMap.toList == Nil
+
+    @test
+    def fromMap02(): Bool = 
+        SetMultiMap.fromMap(Map#{1 => 'a'}) |> SetMultiMap.toList == (1, 'a') :: Nil
+
+    @test
+    def fromMap03(): Bool = 
+        SetMultiMap.fromMap(Map#{1 => 'a', 2 => 'b'}) |> SetMultiMap.toList == (1, 'a') :: (2, 'b') :: Nil
+
 
     /////////////////////////////////////////////////////////////////////////////
     // isEmpty                                                                 //
