@@ -34,6 +34,10 @@ namespace MultiMap {
     ///
     pub def singleton(k: k, v: v): MultiMap[k, v] with Order[k] = MultiMap(Map.singleton(k, Nec.singleton(v)))
 
+
+    pub def fromMap(m: Map[k, Nec[v]]): Multimap[k, v] = Multimap(m)
+
+
     ///
     /// Returns `true` if and only if `m` is the empty multimap.
     ///
@@ -123,11 +127,11 @@ namespace MultiMap {
     ///
     pub def findLeft(f: (k, v) -> Bool, m: MultiMap[k, v]): Option[(k, v)] =
         let MultiMap(m1) = m;
-        let f1 = (k, vs: Nec[v]) -> Nec.exists(f(k), vs);
-        let f2 = (k, vs: Nec[v]) -> Nec.findLeft(f(k), vs) |> Option.map(v1 -> (k, v1));
-        match Map.findLeft(f1, m1) {
+        let findGroup = (k, vs: Nec[v]) -> Nec.exists(f(k), vs);
+        let findItem = (k, vs: Nec[v]) -> Nec.findLeft(f(k), vs) |> Option.map(v1 -> (k, v1));
+        match Map.findLeft(findGroup, m1) {
             case None          => None
-            case Some((k, vs)) => f2(k, vs)
+            case Some((k, vs)) => findItem(k, vs)
         }
 
     ///
@@ -137,13 +141,13 @@ namespace MultiMap {
     ///
     pub def findRight(f: (k, v) -> Bool, m: MultiMap[k, v]): Option[(k, v)] =
         let MultiMap(m1) = m;
-        let f1 = (k, vs: Nec[v]) -> Nec.exists(f(k), vs);
-        let f2 = (k, vs: Nec[v]) -> Nec.findRight(f(k), vs) |> Option.map(v1 -> (k, v1));
-        match Map.findRight(f1, m1) {
+        let findGroup = (k, vs: Nec[v]) -> Nec.exists(f(k), vs);
+        let findItem = (k, vs: Nec[v]) -> Nec.findRight(f(k), vs) |> Option.map(v1 -> (k, v1));
+        match Map.findRight(findGroup, m1) {
             case None          => None
-            case Some((k, vs)) => f2(k, vs)
+            case Some((k, vs)) => findItem(k, vs)
         }
-/*
+
     ///
     /// Returns a map of all mappings `k => v` in `m` where `v` satisfies the predicate `f`.
     ///
@@ -158,7 +162,6 @@ namespace MultiMap {
     ///
     pub def filterWithKey(f: (k, v) -> Bool, m: MultiMap[k, v]): MultiMap[k, v] with Order[k] =
         foldLeftWithKey((acc, k, v) -> if (f(k, v)) insert(k, v, acc) else acc, empty(), m)
-*/
 
     ///
     /// Returns a map with mappings `k => f(v)` for every `k => v` in `m`.
@@ -174,8 +177,8 @@ namespace MultiMap {
     ///
     pub def mapWithKey(f: (k, v1) -> v2 & ef, m: MultiMap[k, v1]): MultiMap[k, v2] & ef =
         let MultiMap(m1) = m;
-        let f1 = (k, vs) -> Nec.map(f(k), vs);
-        MultiMap(Map.mapWithKey(f1, m1))
+        let outer = (k, vs) -> Nec.map(f(k), vs);
+        MultiMap(Map.mapWithKey(outer, m1))
 
 
     ///
@@ -198,8 +201,8 @@ namespace MultiMap {
     ///
     pub def foldLeftWithKey(f: (b, k, v) -> b & ef, s: b, m: MultiMap[k, v]): b & ef =
         let MultiMap(m1) = m;
-        let f1 = (acc, k, vs) -> Nec.foldLeft((acc1, v1) -> f(acc1, k, v1), acc, vs);
-        Map.foldLeftWithKey(f1, s, m1)
+        let outer = (acc, k, vs) -> Nec.foldLeft((acc1, v1) -> f(acc1, k, v1), acc, vs);
+        Map.foldLeftWithKey(outer, s, m1)
 
     ///
     /// Applies `f` to a start value `s` and all values in `m` going from right to left.
@@ -216,8 +219,8 @@ namespace MultiMap {
     ///
     pub def foldRightWithKey(f: (k, v, b) -> b & ef, s: b, m: MultiMap[k, v]): b & ef =
         let MultiMap(m1) = m;
-        let f1 = (k, vs, acc) -> Nec.foldRight((v1, acc1) -> f(k, v1, acc1), acc, vs);
-        Map.foldRightWithKey(f1, s, m1)
+        let outer = (k, vs, acc) -> Nec.foldRight((v1, acc1) -> f(k, v1, acc1), acc, vs);
+        Map.foldRightWithKey(outer, s, m1)
 
     ///
     /// Applies `f` to a start value `z` and all values in `m` going from right to left.
@@ -238,6 +241,187 @@ namespace MultiMap {
         let MultiMap(m1) = m;
         Map.foldRightWithKeyCont((k, vs, b1) -> Nec.foldRightWithCont((v1, fac) -> f(k, v1, fac), b1(), vs), z, m1)
 
-        /// ??? We call the outer continuation b1 - is this correct?
+        /// ??? We call the outer continuation `b1` - is this correct?
+
+    ///
+    /// Applies `f` to all values in `m` going from left to right until a single value `v` is obtained.  Returns `Some(v)`.
+    ///
+    /// That is, the result is of the form: `Some(f(...f(f(v1, v2), v3)..., vn))`
+    ///
+    /// Returns `None` if `m` is the empty map.
+    ///
+    pub def reduceLeft(f: (v, v) -> v & ef, m: MultiMap[k, v]): Option[v] & ef =
+        reduceLeftWithKey((k, v1, _, v2) -> (k, f(v1, v2)), m) |> Option.map(snd)
+
+    ///
+    /// Applies `f` to all mappings in `m` going from left to right until a single mapping `(k, v)` is obtained.  Returns `Some((k, v))`.
+    ///
+    /// That is, the result is of the form: `Some(f(...f(f(k1, v1, k2, v2), k3, v3)..., kn, vn))`
+    ///
+    /// Returns `None` if `m` is the empty multimap.
+    ///
+    pub def reduceLeftWithKey(f: (k, v, k, v) -> (k, v) & ef, m: MultiMap[k, v]): Option[(k, v)] & ef =
+        let MultiMap(m1) = m;
+        let inner = (k, acc, v) -> match acc {
+            case None           => Some((k, v))
+            case Some((k1, v1)) => Some(f(k, v, k1, v1))
+        };
+        let outer = (acc, k, vs) -> Nec.foldLeft(inner(k), acc, vs);
+        Map.foldLeftWithKey(outer, None, m1)
+
+    ///
+    /// Applies `f` to all values in `m` going from right to left until a single value `v` is obtained.  Returns `Some(v)`.
+    ///
+    /// That is, the result is of the form: `Some(f(v1, ...f(vn-2, f(vn-1, vn))...))`
+    ///
+    /// Returns `None` if `m` is the empty multimap.
+    ///
+    pub def reduceRight(f: (v, v) -> v & ef, m: MultiMap[k, v]): Option[v] & ef =
+        reduceRightWithKey((k, v1, _, v2) -> (k, f(v1, v2)), m) |> Option.map(snd)
+
+    ///
+    /// Applies `f` to all mappings in `m` going from right to left until a single mapping `(k, v)` is obtained.  Returns `Some((k, v))`.
+    ///
+    /// That is, the result is of the form: `Some(f(k1, v1, ...f(kn-2, vn-2, f(kn-1, vn-1, kn, vn))...))`
+    ///
+    /// Returns `None` if `m` is the empty map.
+    ///
+    pub def reduceRightWithKey(f: (k, v, k, v) -> (k, v) & ef, m: MultiMap[k, v]): Option[(k, v)] & ef =
+        let MultiMap(m1) = m;
+        let inner = (k, v, acc) -> match acc {
+            case None           => Some((k, v))
+            case Some((k1, v1)) => Some(f(k1, v1, k, v))
+        };
+        let outer = (k, vs, acc) -> Nec.foldRight(inner(k), acc, vs);
+        Map.foldRightWithKey(outer, None, m1)
+
+    ///
+    /// Returns the number of mappings `k => v` in `m` that satisfy the predicate `f`.
+    ///
+    /// Purity reflective: Runs in parallel when given a pure function `f`.
+    ///
+    @ParallelWhenPure
+    pub def count(f: (k, v) -> Bool & ef, m: MultiMap[k, v]): Int32 & ef =
+        sumWith((k, v) -> if (f(k,v)) 1 else 0, m)
+
+    ///
+    /// Returns the sum of all keys in the map `m`.
+    ///
+    pub def sumKeys(m: MultiMap[Int32, v]): Int32 =
+        sumWith((k, _) -> k, m)
+
+    ///
+    /// Returns the sum of all values in the map `m`.
+    ///
+    pub def sumValues(m: MultiMap[k, Int32]): Int32 =
+        sumWith((_, v) -> v, m)
+
+    ///
+    /// Returns the sum of all key-value pairs `k => v` in the map `m` according to the function `f`.
+    ///
+    /// Purity reflective: Runs in parallel when given a pure function `f`.
+    ///
+    @ParallelWhenPure
+    pub def sumWith(f: (k, v) -> Int32 & ef, m: MultiMap[k, v]): Int32 & ef =
+        let MultiMap(m1) = m;
+        let outer = (k, vs) -> Nec.sumWith(v -> f(k, v), vs);
+        Map.sumWith(outer, m1)
+
+    ///
+    /// Returns the product of all keys in the map `m`.
+    ///
+    pub def productKeys(m: Map[Int32, v]): Int32 =
+        let Map(t) = m;
+        RedBlackTree.productKeys(t)
+
+    ///
+    /// Returns the product of all values in the map `m`.
+    ///
+    pub def productValues(m: Map[k, Int32]): Int32 =
+        let Map(t) = m;
+        RedBlackTree.productValues(t)
+
+    ///
+    /// Returns the product of all key-value pairs `k => v` in the map `m` according to the function `f`.
+    ///
+    /// Purity reflective: Runs in parallel when given a pure function `f`.
+    ///
+    @ParallelWhenPure
+    pub def productWith(f: (k, v) -> Int32 & ef, m: MultiMap[k, v]): Int32 & ef =
+        let MultiMap(m1) = m;
+        let outer = (k, vs) -> Nec.productWith(v -> f(k, v), vs);
+        Map.productWith(outer, m1)
+        
+    ///
+    /// Returns `true` if and only if at least one mapping in `m` satisfies the predicate `f`.
+    ///
+    /// Returns `false` if `m` is the empty map.
+    ///
+    /// Purity reflective: Runs in parallel when given a pure function `f`.
+    ///
+    @ParallelWhenPure
+    pub def exists(f: (k, v) -> Bool & ef, m: MultiMap[k, v]): Bool & ef =
+        let MultiMap(m1) = m;
+        let outer = (k, vs) -> Nec.exists(v -> f(k, v), vs);
+        Map.exists(outer, m1)
+
+    ///
+    /// Returns `true` if and only if all mappings in `m` satisfy the predicate `f`.
+    ///
+    /// Returns `true` if `m` is the empty map.
+    ///
+    /// Purity reflective: Runs in parallel when given a pure function `f`.
+    ///
+    @ParallelWhenPure
+    pub def forall(f: (k, v) -> Bool & ef, m: MultiMap[k, v]): Bool & ef =
+        let MultiMap(m1) = m;
+        let outer = (k, vs) -> Nec.forall(v -> f(k, v), vs);
+        Map.forall(outer, m1)
+
+    ///
+    /// Returns the union of `m1` and `m2`.
+    ///
+    /// Duplicate keys are concatenated.
+    ///
+    pub def union(m1: MultiMap[k, v], m2: MultiMap[k, v]): MultiMap[k, v] with Order[k] =
+        let MultiMap(mm1) = m1;
+        let MultiMap(mm2) = m2;
+        MultiMap(Map.unionWith((n1, n2) -> Nec.append(n1, n2), mm1, mm2))
+
+    ///
+    /// Returns the intersection of `m1` and `m2`.
+    ///
+    pub def intersection(m1: MultiMap[k, v], m2: MultiMap[k, v]): MultiMap[k, v] with Order[k], Eq[v] =
+        let MultiMap(mm1) = m1;
+        let MultiMap(mm2) = m2;
+        let step = (acc, k, vs) -> match Map.get(k, mm2) {
+            case None => acc
+            case Some(vs1) => match intersectionNec(vs, vs1) {
+                case None      => acc
+                case Some(vs2) => Map.insert(k, vs2, acc)
+            }
+        };
+        MultiMap(Map.foldLeftWithKey(step, Map.empty(), mm1))
+
+    def intersectionNec(n1: Nec[v], n2: Nec[v]): Option[Nec[v]] with Eq[v] =
+        Nec.foldLeft((acc, v) -> if (Nec.memberOf(v, n2) and not Chain.memberOf(v, acc)) Chain.snoc(acc, v) else acc, Chain.empty(), n1) 
+            |> ctoNec
+
+    pub def ctoNec(c: Chain[a]): Option[Nec[a]] = 
+        use Chain.ViewLeft.{NoneLeft, SomeLeft};
+        match Chain.viewLeft(c) {
+            case NoneLeft        => None
+            case SomeLeft(x, rs) => Chain.foldLeft(Nec.snoc, Nec.singleton(x), rs) |> Some
+        }
+
+/*
+    ///
+    /// Returns the result of running all the actions in the map `m`.
+    ///
+    pub def sequence(m: MultiMap[k, m[v]]): m[MultiMap[k, v]] with Applicative[m] =
+        let MultiMap(m1) = m;
+        Functor.map(MultiMap, Traversable.sequence(Traversable.sequence), m1))
+
+*/
 
 }
