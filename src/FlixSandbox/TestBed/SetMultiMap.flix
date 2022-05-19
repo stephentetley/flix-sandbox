@@ -338,7 +338,7 @@ namespace SetMultiMap {
         let SetMultiMap(m1) = m;
         let inner = (k, acc, v) -> match acc {
             case None           => Some((k, v))
-            case Some((k1, v1)) => Some(f(k, v, k1, v1))
+            case Some((k1, v1)) => Some(f(k1, v1, k, v))
         };
         let outer = (acc, k, vs) -> Set.foldLeft(inner(k), acc, vs);
         Map.foldLeftWithKey(outer, None, m1)

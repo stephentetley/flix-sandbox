@@ -598,9 +598,9 @@ namespace TestBagMultiMap {
         BagMultiMap.reduceLeft((v1, v2) -> v1 - v2, BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 4)) == Some(0)
 
     @test
-    def reduceLeft05(): Bool = 
+    def reduceLeft05(): Bool =           
         BagMultiMap.reduceLeft((v1, v2) -> v1 - v2, 
-            BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 2) |> BagMultiMap.insert(1, 1)) == Some(1)
+            BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 2) |> BagMultiMap.insert(1, 1)) == Some(-5)
 
 
 /// TODO other reduce functions

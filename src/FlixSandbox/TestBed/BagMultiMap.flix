@@ -138,21 +138,24 @@ namespace BagMultiMap {
     ///
     /// Updates `m` with `k => v`.
     ///
+    /// Operationally, if one or more values already exists for `k` then `v` is added to the 
+    /// front of the bag of values.
+    /// 
     pub def insert(k: k, v: v, m: BagMultiMap[k, v]): BagMultiMap[k, v] with Order[k] =
         let BagMultiMap(m1) = m;
-        BagMultiMap(Map.insertWith((v1, v2) -> Nec.append(v1, v2), k, Nec.singleton(v), m1))
+        BagMultiMap(Map.insertWith((_, vs) -> Nec.cons(v, vs), k, Nec.singleton(v), m1))
 
     ///
     /// Updates `m` with `k => vs`.
     ///
-    /// Where `vs` is any foldable container. If `vs` is empty nothing is inserted.
+    /// Where `vs` is any foldable container. If `vs` is empty then nothing is inserted.
     ///
     pub def inserts(k: k, vs: t[v], m: BagMultiMap[k, v]): BagMultiMap[k, v] with Order[k], Foldable[t] =
         match Foldable.toList(vs) |> List.toNec {
             case None => m
-            case Some(n1) => { 
+            case Some(front) => { 
                 let BagMultiMap(m1) = m;
-                BagMultiMap(Map.insertWith((v1, v2) -> Nec.append(v1, v2), k, n1, m1))
+                BagMultiMap(Map.insertWith((_, vs) -> Nec.append(front, vs), k, front, m1))
             }
         }
         
@@ -344,7 +347,7 @@ namespace BagMultiMap {
         let BagMultiMap(m1) = m;
         let inner = (k, acc, v) -> match acc {
             case None           => Some((k, v))
-            case Some((k1, v1)) => Some(f(k, v, k1, v1))
+            case Some((k1, v1)) => Some(f(k1, v1, k, v))
         };
         let outer = (acc, k, vs) -> Nec.foldLeft(inner(k), acc, vs);
         Map.foldLeftWithKey(outer, None, m1)
