@@ -134,6 +134,22 @@ namespace SetMultiMap {
         let SetMultiMap(m1) = m;
         SetMultiMap(Map.insertWith((v1, v2) -> Set.union(v1, v2), k, Set.singleton(v), m1))
 
+
+    ///
+    /// Updates `m` with `k => vs`.
+    ///
+    /// Where `vs` is any foldable container. If `vs` is empty nothing is inserted.
+    ///
+    pub def inserts(k: k, vs: t[v], m: SetMultiMap[k, v]): SetMultiMap[k, v] with Order[k], Order[v], Foldable[t] =
+        match Foldable.toSet(vs) {
+            case s1 if Set.isEmpty(s1) => m
+            case s1                    => { 
+                let SetMultiMap(m1) = m;
+                SetMultiMap(Map.insertWith((v1, v2) -> Set.union(v1, v2), k, s1, m1))
+            }
+        }
+
+
     ///
     /// Updates `m` with `k => map(f, vs)` if `k => vs` is in `m`.
     ///

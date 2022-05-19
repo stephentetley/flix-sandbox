@@ -142,7 +142,20 @@ namespace BagMultiMap {
         let BagMultiMap(m1) = m;
         BagMultiMap(Map.insertWith((v1, v2) -> Nec.append(v1, v2), k, Nec.singleton(v), m1))
 
-
+    ///
+    /// Updates `m` with `k => vs`.
+    ///
+    /// Where `vs` is any foldable container. If `vs` is empty nothing is inserted.
+    ///
+    pub def inserts(k: k, vs: t[v], m: BagMultiMap[k, v]): BagMultiMap[k, v] with Order[k], Foldable[t] =
+        match Foldable.toList(vs) |> List.toNec {
+            case None => m
+            case Some(n1) => { 
+                let BagMultiMap(m1) = m;
+                BagMultiMap(Map.insertWith((v1, v2) -> Nec.append(v1, v2), k, n1, m1))
+            }
+        }
+        
 
     ///
     /// Updates `m` with `k => map(f, vs)` if `k => vs` is in `m`.
@@ -373,6 +386,8 @@ namespace BagMultiMap {
 
     ///
     /// Returns the sum of all keys in the map `m`.
+    ///
+    /// A key is counted foreach value it points to.
     ///
     pub def sumKeys(m: BagMultiMap[Int32, v]): Int32 =
         sumWith((k, _) -> k, m)

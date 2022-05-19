@@ -575,4 +575,99 @@ namespace TestBagMultiMap {
         BagMultiMap.foldLeftWithKey((acc, k, v) -> acc + k + v, 0, 
             BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 2) |> BagMultiMap.insert(1, 1)) == 11
 
+/// TODO foldRight functions - looks like we need a proper notion of order...
+
+    /////////////////////////////////////////////////////////////////////////////
+    // reduceLeft                                                              //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def reduceLeft01(): Bool = 
+        BagMultiMap.reduceLeft((v1, v2) -> v1 - v2, BagMultiMap.empty(): BagMultiMap[Int32, Int32]) == None
+
+    @test
+    def reduceLeft02(): Bool = 
+        BagMultiMap.reduceLeft((v1, v2) -> v1 - v2, BagMultiMap.singleton(1, 2)) == Some(2)
+
+    @test
+    def reduceLeft03(): Bool = 
+        BagMultiMap.reduceLeft((v1, v2) -> v1 - v2, BagMultiMap.singleton(1, 1)) == Some(1)
+
+    @test
+    def reduceLeft04(): Bool = 
+        BagMultiMap.reduceLeft((v1, v2) -> v1 - v2, BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 4)) == Some(0)
+
+    @test
+    def reduceLeft05(): Bool = 
+        BagMultiMap.reduceLeft((v1, v2) -> v1 - v2, 
+            BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 2) |> BagMultiMap.insert(1, 1)) == Some(1)
+
+
+/// TODO other reduce functions
+
+    /////////////////////////////////////////////////////////////////////////////
+    // count                                                                   //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def count01(): Bool = 
+        BagMultiMap.count((k, v) -> v > k, BagMultiMap.empty(): BagMultiMap[Int32, Int32]) == 0
+
+    @test
+    def count02(): Bool = 
+        BagMultiMap.count((k, v) -> v > k, BagMultiMap.singleton(1, 2)) == 1
+
+    @test
+    def count03(): Bool = 
+        BagMultiMap.count((k, v) -> v > k, BagMultiMap.singleton(1, 1)) == 0
+
+    @test
+    def count04(): Bool = 
+        BagMultiMap.count((k, v) -> v > k, BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 4)) == 2
+
+    @test
+    def count05(): Bool = 
+        BagMultiMap.count((k, v) -> v > k, 
+            BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 2) |> BagMultiMap.insert(1, 1)) == 1
+
+    /////////////////////////////////////////////////////////////////////////////
+    // sumKeys                                                                 //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def sumKeys01(): Bool = BagMultiMap.sumKeys(BagMultiMap.empty(): BagMultiMap[Int32, Int32]) == 0
+
+    @test
+    def sumKeys02(): Bool = BagMultiMap.sumKeys(BagMultiMap.singleton(1, 2)) == 1
+
+    @test
+    def sumKeys03(): Bool = BagMultiMap.sumKeys(BagMultiMap.singleton(1, 1)) == 1
+
+    @test
+    def sumKeys04(): Bool = BagMultiMap.sumKeys(BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 4)) == 3
+
+    @test
+    def sumKeys05(): Bool = 
+        BagMultiMap.sumKeys(BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 2) |> BagMultiMap.insert(1, 1)) == 4
+
+    /////////////////////////////////////////////////////////////////////////////
+    // sumValues                                                               //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def sumValues01(): Bool = BagMultiMap.sumValues(BagMultiMap.empty(): BagMultiMap[Int32, Int32]) == 0
+
+    @test
+    def sumValues02(): Bool = BagMultiMap.sumValues(BagMultiMap.singleton(1, 2)) == 2
+
+    @test
+    def sumValues03(): Bool = BagMultiMap.sumValues(BagMultiMap.singleton(1, 1)) == 1
+
+    @test
+    def sumValues04(): Bool = BagMultiMap.sumValues(BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 4)) == 8
+
+    @test
+    def sumValues05(): Bool = 
+        BagMultiMap.sumValues(BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 2) |> BagMultiMap.insert(1, 1)) == 7
+
 }
