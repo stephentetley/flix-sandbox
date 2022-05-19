@@ -531,24 +531,24 @@ namespace TestBagMultiMap {
 
     @test
     def foldLeft01(): Bool = 
-        BagMultiMap.foldLeft((acc, v) -> acc + v, 0, BagMultiMap.empty(): BagMultiMap[Int32, Int32]) == 0
+        BagMultiMap.foldLeft((acc, v) -> v :: acc, Nil, BagMultiMap.empty(): BagMultiMap[Int32, Int32]) == Nil
 
     @test
     def foldLeft02(): Bool = 
-        BagMultiMap.foldLeft((acc, v) -> acc + v, 0, BagMultiMap.singleton(1, 2)) == 2
+        BagMultiMap.foldLeft((acc, v) -> v :: acc, Nil, BagMultiMap.singleton(1, 2)) == 2 :: Nil
 
     @test
     def foldLeft03(): Bool = 
-        BagMultiMap.foldLeft((acc, v) -> acc + v, 0, BagMultiMap.singleton(1, 1)) == 1
+        BagMultiMap.foldLeft((acc, v) -> v :: acc, Nil, BagMultiMap.singleton(1, 1)) == 1 :: Nil
 
     @test
     def foldLeft04(): Bool = 
-        BagMultiMap.foldLeft((acc, v) -> acc + v, 0, BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 4)) == 8
+        BagMultiMap.foldLeft((acc, v) -> v :: acc, Nil, BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 5)) == 5 :: 4 :: Nil
 
     @test
     def foldLeft05(): Bool = 
-        BagMultiMap.foldLeft((acc, v) -> acc + v, 0, 
-            BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 2) |> BagMultiMap.insert(1, 1)) == 7
+        BagMultiMap.foldLeft((acc, v) -> v :: acc, Nil, 
+            BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 2) |> BagMultiMap.insert(1, 1)) == 2 :: 4 :: 1 :: Nil
 
     /////////////////////////////////////////////////////////////////////////////
     // foldLeftWithKey                                                         //
@@ -556,26 +556,76 @@ namespace TestBagMultiMap {
 
     @test
     def foldLeftWithKey01(): Bool = 
-        BagMultiMap.foldLeftWithKey((acc, k, v) -> acc + k + v, 0, BagMultiMap.empty(): BagMultiMap[Int32, Int32]) == 0
+        BagMultiMap.foldLeftWithKey((acc, k, v) -> (k, v) :: acc, Nil, BagMultiMap.empty(): BagMultiMap[Int32, Int32]) == Nil
 
     @test
     def foldLeftWithKey02(): Bool = 
-        BagMultiMap.foldLeftWithKey((acc, k, v) -> acc + k + v, 0, BagMultiMap.singleton(1, 2)) == 3
+        BagMultiMap.foldLeftWithKey((acc, k, v) -> (k, v) :: acc, Nil, BagMultiMap.singleton(1, 2)) == (1, 2) :: Nil
 
     @test
     def foldLeftWithKey03(): Bool = 
-        BagMultiMap.foldLeftWithKey((acc, k, v) -> acc + k + v, 0, BagMultiMap.singleton(1, 1)) == 2
+        BagMultiMap.foldLeftWithKey((acc, k, v) -> (k, v) :: acc, Nil, BagMultiMap.singleton(1, 1)) == (1, 1) :: Nil
 
     @test
     def foldLeftWithKey04(): Bool = 
-        BagMultiMap.foldLeftWithKey((acc, k, v) -> acc + k + v, 0, BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 4)) == 11
+        BagMultiMap.foldLeftWithKey((acc, k, v) -> (k, v) :: acc, Nil, 
+            BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 5)) == (2, 5) :: (1, 4) :: Nil
 
     @test
     def foldLeftWithKey05(): Bool = 
-        BagMultiMap.foldLeftWithKey((acc, k, v) -> acc + k + v, 0, 
-            BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 2) |> BagMultiMap.insert(1, 1)) == 11
+        BagMultiMap.foldLeftWithKey((acc, k, v) -> (k, v) :: acc, Nil, 
+            BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 2) |> BagMultiMap.insert(1, 1)) == (2, 2) :: (1, 4) :: (1, 1) :: Nil
 
-/// TODO foldRight functions - looks like we need a proper notion of order...
+    /////////////////////////////////////////////////////////////////////////////
+    // foldRight                                                               //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def foldRight01(): Bool = 
+        BagMultiMap.foldRight((v, acc) -> v :: acc, Nil, BagMultiMap.empty(): BagMultiMap[Int32, Int32]) == Nil
+
+    @test
+    def foldRight02(): Bool = 
+        BagMultiMap.foldRight((v, acc) -> v :: acc, Nil, BagMultiMap.singleton(1, 2)) == 2 :: Nil
+
+    @test
+    def foldRight03(): Bool = 
+        BagMultiMap.foldRight((v, acc) -> v :: acc, Nil, BagMultiMap.singleton(1, 1)) == 1 :: Nil
+
+    @test
+    def foldRight04(): Bool = 
+        BagMultiMap.foldRight((v, acc) -> v :: acc, Nil, BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 5)) == 4 :: 5 :: Nil
+
+    @test
+    def foldRight05(): Bool = 
+        BagMultiMap.foldRight((v, acc) -> v :: acc, Nil, 
+            BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 2) |> BagMultiMap.insert(1, 1)) == 1 :: 4 :: 2 :: Nil
+
+    /////////////////////////////////////////////////////////////////////////////
+    // foldRightWithKey                                                        //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def foldRightWithKey01(): Bool = 
+        BagMultiMap.foldRightWithKey((k, v, acc) -> (k, v) :: acc, Nil, BagMultiMap.empty(): BagMultiMap[Int32, Int32]) == Nil
+
+    @test
+    def foldRightWithKey02(): Bool = 
+        BagMultiMap.foldRightWithKey((k, v, acc) -> (k, v) :: acc, Nil, BagMultiMap.singleton(1, 2)) == (1, 2) :: Nil
+
+    @test
+    def foldRightWithKey03(): Bool = 
+        BagMultiMap.foldRightWithKey((k, v, acc) -> (k, v) :: acc, Nil, BagMultiMap.singleton(1, 1)) == (1, 1) :: Nil
+
+    @test
+    def foldRightWithKey04(): Bool = 
+        BagMultiMap.foldRightWithKey((k, v, acc) -> (k, v) :: acc, Nil, 
+            BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 5)) == (1, 4) :: (2, 5) :: Nil
+
+    @test
+    def foldRightWithKey05(): Bool = 
+        BagMultiMap.foldRightWithKey((k, v, acc) -> (k, v) :: acc, Nil, 
+            BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 2) |> BagMultiMap.insert(1, 1)) == (1, 1) :: (1, 4) :: (2, 2) :: Nil
 
     /////////////////////////////////////////////////////////////////////////////
     // reduceLeft                                                              //
@@ -595,7 +645,7 @@ namespace TestBagMultiMap {
 
     @test
     def reduceLeft04(): Bool = 
-        BagMultiMap.reduceLeft((v1, v2) -> v1 - v2, BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 4)) == Some(0)
+        BagMultiMap.reduceLeft((v1, v2) -> v1 - v2, BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 5)) == Some(-1)
 
     @test
     def reduceLeft05(): Bool =           
@@ -603,7 +653,86 @@ namespace TestBagMultiMap {
             BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 2) |> BagMultiMap.insert(1, 1)) == Some(-5)
 
 
-/// TODO other reduce functions
+
+    /////////////////////////////////////////////////////////////////////////////
+    // reduceLeftWithKey                                                       //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def reduceLeftWithKey01(): Bool = 
+        BagMultiMap.reduceLeftWithKey((k1, v1, _, v2) -> (k1, v1 - v2), BagMultiMap.empty(): BagMultiMap[Int32, Int32]) == None
+
+    @test
+    def reduceLeftWithKey02(): Bool = 
+        BagMultiMap.reduceLeftWithKey((k1, v1, _, v2) -> (k1, v1 - v2), BagMultiMap.singleton(1, 2)) == Some((1, 2))
+
+    @test
+    def reduceLeftWithKey03(): Bool = 
+        BagMultiMap.reduceLeftWithKey((k1, v1, _, v2) -> (k1, v1 - v2), BagMultiMap.singleton(1, 1)) == Some((1, 1))
+
+    @test
+    def reduceLeftWithKey04(): Bool = 
+        BagMultiMap.reduceLeftWithKey((k1, v1, _, v2) -> (k1, v1 - v2), 
+            BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 5)) == Some((1, -1))
+
+    @test
+    def reduceLeftWithKey05(): Bool =           
+        BagMultiMap.reduceLeftWithKey((k1, v1, _, v2) -> (k1, v1 - v2), 
+            BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 2) |> BagMultiMap.insert(1, 1)) == Some((1, -5))
+
+    /////////////////////////////////////////////////////////////////////////////
+    // reduceRight                                                             //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def reduceRight01(): Bool = 
+        BagMultiMap.reduceRight((v1, v2) -> v1 - v2, BagMultiMap.empty(): BagMultiMap[Int32, Int32]) == None
+
+    @test
+    def reduceRight02(): Bool = 
+        BagMultiMap.reduceRight((v1, v2) -> v1 - v2, BagMultiMap.singleton(1, 2)) == Some(2)
+
+    @test
+    def reduceRight03(): Bool = 
+        BagMultiMap.reduceRight((v1, v2) -> v1 - v2, BagMultiMap.singleton(1, 1)) == Some(1)
+
+    @test
+    def reduceRight04(): Bool = 
+        BagMultiMap.reduceRight((v1, v2) -> v1 - v2, BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 5)) == Some(1)
+
+    @test
+    def reduceRight05(): Bool =           
+        BagMultiMap.reduceRight((v1, v2) -> v1 - v2, 
+            BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 2) |> BagMultiMap.insert(1, 1)) == Some(-3)
+
+    /////////////////////////////////////////////////////////////////////////////
+    // reduceRightWithKey                                                      //
+    /////////////////////////////////////////////////////////////////////////////
+/*
+    @test
+    def reduceRightWithKey01(): Bool = 
+        BagMultiMap.reduceRightWithKey((k1, v1, _, v2) -> (k1, v1 - v2), BagMultiMap.empty(): BagMultiMap[Int32, Int32]) == None
+
+    @test
+    def reduceRightWithKey02(): Bool = 
+        BagMultiMap.reduceRightWithKey((k1, v1, _, v2) -> (k1, v1 - v2), BagMultiMap.singleton(1, 2)) == Some((1, 2))
+
+    @test
+    def reduceRightWithKey03(): Bool = 
+        BagMultiMap.reduceRightWithKey((k1, v1, _, v2) -> (k1, v1 - v2), BagMultiMap.singleton(1, 1)) == Some((1, 1))
+
+    @test
+    def reduceRightWithKey04(): Bool = 
+        BagMultiMap.reduceRightWithKey((k1, v1, _, v2) -> (k1, v1 - v2), 
+            BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 5)) == Some((1, -1))
+*/
+    @test
+    def reduceRightWithKey05(): Bool & Impure =
+        println("reduceRightWithKey05()");
+        println(BagMultiMap.reduceRightWithKey((k1, v1, _, v2) -> (k1, v1 - v2), 
+            BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 2) |> BagMultiMap.insert(1, 1)));
+        BagMultiMap.reduceRightWithKey((k1, v1, _, v2) -> (k1, v1 - v2), 
+            BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 2) |> BagMultiMap.insert(1, 1)) == Some((2, -3))
 
     /////////////////////////////////////////////////////////////////////////////
     // count                                                                   //
