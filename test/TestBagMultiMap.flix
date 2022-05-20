@@ -658,27 +658,29 @@ namespace TestBagMultiMap {
     // reduceLeftWithKey                                                       //
     /////////////////////////////////////////////////////////////////////////////
 
+    /// Leftmost key, rightmost value
+
     @test
     def reduceLeftWithKey01(): Bool = 
-        BagMultiMap.reduceLeftWithKey((k1, v1, _, v2) -> (k1, v1 - v2), BagMultiMap.empty(): BagMultiMap[Int32, Int32]) == None
+        BagMultiMap.reduceLeftWithKey((k1, _, _, v2) -> (k1, v2), BagMultiMap.empty(): BagMultiMap[Int32, Int32]) == None
 
     @test
     def reduceLeftWithKey02(): Bool = 
-        BagMultiMap.reduceLeftWithKey((k1, v1, _, v2) -> (k1, v1 - v2), BagMultiMap.singleton(1, 2)) == Some((1, 2))
+        BagMultiMap.reduceLeftWithKey((k1, _, _, v2) -> (k1, v2), BagMultiMap.singleton(1, 2)) == Some((1, 2))
 
     @test
     def reduceLeftWithKey03(): Bool = 
-        BagMultiMap.reduceLeftWithKey((k1, v1, _, v2) -> (k1, v1 - v2), BagMultiMap.singleton(1, 1)) == Some((1, 1))
+        BagMultiMap.reduceLeftWithKey((k1, _, _, v2) -> (k1, v2), BagMultiMap.singleton(1, 1)) == Some((1, 1))
 
     @test
     def reduceLeftWithKey04(): Bool = 
-        BagMultiMap.reduceLeftWithKey((k1, v1, _, v2) -> (k1, v1 - v2), 
-            BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 5)) == Some((1, -1))
+        BagMultiMap.reduceLeftWithKey((k1, _, _, v2) -> (k1, v2), 
+            BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 5)) == Some((1, 5))
 
     @test
     def reduceLeftWithKey05(): Bool =           
-        BagMultiMap.reduceLeftWithKey((k1, v1, _, v2) -> (k1, v1 - v2), 
-            BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 2) |> BagMultiMap.insert(1, 1)) == Some((1, -5))
+        BagMultiMap.reduceLeftWithKey((k1, _, _, v2) -> (k1, v2), 
+            BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 2) |> BagMultiMap.insert(1, 1)) == Some((1, 2))
 
     /////////////////////////////////////////////////////////////////////////////
     // reduceRight                                                             //
@@ -708,31 +710,30 @@ namespace TestBagMultiMap {
     /////////////////////////////////////////////////////////////////////////////
     // reduceRightWithKey                                                      //
     /////////////////////////////////////////////////////////////////////////////
-/*
+
+    /// Rightmost key, leftmost value
+
     @test
     def reduceRightWithKey01(): Bool = 
-        BagMultiMap.reduceRightWithKey((k1, v1, _, v2) -> (k1, v1 - v2), BagMultiMap.empty(): BagMultiMap[Int32, Int32]) == None
+        BagMultiMap.reduceRightWithKey((k1, _, _, v2) -> (k1, v2), BagMultiMap.empty(): BagMultiMap[Int32, Int32]) == None
 
     @test
     def reduceRightWithKey02(): Bool = 
-        BagMultiMap.reduceRightWithKey((k1, v1, _, v2) -> (k1, v1 - v2), BagMultiMap.singleton(1, 2)) == Some((1, 2))
+        BagMultiMap.reduceRightWithKey((k1, _, _, v2) -> (k1, v2), BagMultiMap.singleton(1, 2)) == Some((1, 2))
 
     @test
     def reduceRightWithKey03(): Bool = 
-        BagMultiMap.reduceRightWithKey((k1, v1, _, v2) -> (k1, v1 - v2), BagMultiMap.singleton(1, 1)) == Some((1, 1))
+        BagMultiMap.reduceRightWithKey((k1, _, _, v2) -> (k1, v2), BagMultiMap.singleton(1, 1)) == Some((1, 1))
 
     @test
     def reduceRightWithKey04(): Bool = 
-        BagMultiMap.reduceRightWithKey((k1, v1, _, v2) -> (k1, v1 - v2), 
-            BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 5)) == Some((1, -1))
-*/
+        BagMultiMap.reduceRightWithKey((k1, _, _, v2) -> (k1, v2), 
+            BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 5)) == Some((2, 4))
+
     @test
-    def reduceRightWithKey05(): Bool & Impure =
-        println("reduceRightWithKey05()");
-        println(BagMultiMap.reduceRightWithKey((k1, v1, _, v2) -> (k1, v1 - v2), 
-            BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 2) |> BagMultiMap.insert(1, 1)));
-        BagMultiMap.reduceRightWithKey((k1, v1, _, v2) -> (k1, v1 - v2), 
-            BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 2) |> BagMultiMap.insert(1, 1)) == Some((2, -3))
+    def reduceRightWithKey05(): Bool =
+        BagMultiMap.reduceRightWithKey((k1, _, _, v2) -> (k1, v2), 
+            BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 2) |> BagMultiMap.insert(1, 1)) == Some((2, 1))
 
     /////////////////////////////////////////////////////////////////////////////
     // count                                                                   //
@@ -798,5 +799,131 @@ namespace TestBagMultiMap {
     @test
     def sumValues05(): Bool = 
         BagMultiMap.sumValues(BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 2) |> BagMultiMap.insert(1, 1)) == 7
+
+    /////////////////////////////////////////////////////////////////////////////
+    // sumWith                                                                 //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def sumWith01(): Bool = BagMultiMap.sumWith((k, v) -> if (v > k) 10 else 0, BagMultiMap.empty(): BagMultiMap[Int32, Int32]) == 0
+
+    @test
+    def sumWith02(): Bool = BagMultiMap.sumWith((k, v) -> if (v > k) 10 else 0, BagMultiMap.singleton(1, 2)) == 10
+
+    @test
+    def sumWith03(): Bool = BagMultiMap.sumWith((k, v) -> if (v > k) 10 else 0, BagMultiMap.singleton(1, 1)) == 0
+
+    @test
+    def sumWith04(): Bool = 
+        BagMultiMap.sumWith((k, v) -> if (v > k) 10 else 0, BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 4)) == 20
+
+    @test
+    def sumWith05(): Bool = 
+        BagMultiMap.sumWith((k, v) -> if (v > k) 10 else 0, 
+            BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 2) |> BagMultiMap.insert(1, 1)) == 10
+
+    /////////////////////////////////////////////////////////////////////////////
+    // productKeys                                                             //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def productKeys01(): Bool = BagMultiMap.productKeys(BagMultiMap.empty(): BagMultiMap[Int32, Int32]) == 0
+
+    @test
+    def productKeys02(): Bool = BagMultiMap.productKeys(BagMultiMap.singleton(1, 2)) == 1
+
+    @test
+    def productKeys03(): Bool = BagMultiMap.productKeys(BagMultiMap.singleton(1, 1)) == 1
+
+    @test
+    def productKeys04(): Bool = BagMultiMap.productKeys(BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 4)) == 2
+
+    @test
+    def productKeys05(): Bool = 
+        BagMultiMap.productKeys(BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 2) |> BagMultiMap.insert(1, 1)) == 2
+
+
+    /////////////////////////////////////////////////////////////////////////////
+    // productValues                                                           //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def productValues01(): Bool = BagMultiMap.productValues(BagMultiMap.empty(): BagMultiMap[Int32, Int32]) == 0
+
+    @test
+    def productValues02(): Bool = BagMultiMap.productValues(BagMultiMap.singleton(1, 2)) == 2
+
+    @test
+    def productValues03(): Bool = BagMultiMap.productValues(BagMultiMap.singleton(1, 1)) == 1
+
+    @test
+    def productValues04(): Bool = BagMultiMap.productValues(BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 4)) == 16
+
+    @test
+    def productValues05(): Bool = 
+        BagMultiMap.productValues(BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 2) |> BagMultiMap.insert(1, 1)) == 8
+
+    /////////////////////////////////////////////////////////////////////////////
+    // productWith                                                             //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def productWith01(): Bool = BagMultiMap.productWith((k, v) -> if (v > k) 10 else 1, BagMultiMap.empty(): BagMultiMap[Int32, Int32]) == 0
+
+    @test
+    def productWith02(): Bool = BagMultiMap.productWith((k, v) -> if (v > k) 10 else 1, BagMultiMap.singleton(1, 2)) == 10
+
+    @test
+    def productWith03(): Bool = BagMultiMap.productWith((k, v) -> if (v > k) 10 else 1, BagMultiMap.singleton(1, 1)) == 1
+
+    @test
+    def productWith04(): Bool = 
+        BagMultiMap.productWith((k, v) -> if (v > k) 10 else 1, BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 4)) == 100
+
+    @test
+    def productWith05(): Bool = 
+        BagMultiMap.productWith((k, v) -> if (v > k) 10 else 1, 
+            BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 2) |> BagMultiMap.insert(1, 1)) == 10
+
+    /////////////////////////////////////////////////////////////////////////////
+    // exists                                                                  //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def exists01(): Bool = not BagMultiMap.exists((k, v) -> v > k, BagMultiMap.empty(): BagMultiMap[Int32, Int32])
+
+    @test
+    def exists02(): Bool = BagMultiMap.exists((k, v) -> v > k, BagMultiMap.singleton(1, 2))
+
+    @test
+    def exists03(): Bool = not BagMultiMap.exists((k, v) -> v > k, BagMultiMap.singleton(1, 1))
+
+    @test
+    def exists04(): Bool = BagMultiMap.exists((k, v) -> v > k, BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 4))
+
+    @test
+    def exists05(): Bool = 
+        BagMultiMap.exists((k, v) -> v > k, 
+            BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 2) |> BagMultiMap.insert(1, 1))
+    
+    /////////////////////////////////////////////////////////////////////////////
+    // forall                                                                  //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def forall01(): Bool = BagMultiMap.forall((k, v) -> v > k, BagMultiMap.empty(): BagMultiMap[Int32, Int32])
+
+    @test
+    def forall02(): Bool = BagMultiMap.forall((k, v) -> v > k, BagMultiMap.singleton(1, 2))
+
+    @test
+    def forall03(): Bool = not BagMultiMap.forall((k, v) -> v > k, BagMultiMap.singleton(1, 1))
+
+    @test
+    def forall04(): Bool = BagMultiMap.forall((k, v) -> v > k, BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 4))
+
+    @test
+    def forall05(): Bool = 
+        not BagMultiMap.forall((k, v) -> v > k, BagMultiMap.singleton(1, 4) |> BagMultiMap.insert(2, 2) |> BagMultiMap.insert(1, 1))
 
 }
