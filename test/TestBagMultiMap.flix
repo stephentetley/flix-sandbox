@@ -16,7 +16,7 @@
 
 namespace TestBagMultiMap {
 
-    use BagMultiMap.{empty, singleton, insert};
+    use BagMultiMap.{empty, singleton, insert, toAssocList};
 
     def toBagMultiMap(l: List[(k, v)]): BagMultiMap[k, v] with Order[k], Order[v] = 
         List.foldLeft((acc, kv) -> let (k, v) = kv; insert(k, v, acc), empty(), l)
@@ -930,7 +930,7 @@ namespace TestBagMultiMap {
     // union                                                                   //
     /////////////////////////////////////////////////////////////////////////////
     @test
-    def union01(): Bool = BagMultiMap.union(empty(): BagMultiMap[Unit, Unit], empty()) == empty()
+    def union01(): Bool = BagMultiMap.union(empty(): BagMultiMap[Int32, Int32], empty()) == empty()
 
     @test
     def union02(): Bool = BagMultiMap.union(singleton(1, 2), empty()) == singleton(1, 2)
@@ -950,6 +950,128 @@ namespace TestBagMultiMap {
     def union06(): Bool = 
         BagMultiMap.union(singleton(1, 2), singleton(2, 4)) == BagMultiMap.fromMap(Map#{1 => 2, 2 => 4})
 
-    /// TODO multiple values for `k`...
+    @test
+    def union07(): Bool = 
+        BagMultiMap.union(singleton(1, 2), singleton(1, 3)) 
+            |> BagMultiMap.toList == (1, 2) :: (1, 3) :: Nil
+
+    @test
+    def union08(): Bool = 
+        BagMultiMap.union(singleton(1, 4), singleton(1, 2) |> insert(2, 3)) 
+            |> BagMultiMap.toList == (1, 4) :: (1, 2) :: (2, 3) :: Nil
+
+    /////////////////////////////////////////////////////////////////////////////
+    // intersection                                                            //
+    /////////////////////////////////////////////////////////////////////////////
+    
+    @test
+    def intersection01(): Bool = BagMultiMap.intersection(empty(): BagMultiMap[Int32, Int32], empty()) == empty()
+
+    @test
+    def intersection02(): Bool = BagMultiMap.intersection(singleton(1, 2), empty()) == empty()
+
+    @test
+    def intersection03(): Bool = BagMultiMap.intersection(empty(), singleton(1, 2)) == empty()
+
+    @test
+    def intersection04(): Bool = BagMultiMap.intersection(singleton(1, 2), singleton(1, 3)) == empty()
+
+    @test
+    def intersection05(): Bool = BagMultiMap.intersection(singleton(1, 2), singleton(1, 2)) == singleton(1, 2)
+
+    @test
+    def intersection06(): Bool = 
+        BagMultiMap.intersection(singleton(1, 2) |> insert(1, 3), singleton(1, 2) |> insert(1, 4)) == singleton(1, 2)
+
+    @test
+    def intersection07(): Bool = 
+        BagMultiMap.intersection(singleton(1, 2) |> insert(1, 4), singleton(1, 2) |> insert(1, 4))
+            |> BagMultiMap.toList == (1, 4) :: (1, 2) :: Nil
+
+    @test
+    def intersection08(): Bool = 
+        BagMultiMap.intersection(singleton(1, 2) |> insert(1, 4), singleton(1, 4) |> insert(1, 2) |> insert(1, 3))
+            |> BagMultiMap.toList == (1, 4) :: (1, 2) :: Nil
+
+    /////////////////////////////////////////////////////////////////////////////
+    // chainToNec (move to TestChain)                                          //
+    /////////////////////////////////////////////////////////////////////////////
+    
+    @test
+    def chainToNec01(): Bool = BagMultiMap.chainToNec(Chain.empty(): Chain[Int32]) == None
+
+    @test
+    def chainToNec02(): Bool = BagMultiMap.chainToNec(Chain.singleton(1)) == Some(Nec.singleton(1))
+
+    /////////////////////////////////////////////////////////////////////////////
+    // sequence                                                                //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def sequence01(): Bool = BagMultiMap.sequence(empty(): BagMultiMap[Int32, Option[Int32]]) == Some(empty())
+
+    @test
+    def sequence02(): Bool = BagMultiMap.sequence(singleton(1, None): BagMultiMap[Int32, Option[Int32]]) == None
+
+    @test
+    def sequence03(): Bool = BagMultiMap.sequence(singleton(1, Some(2))) == Some(singleton(1, 2))
+
+    @test
+    def sequence04(): Bool = BagMultiMap.sequence(singleton(1, Some(2)) |> insert(2, None)) == None
+
+    @test
+    def sequence05(): Bool =
+        BagMultiMap.sequence(singleton(1, Some(2)) |> insert(2, Some(4))) 
+            |> Option.map(toAssocList) == Some((1, 2 :: Nil) :: (2, 4 :: Nil) :: Nil)
+
+
+    /////////////////////////////////////////////////////////////////////////////
+    // traverse                                                                //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def traverse01(): Bool = BagMultiMap.traverse(v -> Some(v+1), empty(): BagMultiMap[Int32, Int32]) == Some(empty())
+
+    @test
+    def traverse02(): Bool = BagMultiMap.traverse(v -> Some(v+1), singleton(1, 2)) == Some(singleton(1,3))
+
+    @test
+    def traverse03(): Bool = 
+        BagMultiMap.traverse(v -> Some(v+1), singleton(1, 2) |> insert(2, 4)) 
+            |> Option.map(toAssocList) == Some((1, 3 :: Nil) :: (2, 5 :: Nil) :: Nil)
+
+    @test
+    def traverse04(): Bool = 
+        BagMultiMap.traverse(v -> Some(v+1), singleton(1, 2) |> insert(1, 4)) 
+            |> Option.map(toAssocList) == Some((1, 5 :: 3 :: Nil) :: Nil)
+
+    @test
+    def traverse05(): Bool = BagMultiMap.traverse(_ -> None : Option[Int32], singleton(1, 2) |> insert(1, 4)) == None      
+
+    /////////////////////////////////////////////////////////////////////////////
+    // traverseWithKey                                                         //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def traverseWithKey01(): Bool = 
+        BagMultiMap.traverseWithKey((k, v) -> Some(k+v), empty(): BagMultiMap[Int32, Int32]) == Some(empty())
+
+    @test
+    def traverseWithKey02(): Bool = 
+        BagMultiMap.traverseWithKey((k, v) -> Some(k+v), singleton(1, 2)) == Some(singleton(1,3))
+
+    @test
+    def traverseWithKey03(): Bool = 
+        BagMultiMap.traverseWithKey((k, v) -> Some(k+v), singleton(1, 2) |> insert(2, 4)) 
+            |> Option.map(toAssocList) == Some((1, 3 :: Nil) :: (2, 6 :: Nil) :: Nil)
+
+    @test
+    def traverseWithKey04(): Bool = 
+        BagMultiMap.traverseWithKey((k, v) -> Some(k+v), singleton(1, 2) |> insert(1, 4)) 
+            |> Option.map(toAssocList) == Some((1, 5 :: 3 :: Nil) :: Nil)
+
+    @test
+    def traverseWithKey05(): Bool = 
+        BagMultiMap.traverseWithKey((_, _) -> None : Option[Int32], singleton(1, 2) |> insert(1, 4)) == None
 
 }

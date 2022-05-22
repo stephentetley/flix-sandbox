@@ -488,10 +488,10 @@ namespace BagMultiMap {
 
     def intersectionNec(n1: Nec[v], n2: Nec[v]): Option[Nec[v]] with Eq[v] =
         Nec.foldLeft((acc, v) -> if (Nec.memberOf(v, n2) and not Chain.memberOf(v, acc)) Chain.snoc(acc, v) else acc, Chain.empty(), n1) 
-            |> ctoNec
+            |> chainToNec
 
     /// To add to Chain.flix
-    pub def ctoNec(c: Chain[a]): Option[Nec[a]] = 
+    pub def chainToNec(c: Chain[a]): Option[Nec[a]] = 
         use Chain.ViewLeft.{NoneLeft, SomeLeft};
         match Chain.viewLeft(c) {
             case NoneLeft        => None
@@ -502,9 +502,28 @@ namespace BagMultiMap {
     ///
     /// Returns the map `m` as a list of singleton key-value pairs.
     ///
-    pub def toList(m: BagMultiMap[k, v]): List[(k, v)] =
+    pub def toList(m: BagMultiMap[k, v]): List[(k, v)] = toAscList(m)
+
+    ///
+    /// Returns the map `m` as a list of singleton key-value pairs in ascending order.
+    ///
+    pub def toAscList(m: BagMultiMap[k, v]): List[(k, v)] =
         foldRightWithKey((k, v, acc) -> (k, v) :: acc, Nil, m)
 
+
+    ///
+    /// Returns the map `m` as a list of singleton key-value pairs in descending order.
+    ///
+    pub def toDescList(m: BagMultiMap[k, v]): List[(k, v)] =
+        foldLeftWithKey((acc, k, v) -> (k, v) :: acc, Nil, m)
+
+
+    ///
+    /// Returns the map `m` as a list of key * List[value] pairs in ascending order.
+    ///
+    pub def toAssocList(m: BagMultiMap[k, v]): List[(k, List[v])] = 
+        let BagMultiMap(m1) = m;
+        Map.foldRightWithKey((k, vs, acc) -> (k, Nec.toList(vs)) :: acc, Nil, m1)
 
     ///
     /// Returns the result of running all the actions in the map `m`.
