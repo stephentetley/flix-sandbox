@@ -981,12 +981,12 @@ namespace TestBagMultiMap {
     @test
     def union07(): Bool = 
         BagMultiMap.union(singleton(1, 2), singleton(1, 3)) 
-            |> BagMultiMap.toList == (1, 2) :: (1, 3) :: Nil
+            |> toAssocList == (1, 2 :: 3 :: Nil) :: Nil
 
     @test
     def union08(): Bool = 
         BagMultiMap.union(singleton(1, 4), singleton(1, 2) |> insert(2, 3)) 
-            |> BagMultiMap.toList == (1, 4) :: (1, 2) :: (2, 3) :: Nil
+            |> toAssocList == (1, 4 :: 2 :: Nil) :: (2, 3 :: Nil) :: Nil
 
     /////////////////////////////////////////////////////////////////////////////
     // intersection                                                            //
@@ -1014,12 +1014,51 @@ namespace TestBagMultiMap {
     @test
     def intersection07(): Bool = 
         BagMultiMap.intersection(singleton(1, 2) |> insert(1, 4), singleton(1, 2) |> insert(1, 4))
-            |> BagMultiMap.toList == (1, 4) :: (1, 2) :: Nil
+            |> toAssocList == (1, 4 :: 2 :: Nil) :: Nil
 
     @test
     def intersection08(): Bool = 
         BagMultiMap.intersection(singleton(1, 2) |> insert(1, 4), singleton(1, 4) |> insert(1, 2) |> insert(1, 3))
-            |> BagMultiMap.toList == (1, 4) :: (1, 2) :: Nil
+            |> toAssocList == (1, 4 :: 2 :: Nil) :: Nil
+
+    /////////////////////////////////////////////////////////////////////////////
+    // difference                                                              //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def difference01(): Bool = BagMultiMap.difference(empty(): BagMultiMap[Int32, Int32], empty()) == empty()
+
+    @test
+    def difference02(): Bool = BagMultiMap.difference(singleton(1, 2), empty()) == singleton(1, 2)
+
+    @test
+    def difference03(): Bool = 
+        BagMultiMap.difference(empty(), singleton(1, 2)) == empty()
+
+    @test
+    def difference04(): Bool =
+        BagMultiMap.difference(singleton(1, 2), singleton(1, 3)) 
+            |> toAssocList == (1 , 2 :: Nil) :: Nil
+
+    @test
+    def difference05(): Bool = BagMultiMap.difference(singleton(1, 2), singleton(1, 2)) == empty()
+
+    @test
+    def difference06(): Bool = 
+        BagMultiMap.difference(singleton(1, 2) |> insert(1, 3), singleton(1, 2) |> insert(1, 4)) == singleton(1, 3)
+
+    @test
+    def difference07(): Bool = 
+        BagMultiMap.difference(singleton(1, 2) |> insert(1, 4), singleton(1, 2) |> insert(1, 4)) == empty()
+
+    @test
+    def difference08(): Bool = 
+        BagMultiMap.difference(singleton(1, 2) |> insert(1, 4), singleton(1, 4) |> insert(1, 2) |> insert(1, 3)) == empty()
+
+    @test
+    def difference09(): Bool = 
+        BagMultiMap.difference(singleton(1, 2) |> insert(1, 4) |> insert(1, 3), singleton(1, 4) |> insert(1, 2))
+            |> toAssocList == (1, 3 :: Nil) :: Nil
 
     /////////////////////////////////////////////////////////////////////////////
     // chainToNec (move to TestChain)                                          //

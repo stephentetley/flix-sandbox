@@ -498,6 +498,53 @@ namespace BagMultiMap {
             case SomeLeft(x, rs) => Chain.foldLeft(Nec.snoc, Nec.singleton(x), rs) |> Some
         }
 
+    ///
+    /// Returns the difference of `m1` and `m2` i.e `m1 - m2` (left biased).
+    ///
+    pub def difference(m1: BagMultiMap[k, v], m2: BagMultiMap[k, v]): BagMultiMap[k, v] with Order[k], Eq[v] =
+        let BagMultiMap(mm1) = m1;
+        let BagMultiMap(mm2) = m2;
+        BagMultiMap(Map.differenceWith(differenceNec, mm1, mm2))
+
+    ///
+    /// Returns the difference of `n1` and `n2` i.e `n1 - n2` (left biased).
+    ///
+    def differenceNec(n1: Nec[v], n2: Nec[v]): Option[Nec[v]] with Eq[v] =
+        necRemoveLefts(Nec.toList(n2), n1)
+
+    ///
+    /// Helper for `differenceNec`.
+    ///
+    def necRemoveLefts(xs: List[a], nec: Nec[a]): Option[Nec[a]] with Eq[a] = 
+        def loop(acc, ds) = match (acc, ds) {
+            case (None, _)            => None
+            case (Some(n1), Nil)      => Some(n1)
+            case (Some(n1), d1 :: rs) => let n2 = necRemoveLeft(d1, n1); loop(n2, rs)
+        };
+        loop(Some(nec), xs)
+
+    ///
+    /// Helper for `differenceNec`.
+    ///
+    def necRemoveLeft(x: a, nec: Nec[a]): Option[Nec[a]] with Eq[a] = 
+        use Nec.ViewLeft.{OneLeft, SomeLeft};
+        let snoc1 = (acc, b) -> match acc {
+            case None             => Some(Nec.singleton(b))
+            case Some(acc1)       => Some(Nec.snoc(acc1, b))
+        };
+        let append1 = (acc, bs) -> match acc {
+            case None             => Some(bs)
+            case Some(acc1)       => Some(Nec.append(acc1, bs))
+        };
+        def loop(acc, c) = match Nec.viewLeft(c) {
+            case OneLeft(b) if b == x      => acc 
+            case OneLeft(b)                => snoc1(acc, b)
+            case SomeLeft(b, rs) if b == x => append1(acc, rs)
+            case SomeLeft(b, rs)           => loop(snoc1(acc, b), rs)
+        };
+        loop(None, nec)
+
+
 
     ///
     /// Returns the map `m` as a list of singleton key-value pairs.
