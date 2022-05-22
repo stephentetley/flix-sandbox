@@ -18,9 +18,6 @@ namespace TestBagMultiMap {
 
     use BagMultiMap.{empty, singleton, insert, toAssocList};
 
-    def toBagMultiMap(l: List[(k, v)]): BagMultiMap[k, v] with Order[k], Order[v] = 
-        List.foldLeft((acc, kv) -> let (k, v) = kv; insert(k, v, acc), empty(), l)
-
     def isEven(i: Int32): Bool = i rem 2 == 0
     
     def isOdd(i: Int32): Bool = not isEven(i)
@@ -38,7 +35,7 @@ namespace TestBagMultiMap {
 
     @test
     def singleton01(): Bool = 
-        BagMultiMap.singleton(1, 'a') |> BagMultiMap.toList == (1, 'a') :: Nil
+        BagMultiMap.singleton(1, 'a') |> toAssocList == (1, 'a' :: Nil) :: Nil
 
     /////////////////////////////////////////////////////////////////////////////
     // fromMap                                                                 //
@@ -46,15 +43,15 @@ namespace TestBagMultiMap {
 
     @test
     def fromMap01(): Bool = 
-        BagMultiMap.fromMap(Map#{}: Map[Int32, Char]) |> BagMultiMap.toList == Nil
+        BagMultiMap.fromMap(Map#{}: Map[Int32, Char]) |> toAssocList == Nil
 
     @test
     def fromMap02(): Bool = 
-        BagMultiMap.fromMap(Map#{1 => 'a'}) |> BagMultiMap.toList == (1, 'a') :: Nil
+        BagMultiMap.fromMap(Map#{1 => 'a'}) |> toAssocList == (1, 'a' :: Nil) :: Nil
 
     @test
     def fromMap03(): Bool = 
-        BagMultiMap.fromMap(Map#{1 => 'a', 2 => 'b'}) |> BagMultiMap.toList == (1, 'a') :: (2, 'b') :: Nil
+        BagMultiMap.fromMap(Map#{1 => 'a', 2 => 'b'}) |> toAssocList == (1, 'a' :: Nil) :: (2, 'b' :: Nil) :: Nil
 
     /////////////////////////////////////////////////////////////////////////////
     // isEmpty                                                                 //
@@ -82,11 +79,11 @@ namespace TestBagMultiMap {
 
     @test
     def get03(): Bool = 
-        BagMultiMap.get(1, toBagMultiMap((1, 'a') :: (2, 'b') :: Nil)) == 'a' :: Nil
+        BagMultiMap.get(1, singleton(1, 'a') |> insert(2, 'b')) == 'a' :: Nil
 
     @test
     def get04(): Bool = 
-        BagMultiMap.get(1, toBagMultiMap((1, 'a') :: (2, 'b') :: (1, 'c') :: Nil)) |> List.sort == 'a' :: 'c' :: Nil
+        BagMultiMap.get(1, singleton(1, 'a') |> insert(2, 'b') |> insert(1, 'c')) == 'c' :: 'a' :: Nil
 
     /////////////////////////////////////////////////////////////////////////////
     // memberOf                                                                //
@@ -103,7 +100,7 @@ namespace TestBagMultiMap {
     def memberOf03(): Bool = not BagMultiMap.memberOf(1, singleton(2, 'b'))
 
     @test
-    def memberOf04(): Bool = BagMultiMap.memberOf(1, toBagMultiMap((1, 'a') :: (2, 'b') :: (1, 'c') :: Nil))
+    def memberOf04(): Bool = BagMultiMap.memberOf(1, singleton(1, 'a') |> insert(2, 'b') |> insert(1, 'c'))
 
     /////////////////////////////////////////////////////////////////////////////
     // keysOf                                                                  //
@@ -119,7 +116,8 @@ namespace TestBagMultiMap {
     def keysOf03(): Bool = BagMultiMap.keysOf(singleton(2, 'b')) == Set#{2}
 
     @test
-    def keysOf04(): Bool = BagMultiMap.keysOf(toBagMultiMap((1, 'a') :: (2, 'b') :: (1, 'c') :: Nil)) == Set#{1, 2}
+    def keysOf04(): Bool = 
+        BagMultiMap.keysOf(singleton(1, 'a') |> insert(2, 'b') |> insert(1, 'c')) == Set#{1, 2}
 
 
     /////////////////////////////////////////////////////////////////////////////
@@ -137,12 +135,12 @@ namespace TestBagMultiMap {
 
     @test
     def valuesOf04(): Bool = 
-        BagMultiMap.valuesOf(toBagMultiMap((1, 'a') :: (2, 'b') :: (1, 'c') :: Nil)) 
+        BagMultiMap.valuesOf(singleton(1, 'a') |> insert(2, 'b') |> insert(1, 'c'))
             |> List.sort == 'a' :: 'b' :: 'c' :: Nil
 
     @test
     def valuesOf05(): Bool = 
-        BagMultiMap.valuesOf(toBagMultiMap((1, 'a') :: (2, 'b') :: (1, 'c') :: (3, 'a') :: Nil)) 
+        BagMultiMap.valuesOf(singleton(1, 'a') |> insert(2, 'b') |> insert(1, 'c') |> insert(3, 'a'))
             |> List.sort == 'a' :: 'a' :: 'b' :: 'c' :: Nil
 
     /////////////////////////////////////////////////////////////////////////////
@@ -151,22 +149,22 @@ namespace TestBagMultiMap {
 
     @test
     def insert01(): Bool = 
-        BagMultiMap.insert(1, 'a', empty()) |> BagMultiMap.toList |> List.sort == (1, 'a') :: Nil
+        BagMultiMap.insert(1, 'a', empty()) |> toAssocList == (1, 'a' :: Nil) :: Nil
 
     @test
     def insert02(): Bool = 
         empty() |> BagMultiMap.insert(1, 'a') |> BagMultiMap.insert(2, 'b') 
-            |> BagMultiMap.toList |> List.sort == (1, 'a') :: (2, 'b') :: Nil
+            |> toAssocList == (1, 'a' :: Nil) :: (2, 'b' :: Nil) :: Nil
 
     @test
     def insert03(): Bool = 
         empty() |> BagMultiMap.insert(1, 'a') |> BagMultiMap.insert(2, 'b') |> BagMultiMap.insert(1, 'c') 
-            |> BagMultiMap.toList |> List.sort == (1, 'a') :: (1, 'c') :: (2, 'b') :: Nil
+            |> toAssocList == (1, 'c' :: 'a' :: Nil) :: (2, 'b' :: Nil) :: Nil
 
     @test
     def insert04(): Bool = 
         empty() |> BagMultiMap.insert(1, 'a') |> BagMultiMap.insert(2, 'b') |> BagMultiMap.insert(1, 'c') |> BagMultiMap.insert(3, 'b') 
-            |> BagMultiMap.toList |> List.sort == (1, 'a') :: (1, 'c') :: (2, 'b') :: (3, 'b') :: Nil
+            |> toAssocList == (1, 'c' :: 'a' :: Nil) :: (2, 'b' :: Nil) :: (3, 'b' :: Nil) :: Nil
 
     /////////////////////////////////////////////////////////////////////////////
     // adjust                                                                  //
@@ -177,23 +175,21 @@ namespace TestBagMultiMap {
 
     @test
     def adjust02(): Bool = 
-        BagMultiMap.adjust(v -> 2*v, 1, BagMultiMap.singleton(1, 4))
-            |> BagMultiMap.toList |> List.sort == (1, 8) :: Nil
+        BagMultiMap.adjust(v -> 2*v, 1, BagMultiMap.singleton(1, 4)) |> toAssocList == (1, 8 :: Nil) :: Nil
 
     @test
     def adjust03(): Bool = 
-        BagMultiMap.adjust(v -> 2*v, 3, singleton(1, 4))
-            |> BagMultiMap.toList |> List.sort == (1, 4) :: Nil
+        BagMultiMap.adjust(v -> 2*v, 3, singleton(1, 4)) |> toAssocList == (1, 4 :: Nil) :: Nil
 
     @test
     def adjust04(): Bool = 
         BagMultiMap.adjust(v -> 2*v, 1, singleton(1, 4) |> insert(2, 4) |> insert(1, 5))
-            |> BagMultiMap.toList |> List.sort == (1, 8) :: (1, 10) :: (2, 4) :: Nil
+            |> toAssocList == (1, 10 :: 8 :: Nil) :: (2, 4 :: Nil) :: Nil
 
     @test
     def adjust05(): Bool = 
         BagMultiMap.adjust(v -> 2*v, 2, singleton(1, 4) |> insert(2, 4) |> insert(1, 5))
-            |> BagMultiMap.toList |> List.sort == (1, 4) :: (1, 5) :: (2, 8) :: Nil
+            |> toAssocList == (1, 5 :: 4 :: Nil) :: (2, 8 :: Nil) :: Nil
 
     /////////////////////////////////////////////////////////////////////////////
     // adjustWithKey                                                           //
@@ -205,22 +201,22 @@ namespace TestBagMultiMap {
     @test
     def adjustWithKey02(): Bool = 
         BagMultiMap.adjustWithKey((k, v) -> k+v, 1, singleton(1, 4))
-            |> BagMultiMap.toList |> List.sort == (1, 5) :: Nil
+            |> toAssocList == (1, 5 :: Nil) :: Nil
 
     @test
     def adjustWithKey03(): Bool = 
         BagMultiMap.adjustWithKey((k, v) -> k+v, 3, singleton(1, 4))
-            |> BagMultiMap.toList |> List.sort == (1, 4) :: Nil
+            |> toAssocList == (1, 4 :: Nil) :: Nil
 
     @test
     def adjustWithKey04(): Bool = 
         BagMultiMap.adjustWithKey((k, v) -> k+v, 1, singleton(1, 4) |> insert(2, 4) |> insert(1, 5))
-            |> BagMultiMap.toList |> List.sort == (1, 5) :: (1, 6) :: (2, 4) :: Nil
+            |> toAssocList == (1, 6 :: 5 :: Nil) :: (2, 4 :: Nil) :: Nil
 
     @test
     def adjustWithKey05(): Bool = 
         BagMultiMap.adjustWithKey((k, v) -> k+v, 2, singleton(1, 4) |> insert(2, 4) |> insert(1, 5))
-            |> BagMultiMap.toList |> List.sort == (1, 4) :: (1, 5) :: (2, 6) :: Nil
+            |> toAssocList == (1, 5 :: 4 :: Nil) :: (2, 6 :: Nil) :: Nil
 
     /////////////////////////////////////////////////////////////////////////////
     // update                                                                  //
@@ -232,25 +228,22 @@ namespace TestBagMultiMap {
     @test
     def update02(): Bool = 
         BagMultiMap.update(v -> if (isEven(v)) Some(2*v) else None, 1, singleton(1, 4))
-            |> BagMultiMap.toList |> List.sort == (1, 8) :: Nil
+            |> toAssocList == (1, 8 :: Nil) :: Nil
 
     @test
     def update03(): Bool = 
         BagMultiMap.update(v -> if (isEven(v)) Some(2*v) else None, 3, singleton(1, 4))
-            |> BagMultiMap.toList |> List.sort == (1, 4) :: Nil
+            |> toAssocList == (1, 4 :: Nil) :: Nil
 
     @test
-    def update04(): Bool & Impure = 
-        println("update04");
-        println(BagMultiMap.update(v -> if (isEven(v)) Some(2*v) else None, 1, singleton(1, 4) |> insert(2, 4) |> insert(1, 5)));
+    def update04(): Bool = 
         BagMultiMap.update(v -> if (isEven(v)) Some(2*v) else None, 1, singleton(1, 4) |> insert(2, 4) |> insert(1, 5))
-            |> BagMultiMap.toList |> List.sort == (1, 5) :: (1, 8) :: (2, 4) :: Nil
+            |> toAssocList == (1, 5 :: 8 :: Nil) :: (2, 4 :: Nil) :: Nil
 
     @test
     def update05(): Bool = 
         BagMultiMap.update(v -> if (isEven(v)) Some(2*v) else None, 2, singleton(1, 4) |> insert(2, 4) |> insert(1, 5))
-            |> BagMultiMap.toList |> List.sort == (1, 4) :: (1, 5) :: (2, 8) :: Nil
-
+            |> toAssocList == (1, 5 :: 4 :: Nil) :: (2, 8 :: Nil) :: Nil
 
     /////////////////////////////////////////////////////////////////////////////
     // updateWithKey                                                           //
@@ -262,42 +255,42 @@ namespace TestBagMultiMap {
     @test
     def updateWithKey02(): Bool = 
         BagMultiMap.updateWithKey((k, v) -> if (isEven(k)) Some(k+v) else None, 1, singleton(1, 4))
-            |> BagMultiMap.toList |> List.sort == (1, 4) :: Nil
+            |> toAssocList == (1, 4 :: Nil) :: Nil
 
     @test
     def updateWithKey03(): Bool = 
         BagMultiMap.updateWithKey((k, v) -> if (isOdd(k)) Some(k+v) else None, 1, singleton(1, 4))
-            |> BagMultiMap.toList |> List.sort == (1, 5) :: Nil
+            |> toAssocList == (1, 5 :: Nil) :: Nil
 
     @test
     def updateWithKey04(): Bool = 
         BagMultiMap.updateWithKey((k, v) -> if (isEven(k)) Some(k+v) else None, 3, singleton(1, 4))
-            |> BagMultiMap.toList |> List.sort == (1, 4) :: Nil
+            |> toAssocList == (1, 4 :: Nil) :: Nil
 
     @test
     def updateWithKey05(): Bool = 
         BagMultiMap.updateWithKey((k, v) -> if (isOdd(k)) Some(k+v) else None, 3, singleton(1, 4))
-            |> BagMultiMap.toList |> List.sort == (1, 4) :: Nil
+            |> toAssocList == (1, 4 :: Nil) :: Nil
 
     @test
     def updateWithKey06(): Bool = 
         BagMultiMap.updateWithKey((k, v) -> if (isEven(k)) Some(k+v) else None, 1, singleton(1, 4) |> insert(2, 4) |> insert(1, 5))
-            |> BagMultiMap.toList |> List.sort == (1, 4) :: (1, 5) :: (2, 4) :: Nil
+            |> toAssocList == (1, 5 :: 4 :: Nil) :: (2, 4 :: Nil) :: Nil
 
     @test
     def updateWithKey07(): Bool = 
         BagMultiMap.updateWithKey((k, v) -> if (isOdd(k)) Some(k+v) else None, 1, singleton(1, 4) |> insert(2, 4) |> insert(1, 5))
-            |> BagMultiMap.toList |> List.sort == (1, 5) :: (1, 6) :: (2, 4) :: Nil
+            |> toAssocList == (1, 6 :: 5 :: Nil) :: (2, 4 :: Nil) :: Nil
 
     @test
     def updateWithKey08(): Bool = 
         BagMultiMap.updateWithKey((k, v) -> if (isEven(k)) Some(k+v) else None, 2, singleton(1, 4) |> insert(2, 4) |> insert(1, 5))
-            |> BagMultiMap.toList |> List.sort == (1, 4) :: (1, 5) :: (2, 6) :: Nil
+            |> toAssocList == (1, 5 :: 4 :: Nil) :: (2, 6 :: Nil) :: Nil
 
     @test
     def updateWithKey09(): Bool = 
         BagMultiMap.updateWithKey((k, v) -> if (isOdd(k)) Some(k+v) else None, 2, singleton(1, 4) |> insert(2, 4) |> insert(1, 5))
-            |> BagMultiMap.toList |> List.sort == (1, 4) :: (1, 5) :: (2, 4) :: Nil
+            |> toAssocList == (1, 5 :: 4 :: Nil) :: (2, 4 :: Nil) :: Nil
 
     /////////////////////////////////////////////////////////////////////////////
     // remove                                                                  //
@@ -307,24 +300,19 @@ namespace TestBagMultiMap {
     def remove01(): Bool = BagMultiMap.remove(1, empty(): BagMultiMap[Int32, Int32]) == empty()
 
     @test
-    def remove02(): Bool = 
-        BagMultiMap.remove(1, singleton(1, 4))
-            |> BagMultiMap.toList |> List.sort == Nil
+    def remove02(): Bool = BagMultiMap.remove(1, singleton(1, 4)) |> toAssocList == Nil
 
     @test
-    def remove03(): Bool = 
-        BagMultiMap.remove(3, singleton(1, 4))
-            |> BagMultiMap.toList |> List.sort == (1, 4) :: Nil
+    def remove03(): Bool = BagMultiMap.remove(3, singleton(1, 4)) |> toAssocList == (1, 4 :: Nil) :: Nil
 
     @test
     def remove04(): Bool = 
-        BagMultiMap.remove(1, singleton(1, 4) |> insert(2, 4) |> insert(1, 5))
-            |> BagMultiMap.toList |> List.sort == (2, 4) :: Nil
+        BagMultiMap.remove(1, singleton(1, 4) |> insert(2, 4) |> insert(1, 5)) |> toAssocList == (2, 4 :: Nil) :: Nil
 
     @test
     def remove05(): Bool = 
         BagMultiMap.remove(2, singleton(1, 4) |> insert(2, 4) |> insert(1, 5))
-            |> BagMultiMap.toList |> List.sort == (1, 4) :: (1, 5) :: Nil
+            |> toAssocList == (1, 4 :: Nil) :: (1, 5 :: Nil) :: Nil
 
     /////////////////////////////////////////////////////////////////////////////
     // find                                                                    //
@@ -398,23 +386,20 @@ namespace TestBagMultiMap {
         BagMultiMap.filter(isEven, empty(): BagMultiMap[Int32, Int32]) == empty()
 
     @test
-    def filter02(): Bool = 
-        BagMultiMap.filter(isEven, singleton(1, 2))
-            |> BagMultiMap.toList |> List.sort == (1, 2) :: Nil
+    def filter02(): Bool = BagMultiMap.filter(isEven, singleton(1, 2)) |> toAssocList == (1, 2 :: Nil) :: Nil
 
     @test
-    def filter03(): Bool = 
-        BagMultiMap.filter(isEven, singleton(1, 1)) == empty()
+    def filter03(): Bool = BagMultiMap.filter(isEven, singleton(1, 1)) == empty()
 
     @test
     def filter04(): Bool = 
         BagMultiMap.filter(isEven, singleton(1, 4) |> insert(2, 4))
-            |> BagMultiMap.toList |> List.sort == (1, 4) :: (2, 4) :: Nil
+            |> toAssocList == (1, 4 :: Nil) :: (2, 4 :: Nil) :: Nil
 
     @test
     def filter05(): Bool = 
         BagMultiMap.filter(isEven, singleton(1, 4) |> insert(2, 2) |> insert(1, 3)) 
-            |> BagMultiMap.toList |> List.sort == (1, 4) :: (2, 2) :: Nil
+            |> toAssocList == (1, 4 :: Nil) :: (2, 2 :: Nil) :: Nil
 
 
     /////////////////////////////////////////////////////////////////////////////
@@ -426,13 +411,11 @@ namespace TestBagMultiMap {
         BagMultiMap.filterWithKey((k, v) -> k == v, empty(): BagMultiMap[Int32, Int32]) == empty()
 
     @test
-    def filterWithKey02(): Bool = 
-        BagMultiMap.filterWithKey((k, v) -> k == v, singleton(1, 2)) == empty()
+    def filterWithKey02(): Bool = BagMultiMap.filterWithKey((k, v) -> k == v, singleton(1, 2)) == empty()
 
     @test
     def filterWithKey03(): Bool = 
-        BagMultiMap.filterWithKey((k, v) -> k == v, singleton(1, 1)) 
-            |> BagMultiMap.toList |> List.sort == (1, 1) :: Nil
+        BagMultiMap.filterWithKey((k, v) -> k == v, singleton(1, 1)) |> toAssocList == (1, 1 :: Nil) :: Nil
 
     @test
     def filterWithKey04(): Bool = 
@@ -441,35 +424,32 @@ namespace TestBagMultiMap {
     @test
     def filterWithKey05(): Bool = 
         BagMultiMap.filterWithKey((k, v) -> k == v, singleton(1, 4) |> insert(2, 2) |> insert(1, 1)) 
-            |> BagMultiMap.toList |> List.sort == (1, 1) :: (2, 2) :: Nil
+            |> toAssocList == (1, 1 :: Nil) :: (2, 2 :: Nil) :: Nil
 
     /////////////////////////////////////////////////////////////////////////////
     // map                                                                     //
     /////////////////////////////////////////////////////////////////////////////
 
     @test
-    def map01(): Bool = 
-        BagMultiMap.map(v -> v*3, empty(): BagMultiMap[Int32, Int32]) == empty()
+    def map01(): Bool = BagMultiMap.map(v -> v*3, empty(): BagMultiMap[Int32, Int32]) == empty()
 
     @test
     def map02(): Bool = 
-        BagMultiMap.map(v -> v*3, singleton(1, 2))
-            |> BagMultiMap.toList |> List.sort == (1, 6) :: Nil
+        BagMultiMap.map(v -> v*3, singleton(1, 2)) |> toAssocList == (1, 6 :: Nil) :: Nil
 
     @test
     def map03(): Bool = 
-        BagMultiMap.map(v -> v*3, singleton(1, 1)) 
-            |> BagMultiMap.toList |> List.sort == (1, 3) :: Nil
+        BagMultiMap.map(v -> v*3, singleton(1, 1)) |> toAssocList == (1, 3 :: Nil) :: Nil
 
     @test
     def map04(): Bool = 
         BagMultiMap.map(v -> v*3, singleton(1, 4) |> insert(2, 4))
-            |> BagMultiMap.toList |> List.sort == (1, 12) :: (2, 12) :: Nil
+            |> toAssocList == (1, 12 :: Nil) :: (2, 12 :: Nil) :: Nil
 
     @test
     def map05(): Bool = 
         BagMultiMap.map(v -> v*3, singleton(1, 4) |> insert(2, 2) |> insert(1, 1)) 
-            |> BagMultiMap.toList |> List.sort == (1, 3) :: (1, 12) :: (2, 6) :: Nil
+            |> toAssocList == (1, 3 :: 12 :: Nil) :: (2, 6 :: Nil) :: Nil
 
 
     /////////////////////////////////////////////////////////////////////////////
@@ -482,23 +462,21 @@ namespace TestBagMultiMap {
 
     @test
     def mapWithKey02(): Bool = 
-        BagMultiMap.mapWithKey((k, v) -> v*3+k, singleton(1, 2))
-            |> BagMultiMap.toList |> List.sort == (1, 7) :: Nil
+        BagMultiMap.mapWithKey((k, v) -> v*3+k, singleton(1, 2)) |> toAssocList == (1, 7 :: Nil) :: Nil
 
     @test
     def mapWithKey03(): Bool = 
-        BagMultiMap.mapWithKey((k, v) -> v*3+k, singleton(1, 1)) 
-            |> BagMultiMap.toList |> List.sort == (1, 4) :: Nil
+        BagMultiMap.mapWithKey((k, v) -> v*3+k, singleton(1, 1)) |> toAssocList == (1, 4 :: Nil) :: Nil
 
     @test
     def mapWithKey04(): Bool = 
         BagMultiMap.mapWithKey((k, v) -> v*3+k, singleton(1, 4) |> insert(2, 4))
-            |> BagMultiMap.toList |> List.sort == (1, 13) :: (2, 14) :: Nil
+            |> toAssocList == (1, 13 :: Nil) :: (2, 14 :: Nil) :: Nil
 
     @test
     def mapWithKey05(): Bool = 
         BagMultiMap.mapWithKey((k, v) -> v*3+k, singleton(1, 4) |> insert(2, 2) |> insert(1, 1)) 
-            |> BagMultiMap.toList |> List.sort == (1, 4) :: (1, 13) :: (2, 8) :: Nil
+            |> toAssocList == (1, 4 :: 13 :: Nil) :: (2, 8 :: Nil) :: Nil
 
     /////////////////////////////////////////////////////////////////////////////
     // foldWithKey                                                             //
