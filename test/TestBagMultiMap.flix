@@ -1057,6 +1057,10 @@ namespace TestBagMultiMap {
     def difference09(): Bool = 
         BagMultiMap.difference(singleton(1, 2) |> insert(1, 4) |> insert(1, 3), singleton(1, 4) |> insert(1, 2))
             |> toAssocList == (1, 3 :: Nil) :: Nil
+    @test
+    def difference10(): Bool = 
+        BagMultiMap.difference(singleton(1, 2) |> insert(1, 4) |> insert(1, 3) |> insert(2, 2), singleton(1, 4) |> insert(1, 2))
+            |> toAssocList == (1, 3 :: Nil) :: (2, 2 :: Nil) :: Nil
 
     /////////////////////////////////////////////////////////////////////////////
     // chainToNec (move to TestChain)                                          //

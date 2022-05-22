@@ -1027,7 +1027,7 @@ namespace TestSetMultiMap {
     /////////////////////////////////////////////////////////////////////////////
     // difference                                                              //
     /////////////////////////////////////////////////////////////////////////////
-/*
+
     @test
     def difference01(): Bool = SetMultiMap.difference(empty(): SetMultiMap[Int32, Int32], empty()) == empty()
 
@@ -1040,7 +1040,7 @@ namespace TestSetMultiMap {
 
     @test
     def difference04(): Bool =
-        SetMultiMap.difference(singleton(1, 2), singleton(1, 3)) |> toAssocList == (1 , 2 :: Nil) :: Nil
+        SetMultiMap.difference(singleton(1, 2), singleton(1, 3)) |> toAssocList == (1 , Set#{2}) :: Nil
 
     @test
     def difference05(): Bool = SetMultiMap.difference(singleton(1, 2), singleton(1, 2)) == empty()
@@ -1060,87 +1060,11 @@ namespace TestSetMultiMap {
     @test
     def difference09(): Bool = 
         SetMultiMap.difference(singleton(1, 2) |> insert(1, 4) |> insert(1, 3), singleton(1, 4) |> insert(1, 2))
-            |> toAssocList == (1, 3 :: Nil) :: Nil
-
-    /////////////////////////////////////////////////////////////////////////////
-    // chainToNec (move to TestChain)                                          //
-    /////////////////////////////////////////////////////////////////////////////
-    
-    @test
-    def chainToNec01(): Bool = SetMultiMap.chainToNec(Chain.empty(): Chain[Int32]) == None
+            |> toAssocList == (1, Set#{3}) :: Nil
 
     @test
-    def chainToNec02(): Bool = SetMultiMap.chainToNec(Chain.singleton(1)) == Some(Nec.singleton(1))
-*/
-    /////////////////////////////////////////////////////////////////////////////
-    // sequence                                                                //
-    /////////////////////////////////////////////////////////////////////////////
-/*
-    @test
-    def sequence01(): Bool = SetMultiMap.sequence(empty(): SetMultiMap[Int32, Option[Int32]]) == Some(empty())
-
-    @test
-    def sequence02(): Bool = SetMultiMap.sequence(singleton(1, None): SetMultiMap[Int32, Option[Int32]]) == None
-
-    @test
-    def sequence03(): Bool = SetMultiMap.sequence(singleton(1, Some(2))) == Some(singleton(1, 2))
-
-    @test
-    def sequence04(): Bool = SetMultiMap.sequence(singleton(1, Some(2)) |> insert(2, None)) == None
-
-    @test
-    def sequence05(): Bool =
-        SetMultiMap.sequence(singleton(1, Some(2)) |> insert(2, Some(4))) 
-            |> Option.map(toAssocList) == Some((1, 2 :: Nil) :: (2, 4 :: Nil) :: Nil)
-
-
-    /////////////////////////////////////////////////////////////////////////////
-    // traverse                                                                //
-    /////////////////////////////////////////////////////////////////////////////
-
-    @test
-    def traverse01(): Bool = SetMultiMap.traverse(v -> Some(v+1), empty(): SetMultiMap[Int32, Int32]) == Some(empty())
-
-    @test
-    def traverse02(): Bool = SetMultiMap.traverse(v -> Some(v+1), singleton(1, 2)) == Some(singleton(1,3))
-
-    @test
-    def traverse03(): Bool = 
-        SetMultiMap.traverse(v -> Some(v+1), singleton(1, 2) |> insert(2, 4)) 
-            |> Option.map(toAssocList) == Some((1, 3 :: Nil) :: (2, 5 :: Nil) :: Nil)
-
-    @test
-    def traverse04(): Bool = 
-        SetMultiMap.traverse(v -> Some(v+1), singleton(1, 2) |> insert(1, 4)) 
-            |> Option.map(toAssocList) == Some((1, 5 :: 3 :: Nil) :: Nil)
-
-    @test
-    def traverse05(): Bool = SetMultiMap.traverse(_ -> None : Option[Int32], singleton(1, 2) |> insert(1, 4)) == None      
-
-    /////////////////////////////////////////////////////////////////////////////
-    // traverseWithKey                                                         //
-    /////////////////////////////////////////////////////////////////////////////
-
-    @test
-    def traverseWithKey01(): Bool = 
-        SetMultiMap.traverseWithKey((k, v) -> Some(k+v), empty(): SetMultiMap[Int32, Int32]) == Some(empty())
-
-    @test
-    def traverseWithKey02(): Bool = 
-        SetMultiMap.traverseWithKey((k, v) -> Some(k+v), singleton(1, 2)) == Some(singleton(1,3))
-
-    @test
-    def traverseWithKey03(): Bool = 
-        SetMultiMap.traverseWithKey((k, v) -> Some(k+v), singleton(1, 2) |> insert(2, 4)) 
-            |> Option.map(toAssocList) == Some((1, 3 :: Nil) :: (2, 6 :: Nil) :: Nil)
-
-    @test
-    def traverseWithKey04(): Bool = 
-        SetMultiMap.traverseWithKey((k, v) -> Some(k+v), singleton(1, 2) |> insert(1, 4)) 
-            |> Option.map(toAssocList) == Some((1, 5 :: 3 :: Nil) :: Nil)
-
-    @test
-    def traverseWithKey05(): Bool = 
-        SetMultiMap.traverseWithKey((_, _) -> None : Option[Int32], singleton(1, 2) |> insert(1, 4)) == None
-*/
+    def difference10(): Bool = 
+        SetMultiMap.difference(singleton(1, 2) |> insert(1, 4) |> insert(1, 3) |> insert(2, 2), singleton(1, 4) |> insert(1, 2))
+            |> toAssocList == (1, Set#{3}) :: (2, Set#{2}) :: Nil
+            
 }

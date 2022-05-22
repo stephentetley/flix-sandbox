@@ -467,6 +467,24 @@ namespace SetMultiMap {
         };
         SetMultiMap(Map.foldLeftWithKey(step, Map.empty(), mm1))
 
+    ///
+    /// Returns the difference of `m1` and `m2` i.e `m1 - m2` (left biased).
+    ///
+    pub def difference(m1: SetMultiMap[k, v], m2: SetMultiMap[k, v]): SetMultiMap[k, v] with Order[k], Order[v] =
+        let SetMultiMap(mm1) = m1;
+        let SetMultiMap(mm2) = m2;
+        SetMultiMap(Map.differenceWith(setDifference1, mm1, mm2))
+
+    ///
+    /// Helper for `difference`.
+    ///
+    /// Use returns `None` when the set difference is empty.
+    ///
+    def setDifference1(s1: Set[v], s2: Set[v]): Option[Set[v]] with Order[v] =
+        match Set.difference(s1, s2) {
+            case s if Set.isEmpty(s) => None
+            case s                   => Some(s)
+        }
 
     ///
     /// Returns the map `m` as a list of singleton key-value pairs.
@@ -493,5 +511,7 @@ namespace SetMultiMap {
     pub def toAssocList(m: SetMultiMap[k, v]): List[(k, Set[v])] = 
         let SetMultiMap(m1) = m;
         Map.foldRightWithKey((k, vs, acc) -> (k, vs) :: acc, Nil, m1)
+
+    /// No traversable functions
 
 }
