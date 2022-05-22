@@ -167,6 +167,28 @@ namespace TestBagMultiMap {
             |> toAssocList == (1, 'c' :: 'a' :: Nil) :: (2, 'b' :: Nil) :: (3, 'b' :: Nil) :: Nil
 
     /////////////////////////////////////////////////////////////////////////////
+    // inserts                                                                 //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def inserts01(): Bool = 
+        BagMultiMap.inserts(1, Nil: List[Char], empty()) == empty()
+
+    @test
+    def inserts02(): Bool = 
+        empty() |> BagMultiMap.inserts(1, 'a' :: Nil)|> toAssocList == (1, 'a' :: Nil) :: Nil
+
+    @test
+    def inserts03(): Bool = 
+        empty() |> BagMultiMap.inserts(1, 'a' :: 'c' :: Nil) |> BagMultiMap.inserts(2, 'b' :: Nil)
+            |> toAssocList == (1, 'a' :: 'c' :: Nil) :: (2, 'b' :: Nil) :: Nil
+
+    @test
+    def inserts04(): Bool = 
+        empty() |> BagMultiMap.inserts(1, 'a' :: 'c' :: Nil) |> BagMultiMap.inserts(2, 'b' :: Nil) |> BagMultiMap.inserts(3, 'b' :: Nil) 
+            |> toAssocList == (1, 'a' :: 'c' :: Nil) :: (2, 'b' :: Nil) :: (3, 'b' :: Nil) :: Nil
+
+    /////////////////////////////////////////////////////////////////////////////
     // adjust                                                                  //
     /////////////////////////////////////////////////////////////////////////////
 
@@ -558,6 +580,11 @@ namespace TestBagMultiMap {
         BagMultiMap.foldLeftWithKey((acc, k, v) -> (k, v) :: acc, Nil, 
             singleton(1, 4) |> insert(2, 2) |> insert(1, 1) |> insert(3, 3)) == (3, 3) :: (2, 2) :: (1, 4) :: (1, 1) :: Nil
 
+    @test
+    def foldLeftWithKey06(): Bool = 
+        BagMultiMap.foldLeftWithKey((acc, k, v) -> (k, v) :: acc, Nil, 
+            singleton(1, 4) |> insert(2, 2) |> insert(1, 1) |> insert(3, 3) |> insert(1, 2)) == (3, 3) :: (2, 2) :: (1, 4) :: (1, 1) :: (1, 2) :: Nil
+
     /////////////////////////////////////////////////////////////////////////////
     // foldRight                                                               //
     /////////////////////////////////////////////////////////////////////////////
@@ -610,6 +637,11 @@ namespace TestBagMultiMap {
     def foldRightWithKey05(): Bool = 
         BagMultiMap.foldRightWithKey((k, v, acc) -> (k, v) :: acc, Nil, 
             singleton(1, 4) |> insert(2, 2) |> insert(1, 1) |> insert(3, 3)) == (1, 1) :: (1, 4) :: (2, 2) :: (3, 3) :: Nil
+
+    @test
+    def foldRightWithKey06(): Bool = 
+        BagMultiMap.foldRightWithKey((k, v, acc) -> (k, v) :: acc, Nil, 
+            singleton(1, 4) |> insert(2, 2) |> insert(1, 1) |> insert(3, 3) |> insert(1, 2)) == (1, 2) :: (1, 1) :: (1, 4) :: (2, 2) :: (3, 3) :: Nil
 
     /////////////////////////////////////////////////////////////////////////////
     // reduceLeft                                                              //
@@ -1071,6 +1103,70 @@ namespace TestBagMultiMap {
 
     @test
     def chainToNec02(): Bool = BagMultiMap.chainToNec(Chain.singleton(1)) == Some(Nec.singleton(1))
+
+    /////////////////////////////////////////////////////////////////////////////
+    // toList                                                                  //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def toList01(): Bool = BagMultiMap.toList(empty(): BagMultiMap[Int32, Int32]) == Nil
+
+    @test
+    def toList02(): Bool = BagMultiMap.toList(singleton(1, 4)) == (1, 4) ::  Nil
+
+    @test
+    def toList03(): Bool = BagMultiMap.toList(singleton(1, 4) |> insert(2, 4)) == (1, 4) :: (2, 4) :: Nil
+
+    @test
+    def toList04(): Bool = 
+        BagMultiMap.toList(singleton(1, 4) |> insert(2, 2) |> insert(1, 1)) == (1, 1) :: (1, 4) :: (2, 2) :: Nil
+
+    @test
+    def toList05(): Bool = 
+        BagMultiMap.toList(singleton(1, 4) |> insert(2, 2) |> insert(1, 1)  |> insert(3, 3)) == (1, 1) :: (1, 4) :: (2, 2) :: (3, 3) :: Nil
+
+    /////////////////////////////////////////////////////////////////////////////
+    // toAscList                                                               //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def toAscList01(): Bool = BagMultiMap.toAscList(empty(): BagMultiMap[Int32, Int32]) == Nil
+
+    @test
+    def toAscList02(): Bool = BagMultiMap.toAscList(singleton(1, 4)) == (1, 4) ::  Nil
+
+    @test
+    def toAscList03(): Bool = BagMultiMap.toAscList(singleton(1, 4) |> insert(2, 4)) == (1, 4) :: (2, 4) :: Nil
+
+    @test
+    def toAscList04(): Bool = 
+        BagMultiMap.toAscList(singleton(1, 4) |> insert(2, 4) |> insert(1, 1)) == (1, 1) :: (1, 4) :: (2, 4) :: Nil
+
+    @test
+    def toAscList05(): Bool = 
+        BagMultiMap.toAscList(singleton(1, 4) |> insert(2, 4) |> insert(1, 1)  |> insert(3, 3)) == (1, 1) :: (1, 4) :: (2, 4) :: (3, 3) :: Nil
+
+
+    /////////////////////////////////////////////////////////////////////////////
+    // toDescList                                                              //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def toDescList01(): Bool = BagMultiMap.toDescList(empty(): BagMultiMap[Int32, Int32]) == Nil
+
+    @test
+    def toDescList02(): Bool = BagMultiMap.toDescList(singleton(1, 4)) == (1, 4) ::  Nil
+
+    @test
+    def toDescList03(): Bool = BagMultiMap.toDescList(singleton(1, 4) |> insert(2, 4)) == (2, 4) :: (1, 4) :: Nil
+
+    @test
+    def toDescList04(): Bool = 
+        BagMultiMap.toDescList(singleton(1, 4) |> insert(2, 4) |> insert(1, 1)) == (2, 4) :: (1, 4) :: (1, 1) :: Nil
+
+    @test
+    def toDescList05(): Bool = 
+        BagMultiMap.toDescList(singleton(1, 4) |> insert(2, 4) |> insert(1, 1)  |> insert(3, 3)) == (3, 3) :: (2, 4) :: (1, 4) :: (1, 1) :: Nil
 
     /////////////////////////////////////////////////////////////////////////////
     // sequence                                                                //

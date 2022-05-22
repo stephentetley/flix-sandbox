@@ -172,6 +172,28 @@ namespace TestSetMultiMap {
             |> toAssocList == (1, Set#{'a', 'c'}) :: (2, Set#{'b'}) :: (3, Set#{'b'}) :: Nil
 
     /////////////////////////////////////////////////////////////////////////////
+    // inserts                                                                 //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def inserts01(): Bool = 
+        SetMultiMap.inserts(1, Nil: List[Char], empty()) == empty()
+
+    @test
+    def inserts02(): Bool = 
+        empty() |> SetMultiMap.inserts(1, 'a' :: Nil)|> toAssocList == (1, Set#{'a'}) :: Nil
+
+    @test
+    def inserts03(): Bool = 
+        empty() |> SetMultiMap.inserts(1, 'a' :: 'c' :: Nil) |> SetMultiMap.inserts(2, 'b' :: Nil)
+            |> toAssocList == (1, Set#{'a', 'c'}) :: (2, Set#{'b'}) :: Nil
+
+    @test
+    def inserts04(): Bool = 
+        empty() |> SetMultiMap.inserts(1, 'a' :: 'c' :: Nil) |> SetMultiMap.inserts(2, 'b' :: Nil) |> SetMultiMap.inserts(3, 'b' :: Nil) 
+            |> toAssocList == (1, Set#{'a', 'c'}) :: (2, Set#{'b'}) :: (3, Set#{'b'}) :: Nil
+
+    /////////////////////////////////////////////////////////////////////////////
     // adjust                                                                  //
     /////////////////////////////////////////////////////////////////////////////
 
@@ -562,6 +584,11 @@ namespace TestSetMultiMap {
         SetMultiMap.foldLeftWithKey((acc, k, v) -> (k, v) :: acc, Nil, 
             singleton(1, 4) |> insert(2, 2) |> insert(1, 1) |> insert(3, 3)) == (3, 3) :: (2, 2) :: (1, 4) :: (1, 1) :: Nil
 
+    @test
+    def foldLeftWithKey06(): Bool = 
+        SetMultiMap.foldLeftWithKey((acc, k, v) -> (k, v) :: acc, Nil, 
+            singleton(1, 4) |> insert(2, 2) |> insert(1, 1) |> insert(3, 3) |> insert(1, 2)) == (3, 3) :: (2, 2) :: (1, 4) :: (1, 2) :: (1, 1) :: Nil
+
     /////////////////////////////////////////////////////////////////////////////
     // foldRight                                                               //
     /////////////////////////////////////////////////////////////////////////////
@@ -614,6 +641,11 @@ namespace TestSetMultiMap {
     def foldRightWithKey05(): Bool = 
         SetMultiMap.foldRightWithKey((k, v, acc) -> (k, v) :: acc, Nil, 
             singleton(1, 4) |> insert(2, 2) |> insert(1, 1) |> insert(3, 3)) == (1, 1) :: (1, 4) :: (2, 2) :: (3, 3) :: Nil
+
+    @test
+    def foldRightWithKey06(): Bool = 
+        SetMultiMap.foldRightWithKey((k, v, acc) -> (k, v) :: acc, Nil, 
+            singleton(1, 4) |> insert(2, 2) |> insert(1, 1) |> insert(3, 3) |> insert(1, 2)) == (1, 1) :: (1, 2) :: (1, 4) :: (2, 2) :: (3, 3) :: Nil
 
     /////////////////////////////////////////////////////////////////////////////
     // reduceLeft                                                              //
@@ -1066,5 +1098,68 @@ namespace TestSetMultiMap {
     def difference10(): Bool = 
         SetMultiMap.difference(singleton(1, 2) |> insert(1, 4) |> insert(1, 3) |> insert(2, 2), singleton(1, 4) |> insert(1, 2))
             |> toAssocList == (1, Set#{3}) :: (2, Set#{2}) :: Nil
-            
+    /////////////////////////////////////////////////////////////////////////////
+    // toList                                                                  //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def toList01(): Bool = SetMultiMap.toList(empty(): SetMultiMap[Int32, Int32]) == Nil
+
+    @test
+    def toList02(): Bool = SetMultiMap.toList(singleton(1, 4)) == (1, 4) ::  Nil
+
+    @test
+    def toList03(): Bool = SetMultiMap.toList(singleton(1, 4) |> insert(2, 4)) == (1, 4) :: (2, 4) :: Nil
+
+    @test
+    def toList04(): Bool = 
+        SetMultiMap.toList(singleton(1, 4) |> insert(2, 2) |> insert(1, 1)) == (1, 1) :: (1, 4) :: (2, 2) :: Nil
+
+    @test
+    def toList05(): Bool = 
+        SetMultiMap.toList(singleton(1, 4) |> insert(2, 2) |> insert(1, 1)  |> insert(3, 3)) == (1, 1) :: (1, 4) :: (2, 2) :: (3, 3) :: Nil
+
+    /////////////////////////////////////////////////////////////////////////////
+    // toAscList                                                               //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def toAscList01(): Bool = SetMultiMap.toAscList(empty(): SetMultiMap[Int32, Int32]) == Nil
+
+    @test
+    def toAscList02(): Bool = SetMultiMap.toAscList(singleton(1, 4)) == (1, 4) ::  Nil
+
+    @test
+    def toAscList03(): Bool = SetMultiMap.toAscList(singleton(1, 4) |> insert(2, 4)) == (1, 4) :: (2, 4) :: Nil
+
+    @test
+    def toAscList04(): Bool = 
+        SetMultiMap.toAscList(singleton(1, 4) |> insert(2, 4) |> insert(1, 1)) == (1, 1) :: (1, 4) :: (2, 4) :: Nil
+
+    @test
+    def toAscList05(): Bool = 
+        SetMultiMap.toAscList(singleton(1, 4) |> insert(2, 4) |> insert(1, 1)  |> insert(3, 3)) == (1, 1) :: (1, 4) :: (2, 4) :: (3, 3) :: Nil
+
+
+    /////////////////////////////////////////////////////////////////////////////
+    // toDescList                                                              //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def toDescList01(): Bool = SetMultiMap.toDescList(empty(): SetMultiMap[Int32, Int32]) == Nil
+
+    @test
+    def toDescList02(): Bool = SetMultiMap.toDescList(singleton(1, 4)) == (1, 4) ::  Nil
+
+    @test
+    def toDescList03(): Bool = SetMultiMap.toDescList(singleton(1, 4) |> insert(2, 4)) == (2, 4) :: (1, 4) :: Nil
+
+    @test
+    def toDescList04(): Bool = 
+        SetMultiMap.toDescList(singleton(1, 4) |> insert(2, 4) |> insert(1, 1)) == (2, 4) :: (1, 4) :: (1, 1) :: Nil
+
+    @test
+    def toDescList05(): Bool = 
+        SetMultiMap.toDescList(singleton(1, 4) |> insert(2, 4) |> insert(1, 1)  |> insert(3, 3)) == (3, 3) :: (2, 4) :: (1, 4) :: (1, 1) :: Nil
+
 }
