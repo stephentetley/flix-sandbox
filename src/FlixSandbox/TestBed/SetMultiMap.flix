@@ -337,8 +337,8 @@ namespace SetMultiMap {
     pub def reduceLeftWithKey(f: (k, v, k, v) -> (k, v) & ef, m: SetMultiMap[k, v]): Option[(k, v)] & ef =
         let SetMultiMap(m1) = m;
         let inner = (k, acc, v) -> match acc {
-            case None           => Some((k, v))
-            case Some((k1, v1)) => Some(f(k1, v1, k, v))
+            case None               => Some((k, v))
+            case Some((kacc, vacc)) => Some(f(kacc, vacc, k, v))
         };
         let outer = (acc, k, vs) -> Set.foldLeft(inner(k), acc, vs);
         Map.foldLeftWithKey(outer, None, m1)
@@ -363,8 +363,8 @@ namespace SetMultiMap {
     pub def reduceRightWithKey(f: (k, v, k, v) -> (k, v) & ef, m: SetMultiMap[k, v]): Option[(k, v)] & ef =
         let SetMultiMap(m1) = m;
         let inner = (k, v, acc) -> match acc {
-            case None           => Some((k, v))
-            case Some((k1, v1)) => Some(f(k1, v1, k, v))
+            case None               => Some((k, v))
+            case Some((kacc, vacc)) => Some(f(k, v, kacc, vacc))
         };
         let outer = (k, vs, acc) -> Set.foldRight(inner(k), acc, vs);
         Map.foldRightWithKey(outer, None, m1)
@@ -471,6 +471,27 @@ namespace SetMultiMap {
     ///
     /// Returns the map `m` as a list of singleton key-value pairs.
     ///
-    pub def toList(m: SetMultiMap[k, v]): List[(k, v)] =
+    pub def toList(m: SetMultiMap[k, v]): List[(k, v)] = toAscList(m)
+
+    ///
+    /// Returns the map `m` as a list of singleton key-value pairs in ascending order.
+    ///
+    pub def toAscList(m: SetMultiMap[k, v]): List[(k, v)] =
         foldRightWithKey((k, v, acc) -> (k, v) :: acc, Nil, m)
+
+
+    ///
+    /// Returns the map `m` as a list of singleton key-value pairs in descending order.
+    ///
+    pub def toDescList(m: SetMultiMap[k, v]): List[(k, v)] =
+        foldLeftWithKey((acc, k, v) -> (k, v) :: acc, Nil, m)
+
+
+    ///
+    /// Returns the map `m` as a list of key * Set[value] pairs in ascending order.
+    ///
+    pub def toAssocList(m: SetMultiMap[k, v]): List[(k, Set[v])] = 
+        let SetMultiMap(m1) = m;
+        Map.foldRightWithKey((k, vs, acc) -> (k, vs) :: acc, Nil, m1)
+
 }

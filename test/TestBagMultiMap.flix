@@ -968,20 +968,19 @@ namespace TestBagMultiMap {
 
     @test
     def union04(): Bool = 
-        BagMultiMap.union(empty(), singleton(1, 2) |> insert(2, 4)) == BagMultiMap.fromMap(Map#{1 => 2, 2 => 4})
+        BagMultiMap.union(empty(), singleton(1, 2) |> insert(2, 4)) |> toAssocList == (1, 2 :: Nil) :: (2, 4 :: Nil) :: Nil
 
     @test
     def union05(): Bool = 
-        BagMultiMap.union(singleton(1, 2) |> insert(2, 4), empty()) == BagMultiMap.fromMap(Map#{1 => 2, 2 => 4})
+        BagMultiMap.union(singleton(1, 2) |> insert(2, 4), empty()) |> toAssocList == (1, 2 :: Nil) :: (2, 4 :: Nil) :: Nil
 
     @test
     def union06(): Bool = 
-        BagMultiMap.union(singleton(1, 2), singleton(2, 4)) == BagMultiMap.fromMap(Map#{1 => 2, 2 => 4})
+        BagMultiMap.union(singleton(1, 2), singleton(2, 4)) |> toAssocList == (1, 2 :: Nil) :: (2, 4 :: Nil) :: Nil
 
     @test
     def union07(): Bool = 
-        BagMultiMap.union(singleton(1, 2), singleton(1, 3)) 
-            |> toAssocList == (1, 2 :: 3 :: Nil) :: Nil
+        BagMultiMap.union(singleton(1, 2), singleton(1, 3)) |> toAssocList == (1, 2 :: 3 :: Nil) :: Nil
 
     @test
     def union08(): Bool = 
@@ -1037,8 +1036,7 @@ namespace TestBagMultiMap {
 
     @test
     def difference04(): Bool =
-        BagMultiMap.difference(singleton(1, 2), singleton(1, 3)) 
-            |> toAssocList == (1 , 2 :: Nil) :: Nil
+        BagMultiMap.difference(singleton(1, 2), singleton(1, 3)) |> toAssocList == (1 , 2 :: Nil) :: Nil
 
     @test
     def difference05(): Bool = BagMultiMap.difference(singleton(1, 2), singleton(1, 2)) == empty()
