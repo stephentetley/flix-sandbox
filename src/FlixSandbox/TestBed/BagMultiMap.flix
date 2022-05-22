@@ -334,7 +334,7 @@ namespace BagMultiMap {
     /// Returns `None` if `m` is the empty map.
     ///
     pub def reduceLeft(f: (v, v) -> v & ef, m: BagMultiMap[k, v]): Option[v] & ef =
-        reduceLeftWithKey((k, v1, _, v2) -> (k, f(v1, v2)), m) |> Option.map(snd)
+        reduceLeftWithKey((_, v1, k, v2) -> (k, f(v1, v2)), m) |> Option.map(snd)
 
     ///
     /// Applies `f` to all mappings in `m` going from left to right until a single mapping `(k, v)` is obtained.  Returns `Some((k, v))`.
@@ -346,8 +346,8 @@ namespace BagMultiMap {
     pub def reduceLeftWithKey(f: (k, v, k, v) -> (k, v) & ef, m: BagMultiMap[k, v]): Option[(k, v)] & ef =
         let BagMultiMap(m1) = m;
         let inner = (k, acc, v) -> match acc {
-            case None           => Some((k, v))
-            case Some((k1, v1)) => Some(f(k1, v1, k, v))
+            case None               => Some((k, v))
+            case Some((kacc, vacc)) => Some(f(kacc, vacc, k, v))
         };
         let outer = (acc, k, vs) -> Nec.foldLeft(inner(k), acc, vs);
         Map.foldLeftWithKey(outer, None, m1)
@@ -372,8 +372,8 @@ namespace BagMultiMap {
     pub def reduceRightWithKey(f: (k, v, k, v) -> (k, v) & ef, m: BagMultiMap[k, v]): Option[(k, v)] & ef =
         let BagMultiMap(m1) = m;
         let inner = (k, v, acc) -> match acc {
-            case None           => Some((k, v))
-            case Some((k1, v1)) => Some(f(k1, v1, k, v))
+            case None               => Some((k, v))
+            case Some((kacc, vacc)) => Some(f(k, v, kacc, vacc))
         };
         let outer = (k, vs, acc) -> Nec.foldRight(inner(k), acc, vs);
         Map.foldRightWithKey(outer, None, m1)
