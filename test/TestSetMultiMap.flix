@@ -22,6 +22,50 @@ namespace TestSetMultiMap {
     
     def isOdd(i: Int32): Bool = not isEven(i)
 
+    /////////////////////////////////////////////////////////////////////////////
+    // Eq                                                                      //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def eq01(): Bool = empty(): SetMultiMap[Int32, Char] == empty(): SetMultiMap[Int32, Char]
+
+    @test
+    def eq02(): Bool = singleton(1, 'a') != empty()
+
+    @test
+    def eq03(): Bool = empty() != singleton(1, 'a')
+
+    @test
+    def eq04(): Bool = singleton(1, 'a') != singleton(1, 'b')
+
+    @test
+    def eq05(): Bool = singleton(1, 'a') == singleton(1, 'a')
+
+    @test
+    def eq06(): Bool = singleton(1, 'a') |> insert(1, 'b') == singleton(1, 'a') |> insert(1, 'b')
+
+    /// Insert order doesn't matter for SetMultiMap
+    @test
+    def eq07(): Bool = singleton(1, 'b') |> insert(1, 'a') == singleton(1, 'a') |> insert(1, 'b')
+
+    /////////////////////////////////////////////////////////////////////////////
+    // Order (compare)                                                         //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def compare01(): Bool = Order.compare(empty(): SetMultiMap[Int32, Char], empty(): SetMultiMap[Int32, Char]) == EqualTo
+
+    @test
+    def compare02(): Bool = Order.compare(singleton(1, 'a'), empty()) == GreaterThan
+
+    @test
+    def compare03(): Bool = Order.compare(empty(), singleton(1, 'a')) == LessThan
+
+    @test
+    def compare04(): Bool = Order.compare(singleton(1, 'b'), singleton(1, 'a')) == GreaterThan
+
+    @test
+    def compare05(): Bool = Order.compare(singleton(1, 'a'), singleton(1, 'b')) == LessThan
 
     /////////////////////////////////////////////////////////////////////////////
     // empty                                                                   //
