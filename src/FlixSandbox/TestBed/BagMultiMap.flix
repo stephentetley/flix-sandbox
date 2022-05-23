@@ -18,6 +18,9 @@
 ///
 /// The BagMultiMap type.
 ///
+/// A BagMultiMap is a Map that allows multiple values for a key. 
+/// Mulitple values re stored in an ordered Bag so duplicates are allowed.
+///
 pub enum BagMultiMap[k, v] {
     case BagMultiMap(Map[k, Nec[v]])
 }
@@ -81,22 +84,22 @@ instance CommutativeMonoid[BagMultiMap[k, v]] with Order[k], CommutativeMonoid[v
 namespace BagMultiMap {
 
     ///
-    /// Returns the empty map.
+    /// Returns the empty BagMultiMap.
     ///
     pub def empty(): BagMultiMap[k, v] = BagMultiMap(Map.empty())
 
     ///
-    /// Returns the singleton multimap where key `k` is mapped to value `v`.
+    /// Returns the singleton BagMultiMap where key `k` is mapped to value `v`.
     ///
     pub def singleton(k: k, v: v): BagMultiMap[k, v] with Order[k] = BagMultiMap(Map.singleton(k, Nec.singleton(v)))
 
     ///
-    /// Returns a multimap where key `k` is mapped to the singleton bag containing `v`.
+    /// Returns a BagMultiMap where key `k` is mapped to the singleton bag containing `v`.
     ///
     pub def fromMap(m: Map[k, v]): BagMultiMap[k, v] with Order[k] = BagMultiMap(Map.map(Nec.singleton, m))
 
     ///
-    /// Returns `true` if and only if `m` is the empty multimap.
+    /// Returns `true` if and only if `m` is the empty BagMultiMap.
     ///
     pub def isEmpty(m: BagMultiMap[k, v]): Bool =
         let BagMultiMap(m1) = m;
@@ -159,7 +162,6 @@ namespace BagMultiMap {
             }
         }
         
-
     ///
     /// Updates `m` with `k => map(f, vs)` if `k => vs` is in `m`.
     ///
@@ -190,7 +192,7 @@ namespace BagMultiMap {
         BagMultiMap(Map.mapWithKey(outer, m1))
 
     ///
-    /// Removes the mapping `k` from the map `m`.
+    /// Removes the mapping `k` from the BagMultiMap `m`.
     ///
     pub def remove(k: k, m: BagMultiMap[k, v]): BagMultiMap[k, v] with Order[k] =
         let BagMultiMap(m1) = m;
@@ -331,7 +333,7 @@ namespace BagMultiMap {
     ///
     /// That is, the result is of the form: `Some(f(...f(f(v1, v2), v3)..., vn))`
     ///
-    /// Returns `None` if `m` is the empty map.
+    /// Returns `None` if `m` is the empty BagMultiMap.
     ///
     pub def reduceLeft(f: (v, v) -> v & ef, m: BagMultiMap[k, v]): Option[v] & ef =
         reduceLeftWithKey((_, v1, k, v2) -> (k, f(v1, v2)), m) |> Option.map(snd)
@@ -341,7 +343,7 @@ namespace BagMultiMap {
     ///
     /// That is, the result is of the form: `Some(f(...f(f(k1, v1, k2, v2), k3, v3)..., kn, vn))`
     ///
-    /// Returns `None` if `m` is the empty multimap.
+    /// Returns `None` if `m` is the empty BagMultiMap.
     ///
     pub def reduceLeftWithKey(f: (k, v, k, v) -> (k, v) & ef, m: BagMultiMap[k, v]): Option[(k, v)] & ef =
         let BagMultiMap(m1) = m;
@@ -357,7 +359,7 @@ namespace BagMultiMap {
     ///
     /// That is, the result is of the form: `Some(f(v1, ...f(vn-2, f(vn-1, vn))...))`
     ///
-    /// Returns `None` if `m` is the empty multimap.
+    /// Returns `None` if `m` is the empty BagMultiMap.
     ///
     pub def reduceRight(f: (v, v) -> v & ef, m: BagMultiMap[k, v]): Option[v] & ef =
         reduceRightWithKey((k, v1, _, v2) -> (k, f(v1, v2)), m) |> Option.map(snd)
@@ -367,7 +369,7 @@ namespace BagMultiMap {
     ///
     /// That is, the result is of the form: `Some(f(k1, v1, ...f(kn-2, vn-2, f(kn-1, vn-1, kn, vn))...))`
     ///
-    /// Returns `None` if `m` is the empty map.
+    /// Returns `None` if `m` is the empty BagMultiMap.
     ///
     pub def reduceRightWithKey(f: (k, v, k, v) -> (k, v) & ef, m: BagMultiMap[k, v]): Option[(k, v)] & ef =
         let BagMultiMap(m1) = m;
@@ -388,7 +390,7 @@ namespace BagMultiMap {
         sumWith((k, v) -> if (f(k,v)) 1 else 0, m)
 
     ///
-    /// Returns the sum of all keys in the map `m`.
+    /// Returns the sum of all keys in the BagMultiMap `m`.
     ///
     /// A key is counted foreach value it points to.
     ///
@@ -396,13 +398,13 @@ namespace BagMultiMap {
         sumWith((k, _) -> k, m)
 
     ///
-    /// Returns the sum of all values in the map `m`.
+    /// Returns the sum of all values in the BagMultiMap `m`.
     ///
     pub def sumValues(m: BagMultiMap[k, Int32]): Int32 =
         sumWith((_, v) -> v, m)
 
     ///
-    /// Returns the sum of all key-value pairs `k => v` in the map `m` according to the function `f`.
+    /// Returns the sum of all key-value pairs `k => v` in the BagMultiMap `m` according to the function `f`.
     ///
     /// Purity reflective: Runs in parallel when given a pure function `f`.
     ///
@@ -413,19 +415,19 @@ namespace BagMultiMap {
         Map.sumWith(outer, m1)
 
     ///
-    /// Returns the product of all keys in the map `m`.
+    /// Returns the product of all keys in the BagMultiMap `m`.
     ///
     pub def productKeys(m: BagMultiMap[Int32, v]): Int32 =
         productWith((k, _) -> k, m)
 
     ///
-    /// Returns the product of all values in the map `m`.
+    /// Returns the product of all values in the BagMultiMap `m`.
     ///
     pub def productValues(m: BagMultiMap[k, Int32]): Int32 =
         productWith((_, v) -> v, m)
 
     ///
-    /// Returns the product of all key-value pairs `k => v` in the map `m` according to the function `f`.
+    /// Returns the product of all key-value pairs `k => v` in the BagMultiMap `m` according to the function `f`.
     ///
     /// Purity reflective: Runs in parallel when given a pure function `f`.
     ///
@@ -438,7 +440,7 @@ namespace BagMultiMap {
     ///
     /// Returns `true` if and only if at least one mapping in `m` satisfies the predicate `f`.
     ///
-    /// Returns `false` if `m` is the empty map.
+    /// Returns `false` if `m` is the empty BagMultiMap.
     ///
     /// Purity reflective: Runs in parallel when given a pure function `f`.
     ///
@@ -451,7 +453,7 @@ namespace BagMultiMap {
     ///
     /// Returns `true` if and only if all mappings in `m` satisfy the predicate `f`.
     ///
-    /// Returns `true` if `m` is the empty map.
+    /// Returns `true` if `m` is the empty BagMultiMap.
     ///
     /// Purity reflective: Runs in parallel when given a pure function `f`.
     ///
@@ -464,7 +466,7 @@ namespace BagMultiMap {
     ///
     /// Returns the union of `m1` and `m2`.
     ///
-    /// Duplicate keys are concatenated.
+    /// If a key is common to both BagMultiMaps then the left and right bags are concatenated.
     ///
     pub def union(m1: BagMultiMap[k, v], m2: BagMultiMap[k, v]): BagMultiMap[k, v] with Order[k] =
         let BagMultiMap(mm1) = m1;
@@ -486,6 +488,9 @@ namespace BagMultiMap {
         };
         BagMultiMap(Map.foldLeftWithKey(step, Map.empty(), mm1))
 
+    ///
+    /// Helper function for `intersection`.
+    ///
     def intersectionNec(n1: Nec[v], n2: Nec[v]): Option[Nec[v]] with Eq[v] =
         Nec.foldLeft((acc, v) -> if (Nec.memberOf(v, n2) and not Chain.memberOf(v, acc)) Chain.snoc(acc, v) else acc, Chain.empty(), n1) 
             |> chainToNec
@@ -547,40 +552,40 @@ namespace BagMultiMap {
 
 
     ///
-    /// Returns the map `m` as a list of singleton key-value pairs.
+    /// Returns the BagMultiMap `m` as a list of singleton key-value pairs.
     ///
     pub def toList(m: BagMultiMap[k, v]): List[(k, v)] = toAscList(m)
 
     ///
-    /// Returns the map `m` as a list of singleton key-value pairs in ascending order.
+    /// Returns the BagMultiMap `m` as a list of singleton key-value pairs in ascending order.
     ///
     pub def toAscList(m: BagMultiMap[k, v]): List[(k, v)] =
         foldRightWithKey((k, v, acc) -> (k, v) :: acc, Nil, m)
 
 
     ///
-    /// Returns the map `m` as a list of singleton key-value pairs in descending order.
+    /// Returns the BagMultiMap `m` as a list of singleton key-value pairs in descending order.
     ///
     pub def toDescList(m: BagMultiMap[k, v]): List[(k, v)] =
         foldLeftWithKey((acc, k, v) -> (k, v) :: acc, Nil, m)
 
 
     ///
-    /// Returns the map `m` as a list of key * List[value] pairs in ascending order.
+    /// Returns the BagMultiMap `m` as a list of key * List[value] pairs in ascending order.
     ///
     pub def toAssocList(m: BagMultiMap[k, v]): List[(k, List[v])] = 
         let BagMultiMap(m1) = m;
         Map.foldRightWithKey((k, vs, acc) -> (k, Nec.toList(vs)) :: acc, Nil, m1)
 
     ///
-    /// Returns the result of running all the actions in the map `m`.
+    /// Returns the result of running all the actions in the BagMultiMap `m`.
     ///
     pub def sequence(m: BagMultiMap[k, m[v]]): m[BagMultiMap[k, v]] with Applicative[m] =
         traverse(identity, m)
 
     ///
     /// Returns the result of applying the applicative mapping function `f` to all the values of the
-    /// map `m`.
+    /// BagMultiMap `m`.
     ///
     pub def traverse(f: v1 -> m[v2] & ef, m: BagMultiMap[k, v1]): m[BagMultiMap[k, v2]] & ef with Applicative[m] =
         let BagMultiMap(m1) = m;
@@ -588,7 +593,7 @@ namespace BagMultiMap {
 
     ///
     /// Returns the result of applying the applicative mapping function `f` to all the key-value pairs
-    /// of the multimap `m`.
+    /// of the BagMultiMap `m`.
     ///
     pub def traverseWithKey(f: (k, v1) -> m[v2] & ef, m: BagMultiMap[k, v1]): m[BagMultiMap[k, v2]] & ef with Applicative[m] =
         let BagMultiMap(m1) = m;

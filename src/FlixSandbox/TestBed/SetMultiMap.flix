@@ -18,6 +18,11 @@
 ///
 /// The SetMultiMap type.
 ///
+/// A SetMultiMap is a Map that allows multiple values for a key. 
+/// Mulitple values are stored in a Set so duplicates are not allowed.
+///
+/// Value and key types must be implement Order.
+///
 pub enum SetMultiMap[k, v] {
     case SetMultiMap(Map[k, Set[v]])
 }
@@ -73,22 +78,22 @@ instance CommutativeMonoid[SetMultiMap[k, v]] with Order[k], Order[v]
 namespace SetMultiMap {
 
     ///
-    /// Returns the empty map.
+    /// Returns the empty SetMultiMap.
     ///
     pub def empty(): SetMultiMap[k, v] = SetMultiMap(Map.empty())
 
     ///
-    /// Returns the singleton multimap where key `k` is mapped to value `v`.
+    /// Returns the singleton SetMultiMap where key `k` is mapped to value `v`.
     ///
     pub def singleton(k: k, v: v): SetMultiMap[k, v] with Order[k], Order[v] = SetMultiMap(Map.singleton(k, Set.singleton(v)))
 
     ///
-    /// Returns a multimap where key `k` is mapped to the singleton set containing `v`.
+    /// Returns a SetMultiMap where key `k` is mapped to the singleton set containing `v`.
     ///
     pub def fromMap(m: Map[k, v]): SetMultiMap[k, v] with Order[k], Order[v] = SetMultiMap(Map.map(Set.singleton, m))
 
     ///
-    /// Returns `true` if and only if `m` is the empty multimap.
+    /// Returns `true` if and only if `m` is the empty SetMultiMap.
     ///
     pub def isEmpty(m: SetMultiMap[k, v]): Bool =
         let SetMultiMap(m1) = m;
@@ -181,7 +186,7 @@ namespace SetMultiMap {
 
 
     ///
-    /// Removes the mapping `k` from the map `m`.
+    /// Removes the mapping `k` from the SetMultiMap `m`.
     ///
     pub def remove(k: k, m: SetMultiMap[k, v]): SetMultiMap[k, v] with Order[k] =
         let SetMultiMap(m1) = m;
@@ -223,7 +228,7 @@ namespace SetMultiMap {
         }
 
     ///
-    /// Returns a map of all mappings `k => v` in `m` where `v` satisfies the predicate `f`.
+    /// Returns a SetMultiMap of all mappings `k => v` in `m` where `v` satisfies the predicate `f`.
     ///
     /// The function `f` must be pure.
     ///
@@ -231,7 +236,7 @@ namespace SetMultiMap {
         filterWithKey((_, v) -> f(v), m)
 
     ///
-    /// Returns a map of all mappings `k => v` in `m` where `(k, v)` satisfies the predicate `f`.
+    /// Returns a SetMultiMap of all mappings `k => v` in `m` where `(k, v)` satisfies the predicate `f`.
     ///
     /// The function `f` must be pure.
     ///
@@ -239,7 +244,7 @@ namespace SetMultiMap {
         foldLeftWithKey((acc, k, v) -> if (f(k, v)) insert(k, v, acc) else acc, empty(), m)
 
     ///
-    /// Returns a map with mappings `k => f(v)` for every `k => v` in `m`.
+    /// Returns a SetMultiMap with mappings `k => f(v)` for every `k => v` in `m`.
     ///
     /// Purity reflective: Runs in parallel when given a pure function `f`.
     ///
@@ -247,7 +252,7 @@ namespace SetMultiMap {
         mapWithKey((_, v) -> f(v), m)
 
     ///
-    /// Returns a map with mappings `k => f(k, v)` for every `k => v` in `m`.
+    /// Returns a SetMultiMap with mappings `k => f(k, v)` for every `k => v` in `m`.
     ///
     /// Purity reflective: Runs in parallel when given a pure function `f`.
     ///
@@ -322,7 +327,7 @@ namespace SetMultiMap {
     ///
     /// That is, the result is of the form: `Some(f(...f(f(v1, v2), v3)..., vn))`
     ///
-    /// Returns `None` if `m` is the empty map.
+    /// Returns `None` if `m` is the empty SetMultiMap.
     ///
     pub def reduceLeft(f: (v, v) -> v & ef, m: SetMultiMap[k, v]): Option[v] & ef =
         reduceLeftWithKey((k, v1, _, v2) -> (k, f(v1, v2)), m) |> Option.map(snd)
@@ -332,7 +337,7 @@ namespace SetMultiMap {
     ///
     /// That is, the result is of the form: `Some(f(...f(f(k1, v1, k2, v2), k3, v3)..., kn, vn))`
     ///
-    /// Returns `None` if `m` is the empty multimap.
+    /// Returns `None` if `m` is the empty SetMultiMap.
     ///
     pub def reduceLeftWithKey(f: (k, v, k, v) -> (k, v) & ef, m: SetMultiMap[k, v]): Option[(k, v)] & ef =
         let SetMultiMap(m1) = m;
@@ -348,7 +353,7 @@ namespace SetMultiMap {
     ///
     /// That is, the result is of the form: `Some(f(v1, ...f(vn-2, f(vn-1, vn))...))`
     ///
-    /// Returns `None` if `m` is the empty multimap.
+    /// Returns `None` if `m` is the empty SetMultiMap.
     ///
     pub def reduceRight(f: (v, v) -> v & ef, m: SetMultiMap[k, v]): Option[v] & ef =
         reduceRightWithKey((k, v1, _, v2) -> (k, f(v1, v2)), m) |> Option.map(snd)
@@ -358,7 +363,7 @@ namespace SetMultiMap {
     ///
     /// That is, the result is of the form: `Some(f(k1, v1, ...f(kn-2, vn-2, f(kn-1, vn-1, kn, vn))...))`
     ///
-    /// Returns `None` if `m` is the empty map.
+    /// Returns `None` if `m` is the empty SetMultiMap.
     ///
     pub def reduceRightWithKey(f: (k, v, k, v) -> (k, v) & ef, m: SetMultiMap[k, v]): Option[(k, v)] & ef =
         let SetMultiMap(m1) = m;
@@ -379,19 +384,19 @@ namespace SetMultiMap {
         sumWith((k, v) -> if (f(k,v)) 1 else 0, m)
 
     ///
-    /// Returns the sum of all keys in the map `m`.
+    /// Returns the sum of all keys in the SetMultiMap `m`.
     ///
     pub def sumKeys(m: SetMultiMap[Int32, v]): Int32 =
         sumWith((k, _) -> k, m)
 
     ///
-    /// Returns the sum of all values in the map `m`.
+    /// Returns the sum of all values in the SetMultiMap `m`.
     ///
     pub def sumValues(m: SetMultiMap[k, Int32]): Int32 =
         sumWith((_, v) -> v, m)
 
     ///
-    /// Returns the sum of all key-value pairs `k => v` in the map `m` according to the function `f`.
+    /// Returns the sum of all key-value pairs `k => v` in the SetMultiMap `m` according to the function `f`.
     ///
     /// Purity reflective: Runs in parallel when given a pure function `f`.
     ///
@@ -402,19 +407,19 @@ namespace SetMultiMap {
         Map.sumWith(outer, m1)
 
     ///
-    /// Returns the product of all keys in the map `m`.
+    /// Returns the product of all keys in the SetMultiMap `m`.
     ///
     pub def productKeys(m: SetMultiMap[Int32, v]): Int32 =
         productWith((k, _) -> k, m)
 
     ///
-    /// Returns the product of all values in the map `m`.
+    /// Returns the product of all values in the SetMultiMap `m`.
     ///
     pub def productValues(m: SetMultiMap[k, Int32]): Int32 =
         productWith((_, v) -> v, m)
 
     ///
-    /// Returns the product of all key-value pairs `k => v` in the map `m` according to the function `f`.
+    /// Returns the product of all key-value pairs `k => v` in the SetMultiMap `m` according to the function `f`.
     ///
     /// Purity reflective: Runs in parallel when given a pure function `f`.
     ///
@@ -427,7 +432,7 @@ namespace SetMultiMap {
     ///
     /// Returns `true` if and only if at least one mapping in `m` satisfies the predicate `f`.
     ///
-    /// Returns `false` if `m` is the empty map.
+    /// Returns `false` if `m` is the empty SetMultiMap.
     ///
     pub def exists(f: (k, v) -> Bool, m: SetMultiMap[k, v]): Bool =
         let SetMultiMap(m1) = m;
@@ -437,7 +442,7 @@ namespace SetMultiMap {
     ///
     /// Returns `true` if and only if all mappings in `m` satisfy the predicate `f`.
     ///
-    /// Returns `true` if `m` is the empty map.
+    /// Returns `true` if `m` is the empty SetMultiMap.
     ///
     pub def forall(f: (k, v) -> Bool, m: SetMultiMap[k, v]): Bool =
         let SetMultiMap(m1) = m;
@@ -478,7 +483,7 @@ namespace SetMultiMap {
     ///
     /// Helper for `difference`.
     ///
-    /// Use returns `None` when the set difference is empty.
+    /// Note - returns `None` when the set difference is empty.
     ///
     def setDifference1(s1: Set[v], s2: Set[v]): Option[Set[v]] with Order[v] =
         match Set.difference(s1, s2) {
@@ -487,31 +492,31 @@ namespace SetMultiMap {
         }
 
     ///
-    /// Returns the map `m` as a list of singleton key-value pairs.
+    /// Returns the SetMultiMap `m` as a list of singleton key-value pairs.
     ///
     pub def toList(m: SetMultiMap[k, v]): List[(k, v)] = toAscList(m)
 
     ///
-    /// Returns the map `m` as a list of singleton key-value pairs in ascending order.
+    /// Returns the SetMultiMap `m` as a list of singleton key-value pairs in ascending order.
     ///
     pub def toAscList(m: SetMultiMap[k, v]): List[(k, v)] =
         foldRightWithKey((k, v, acc) -> (k, v) :: acc, Nil, m)
 
 
     ///
-    /// Returns the map `m` as a list of singleton key-value pairs in descending order.
+    /// Returns the SetMultiMap `m` as a list of singleton key-value pairs in descending order.
     ///
     pub def toDescList(m: SetMultiMap[k, v]): List[(k, v)] =
         foldLeftWithKey((acc, k, v) -> (k, v) :: acc, Nil, m)
 
 
     ///
-    /// Returns the map `m` as a list of key * Set[value] pairs in ascending order.
+    /// Returns the SetMultiMap `m` as a list of key * Set[value] pairs in ascending order.
     ///
     pub def toAssocList(m: SetMultiMap[k, v]): List[(k, Set[v])] = 
         let SetMultiMap(m1) = m;
         Map.foldRightWithKey((k, vs, acc) -> (k, vs) :: acc, Nil, m1)
 
-    /// No traversable functions
+    /// No traversable functions due to Order constraint that's outside the `Traversable` class.
 
 }
