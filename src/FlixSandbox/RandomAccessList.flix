@@ -29,13 +29,12 @@ namespace FlixSandbox/RandomAccessList {
 
     pub opaque type RandomAccessList[a] = List[(Int32, Tree[a])]
 
+    type alias RandomAccessListBody[a] = List[(Int32, Tree[a])]
+
     def getRandomAccessList(l: RandomAccessList[a]): List[(Int32, Tree[a])] = 
         let RandomAccessList(l1) = l;
         l1
 
-    def updateRandomAccessList(f: List[(Int32, Tree[a])] -> List[(Int32, Tree[a])], l: RandomAccessList[a]): RandomAccessList[a]= 
-        let RandomAccessList(l1) = l;
-        RandomAccessList(f(l1))
 
 
     pub def cons(x: a, l: RandomAccessList[a]): RandomAccessList[a] = match getRandomAccessList(l) {
@@ -55,7 +54,7 @@ namespace FlixSandbox/RandomAccessList {
         case _                          => RandomAccessList(Nil)
     }
 
-    /// CPS convert...
+    /// Should be tail recursive...
     def lookupTree(weight: Int32, idx: Int32, tree: Tree[a]): Option[a] = match (weight, idx, tree) {
         case (1, 0, Leaf(x))         => Some(x)
         case (_, _, Leaf(_))         => None
@@ -76,25 +75,37 @@ namespace FlixSandbox/RandomAccessList {
                 lookup(i - w, RandomAccessList(ts))
     }
 
-    /// CPS convert...
-    pub def updateTree(weight: Int32, idx: Int32, y: a, tree: Tree[a]): Option[Tree[a]] = match (weight, idx, tree) {
-        case (1, 0, Leaf(_))         => Some(Leaf(y))
-        case (_, _, Leaf(_))         => None
-        case (_, 0, Node(_, t1, t2)) => Some((Node(y, t1, t2)))
+    /// CPS converted
+    def updateTree(weight: Int32, idx: Int32, y: a, tree: Tree[a], k: Option[Tree[a]] -> Option[Tree[a]]): Option[Tree[a]] = match (weight, idx, tree) {
+        case (1, 0, Leaf(_))         => k(Some(Leaf(y)))
+        case (_, _, Leaf(_))         => k(None)
+        case (_, 0, Node(_, t1, t2)) => k(Some((Node(y, t1, t2))))
         case (w, i, Node(x, t1, t2)) => 
             if (i <= w/2) 
-                updateTree(w/2, i-1, y, t1) |> Option.map(tt -> Node(x, tt, t2))
+                updateTree(w/2, i-1, y, t1, kt -> k(Option.map(tt -> Node(x, tt, t2), kt)))
             else
-                updateTree(w/2, i - 1 - w / 2, y, t2) |> Option.map(tt -> Node(x, t1, tt))
+                updateTree(w/2, i - 1 - w / 2, y, t2, kt -> k(Option.map(tt -> Node(x, t1, tt), kt)))
     }
 
-    pub def update(i: Int32, y: a, l: RandomAccessList[a]): Option[RandomAccessList[a]] = match getRandomAccessList(l) {
-        case Nil          => None
+    def updateHelper(i: Int32, y: a, l: RandomAccessListBody[a], 
+                        k: RandomAccessListBody[a] -> RandomAccessListBody[a]): RandomAccessListBody[a] = match l {
+        case Nil          => k(Nil)
         case (w, t) :: ts => 
             if (i < w)
-                updateTree(w, i, y, t) |> Option.map(tt -> RandomAccessList((w, tt) :: ts))
+                match updateTree(w, i, y, t, identity) { 
+                    case None     => k((w, t) :: ts)
+                    case Some(t1) => k((w, t1) :: ts)
+                }
             else
-                update(i - w, y, RandomAccessList(ts)) |> Option.map(updateRandomAccessList(tss -> (w, t) :: tss))
+                updateHelper(i - w, y, ts, ks -> k((w, t) :: ks))
     }
+
+
+    ///
+    /// Updates `l` at index `i` with `y`. if `i` is out-of-bounds, returns `l`.
+    ///
+    pub def update(i: Int32, y: a, l: RandomAccessList[a]): RandomAccessList[a] = 
+        let RandomAccessList(l1) = l;
+        updateHelper(i, y, l1, identity) |> RandomAccessList
 
 }
