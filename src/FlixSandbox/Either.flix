@@ -16,8 +16,8 @@
 
 namespace FlixSandbox {
 
-    enum Either[a, b] {
-        case Left(a),
+    enum Either[a, b] with Eq, Order, ToString {
+        case Left(a)
         case Right(b)
     }
 

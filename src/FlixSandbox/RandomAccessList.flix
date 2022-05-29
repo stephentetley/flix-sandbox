@@ -22,7 +22,7 @@
 
 namespace FlixSandbox/RandomAccessList {
 
-    enum Tree[a] {
+    enum Tree[a] with Eq, Order, ToString {
         case Leaf(a)
         case Node(a, Tree[a], Tree[a])
     }
@@ -35,7 +35,25 @@ namespace FlixSandbox/RandomAccessList {
         let RandomAccessList(l1) = l;
         l1
 
+    instance Functor[Tree] {
+        pub def map(f: a -> b & ef, t: Tree[a]): Tree[b] & ef = 
+            def loop(tree, k) = match tree {
+                case Leaf(a)         => {let ans = Leaf(f(a)); k(ans)}
+                case Node(a, t1, t2) => {
+                    let b = f(a);
+                    loop(t1, v1 ->
+                        loop(t2, v2 ->
+                            k(Node(b, v1, v2))))
+                }
+            };
+            loop(t, k -> k as & ef)
+    }
 
+    instance Functor[RandomAccessList] {
+        pub def map(f: a -> b & ef, l: RandomAccessList[a]): RandomAccessList[b] & ef = 
+            let RandomAccessList(l1) = l;
+            Functor.map(x -> {let (i, t) = x; (i, Functor.map(f, t))}, l1) |> RandomAccessList
+    }
 
     pub def cons(x: a, l: RandomAccessList[a]): RandomAccessList[a] = match getRandomAccessList(l) {
         case (w1, t1) :: (w2, t2) :: rs if (w1 == w2) => RandomAccessList((1 + w1 + w2, Node(x, t1, t2)) :: rs)
@@ -76,27 +94,25 @@ namespace FlixSandbox/RandomAccessList {
     }
 
     /// CPS converted
-    def updateTree(weight: Int32, idx: Int32, y: a, tree: Tree[a], k: Option[Tree[a]] -> Option[Tree[a]]): Option[Tree[a]] = match (weight, idx, tree) {
-        case (1, 0, Leaf(_))         => k(Some(Leaf(y)))
-        case (_, _, Leaf(_))         => k(None)
-        case (_, 0, Node(_, t1, t2)) => k(Some((Node(y, t1, t2))))
+    def updateTree(weight: Int32, idx: Int32, y: a, tree: Tree[a], k: Tree[a] -> Tree[a]): Tree[a] = match (weight, idx, tree) {
+        case (1, 0, Leaf(_))         => k(Leaf(y))
+        case (_, _, Leaf(x))         => k(Leaf(x))
+        case (_, 0, Node(_, t1, t2)) => k(Node(y, t1, t2))
         case (w, i, Node(x, t1, t2)) => 
             if (i <= w/2) 
-                updateTree(w/2, i-1, y, t1, kt -> k(Option.map(tt -> Node(x, tt, t2), kt)))
+                updateTree(w/2, i-1, y, t1, kt -> k(Node(x, kt, t2)))
             else
-                updateTree(w/2, i - 1 - w / 2, y, t2, kt -> k(Option.map(tt -> Node(x, t1, tt), kt)))
+                updateTree(w/2, i - 1 - w / 2, y, t2, kt -> k(Node(x, t1, kt)))
     }
 
     def updateHelper(i: Int32, y: a, l: RandomAccessListBody[a], 
                         k: RandomAccessListBody[a] -> RandomAccessListBody[a]): RandomAccessListBody[a] = match l {
         case Nil          => k(Nil)
         case (w, t) :: ts => 
-            if (i < w)
-                match updateTree(w, i, y, t, identity) { 
-                    case None     => k((w, t) :: ts)
-                    case Some(t1) => k((w, t1) :: ts)
-                }
-            else
+            if (i < w) {
+                let t1 = updateTree(w, i, y, t, identity);
+                k((w, t1) :: ts)
+            } else
                 updateHelper(i - w, y, ts, ks -> k((w, t) :: ks))
     }
 
