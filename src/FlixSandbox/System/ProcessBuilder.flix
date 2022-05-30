@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Stephen Tetley
+ * Copyright 2022 Stephen Tetley
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,13 +23,12 @@ namespace FlixSandbox/System {
 
 
     ///
-    /// State and Codensity(Error) monad
+    /// Reader (without local) and Error) monad
     /// 
     /// `ka` is the continuation answer type
     ///
     pub opaque type ProcessBuilder[ka, a] = 
-            ##java.lang.ProcessBuilder -> 
-                (a -> ##java.lang.ProcessBuilder -> Result[ka, String] & Impure) -> Result[ka, String] & Impure
+            ##java.lang.ProcessBuilder -> (a -> Result[ka, String] & Impure) -> Result[ka, String] & Impure
 
 
     instance Functor[ProcessBuilder[ka]] {
@@ -66,22 +65,22 @@ namespace FlixSandbox/System/ProcessBuilder {
     /// Helper function for the implementation of `map` and `ap` etc.
     ///
     def apply1(ma: ProcessBuilder[ka, a], 
-                st: ##java.lang.ProcessBuilder, 
-                k: a -> ##java.lang.ProcessBuilder -> Result[ka, String] & Impure): Result[ka, String] & Impure =
+                r: ##java.lang.ProcessBuilder, 
+                k: a -> Result[ka, String] & Impure): Result[ka, String] & Impure =
         let ProcessBuilder(ma1) = ma;
-        ma1(st, k)
+        ma1(r, k)
 
 
 
-    pub def start(ma: ProcessBuilder[(##java.lang.ProcessBuilder, a), a]): Result[Process, String] & Impure = 
+    pub def start(ma: ProcessBuilder[a, a]): Result[Process, String] & Impure = 
         import new java.lang.ProcessBuilder(##java.util.List): ##java.lang.ProcessBuilder & Impure as newProcessBuilder;
         import java.lang.ProcessBuilder.start(): ##java.lang.Process & Impure as start1;
         try {
             let strs = FlixSandbox/Marshal.marshalList(x1 -> x1 as ##java.lang.Object, Nil);
             let jbuilder = newProcessBuilder(strs);
             match runBuilder(ma, jbuilder) {
-                case Err(msg)           => Err(msg)
-                case Ok((jbuilder1, _)) => Ok(Process(start1(jbuilder1)))
+                case Err(msg) => Err(msg)
+                case Ok(_)    => Ok(Process(start1(jbuilder)))
             }
         } catch {
             case ex: ##java.lang.Exception => Err(FlixSandbox/Marshal.unmarshalExceptionMessage(ex))
@@ -91,34 +90,34 @@ namespace FlixSandbox/System/ProcessBuilder {
     ///
     /// Returns the result (new state and answer) of applying `ma` to the initial state `st`.
     ///
-    def runBuilder(ma: ProcessBuilder[(##java.lang.ProcessBuilder, a), a], 
-                    st: ##java.lang.ProcessBuilder): Result[(##java.lang.ProcessBuilder, a), String] & Impure =
+    def runBuilder(ma: ProcessBuilder[a, a], 
+                    r: ##java.lang.ProcessBuilder): Result[a, String] & Impure =
         let ProcessBuilder(f) = ma;
-        let cont = (a, s) -> Ok(s, a) as & Impure;
-        f(st, cont)
+        let cont = a -> Ok(a) as & Impure;
+        f(r, cont)
 
 
     pub def point(x: a): ProcessBuilder[ka, a] =
-        ProcessBuilder((s, k) -> k(x, s))
+        ProcessBuilder((_, k) -> k(x))
 
     pub def map(f: a -> b & ef, ma: ProcessBuilder[ka, a]): ProcessBuilder[ka, b] & ef =
-        ProcessBuilder((s, k) ->
-            apply1(ma, s, (a, s1) -> k(f(a) as & Impure, s1))
+        ProcessBuilder((r, k) ->
+            apply1(ma, r, a -> k(f(a) as & Impure))
         ) as & ef
 
     pub def ap(mf: ProcessBuilder[ka, a -> b & ef], ma: ProcessBuilder[ka, a]): ProcessBuilder[ka, b] & ef =
-        ProcessBuilder((s, k) ->
-            apply1(mf, s, (f, s1) ->
-                apply1(ma, s1, (a, s2) ->
-                    k(f(a) as & Impure, s2)))
+        ProcessBuilder((r, k) ->
+            apply1(mf, r, f ->
+                apply1(ma, r, a ->
+                    k(f(a) as & Impure)))
         ) as & ef
 
 
     pub def flatMap(f: a -> ProcessBuilder[ka, b] & ef, ma: ProcessBuilder[ka, a]): ProcessBuilder[ka, b] & ef =
-        ProcessBuilder((s, k) ->
-            apply1(ma, s, (a, s1) ->
-                apply1(f(a) as & Impure, s1, (b, s2) ->
-                    k(b, s2)))
+        ProcessBuilder((r, k) ->
+            apply1(ma, r, a ->
+                apply1(f(a) as & Impure, r, b ->
+                    k(b)))
         ) as & ef
 
     pub def throwError(msg: String): ProcessBuilder[ka, a] = 
@@ -126,10 +125,10 @@ namespace FlixSandbox/System/ProcessBuilder {
 
 
     def liftJavaBuilderGetter(f: ##java.lang.ProcessBuilder-> a & Impure): ProcessBuilder[ka, a] = 
-        ProcessBuilder((s, k) ->
+        ProcessBuilder((r, k) ->
             try {
-                let ans = f(s);
-                k(ans, s)
+                let ans = f(r);
+                k(ans)
             } catch {
                 case ex: ##java.lang.Exception => Err(FlixSandbox/Marshal.unmarshalExceptionMessage(ex))
             }            
@@ -138,8 +137,8 @@ namespace FlixSandbox/System/ProcessBuilder {
     def liftJavaBuilderSetter(f: ##java.lang.ProcessBuilder-> ##java.lang.ProcessBuilder & Impure): ProcessBuilder[ka, Unit] = 
         ProcessBuilder((s, k) ->
             try {
-                let s1 = f(s);
-                k((), s1)
+                f(s);
+                k()
             } catch {
                 case ex: ##java.lang.Exception => Err(FlixSandbox/Marshal.unmarshalExceptionMessage(ex))
             }            
