@@ -27,7 +27,7 @@ namespace FlixSandbox/RandomAccessList {
         case Node(a, Tree[a], Tree[a])
     }
 
-    pub opaque type RandomAccessList[a] = List[(Int32, Tree[a])]
+    pub enum RandomAccessList[a](List[(Int32, Tree[a])])
 
     type alias RandomAccessListBody[a] = List[(Int32, Tree[a])]
 

@@ -15,10 +15,11 @@
  */
 
 namespace FlixSandbox/Text {
+    
     ///
     /// Represents a Collator.
     ///
-    pub opaque type Collator = ##java.text.Collator
+    pub enum Collator(##java.text.Collator)
 }
 
 namespace FlixSandbox/Text/Collator {

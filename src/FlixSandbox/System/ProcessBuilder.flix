@@ -18,17 +18,12 @@
 namespace FlixSandbox/System {
 
 
-
-    /// pub opaque type  = ##java.lang.ProcessBuilder
-
-
     ///
-    /// Reader (without local) and Error) monad
+    /// Reader (without local) and Error monad in codensity style to be stack safe.
     /// 
     /// `ka` is the continuation answer type
     ///
-    pub opaque type ProcessBuilder[ka, a] = 
-            ##java.lang.ProcessBuilder -> (a -> Result[ka, String] & Impure) -> Result[ka, String] & Impure
+    pub enum ProcessBuilder[ka, a](##java.lang.ProcessBuilder -> (a -> Result[ka, String] & Impure) -> Result[ka, String] & Impure)
 
 
     instance Functor[ProcessBuilder[ka]] {

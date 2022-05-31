@@ -24,7 +24,7 @@ namespace FlixSandbox/Test/FlixCheck {
     ///
     /// Represents a random number generator.
     ///
-    pub opaque type SplittableRandom = ##java.util.SplittableRandom
+    pub enum SplittableRandom(##java.util.SplittableRandom)
 
     def splittableRandom(): SplittableRandom & Impure =
         import new java.util.SplittableRandom() as newSplittableRandom;
@@ -80,7 +80,7 @@ namespace FlixSandbox/Test/FlixCheck {
         }
 
 
-    pub opaque type Gen[a] = (Int32, SplittableRandom) -> a & Impure
+    pub enum Gen[a]((Int32, SplittableRandom) -> a & Impure)
 
 
     instance Functor[Gen] {
@@ -382,7 +382,7 @@ namespace FlixSandbox/Test/FlixCheck {
 
     def nothing(): Answer = { okay = None, stamp = Nil, arguments = Nil }
 
-    pub opaque type Property = Gen[Answer]
+    pub enum Property(Gen[Answer])
 
     pub def answer(ans: Answer): Property =
         let ma = point(ans);

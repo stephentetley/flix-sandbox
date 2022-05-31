@@ -18,7 +18,7 @@
 
 namespace FlixSandbox/Deprecated {
 
-    pub opaque type Cursor[e, a] = FlixSandbox/Deprecated/Cursor.CursorImpl[e, a]
+    pub enum Cursor[e, a](FlixSandbox/Deprecated/Cursor.CursorImpl[e, a])
 
     pub type alias CursorAlg[e, a] = { hasNext :: Unit -> Bool & Impure, next :: Unit -> Result[a, e] & Impure, finalize :: Unit -> Unit & Impure }
 }

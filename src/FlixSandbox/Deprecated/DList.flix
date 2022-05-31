@@ -19,7 +19,7 @@ namespace FlixSandbox/Deprecated {
     ///
     /// A DList
     ///
-    pub opaque type DList[a] = List[a] -> List[a]
+    pub enum DList[a](List[a] -> List[a])
 
 }
 

@@ -17,7 +17,7 @@
 
 namespace FlixSandbox/Doodle {
 
-    pub opaque type MutBitSet = ##java.util.BitSet
+    pub enum MutBitSet(##java.util.BitSet)
 
     instance ToString[MutBitSet] {
         pub def toString(x: MutBitSet): String =

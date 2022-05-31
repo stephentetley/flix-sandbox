@@ -47,10 +47,8 @@ instance Eq[BagMultiMap[k, v]] with Eq[k], Eq[v] {
 }
 
 instance Order[BagMultiMap[k, v]] with Order[k], Order[v] {
-
     pub def compare(x: BagMultiMap[k, v], y: BagMultiMap[k, v]): Comparison =
         BagMultiMap.toList(x) <=> BagMultiMap.toList(y)
-
 }
 
 instance Functor[BagMultiMap[k]] {
@@ -599,5 +597,8 @@ namespace BagMultiMap {
         let BagMultiMap(m1) = m;
         Functor.map(BagMultiMap, Map.traverseWithKey((k, vs) -> Traversable.traverse(f(k), vs), m1))
 
+
+    /// pub def groupWith(f: v -> k, l: List[v]): BagMultiMap[k, v] = 
+        
 
 }

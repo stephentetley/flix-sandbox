@@ -21,7 +21,7 @@ namespace FlixSandbox/System/File {
     ///
     /// Represents a FileInputStream.
     ///
-    pub opaque type FileInputStream = ##java.io.FileInputStream
+    pub enum FileInputStream(##java.io.FileInputStream)
 
 }
 

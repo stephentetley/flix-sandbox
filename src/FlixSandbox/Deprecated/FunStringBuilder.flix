@@ -150,14 +150,14 @@ namespace FlixSandbox/Deprecated/FunStringBuilder {
     ///
     /// Return `sb` converted  to a string.
     ///
-    pub def toString(sb: FunStringBuilder): String = toStringHelper(sb) as & Pure
+    pub def toString(f: FunStringBuilder): String =
+        region r { 
+            let sb = new StringBuilder(r);
+            toStringHelperBody(sb, f, k -> k as & r);
+            StringBuilder.toString(sb)
+        }
 
-    def toStringHelper(f: FunStringBuilder): String & Impure =
-        let sb = StringBuilder.new();
-        toStringHelperBody(sb, f, x1 -> x1 as & Impure);
-        StringBuilder.toString(sb)
-
-    def toStringHelperBody(sb: StringBuilder, src: FunStringBuilder, k: Unit -> Unit & Impure): Unit & Impure = match src {
+    def toStringHelperBody(sb: StringBuilder[r], src: FunStringBuilder, k: Unit -> Unit \ Write(r)): Unit \ Write(r) = match src {
         case Empty => k()
         case Text(s) => {StringBuilder.append!(s, sb); k()}
         case Char(c) => {StringBuilder.append!(c, sb); k()}

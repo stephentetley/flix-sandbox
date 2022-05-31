@@ -16,7 +16,8 @@
 
 
 namespace FlixSandbox/Doodle {
-    pub opaque type BigDecimal = ##java.math.BigDecimal
+    
+    pub enum BigDecimal(##java.math.BigDecimal)
 
     instance ToString[BigDecimal] {
         pub def toString(x: BigDecimal): String =

@@ -17,7 +17,7 @@
 
 namespace FlixSandbox/System {
 
-    pub opaque type Process = ##java.lang.Process
+    pub enum Process(##java.lang.Process)
 }
 
 

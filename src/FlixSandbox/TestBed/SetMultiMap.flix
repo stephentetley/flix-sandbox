@@ -51,10 +51,8 @@ instance Eq[SetMultiMap[k, v]] with Eq[k], Eq[v] {
 }
 
 instance Order[SetMultiMap[k, v]] with Order[k], Order[v] {
-
     pub def compare(x: SetMultiMap[k, v], y: SetMultiMap[k, v]): Comparison =
         SetMultiMap.toList(x) <=> SetMultiMap.toList(y)
-
 }
 
 instance Foldable[SetMultiMap[k]] {

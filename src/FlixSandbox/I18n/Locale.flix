@@ -18,7 +18,7 @@
 
 namespace FlixSandbox/I18n {
 
-    pub opaque type Locale = ##java.util.Locale
+    pub enum Locale(##java.util.Locale)
 
     instance ToString[Locale] {
         pub def toString(x: Locale): String = FlixSandbox/I18n/Locale.toString(x)

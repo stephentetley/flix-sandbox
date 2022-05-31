@@ -20,7 +20,7 @@ namespace FlixSandbox/System {
     ///
     /// Represents a FilePath.
     ///
-    pub opaque type FilePath = ##java.nio.file.Path
+    pub enum FilePath(##java.nio.file.Path)
 
     /// Note formatting is system dependent.
     instance ToString[FilePath] {

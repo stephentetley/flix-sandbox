@@ -21,7 +21,7 @@ namespace FlixSandbox/System/File {
     ///
     /// Represents a FilePath.
     ///
-    pub opaque type BufferedReader = ##java.io.BufferedReader
+    pub enum BufferedReader(##java.io.BufferedReader)
 
 }
 

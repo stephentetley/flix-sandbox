@@ -15,14 +15,14 @@
  */
 
 namespace FlixSandbox/Doodle {
-    pub opaque type FixedDecimal[a] = (a, BigInt)
+    pub enum FixedDecimal[a](a, BigInt)
 
     pub class HasResolution[a] {
         pub def resolution(x: FixedDecimal[a]): BigInt
         pub def zero(): FixedDecimal[a]
     }
 
-    pub opaque type E3 = Unit
+    pub enum E3(Unit)
 
     instance HasResolution[E3] {
         pub def resolution(_: FixedDecimal[E3]): BigInt = 1000ii

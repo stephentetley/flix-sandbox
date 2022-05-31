@@ -20,7 +20,7 @@ namespace FlixSandbox/Deprecated/SimpleFormat {
     ///
     /// Represents a FilePath.
     ///
-    pub opaque type Doc = FlixSandbox/Deprecated.FunStringBuilder
+    pub enum Doc(FlixSandbox/Deprecated.FunStringBuilder)
 
 
     ///

@@ -22,7 +22,7 @@ namespace FlixSandbox/BitSet {
 
     // Only use non-negative ints!
 
-    pub opaque type BitSet with Eq = BigInt
+    pub enum BitSet(BigInt) with Eq
 
     instance ToString[BitSet] {
         pub def toString(s: BitSet): String = ("BitSet#" + internalToString(s)) as & Pure

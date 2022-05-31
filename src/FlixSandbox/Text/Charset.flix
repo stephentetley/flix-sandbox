@@ -19,7 +19,7 @@ namespace FlixSandbox/Text  {
     ///
     /// Represents a Charset.
     ///
-    pub opaque type Charset = ##java.nio.charset.Charset
+    pub enum Charset(##java.nio.charset.Charset)
 
     instance ToString[Charset] {
         pub def toString(cs: Charset): String =
