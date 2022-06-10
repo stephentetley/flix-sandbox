@@ -18,7 +18,6 @@
 
 namespace FlixSandbox/System/Extras {
 
-
     pub def globList(glob: {glob :: String}, f: String): Result[List[String], String] & Impure =
         globListWithIter(glob, f) |> Result.map(Iterator.toList)
 
@@ -74,7 +73,5 @@ namespace FlixSandbox/System/Extras {
                 import java.lang.Throwable.getMessage(): String & Impure;
                 Err(getMessage(ex))
         }
-
-
 
 }

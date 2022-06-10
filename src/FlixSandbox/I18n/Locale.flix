@@ -21,7 +21,10 @@ namespace FlixSandbox/I18n {
     pub enum Locale(##java.util.Locale)
 
     instance ToString[Locale] {
-        pub def toString(x: Locale): String = FlixSandbox/I18n/Locale.toString(x)
+        pub def toString(x: Locale): String =
+            import java.util.Locale.toString(): String & Pure;
+            let Locale(x1) = x;
+            toString(x1)
     }
 
     instance FromString[Locale] {
@@ -35,11 +38,18 @@ namespace FlixSandbox/I18n {
     }
 
     instance Eq[Locale] {
-        pub def eq(x: Locale, y: Locale): Bool = FlixSandbox/I18n/Locale.equals(x, y)
+        pub def eq(x: Locale, y: Locale): Bool =
+            import java.util.Locale.equals(##java.lang.Object): Bool & Pure;
+            let Locale(x1) = x;
+            let Locale(y1) = y;
+            equals(x1, y1 as ##java.lang.Object)
     }
 
     instance Hash[Locale] {
-        pub def hash(x: Locale): Int32 = FlixSandbox/I18n/Locale.hashCode(x)
+        pub def hash(x: Locale): Int32 =
+            import java.util.Locale.hashCode(): Int32 & Pure;
+            let Locale(x1) = x;
+            hashCode(x1)
     }
 
     /// No Order, so no Boxable
@@ -113,21 +123,7 @@ namespace FlixSandbox/I18n/Locale {
             case _: ##java.lang.Exception => Err("setDefaultWithCategory! failed")
         }
 
-    pub def equals(x: Locale, y: Locale): Bool =
-        import java.util.Locale.equals(##java.lang.Object): Bool & Pure;
-        let Locale(x1) = x;
-        let Locale(y1) = y;
-        equals(x1, y1 as ##java.lang.Object)
-
-    pub def toString(x: Locale): String =
-        import java.util.Locale.toString(): String & Pure;
-        let Locale(x1) = x;
-        toString(x1)
-
-    pub def hashCode(x: Locale): Int32 =
-        import java.util.Locale.hashCode(): Int32 & Pure;
-        let Locale(x1) = x;
-        hashCode(x1)
+        
 
     pub def canada(): Locale =
         import static get java.util.Locale.CANADA: ##java.util.Locale & Pure as getCANADA;
@@ -286,10 +282,12 @@ namespace FlixSandbox/I18n/Locale {
 
 
     /// This marshals okay...
-    pub def getAvailableLocales(): Array[Locale] & Impure =
-        import static java.util.Locale.getAvailableLocales(): Array[##java.util.Locale] & Impure;
-        let arr = getAvailableLocales();
-        Array.map(Locale, arr)
+    pub def getAvailableLocales(): List[Locale] =
+        region r {
+            import static java.util.Locale.getAvailableLocales(): Array[##java.util.Locale, r] & r;
+            let arr = {[] @ r; getAvailableLocales()};
+            arr |> Array.toList |> List.map(Locale)
+        }
 
     pub enum IsoCountryCode with Eq, Order, Boxable, Hash, ToString {
         case Part1Alpha2
@@ -307,14 +305,16 @@ namespace FlixSandbox/I18n/Locale {
             case Part3          => getPart3()
         }
 
-
-    pub def getIsoCountries(): Result[Array[String], String] & Impure =
-        import static java.util.Locale.getISOCountries(): Array[String] & Impure;
-        try {
-            let arr = getISOCountries();
-            Ok(arr)
-        } catch {
-            case _: ##java.lang.Exception => Err("getIsoCountries")
+    /// Is this Pure?
+    pub def getIsoCountries(): Result[List[String], String] =
+        region r {
+            try { 
+                import static java.util.Locale.getISOCountries(): Array[String, r] & r;
+                let arr = {[] @ r; getISOCountries()};
+                Ok(Array.toList(arr))    
+            } catch {
+                case _: ##java.lang.Exception => Err("getIsoCountries")
+            }
         }
 
     pub def getIsoCountriesWithIsoCountryCode(icc: IsoCountryCode): Result[Set[String], String] & Impure =
@@ -341,13 +341,16 @@ namespace FlixSandbox/I18n/Locale {
             k(Nil)
 
 
-    pub def getIsoLanguages(): Result[List[String], String] & Impure =
-        import static java.util.Locale.getISOLanguages(): Array[String] & Impure;
-        try {
-            let arr = getISOLanguages();
-            Ok(Array.toList(arr))
-        } catch {
-            case _: ##java.lang.Exception => Err("getIsoLanguages")
+    pub def getIsoLanguages(): Result[List[String], String] =                
+        region r {
+            try {
+                import static java.util.Locale.getISOLanguages(): Array[String, r] & r;
+                let arr = {[] @ r; getISOLanguages()};
+                Ok(Array.toList(arr))
+            
+            } catch {
+                case _: ##java.lang.Exception => Err("getIsoLanguages")
+            }
         }
 
     pub def getUnicodeLocaleAttributes(x: Locale): Result[Set[String], String] & Impure =

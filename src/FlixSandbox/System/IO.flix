@@ -40,6 +40,7 @@ namespace FlixSandbox/System/IO {
         }
     }
 
+
     def writeModeToNative(x: WriteMode): ##java.nio.file.StandardOpenOption =
         import static get java.nio.file.StandardOpenOption.APPEND: ##java.nio.file.StandardOpenOption & Pure as getAPPEND;
         import static get java.nio.file.StandardOpenOption.CREATE: ##java.nio.file.StandardOpenOption & Pure as getCREATE;
@@ -132,8 +133,8 @@ namespace FlixSandbox/System/IO {
         }
 
     /// Note we are reading to a *signed* Int8.
-    pub def readBytes(path: FilePath): Result[Array[Int8], String] & Impure =
-        import static java.nio.file.Files.readAllBytes(##java.nio.file.Path): Array[Int8] & Impure;
+    pub def readBytes(path: FilePath): Result[Array[Int8, Static], String] & Impure =
+        import static java.nio.file.Files.readAllBytes(##java.nio.file.Path): Array[Int8, Static] & Impure;
         try {
             let FilePath(path1) = path;
             Ok(readAllBytes(path1))
@@ -142,11 +143,13 @@ namespace FlixSandbox/System/IO {
             case _: ##java.lang.Exception => Err("readBytes")
         }
 
-    pub def writeBytes(path: FilePath, bytes: Array[Int8]): Result[Unit, String] & Impure =
+
+    
+    pub def writeBytes(path: FilePath, bytes: Array[Int8, Static]): Result[Unit, String] & Impure =
         writeBytesWith({path = path, mode = Create}, bytes)
 
-    pub def writeBytesWith(opts: {path :: FilePath, mode :: WriteMode}, bytes: Array[Int8]): Result[Unit, String] & Impure =
-        import static flixspt.sandbox.IOWrapper.writeBytes(##java.nio.file.Path, ##java.nio.file.StandardOpenOption, Array[Int8]): Unit & Impure;
+    pub def writeBytesWith(opts: {path :: FilePath, mode :: WriteMode}, bytes: Array[Int8, Static]): Result[Unit, String] & Impure =
+        import static flixspt.sandbox.IOWrapper.writeBytes(##java.nio.file.Path, ##java.nio.file.StandardOpenOption, Array[Int8, Static]): Unit & Impure;
         try {
             let FilePath(path1) = opts.path;
             let mode1 = writeModeToNative(opts.mode);
@@ -174,11 +177,11 @@ namespace FlixSandbox/System/IO {
             case _: ##java.lang.Exception => Err("foldableWriteBytesWith")
         }
 
-    pub def readChunks(path: FilePath, chunkSize: Int32): Result[Iterator[Array[Int8]], String] & Impure =
+    pub def readChunks(path: FilePath, chunkSize: Int32): Result[Iterator[Array[Int8, Static]], String] & Impure =
         import new flixspt.sandbox.SBCIterator(##java.nio.file.Path, Int32): ##flixspt.sandbox.SBCIterator & Impure as newIter;
         import flixspt.sandbox.SBCIterator.hasNext(): Bool & Impure;
         import flixspt.sandbox.SBCIterator.nextBufferSize(): Int32 & Impure;
-        import flixspt.sandbox.SBCIterator.next(): Array[Int8] & Impure;
+        import flixspt.sandbox.SBCIterator.next(): Array[Int8, Static] & Impure;
         try {
             let FilePath(path1) = path;
             let primIter = newIter(path1, chunkSize);
@@ -252,4 +255,5 @@ namespace FlixSandbox/System/IO {
         } catch {
             case _: ##java.lang.Exception => Err("matchesIter")
         }
+
 }

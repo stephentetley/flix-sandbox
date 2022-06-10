@@ -16,8 +16,6 @@
 
 namespace TestProcess {
 
-
-
     @test
     def process01(): Unit & Impure =
         match FlixSandbox/System/Process.process({cmd = "java", args = "--version" :: Nil, charset = FlixSandbox/Text/Charset.utf_8()}) {
@@ -38,4 +36,5 @@ namespace TestProcess {
             case Err(msg) => println("Process Err: ${msg}")
             case Ok(ans)  => println("${ans.processResponse}")
         }
+
 }

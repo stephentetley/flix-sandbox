@@ -16,8 +16,6 @@
 
 namespace TestDirectory {
 
-
-
     @test
     def contents201(): Unit & Impure =
         match FlixSandbox/System/FilePath.tryNew("E:/coding/flix/flix-sandbox/_old") {

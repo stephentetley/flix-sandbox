@@ -32,11 +32,14 @@ namespace FlixSandbox/System {
 
     instance FromString[FilePath] {
         pub def fromString(s: String): Option[FilePath] =
-            import static java.nio.file.Path.of(String, Array[String]): ##java.nio.file.Path & Pure as of1;
-            try {
-                Some(FilePath(of1(s, [] as & Pure)))
+            region r {
+                try { 
+                    import static java.nio.file.Path.of(String, Array[String, r]): ##java.nio.file.Path & r as of1;
+                    Some(FilePath(of1(s, [] @ r)))
+
             } catch {
                 case _: ##java.lang.Exception => None
+            }
             }
     }
 
@@ -89,39 +92,49 @@ namespace FlixSandbox/System/FilePath {
     /// Returns a new FilePath.
     ///
     pub def filePath(s: String): FilePath =
-        import static java.nio.file.Path.of(String, Array[String]): ##java.nio.file.Path & Pure as of1;
-        try {
-            FilePath(of1(s, [] as & Pure))
-        } catch {
-            case _: ##java.lang.Exception => empty()
+        region r {
+            import static java.nio.file.Path.of(String, Array[String, r]): ##java.nio.file.Path & r as of1;
+            try {
+                FilePath(of1(s, [] @ r))
+            } catch {
+                case _: ##java.lang.Exception => empty()
+            }
         }
 
     pub def filePathConcat(l: List[String]): FilePath =
-        import static java.nio.file.Path.of(String, Array[String]): ##java.nio.file.Path & Impure as of1;
-        try {
-            match l { 
-                case x :: rs => FilePath(FlixSandbox/Marshal.runVaragsOfString(rs, of1(x)))  as & Pure
-                case Nil     => empty()
+        region r {
+            import static java.nio.file.Path.of(String, Array[String, r]): ##java.nio.file.Path & r as of1;
+            try {
+                match l { 
+                    case x :: rs => FilePath(FlixSandbox/Marshal.runVaragsOfString(rs, of1(x), r)) as & Pure
+                    case Nil     => empty()
+                }
+            } catch {
+                case _: ##java.lang.Exception => empty()
             }
-        } catch {
-            case _: ##java.lang.Exception => empty()
         }
 
 
     pub def tryNew(s: String): Result[FilePath, String] =
-        import static java.nio.file.Path.of(String, Array[String]): ##java.nio.file.Path & Pure as of1;
-        try {
-            Ok(FilePath(of1(s, [] as & Pure)))
-        } catch {
-            case _: ##java.lang.Exception => Err("Invalid FilePath")
+        region r {
+            import static java.nio.file.Path.of(String, Array[String, r]): ##java.nio.file.Path & r as of1;
+            try {
+                
+                Ok(FilePath(of1(s, [] @ r)))
+            } catch {
+                case _: ##java.lang.Exception => Err("Invalid FilePath")
+            }
         }
 
-    pub def empty(): FilePath =
-        import static java.nio.file.Path.of(String, Array[String]): ##java.nio.file.Path & Pure as of1;
-        try {
-            FilePath(of1("", [] as & Pure))
-        } catch {
-            case _: ##java.lang.Exception => bug!("FilePath.empty")
+    pub def empty(): FilePath =        
+        region r {
+            import static java.nio.file.Path.of(String, Array[String, r]): ##java.nio.file.Path & r as of1;
+            try {
+                
+                FilePath(of1("", [] @ r))
+            } catch {
+                case _: ##java.lang.Exception => bug!("FilePath.empty")
+            }
         }
 
     pub def normalize(path: FilePath): FilePath =
@@ -461,4 +474,6 @@ namespace FlixSandbox/System/FilePath {
 
     pub def isRegexMatch(patt: String, path: FilePath): Result[Bool, String] =
         pathMatcherMatches(path, "regex:" + patt) as & Pure
+
+
 }
