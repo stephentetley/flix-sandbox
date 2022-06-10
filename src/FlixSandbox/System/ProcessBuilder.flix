@@ -66,22 +66,6 @@ namespace FlixSandbox/System/ProcessBuilder {
         ma1(r, k)
 
 
-
-    pub def start(ma: ProcessBuilder[a, a]): Result[Process, String] & Impure = 
-        import new java.lang.ProcessBuilder(##java.util.List): ##java.lang.ProcessBuilder & Impure as newProcessBuilder;
-        import java.lang.ProcessBuilder.start(): ##java.lang.Process & Impure as start1;
-        try {
-            let strs = FlixSandbox/Marshal.marshalList(x1 -> x1 as ##java.lang.Object, Nil);
-            let jbuilder = newProcessBuilder(strs);
-            match runBuilder(ma, jbuilder) {
-                case Err(msg) => Err(msg)
-                case Ok(_)    => Ok(Process(start1(jbuilder)))
-            }
-        } catch {
-            case ex: ##java.lang.Exception => Err(FlixSandbox/Marshal.unmarshalExceptionMessage(ex))
-        }
-
-
     ///
     /// Returns the result (new state and answer) of applying `ma` to the initial state `st`.
     ///
@@ -118,6 +102,20 @@ namespace FlixSandbox/System/ProcessBuilder {
     pub def throwError(msg: String): ProcessBuilder[ka, a] = 
         ProcessBuilder((_, _) -> Err(msg) as & Impure)
 
+
+    pub def start(ma: ProcessBuilder[a, a]): Result[Process, String] & Impure = 
+        import new java.lang.ProcessBuilder(##java.util.List): ##java.lang.ProcessBuilder & Impure as newProcessBuilder;
+        import java.lang.ProcessBuilder.start(): ##java.lang.Process & Impure as start1;
+        try {
+            let strs = FlixSandbox/Marshal.marshalList(x1 -> x1 as ##java.lang.Object, Nil);
+            let jbuilder = newProcessBuilder(strs);
+            match runBuilder(ma, jbuilder) {
+                case Err(msg) => Err(msg)
+                case Ok(_)    => Ok(Process(start1(jbuilder)))
+            }
+        } catch {
+            case ex: ##java.lang.Exception => Err(FlixSandbox/Marshal.unmarshalExceptionMessage(ex))
+        }
 
     def liftJavaBuilderGetter(f: ##java.lang.ProcessBuilder-> a & Impure): ProcessBuilder[ka, a] = 
         ProcessBuilder((r, k) ->

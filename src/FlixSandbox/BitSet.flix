@@ -107,12 +107,13 @@ namespace FlixSandbox/BitSet {
 
 
     def toJavaBitSet(s: BitSet): ##java.util.BitSet & Impure = 
-        import java.math.BigInteger.toByteArray(): Array[Int8] & Impure;
-        import static java.util.BitSet.valueOf(Array[Int8]): ##java.util.BitSet & Impure;
+        import java.math.BigInteger.toByteArray(): Array[Int8, Static] & Impure;
+        import static java.util.BitSet.valueOf(Array[Int8, Static]): ##java.util.BitSet & Impure;
         let BitSet(x) = s;
         let arr = toByteArray(x);
         let arr1 = Array.reverse(arr);
         valueOf(arr1)
+
 
     def toJavaIntStream(s: BitSet): ##java.util.stream.IntStream & Impure = 
         import java.util.BitSet.stream(): ##java.util.stream.IntStream & Impure;
@@ -150,9 +151,9 @@ namespace FlixSandbox/BitSet {
         BitSet(x1 &&& BitwiseNot.not(y1))
 
 
-    pub def toArray(s: BitSet): Array[Int32] & Impure = 
-        import java.util.stream.IntStream.toArray(): Array[Int32] & Impure;
-        toJavaIntStream(s) |> toArray
+    pub def toArray(s: BitSet, _: Region[r]): Array[Int32, r] \ Write(r) = 
+        import java.util.stream.IntStream.toArray(): Array[Int32, r] & r;
+        (toJavaIntStream(s) as \ { Write(r) }) |> toArray
 
     pub def toList(s: BitSet): List[Int32] = 
         foldLeft((k, i) -> ks -> k(i :: ks), ks -> ks, s) |> f -> f(Nil)

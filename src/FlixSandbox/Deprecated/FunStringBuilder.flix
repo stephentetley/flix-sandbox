@@ -122,22 +122,23 @@ namespace FlixSandbox/Deprecated/FunStringBuilder {
         let sb1 = appendString(f(x), sb);
         appendLineSeparator(sb1)
 
+
     ///
     /// Returns `sb` with each string in the array `a` appended.
     ///
-    pub def appendLines(a: Array[String], sb: FunStringBuilder): FunStringBuilder & Impure =
+    pub def appendLines(a: Array[String, r], sb: FunStringBuilder): FunStringBuilder \ Read(r) =
         Array.foldLeft(appendLine, sb, a)
 
     ///
     /// Returns `sb` with the strings produced by `f(x)` for each x in array `a` appended.
     ///
-    pub def appendLinesWith(f: a -> String, a: Array[a], sb: FunStringBuilder): FunStringBuilder & Impure =
+    pub def appendLinesWith(f: a -> String, a: Array[a, r], sb: FunStringBuilder): FunStringBuilder \ Read(r) =
        Array.foldLeft((sb1, x) -> appendLineWith(f, x, sb1), sb, a)
 
     ///
     /// Append the array of strings `a` separating each pair of string with `sep` to the StringBuilder `sb`.
     ///
-    pub def intercalate(sep: String, a: Array[String], sb: FunStringBuilder): FunStringBuilder & Impure =
+    pub def intercalate(sep: String, a: Array[String, r], sb: FunStringBuilder): FunStringBuilder \ Read(r) =
         let step = (ac, s) -> {
             let (sb1, i) = ac;
             if (i == 0)
@@ -153,7 +154,7 @@ namespace FlixSandbox/Deprecated/FunStringBuilder {
     pub def toString(f: FunStringBuilder): String =
         region r { 
             let sb = new StringBuilder(r);
-            toStringHelperBody(sb, f, k -> k as & r);
+            toStringHelperBody(sb, f, k -> k as \ Write(r));
             StringBuilder.toString(sb)
         }
 

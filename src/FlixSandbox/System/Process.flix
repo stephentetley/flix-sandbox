@@ -51,8 +51,8 @@ namespace FlixSandbox/System/Process {
 
     pub def getInput(cs: FlixSandbox/Text.Charset, p: Process): Result[String, String] & Impure =
         import java.lang.Process.getInputStream(): ##java.io.InputStream & Impure;
-        import java.io.InputStream.readAllBytes(): Array[Int8] & Impure;
-        import new java.lang.String(Array[Int8], ##java.nio.charset.Charset): String & Impure as newString;
+        import java.io.InputStream.readAllBytes(): Array[Int8, Static] & Impure;
+        import new java.lang.String(Array[Int8, Static], ##java.nio.charset.Charset): String & Impure as newString;
         try {
             let Process(p1) = p;
             let Charset(cs1) = cs;
@@ -67,11 +67,10 @@ namespace FlixSandbox/System/Process {
         }
 
 
-
     pub def getError(cs: FlixSandbox/Text.Charset, p: Process): Result[String, String] & Impure =        
         import java.lang.Process.getErrorStream(): ##java.io.InputStream & Impure;
-        import java.io.InputStream.readAllBytes(): Array[Int8] & Impure;
-        import new java.lang.String(Array[Int8], ##java.nio.charset.Charset): String & Impure as newString;
+        import java.io.InputStream.readAllBytes(): Array[Int8, Static] & Impure;
+        import new java.lang.String(Array[Int8, Static], ##java.nio.charset.Charset): String & Impure as newString;
         try {
             let Process(p1) = p;
             let Charset(cs1) = cs;

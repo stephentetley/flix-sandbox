@@ -324,5 +324,5 @@ namespace FlixSandbox/Deprecated/SimpleFormat {
     /// Enclose in square brackets [...]
     ///
     pub def brackets (x: Doc): Doc = enclose(lbracket(), rbracket(), x)
-    
+   
 }

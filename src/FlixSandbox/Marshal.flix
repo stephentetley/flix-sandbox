@@ -120,8 +120,8 @@ namespace FlixSandbox/Marshal {
         getMessage(ex as ##java.lang.Throwable)
 
 
-    pub def marshalArray(upcast: a -> ##java.lang.Object & ef, arr: Array[a]): Array[##java.lang.Object] & Impure =
-        import java.util.ArrayList.toArray(): Array[##java.lang.Object] & Impure;    
+    pub def marshalArray(upcast: a -> ##java.lang.Object & ef, arr: Array[a, r]): Array[##java.lang.Object, r] & Impure =
+        import java.util.ArrayList.toArray(): Array[##java.lang.Object, r] & r;    
         let step = iter -> match Iterator.next(iter) {
             case Some(x)    => Some((upcast(x), iter))
             case None       => None
@@ -148,7 +148,6 @@ namespace FlixSandbox/Marshal {
             case Nil        => None
         };
         unfoldArrayList(step, l) as ##java.util.List
-
 
     pub def unmarshalList(downcast: ##java.lang.Object -> a & ef, javal: ##java.util.List): List[a] & ef =
         let step = (k, obj) -> {
@@ -211,6 +210,7 @@ namespace FlixSandbox/Marshal {
         foldMap(step, Map.empty(), javam as ##java.util.Map)
 
 
+
     pub def unmarshalIterator(downcast: ##java.lang.Object -> a & ef, javaIter: ##java.util.Iterator): Iterator[a] =
         import java.util.Iterator.hasNext(): Bool & Impure;
         import java.util.Iterator.next(): ##java.lang.Object & Impure;
@@ -223,7 +223,6 @@ namespace FlixSandbox/Marshal {
             downcast(a1) as & Impure
         };
         Iterator(isDone, getNext)
-
 
 
     pub def unmarshalStream(downcast: ##java.lang.Object -> a & ef, strm: ##java.util.stream.Stream): Iterator[a] =
@@ -273,7 +272,6 @@ namespace FlixSandbox/Marshal {
         };
         foldSet(step, ks -> ks, javas) |> f -> f(Nil)
 
-
     pub def marshalAssocListToMap(upcastKey: k -> ##java.lang.Object & ef, 
                                     upcastValue: v -> ##java.lang.Object & ef, 
                                     l: List[(k, v)]): ##java.util.Map & ef =
@@ -283,7 +281,6 @@ namespace FlixSandbox/Marshal {
         };
         unfoldHashMap(step, l) as ##java.util.Map
 
-
     pub def unmarshalMapToAssocList(downcastEntry: ##java.util.Map$Entry -> (k, v) & ef, javam: ##java.util.Map): List[(k, v)] & ef =
         let step = (k, entry) -> {
             let kv = downcastEntry(entry);
@@ -292,16 +289,18 @@ namespace FlixSandbox/Marshal {
         foldMap(step, ks -> ks, javam) |> f -> f(Nil)
 
 
-    pub def marshalListToArray(upcast: a -> ##java.lang.Object & ef, l: List[a]): Array[##java.lang.Object] & Impure =
-        import java.util.ArrayList.toArray(): Array[##java.lang.Object] & Impure;    
+    pub def marshalListToArray(upcast: a -> ##java.lang.Object & ef, l: List[a]): Array[##java.lang.Object, r] & Impure =
+        import java.util.ArrayList.toArray(): Array[##java.lang.Object, r] & r;
         let step = iter -> match Iterator.next(iter) {
             case Some(x)    => Some((upcast(x), iter))
             case None       => None
         };
         unfoldArrayList(step, List.toIterator(l)) |> toArray
 
-    pub def marshalSetToArray(upcast: a -> ##java.lang.Object & ef, s: Set[a]): Array[##java.lang.Object] & Impure =
-        import java.util.ArrayList.toArray(): Array[##java.lang.Object] & Impure;    
+
+    /// Due to change once Iterator uses regions...
+    pub def marshalSetToArray(upcast: a -> ##java.lang.Object & ef, s: Set[a]): Array[##java.lang.Object, r] & Impure =
+        import java.util.ArrayList.toArray(): Array[##java.lang.Object, r] & r;    
         let step = iter -> match Iterator.next(iter) {
             case Some(x)    => Some((upcast(x), iter))
             case None       => None
@@ -384,11 +383,11 @@ namespace FlixSandbox/Marshal {
     /// Unfolds (make specific Java object - client can cast)
 
     pub def unfoldHashSet(f: s -> Option[(##java.lang.Object, s)] & ef, st: s): ##java.util.HashSet & ef =
-        unfoldHashSetHelper(f, st) as & ef
+        unfoldHashSetHelper(f, st)
 
-    def unfoldHashSetHelper(f: s -> Option[(##java.lang.Object, s)] & ef, st: s): ##java.util.HashSet & Impure =
-        import new java.util.HashSet(): ##java.util.HashSet & Impure as newHashSet;
-        import java.util.HashSet.add(##java.lang.Object): Bool & Impure as add; 
+    def unfoldHashSetHelper(f: s -> Option[(##java.lang.Object, s)] & ef, st: s): ##java.util.HashSet & ef =
+        import new java.util.HashSet(): ##java.util.HashSet & ef as newHashSet;
+        import java.util.HashSet.add(##java.lang.Object): Bool & ef as add; 
         def loop(st1, ac) = match f(st1) {
             case None         => ac
             case Some(a, st2) => { let _ = add(ac, a); loop(st2, ac) }
@@ -396,11 +395,11 @@ namespace FlixSandbox/Marshal {
         loop(st, newHashSet())
 
     pub def unfoldLinkedList(f: s -> Option[(##java.lang.Object, s)] & ef, st: s): ##java.util.LinkedList & ef =
-        unfoldLinkedListHelper(f, st) as & ef
+        unfoldLinkedListHelper(f, st)
 
-    def unfoldLinkedListHelper(f: s -> Option[(##java.lang.Object, s)] & ef, st: s): ##java.util.LinkedList & Impure =
-        import new java.util.LinkedList(): ##java.util.LinkedList & Impure as newLinkedList;
-        import java.util.LinkedList.add(##java.lang.Object): Bool & Impure as add;
+    def unfoldLinkedListHelper(f: s -> Option[(##java.lang.Object, s)] & ef, st: s): ##java.util.LinkedList & ef =
+        import new java.util.LinkedList(): ##java.util.LinkedList & ef as newLinkedList;
+        import java.util.LinkedList.add(##java.lang.Object): Bool & ef as add;
         def loop(st1, ac) = match f(st1) {
             case None         => ac
             case Some(a, st2) => { let _ = add(ac, a); loop(st2, ac) }
@@ -408,11 +407,11 @@ namespace FlixSandbox/Marshal {
         loop(st, newLinkedList())
 
     pub def unfoldArrayList(f: s -> Option[(##java.lang.Object, s)] & ef, st: s): ##java.util.ArrayList & ef =
-        unfoldArrayListHelper(f, st) as & ef
+        unfoldArrayListHelper(f, st)
 
-    def unfoldArrayListHelper(f: s -> Option[(##java.lang.Object, s)] & ef, st: s): ##java.util.ArrayList & Impure =
-        import new java.util.ArrayList(): ##java.util.ArrayList & Impure as newArrayList;
-        import java.util.ArrayList.add(##java.lang.Object): Bool & Impure as add;
+    def unfoldArrayListHelper(f: s -> Option[(##java.lang.Object, s)] & ef, st: s): ##java.util.ArrayList & ef =
+        import new java.util.ArrayList(): ##java.util.ArrayList & ef as newArrayList;
+        import java.util.ArrayList.add(##java.lang.Object): Bool & ef as add;
         def loop(st1, ac) = match f(st1) {
             case None         => ac
             case Some(a, st2) => { let _ = add(ac, a); loop(st2, ac) }
@@ -420,11 +419,11 @@ namespace FlixSandbox/Marshal {
         loop(st, newArrayList())
 
     pub def unfoldHashMap(f: s -> Option[(##java.lang.Object, ##java.lang.Object, s)] & ef, st: s): ##java.util.HashMap & ef =
-        unfoldHashMapHelper(f, st) as & ef
+        unfoldHashMapHelper(f, st)
 
-    def unfoldHashMapHelper(f: s -> Option[(##java.lang.Object, ##java.lang.Object, s)] & ef, st: s): ##java.util.HashMap & Impure =
-        import new java.util.HashMap(): ##java.util.HashMap & Impure as newHashMap;
-        import java.util.HashMap.put(##java.lang.Object, ##java.lang.Object): ##java.lang.Object & Impure as put; 
+    def unfoldHashMapHelper(f: s -> Option[(##java.lang.Object, ##java.lang.Object, s)] & ef, st: s): ##java.util.HashMap & ef =
+        import new java.util.HashMap(): ##java.util.HashMap & ef as newHashMap;
+        import java.util.HashMap.put(##java.lang.Object, ##java.lang.Object): ##java.lang.Object & ef as put; 
         def loop(st1, ac) = match f(st1) {
             case None         => ac
             case Some(k, v, st2) => { let _ = put(ac, k, v); loop(st2, ac) }
@@ -432,11 +431,11 @@ namespace FlixSandbox/Marshal {
         loop(st, newHashMap())
 
     pub def unfoldTreeMap(f: s -> Option[(##java.lang.Object, ##java.lang.Object, s)] & ef, st: s): ##java.util.TreeMap & ef =
-        unfoldTreeMapHelper(f, st) as & ef
+        unfoldTreeMapHelper(f, st)
 
-    def unfoldTreeMapHelper(f: s -> Option[(##java.lang.Object, ##java.lang.Object, s)] & ef, st: s): ##java.util.TreeMap & Impure =
-        import new java.util.TreeMap(): ##java.util.TreeMap & Impure as newTreeMap;
-        import java.util.TreeMap.put(##java.lang.Object, ##java.lang.Object): ##java.lang.Object & Impure as put; 
+    def unfoldTreeMapHelper(f: s -> Option[(##java.lang.Object, ##java.lang.Object, s)] & ef, st: s): ##java.util.TreeMap & ef =
+        import new java.util.TreeMap(): ##java.util.TreeMap & ef as newTreeMap;
+        import java.util.TreeMap.put(##java.lang.Object, ##java.lang.Object): ##java.lang.Object & ef as put; 
         def loop(st1, ac) = match f(st1) {
             case None         => ac
             case Some(k, v, st2) => { let _ = put(ac, k, v); loop(st2, ac) }
@@ -446,8 +445,8 @@ namespace FlixSandbox/Marshal {
     /// Special function to avoid Flix marshal bug:
     /// https://github.com/flix/flix/issues/3332
 
-    pub def runVaragsOfString(l: List[String], k: Array[String] -> a & Impure): a & Impure =
-        import static flixspt.sandbox.MarshalArrayList.arrayListOfStringToStringArray(##java.util.ArrayList): Array[String] & Impure;
+    pub def runVaragsOfString(l: List[String], k: Array[String, r] -> a \ Read(r), _: Region[r]): a & Impure =
+        import static flixspt.sandbox.MarshalArrayList.arrayListOfStringToStringArray(##java.util.ArrayList): Array[String, r] \ Read(r);
         let step = iter -> match Iterator.next(iter) {
             case Some(x)    => Some((x as ##java.lang.Object, iter))
             case None       => None

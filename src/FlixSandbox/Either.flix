@@ -44,6 +44,14 @@ namespace FlixSandbox {
         }
     }
 
+    instance ForEach[Either[e]] {
+        pub def foreach(f: a -> Unit & ef, t: Either[e, a]): Unit & ef = 
+            match t {
+                case Left(_) => () as & ef
+                case Right(a) => f(a)
+            }
+    }
+
     instance Foldable[Either[e]] {
         pub def foldLeft(f: (b, a) -> b & ef, s: b, t: Either[e, a]): b & ef = 
             match t {
