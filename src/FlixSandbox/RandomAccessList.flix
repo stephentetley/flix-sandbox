@@ -27,9 +27,20 @@ namespace FlixSandbox/RandomAccessList {
         case Node(a, Tree[a], Tree[a])
     }
 
-    pub enum RandomAccessList[a](List[(Int32, Tree[a])])
+    pub enum RandomAccessList[a](List[(Int32, Tree[a])]) with Eq, Order, ToString
+
+    pub enum View[a] with Eq, Order, ToString {
+        case RAEmpty
+        case RACons(a, RandomAccessList[a])
+    }
+
 
     type alias RandomAccessListBody[a] = List[(Int32, Tree[a])]
+    
+    enum FastView[a] with Eq, Order, ToString {
+        case FastEmpty
+        case FastCons(a, RandomAccessListBody[a])
+    }
 
     def getRandomAccessList(l: RandomAccessList[a]): List[(Int32, Tree[a])] = 
         let RandomAccessList(l1) = l;
@@ -54,6 +65,10 @@ namespace FlixSandbox/RandomAccessList {
             let RandomAccessList(l1) = l;
             Functor.map(x -> {let (i, t) = x; (i, Functor.map(f, t))}, l1) |> RandomAccessList
     }
+
+    pub def empty(): RandomAccessList[a] = RandomAccessList(Nil)
+    
+    pub def singleton(x: a): RandomAccessList[a] = RandomAccessList((1, Leaf(x)) :: Nil)
 
     pub def cons(x: a, l: RandomAccessList[a]): RandomAccessList[a] = match getRandomAccessList(l) {
         case (w1, t1) :: (w2, t2) :: rs if (w1 == w2) => RandomAccessList((1 + w1 + w2, Node(x, t1, t2)) :: rs)
@@ -84,13 +99,33 @@ namespace FlixSandbox/RandomAccessList {
                 lookupTree(w/2, i - 1 - w / 2, t2)
     }
 
-    pub def lookup(i: Int32, l: RandomAccessList[a]): Option[a] = match getRandomAccessList(l) {
-        case Nil          => None
+    pub def get(i: Int32, l: RandomAccessList[a]): Option[a] = 
+        def loop(n, body) = match body {
+            case Nil          => None
+            case (w, t) :: ts => 
+                if (i < w)
+                    lookupTree(w, n, t)
+               else
+                    loop(n - w, ts)
+        };
+        loop(i, getRandomAccessList(l))
+
+    ///
+    /// Updates `l` at index `i` with `y`. if `i` is out-of-bounds, returns `l`.
+    ///
+    pub def update(i: Int32, y: a, l: RandomAccessList[a]): RandomAccessList[a] = 
+        let RandomAccessList(l1) = l;
+        updateBody(i, y, l1, identity) |> RandomAccessList
+
+    def updateBody(i: Int32, y: a, l: RandomAccessListBody[a], 
+                        k: RandomAccessListBody[a] -> RandomAccessListBody[a]): RandomAccessListBody[a] = match l {
+        case Nil          => k(Nil)
         case (w, t) :: ts => 
-            if (i < w)
-                lookupTree(w, i, t)
-            else
-                lookup(i - w, RandomAccessList(ts))
+            if (i < w) {
+                let t1 = updateTree(w, i, y, t, identity);
+                k((w, t1) :: ts)
+            } else
+                updateBody(i - w, y, ts, ks -> k((w, t) :: ks))
     }
 
     /// CPS converted
@@ -105,23 +140,72 @@ namespace FlixSandbox/RandomAccessList {
                 updateTree(w/2, i - 1 - w / 2, y, t2, kt -> k(Node(x, t1, kt)))
     }
 
-    def updateHelper(i: Int32, y: a, l: RandomAccessListBody[a], 
-                        k: RandomAccessListBody[a] -> RandomAccessListBody[a]): RandomAccessListBody[a] = match l {
-        case Nil          => k(Nil)
-        case (w, t) :: ts => 
-            if (i < w) {
-                let t1 = updateTree(w, i, y, t, identity);
-                k((w, t1) :: ts)
-            } else
-                updateHelper(i - w, y, ts, ks -> k((w, t) :: ks))
-    }
+    /// Remove would be an interesting operation (c.f. Map) but it is not supported by List or Array
+    /// It is complicated too.
 
 
     ///
     /// Updates `l` at index `i` with `y`. if `i` is out-of-bounds, returns `l`.
     ///
-    pub def update(i: Int32, y: a, l: RandomAccessList[a]): RandomAccessList[a] = 
+    pub def range(b: Int32, e: Int32): RandomAccessList[Int32] = 
+        def loop(i, acc) = if (i < b) acc else loop(i-1, cons(i, acc));
+        loop(e -1, empty())
+
+    pub def view(l: RandomAccessList[a]): View[a] = 
         let RandomAccessList(l1) = l;
-        updateHelper(i, y, l1, identity) |> RandomAccessList
+        match l1 {
+            case Nil                          => RAEmpty
+            case ((_, Leaf(x)) :: ts)         => RACons(x, RandomAccessList(ts))
+            case ((w, Node(x, tl, tr)) :: ts) => {
+                let hw = w / 2;
+                RACons(x, RandomAccessList((hw, tl) :: (hw, tr) :: ts))
+            }
+        }
+
+    /// Without 1 layer of wrapping...
+    def fastView(l: RandomAccessListBody[a]): FastView[a] = 
+        match l {
+            case Nil                          => FastEmpty
+            case ((_, Leaf(x)) :: ts)         => FastCons(x, ts)
+            case ((w, Node(x, tl, tr)) :: ts) => {
+                let hw = w / 2;
+                FastCons(x, (hw, tl) :: (hw, tr) :: ts)
+            }
+        }
+
+    pub def length(l: RandomAccessList[a]): Int32 = 
+        def loop(n, xs) = match xs {
+            case Nil            => n
+            case ((w, _) :: ts) => loop(n+w, ts)
+        };
+        let RandomAccessList(l1) = l;
+        loop(0, l1)
+
+    pub def foldLeft(f: (b, a) -> b & ef, s: b, l: RandomAccessList[a]): b & ef =
+        def loop(s1, xs) = match fastView(xs) {
+            case FastEmpty       => s1
+            case FastCons(x, rs) => loop(f(s1, x), rs)
+        };
+        let RandomAccessList(l1) = l;
+        loop(s, l1)
+
+    pub def foldRight(f: (a, b) -> b & ef, s: b, l: RandomAccessList[a]): b & ef =
+        def loop(xs, k) = match fastView(xs) {
+            case FastEmpty       => k(s)
+            case FastCons(x, rs) => loop(rs, ka -> k(f(x, ka)))
+        };
+        let RandomAccessList(l1) = l;
+        loop(l1, ka -> ka as & ef)
+
+    pub def filter(f: a -> Bool & ef, l: RandomAccessList[a]): RandomAccessList[a] & ef =
+        let step = (x, acc) -> if (f(x)) cons(x, acc) else acc;
+        foldRight(step, empty(), l)
+    
+    pub def filterMap(f: a -> Option[b] & ef, l: RandomAccessList[a]): RandomAccessList[b] & ef =
+        let step = (x, acc) -> match f(x) {
+            case None    => acc
+            case Some(b) => cons(b, acc)
+        };
+        foldRight(step, empty(), l)
 
 }
