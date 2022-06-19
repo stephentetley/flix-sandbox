@@ -147,8 +147,8 @@ namespace FlixSandbox/IteratorTemp {
     pub def dropWhileL(f: a -> Bool, iter: Iterator[a]): Iterator[a] & Impure =
         let Iterator(done, next) = iter;
         match dropWhileForward(f, done, next) {
-            case None       => Iterator.empty()
-            case Some(iter) => iter
+            case None        => Iterator.empty()
+            case Some(iter1) => iter1
         }
 
     ///

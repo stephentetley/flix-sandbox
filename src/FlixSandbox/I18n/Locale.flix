@@ -113,11 +113,11 @@ namespace FlixSandbox/I18n/Locale {
         import static get java.util.Locale$Category.FORMAT: ##java.util.Locale$Category & Pure as getFormat;
         try {
             let Locale(x1) = x;
-            let category = match category {
+            let category1 = match category {
                 case Display => getDisplay()
                 case Format => getFormat()
             };
-            setDefault(category, x1);
+            setDefault(category1, x1);
             Ok()
         } catch {
             case _: ##java.lang.Exception => Err("setDefaultWithCategory! failed")
