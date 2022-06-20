@@ -75,6 +75,12 @@ namespace FlixSandbox/RandomAccessList {
         case ts                                       => RandomAccessList((1, Leaf(x)) :: ts)
     }
 
+    pub def append(l1: RandomAccessList[a], l2: RandomAccessList[a]): RandomAccessList[a] = 
+        let RandomAccessList(b1) = l1;
+        let RandomAccessList(b2) = l2;
+        RandomAccessList(List.append(b1, b2))
+
+
     pub def head(l: RandomAccessList[a]): Option[a] = match getRandomAccessList(l) {
         case (1, Leaf(x)) :: _          => Some(x)
         case (_, Node(x, _, _)) :: _    => Some(x)
@@ -207,5 +213,38 @@ namespace FlixSandbox/RandomAccessList {
             case Some(b) => cons(b, acc)
         };
         foldRight(step, empty(), l)
+
+    pub def map(f: a -> b & ef, l: RandomAccessList[a]): RandomAccessList[b] & ef = 
+        let RandomAccessList(l1) = l;
+        List.map(xy -> let (w, t) = xy; (w, mapTree(f, t)), l1) |> RandomAccessList
+
+    def mapTree(f: a -> b & ef, t: Tree[a]): Tree[b] & ef = 
+        def loop(tree, k) = match tree {
+            case Leaf(a)         => {let ans = Leaf(f(a)); k(ans)}
+            case Node(a, t1, t2) => {
+                let b = f(a);
+                loop(t1, v1 ->
+                    loop(t2, v2 ->
+                        k(Node(b, v1, v2))))
+            }
+        };
+        loop(t, k -> k as & ef)
+
+
+    pub def ap(f: RandomAccessList[a -> b & ef], x: RandomAccessList[a]) : RandomAccessList[b] & ef =
+        def loop(g, acc) = match g {
+            case FastEmpty       => acc
+            case FastCons(h, xs) => loop(fastView(xs), acc `append` map(h, x))
+        };
+        let RandomAccessList(f1) = f;
+        loop(fastView(f1), empty())
+
+    pub def flatMap(f: a -> RandomAccessList[b] & ef, l: RandomAccessList[a]): RandomAccessList[b] & ef =
+        def loop(body, acc) = match fastView(body) {
+            case FastEmpty       => acc
+            case FastCons(a, rs) => loop(rs, append(acc, f(a)))
+        };
+        let RandomAccessList(l1) = l;
+        loop(l1, empty())
 
 }
