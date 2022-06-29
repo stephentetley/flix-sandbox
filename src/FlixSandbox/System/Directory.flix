@@ -46,7 +46,7 @@ namespace FlixSandbox/System/Directory {
             |> Result.map(Iterator.toList)
 
     /// Use File.listWithIter
-    pub def contentsIter(path: FilePath): Result[Iterator[FilePath], String] & Impure =
+    pub def contentsIter(path: FilePath): Result[Iterator[FilePath, Static], String] & Impure =
         import static flixspt.sandbox.PathIterator.newFileslistIterator(##java.nio.file.Path): ##flixspt.sandbox.PathIterator & Impure;
         import flixspt.sandbox.PathIterator.hasNext(): Bool & Impure;
         import flixspt.sandbox.PathIterator.next(): ##java.nio.file.Path & Impure;
@@ -60,13 +60,13 @@ namespace FlixSandbox/System/Directory {
             case _: ##java.lang.Exception => Err("contentsIter")
         }
 
-    pub def contentsIter2(path: FilePath): Result[Iterator[FilePath], String] & Impure = 
+    pub def contentsIter2(path: FilePath): Result[Iterator[FilePath, Static], String] & Impure = 
         import static java.nio.file.Files.list(##java.nio.file.Path): ##java.util.stream.Stream & Impure;
         try {
             let FilePath(path1) = path;
             let strm = list(path1);
             let downcast = x1 -> FilePath(x1 as ##java.nio.file.Path);
-            let iter = FlixSandbox/Marshal.unmarshalStream(downcast, strm);
+            let iter = FlixSandbox/Marshal.unmarshalStream(Static, downcast, strm);
             Ok(iter)
         } catch {
             case _: ##java.lang.Exception => Err("contentsIter2")
@@ -82,7 +82,7 @@ namespace FlixSandbox/System/Directory {
         matchesIter(glob, path)
             |> Result.map(Iterator.toList)
 
-    pub def matchesIter(glob: String, path: FilePath): Result[Iterator[FilePath], String] & Impure =
+    pub def matchesIter(glob: String, path: FilePath): Result[Iterator[FilePath, Static], String] & Impure =
         import static flixspt.sandbox.PathIterator.newFilesnewDirectoryStreamIterator(##java.nio.file.Path, String): ##flixspt.sandbox.PathIterator & Impure;
         import flixspt.sandbox.PathIterator.hasNext(): Bool & Impure;
         import flixspt.sandbox.PathIterator.next(): ##java.nio.file.Path & Impure;
@@ -102,7 +102,7 @@ namespace FlixSandbox/System/Directory {
 
     /// Use `files.walk`...
     /// All levels - recursive, uses a Iterator
-    pub def contentsAllIter(followLinks: Bool, path: FilePath): Result[Iterator[FilePath], String] & Impure =
+    pub def contentsAllIter(followLinks: Bool, path: FilePath): Result[Iterator[FilePath, Static], String] & Impure =
         import static flixspt.sandbox.PathIterator.newFileswalkIterator(##java.nio.file.Path, Bool): ##flixspt.sandbox.PathIterator & Impure;
         import flixspt.sandbox.PathIterator.hasNext(): Bool & Impure;
         import flixspt.sandbox.PathIterator.next(): ##java.nio.file.Path & Impure;

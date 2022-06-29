@@ -91,7 +91,7 @@ namespace FlixSandbox/System/File/BufferedReader {
     ///
     /// Assumes the garbage collector closes the BufferedReader when done...
     ///
-    pub def lines(x: BufferedReader): Iterator[String] & Impure =
+    pub def lines(x: BufferedReader): Iterator[String, Static] & Impure =
         import static flixspt.sandbox.LineIterator.newBufferedReaderlinesIterator(##java.io.BufferedReader): ##flixspt.sandbox.LineIterator & Impure;
         import flixspt.sandbox.LineIterator.hasNext(): Bool & Impure;
         import flixspt.sandbox.LineIterator.next(): String & Impure;

@@ -177,7 +177,7 @@ namespace FlixSandbox/System/IO {
             case _: ##java.lang.Exception => Err("foldableWriteBytesWith")
         }
 
-    pub def readChunks(path: FilePath, chunkSize: Int32): Result[Iterator[Array[Int8, Static]], String] & Impure =
+    pub def readChunks(path: FilePath, chunkSize: Int32): Result[Iterator[Array[Int8, Static], Static], String] & Impure =
         import new flixspt.sandbox.SBCIterator(##java.nio.file.Path, Int32): ##flixspt.sandbox.SBCIterator & Impure as newIter;
         import flixspt.sandbox.SBCIterator.hasNext(): Bool & Impure;
         import flixspt.sandbox.SBCIterator.nextBufferSize(): Int32 & Impure;
@@ -204,7 +204,7 @@ namespace FlixSandbox/System/IO {
             |> Result.map(Iterator.toList)
 
 
-    pub def readLinesIterWith(opts: {charset :: FlixSandbox/Text.Charset}, path: FilePath): Result[Iterator[String], String] & Impure =
+    pub def readLinesIterWith(opts: {charset :: FlixSandbox/Text.Charset}, path: FilePath): Result[Iterator[String, Static], String] & Impure =
         import static flixspt.sandbox.LineIterator.newFileslinesIterator(##java.nio.file.Path, ##java.nio.charset.Charset): ##flixspt.sandbox.LineIterator & Impure;
         import flixspt.sandbox.LineIterator.hasNext(): Bool & Impure;
         import flixspt.sandbox.LineIterator.next(): String & Impure;
@@ -224,7 +224,7 @@ namespace FlixSandbox/System/IO {
             |> Result.map(Iterator.toList)
 
 
-    pub def contentsIter(path: FilePath): Result[Iterator[FilePath], String] & Impure =
+    pub def contentsIter(path: FilePath): Result[Iterator[FilePath, Static], String] & Impure =
         import static flixspt.sandbox.PathIterator.newFileslistIterator(##java.nio.file.Path): ##flixspt.sandbox.PathIterator & Impure;
         import flixspt.sandbox.PathIterator.hasNext(): Bool & Impure;
         import flixspt.sandbox.PathIterator.next(): ##java.nio.file.Path & Impure;
@@ -242,7 +242,7 @@ namespace FlixSandbox/System/IO {
         matchesIter(glob, path)
             |> Result.map(Iterator.toList)
 
-    pub def matchesIter(glob: String, path: FilePath): Result[Iterator[FilePath], String] & Impure =
+    pub def matchesIter(glob: String, path: FilePath): Result[Iterator[FilePath, Static], String] & Impure =
         import static flixspt.sandbox.PathIterator.newFilesnewDirectoryStreamIterator(##java.nio.file.Path, String): ##flixspt.sandbox.PathIterator & Impure;
         import flixspt.sandbox.PathIterator.hasNext(): Bool & Impure;
         import flixspt.sandbox.PathIterator.next(): ##java.nio.file.Path & Impure;

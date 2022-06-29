@@ -120,20 +120,24 @@ namespace FlixSandbox/Marshal {
         getMessage(ex as ##java.lang.Throwable)
 
 
-    pub def marshalArray(upcast: a -> ##java.lang.Object & ef, arr: Array[a, r]): Array[##java.lang.Object, r] & Impure =
+    pub def marshalArray(upcast: a -> ##java.lang.Object & ef, arr: Array[a, r]): Array[##java.lang.Object, r] \ {Read(r), Write(r), ef}=
         import java.util.ArrayList.toArray(): Array[##java.lang.Object, r] & r;    
         let step = iter -> match Iterator.next(iter) {
             case Some(x)    => Some((upcast(x), iter))
             case None       => None
         };
-        unfoldArrayList(step, Array.toIterator(arr)) |> toArray
+        let r1 = Scoped.regionOf(arr);
+        unfoldArrayList(step, Array.toIterator(r1, arr)) |> toArray
+        
 
     pub def marshalSet(upcast: a -> ##java.lang.Object & ef, s: Set[a]): ##java.util.Set & ef =
-        let step = iter -> match Iterator.next(iter) {
-            case Some(x)    => Some((upcast(x), iter))
-            case None       => None
-        };
-        unfoldHashSet(step, Set.toIterator(s)) as ##java.util.Set & ef
+        region r1 {
+            let step = iter -> match Iterator.next(iter) {
+                case Some(x)    => Some((upcast(x), iter))
+                case None       => None
+            };
+            unfoldHashSet(step, Set.toIterator(r1, s)) as ##java.util.Set & ef
+        }
 
     pub def unmarshalSet(downcast: ##java.lang.Object -> a & ef, javas: ##java.util.Set): Set[a] & ef with Order[a] =
         let step = (acc, obj) -> {
@@ -160,11 +164,13 @@ namespace FlixSandbox/Marshal {
     pub def marshalMap(upcastKey: k -> ##java.lang.Object & ef1, 
                         upcastValue: v -> ##java.lang.Object & ef2,  
                         m: Map[k, v]): ##java.util.Map & (ef1 and ef2) =
-        let step = iter -> match Iterator.next(iter) {
-            case Some(k, v)   => Some((upcastKey(k), upcastValue(v), iter))
-            case None         => None
-        };
-        unfoldHashMap(step, Map.toIterator(m)) as ##java.util.Map & (ef1 and ef2)
+        region r1 {
+            let step = iter -> match Iterator.next(iter) {
+                case Some(k, v)   => Some((upcastKey(k), upcastValue(v), iter))
+                case None         => None
+            };
+            unfoldHashMap(step, Map.toIterator(r1, m)) as ##java.util.Map & (ef1 and ef2)
+        }
 
     ///
     /// We don't need the inverse function `marshalMapEntry` because Java's API for building maps is `m.put(k, v)`
@@ -193,11 +199,13 @@ namespace FlixSandbox/Marshal {
     pub def marshalSortedMap(upcastKey: k -> ##java.lang.Object & ef1,
                                 upcastValue: v -> ##java.lang.Object & ef2, 
                                 m: Map[k, v]): ##java.util.SortedMap & (ef1 and ef2) =
-        let step = iter -> match Iterator.next(iter) {
-            case Some(k, v)   => Some((upcastKey(k), upcastValue(v), iter))
-            case None         => None
-        };
-        unfoldTreeMap(step, Map.toIterator(m)) as ##java.util.SortedMap & (ef1 and ef2)
+        region r1 {
+            let step = iter -> match Iterator.next(iter) {
+                case Some(k, v)   => Some((upcastKey(k), upcastValue(v), iter))
+                case None         => None
+            };
+            unfoldTreeMap(step, Map.toIterator(r1, m)) as ##java.util.SortedMap & (ef1 and ef2)
+        }
 
 
     pub def unmarshalSortedMap(downcastKey: ##java.lang.Object -> k & ef, 
@@ -211,46 +219,48 @@ namespace FlixSandbox/Marshal {
 
 
 
-    pub def unmarshalIterator(downcast: ##java.lang.Object -> a & ef, javaIter: ##java.util.Iterator): Iterator[a] =
-        import java.util.Iterator.hasNext(): Bool & Impure;
-        import java.util.Iterator.next(): ##java.lang.Object & Impure;
+    pub def unmarshalIterator(_: Region[r], 
+                                downcast: ##java.lang.Object -> a & ef, 
+                                javaIter: ##java.util.Iterator): Iterator[a, r] \ { Read(r), ef}  =
+        import java.util.Iterator.hasNext(): Bool & r;
+        import java.util.Iterator.next(): ##java.lang.Object & r;
         let isDone = () -> { 
             let ans = hasNext(javaIter);
             not ans
         };
         let getNext = () -> {
             let a1 = next(javaIter);
-            downcast(a1) as & Impure
+            downcast(a1) as \ Read(r)
         };
-        Iterator(isDone, getNext)
+        Iterator(isDone, getNext) as \ {Read(r), ef}
 
 
-    pub def unmarshalStream(downcast: ##java.lang.Object -> a & ef, strm: ##java.util.stream.Stream): Iterator[a] =
-        import java.util.stream.BaseStream.iterator(): ##java.util.Iterator & Pure;
+    pub def unmarshalStream(r: Region[r], downcast: ##java.lang.Object -> a & ef, strm: ##java.util.stream.Stream): Iterator[a, r] \ { Read(r), ef }  =
+        import java.util.stream.BaseStream.iterator(): ##java.util.Iterator & r;
         let bs = strm as ##java.util.stream.BaseStream;
         let javaIter = iterator(bs);
-        unmarshalIterator(downcast, javaIter)
+        unmarshalIterator(r, downcast, javaIter)
 
-    pub def unmarshalIntStream(strm: ##java.util.stream.IntStream): Iterator[Int32] =
-        import java.util.stream.BaseStream.iterator(): ##java.util.Iterator & Pure;
+    pub def unmarshalIntStream(r: Region[r], strm: ##java.util.stream.IntStream): Iterator[Int32, r] \ Read(r)  =
+        import java.util.stream.BaseStream.iterator(): ##java.util.Iterator & r;
         let bs = strm as ##java.util.stream.BaseStream;
         let javaIter = iterator(bs);
         let downcast = obj -> unmarshalInt32(obj as ##java.lang.Integer);
-        unmarshalIterator(downcast, javaIter)
+        unmarshalIterator(r, downcast, javaIter)
 
-    pub def unmarshalLongStream(strm: ##java.util.stream.LongStream): Iterator[Int64] =
-        import java.util.stream.BaseStream.iterator(): ##java.util.Iterator & Pure;
+    pub def unmarshalLongStream(r: Region[r], strm: ##java.util.stream.LongStream): Iterator[Int64, r] \ Read(r)  =
+        import java.util.stream.BaseStream.iterator(): ##java.util.Iterator & r;
         let bs = strm as ##java.util.stream.BaseStream;
         let javaIter = iterator(bs);
         let downcast = obj -> unmarshalInt64(obj as ##java.lang.Long);
-        unmarshalIterator(downcast, javaIter)
+        unmarshalIterator(r, downcast, javaIter)
 
-    pub def unmarshalDoubleStream(strm: ##java.util.stream.DoubleStream): Iterator[Float64] =
-        import java.util.stream.BaseStream.iterator(): ##java.util.Iterator & Pure;
+    pub def unmarshalDoubleStream(r: Region[r], strm: ##java.util.stream.DoubleStream): Iterator[Float64, r] \ Read(r) =
+        import java.util.stream.BaseStream.iterator(): ##java.util.Iterator & r;
         let bs = strm as ##java.util.stream.BaseStream;
         let javaIter = iterator(bs);
         let downcast = obj -> unmarshalFloat64(obj as ##java.lang.Double);
-        unmarshalIterator(downcast, javaIter)
+        unmarshalIterator(r, downcast, javaIter)
 
 
 
@@ -295,7 +305,7 @@ namespace FlixSandbox/Marshal {
             case Some(x)    => Some((upcast(x), iter))
             case None       => None
         };
-        unfoldArrayList(step, List.toIterator(l)) |> toArray
+        unfoldArrayList(step, List.toIterator(Static, l)) |> toArray
 
 
     /// Due to change once Iterator uses regions...
@@ -305,7 +315,7 @@ namespace FlixSandbox/Marshal {
             case Some(x)    => Some((upcast(x), iter))
             case None       => None
         };
-        unfoldArrayList(step, Set.toIterator(s)) |> toArray
+        unfoldArrayList(step, Set.toIterator(Static, s)) |> toArray
 
     /// Folds
 
@@ -451,7 +461,7 @@ namespace FlixSandbox/Marshal {
             case Some(x)    => Some((x as ##java.lang.Object, iter))
             case None       => None
         };
-        let arrlist = unfoldArrayList(step, List.toIterator(l));
+        let arrlist = unfoldArrayList(step, List.toIterator(Static, l));
         k(arrayListOfStringToStringArray(arrlist))
         
 

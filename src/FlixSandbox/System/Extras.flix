@@ -23,7 +23,7 @@ namespace FlixSandbox/System/Extras {
 
 
 
-    pub def globListWithIter(glob: {glob :: String}, f: String): Result[Iterator[String], String] & Impure =
+    pub def globListWithIter(glob: {glob :: String}, f: String): Result[Iterator[String, Static], String] & Impure =
         try {
             import new java.io.File(String): ##java.io.File & Impure as newFile;
             import java.io.File.toPath(): ##java.nio.file.Path & Impure;
@@ -36,7 +36,7 @@ namespace FlixSandbox/System/Extras {
             let javaStream = newDirectoryStream(javaPath, glob.glob);
             let javaIter = iterator(javaStream);
 
-            let iter = FlixSandbox/Marshal.unmarshalIterator(obj -> pathToString(obj as ##java.nio.file.Path), javaIter);
+            let iter = FlixSandbox/Marshal.unmarshalIterator(Static, obj -> pathToString(obj as ##java.nio.file.Path), javaIter);
             Ok(iter)
         } catch {
             case ex: ##java.io.IOException =>
@@ -48,7 +48,7 @@ namespace FlixSandbox/System/Extras {
     pub def regexList(regex: {regex :: String}, f: String): Result[List[String], String] & Impure =
         regexListWithIter(regex, f) |> Result.map(Iterator.toList)
 
-    pub def regexListWithIter(regex: {regex :: String}, f: String): Result[Iterator[String], String] & Impure =
+    pub def regexListWithIter(regex: {regex :: String}, f: String): Result[Iterator[String, Static], String] & Impure =
         try {
             import new java.io.File(String): ##java.io.File & Impure as newFile;
             import java.io.File.toPath(): ##java.nio.file.Path & Impure;
@@ -65,7 +65,7 @@ namespace FlixSandbox/System/Extras {
             let currentFS = getDefault();
             let matcher = getPathMatcher(currentFS, "regex:${regex.regex}");            
             let test = path -> matches(matcher, path) as & Pure;
-            let iter = FlixSandbox/Marshal.unmarshalIterator(obj -> obj as ##java.nio.file.Path, javaIter);
+            let iter = FlixSandbox/Marshal.unmarshalIterator(Static, obj -> obj as ##java.nio.file.Path, javaIter);
             let iter1 = iter |> Iterator.filterL(test) |>  Iterator.mapL(pathToString);
             Ok(iter1)
         } catch {
