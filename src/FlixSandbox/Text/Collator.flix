@@ -93,9 +93,9 @@ namespace FlixSandbox/Text/Collator {
         Collator(getInstance())
 
     /// TODO: Move to Locale?
-    pub def getInstanceWithLocale(locale: FlixSandbox/I18n.Locale): Collator =
+    pub def getInstanceWithLocale(locale: I18n.Locale): Collator =
         import static java.text.Collator.getInstance(##java.util.Locale): ##java.text.Collator & Pure;
-        use FlixSandbox/I18n.Locale.{Locale};
+        use I18n.Locale.{Locale};
         let Locale(locale1) = locale;
         Collator(getInstance(locale1))
 

@@ -72,6 +72,15 @@ namespace FlixSandbox/System {
 
     instance Boxable[FilePath]
 
+    instance Interop.Marshal[FilePath] {
+        pub def toJavaObject(x: FilePath): ##java.lang.Object = 
+            let FilePath(x1) = x;
+            x1 as ##java.lang.Object
+        
+        pub def fromJavaObject(o: ##java.lang.Object): FilePath = 
+            FilePath(o as ##java.nio.file.Path)
+    }
+
 }
 
 namespace FlixSandbox/System/FilePath {

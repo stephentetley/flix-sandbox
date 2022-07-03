@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-// NOTE - keep reconciled with the version in `charset-locale`
-
-// TODO - do we want a set of `show` functions for the java collection types to 
-// aid debugging / testing... ?
+// DEPRECATED - moving to `collection-interop`
 
 namespace FlixSandbox/Marshal {
 

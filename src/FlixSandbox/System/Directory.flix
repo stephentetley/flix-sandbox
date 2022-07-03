@@ -56,20 +56,23 @@ namespace FlixSandbox/System/Directory {
             let done1 = () -> not hasNext(primIter);
             let next1 = () -> FilePath(next(primIter));
             Ok(Iterator(done1, next1))
-        } catch {
-            case _: ##java.lang.Exception => Err("contentsIter")
+        } catch {        
+            case ex: ##java.lang.Exception =>
+                import java.lang.Throwable.getMessage(): String & Impure;
+                Err("contentsIter: ${getMessage(ex)}")
         }
 
     pub def contentsIter2(path: FilePath): Result[Iterator[FilePath, Static], String] & Impure = 
         import static java.nio.file.Files.list(##java.nio.file.Path): ##java.util.stream.Stream & Impure;
         try {
             let FilePath(path1) = path;
-            let strm = list(path1);
-            let downcast = x1 -> FilePath(x1 as ##java.nio.file.Path);
-            let iter = FlixSandbox/Marshal.unmarshalStream(Static, downcast, strm);
+            let strm = Interop/Stream.new(list(path1), Static);
+            let iter = Interop/Stream.iterator(strm);
             Ok(iter)
         } catch {
-            case _: ##java.lang.Exception => Err("contentsIter2")
+            case ex: ##java.lang.Exception =>
+                import java.lang.Throwable.getMessage(): String & Impure;
+                Err("contentsIter2: ${getMessage(ex)}")
         }
 
     pub def contents2(path: FilePath): Result[List[FilePath], String] & Impure =

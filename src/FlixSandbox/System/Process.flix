@@ -22,8 +22,9 @@ namespace FlixSandbox/System {
 
 
 namespace FlixSandbox/System/Process {
-
-    use FlixSandbox/Text.Charset.{Charset};
+    
+    use Text.Charset;
+    use Text.Charset.{Charset};
 
     use FlixSandbox/System.Process;
     use FlixSandbox/System.Process.{Process};
@@ -49,7 +50,7 @@ namespace FlixSandbox/System/Process {
         }
 
 
-    pub def getInput(cs: FlixSandbox/Text.Charset, p: Process): Result[String, String] & Impure =
+    pub def getInput(cs: Charset, p: Process): Result[String, String] & Impure =
         import java.lang.Process.getInputStream(): ##java.io.InputStream & Impure;
         import java.io.InputStream.readAllBytes(): Array[Int8, Static] & Impure;
         import new java.lang.String(Array[Int8, Static], ##java.nio.charset.Charset): String & Impure as newString;
@@ -67,7 +68,7 @@ namespace FlixSandbox/System/Process {
         }
 
 
-    pub def getError(cs: FlixSandbox/Text.Charset, p: Process): Result[String, String] & Impure =        
+    pub def getError(cs: Charset, p: Process): Result[String, String] & Impure =        
         import java.lang.Process.getErrorStream(): ##java.io.InputStream & Impure;
         import java.io.InputStream.readAllBytes(): Array[Int8, Static] & Impure;
         import new java.lang.String(Array[Int8, Static], ##java.nio.charset.Charset): String & Impure as newString;
@@ -89,7 +90,7 @@ namespace FlixSandbox/System/Process {
     pub type alias ProcessArgs =
         { cmd :: String
         , args :: List[String]
-        , charset :: FlixSandbox/Text.Charset
+        , charset :: Charset
         }
 
     /// Return with an Exit Code

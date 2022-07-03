@@ -20,8 +20,8 @@ namespace FlixSandbox/System/IO {
 
     use FlixSandbox/System.FilePath;
     use FlixSandbox/System.FilePath.{FilePath};
-    use FlixSandbox/Text.Charset;
-    use FlixSandbox/Text.Charset.{Charset};
+    use Text.Charset;
+    use Text.Charset.{Charset};
 
     /// See: https://github.com/flix/flix/issues/2040
 
@@ -103,7 +103,7 @@ namespace FlixSandbox/System/IO {
 
     /// #
 
-    pub def readFile(cs: FlixSandbox/Text.Charset, path: FilePath): Result[String, String] & Impure =
+    pub def readFile(cs: Charset, path: FilePath): Result[String, String] & Impure =
         import static java.nio.file.Files.readString(##java.nio.file.Path, ##java.nio.charset.Charset): String & Impure;
         try {
             let FilePath(path1) = path;
@@ -116,9 +116,9 @@ namespace FlixSandbox/System/IO {
 
     /// Write as UTF_8...
     pub def writeFile(path: FilePath, content: String): Result[Unit, String] & Impure =
-        writeFileWith({path = path, charset = FlixSandbox/Text/Charset.utf_8(), mode = Create}, content)
+        writeFileWith({path = path, charset = Text/Charset.utf_8(), mode = Create}, content)
 
-    pub def writeFileWith(opts: {path :: FilePath, charset :: FlixSandbox/Text.Charset, mode:: WriteMode},
+    pub def writeFileWith(opts: {path :: FilePath, charset :: Charset, mode:: WriteMode},
                             content: String): Result[Unit, String] & Impure =
         import static flixspt.sandbox.IOWrapper.writeString(##java.nio.file.Path, ##java.nio.charset.Charset, ##java.nio.file.StandardOpenOption, String): Unit & Impure;
         try {
@@ -199,12 +199,12 @@ namespace FlixSandbox/System/IO {
             case _: ##java.lang.Exception => Err("readChunks")
         }
 
-    pub def readLines(opts: {charset :: FlixSandbox/Text.Charset}, path: FilePath): Result[List[String], String] & Impure =
+    pub def readLines(opts: {charset :: Charset}, path: FilePath): Result[List[String], String] & Impure =
         readLinesIterWith(opts, path) 
             |> Result.map(Iterator.toList)
 
 
-    pub def readLinesIterWith(opts: {charset :: FlixSandbox/Text.Charset}, path: FilePath): Result[Iterator[String, Static], String] & Impure =
+    pub def readLinesIterWith(opts: {charset :: Charset}, path: FilePath): Result[Iterator[String, Static], String] & Impure =
         import static flixspt.sandbox.LineIterator.newFileslinesIterator(##java.nio.file.Path, ##java.nio.charset.Charset): ##flixspt.sandbox.LineIterator & Impure;
         import flixspt.sandbox.LineIterator.hasNext(): Bool & Impure;
         import flixspt.sandbox.LineIterator.next(): String & Impure;
