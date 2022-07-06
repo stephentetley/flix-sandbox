@@ -33,7 +33,7 @@ namespace FlixSandbox/System/Process {
     use FlixSandbox/System.ProcessBuilder.{ProcessBuilder};
 
 
-    pub def processBuilder(cmd: String, args: List[String]): ProcessBuilder[ka, Unit] =
+    pub def processBuilder(cmd: String, args: List[String]): ProcessBuilder[r, ka, Unit] \ Write(r) =
         FlixSandbox/System/ProcessBuilder.command(cmd, args)
 
 
@@ -96,26 +96,29 @@ namespace FlixSandbox/System/Process {
     /// Return with an Exit Code
     pub def processWithExitCode(args: ProcessArgs): Result[{exitCode :: Int32, processResponse :: String}, String] & Impure =
         use Result.flatMap;
-        let pb          = processBuilder(args.cmd, args.args);
-        let* proc       = FlixSandbox/System/ProcessBuilder.start(pb);
-        let* respGood   = getInput(args.charset, proc);
-        let* respBad    = getError(args.charset, proc);
-        let* code       = waitFor(proc);
-        Ok({exitCode = code, processResponse = if (code == 0) respGood else respBad})
+        region r1 {
+            let pb          = processBuilder(args.cmd, args.args);
+            let* proc       = FlixSandbox/System/ProcessBuilder.start(r1, pb);
+            let* respGood   = getInput(args.charset, proc);
+            let* respBad    = getError(args.charset, proc);
+            let* code       = waitFor(proc);
+            Ok({exitCode = code, processResponse = if (code == 0) respGood else respBad})
+        }
 
 
     pub def process(args: ProcessArgs): Result[{processResponse :: String}, String] & Impure =
         use Result.flatMap;
-        let pb          = processBuilder(args.cmd, args.args);
-        let* proc       = FlixSandbox/System/ProcessBuilder.start(pb);
-        let* respGood   = getInput(args.charset, proc);
-        let* respBad    = getError(args.charset, proc);
-        let* code       = waitFor(proc);
-        if (code == 0) 
-            Ok({processResponse = respGood})
-        else 
-            Err(respBad)
-
+        region r1 {
+            let pb          = processBuilder(args.cmd, args.args);
+            let* proc       = FlixSandbox/System/ProcessBuilder.start(r1, pb);
+            let* respGood   = getInput(args.charset, proc);
+            let* respBad    = getError(args.charset, proc);
+            let* code       = waitFor(proc);
+            if (code == 0) 
+                Ok({processResponse = respGood})
+            else 
+                Err(respBad)
+        }
 
 
 }

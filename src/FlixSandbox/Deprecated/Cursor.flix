@@ -305,7 +305,7 @@ namespace FlixSandbox/Deprecated/Cursor {
         if (n <= 0)
             Ok() as & Impure
         else {
-            head!(src);
+            discard head!(src);
             drop!(n - 1, src)
         }
 
