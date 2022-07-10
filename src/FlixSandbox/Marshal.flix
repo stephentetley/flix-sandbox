@@ -124,7 +124,7 @@ namespace FlixSandbox/Marshal {
             case None       => None
         };
         let r1 = Scoped.regionOf(arr);
-        unfoldArrayList(step, Array.toIterator(r1, arr)) |> toArray
+        unfoldArrayList(step, Array.iterator(r1, arr)) |> toArray
         
 
     pub def marshalSet(upcast: a -> ##java.lang.Object & ef, s: Set[a]): ##java.util.Set & ef =
@@ -133,7 +133,7 @@ namespace FlixSandbox/Marshal {
                 case Some(x)    => Some((upcast(x), iter))
                 case None       => None
             };
-            unfoldHashSet(step, Set.toIterator(r1, s)) as ##java.util.Set & ef
+            unfoldHashSet(step, Set.iterator(r1, s)) as ##java.util.Set & ef
         }
 
     pub def unmarshalSet(downcast: ##java.lang.Object -> a & ef, javas: ##java.util.Set): Set[a] & ef with Order[a] =
@@ -166,7 +166,7 @@ namespace FlixSandbox/Marshal {
                 case Some(k, v)   => Some((upcastKey(k), upcastValue(v), iter))
                 case None         => None
             };
-            unfoldHashMap(step, Map.toIterator(r1, m)) as ##java.util.Map & (ef1 and ef2)
+            unfoldHashMap(step, Map.iterator(r1, m)) as ##java.util.Map & (ef1 and ef2)
         }
 
     ///
@@ -201,7 +201,7 @@ namespace FlixSandbox/Marshal {
                 case Some(k, v)   => Some((upcastKey(k), upcastValue(v), iter))
                 case None         => None
             };
-            unfoldTreeMap(step, Map.toIterator(r1, m)) as ##java.util.SortedMap & (ef1 and ef2)
+            unfoldTreeMap(step, Map.iterator(r1, m)) as ##java.util.SortedMap & (ef1 and ef2)
         }
 
 
@@ -302,7 +302,7 @@ namespace FlixSandbox/Marshal {
             case Some(x)    => Some((upcast(x), iter))
             case None       => None
         };
-        unfoldArrayList(step, List.toIterator(Static, l)) |> toArray
+        unfoldArrayList(step, List.iterator(Static, l)) |> toArray
 
 
     /// Due to change once Iterator uses regions...
@@ -312,7 +312,7 @@ namespace FlixSandbox/Marshal {
             case Some(x)    => Some((upcast(x), iter))
             case None       => None
         };
-        unfoldArrayList(step, Set.toIterator(Static, s)) |> toArray
+        unfoldArrayList(step, Set.iterator(Static, s)) |> toArray
 
     /// Folds
 
@@ -458,7 +458,7 @@ namespace FlixSandbox/Marshal {
             case Some(x)    => Some((x as ##java.lang.Object, iter))
             case None       => None
         };
-        let arrlist = unfoldArrayList(step, List.toIterator(Static, l));
+        let arrlist = unfoldArrayList(step, List.iterator(Static, l));
         k(arrayListOfStringToStringArray(arrlist))
         
 

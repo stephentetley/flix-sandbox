@@ -66,7 +66,7 @@ namespace FlixSandbox/System/Directory {
         import static java.nio.file.Files.list(##java.nio.file.Path): ##java.util.stream.Stream & Impure;
         try {
             let FilePath(path1) = path;
-            let strm = Interop/Stream.new(list(path1), Static);
+            let strm = Interop/Stream.new(Static, list(path1));
             let iter = Interop/Stream.iterator(strm);
             Ok(iter)
         } catch {
