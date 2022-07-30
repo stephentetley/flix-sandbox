@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-// DEPRECATED - moving to `collection-interop`
+// DEPRECATED - use `collection-interop` instead
 
-namespace FlixSandbox/Marshal {
+namespace FlixSandbox/Deprecated/Marshal {
 
     pub def marshalInt8(i: Int8): ##java.lang.Byte = 
         import static java.lang.Byte.valueOf(Int8): ##java.lang.Byte & Pure;
@@ -123,8 +123,7 @@ namespace FlixSandbox/Marshal {
             case Some(x)    => Some((upcast(x), iter))
             case None       => None
         };
-        let r1 = Scoped.regionOf(arr);
-        unfoldArrayList(step, Array.iterator(r1, arr)) |> toArray
+        unfoldArrayList(step, Array.iterator(arr)) |> toArray
         
 
     pub def marshalSet(upcast: a -> ##java.lang.Object & ef, s: Set[a]): ##java.util.Set & ef =

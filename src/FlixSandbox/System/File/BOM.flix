@@ -20,8 +20,8 @@
 
 namespace FlixSandbox/System/File/BOM {
 
-    use FlixSandbox/System.FilePath;
-    use FlixSandbox/System.FilePath.{FilePath};
+    use Interop/System.FilePath;
+    use Interop/System.FilePath.{FilePath};
     use FlixSandbox/System/File.BufferedReader;
     use FlixSandbox/System/File.BufferedReader.{BufferedReader};
 

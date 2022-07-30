@@ -159,8 +159,9 @@ namespace FlixSandbox/BitSet {
         foldLeft((k, i) -> ks -> k(i :: ks), ks -> ks, s) |> f -> f(Nil)
 
     pub def toIterator(r: Region[r], s: BitSet): Iterator[Int32, r] \ Write(r) = 
-        let istrm = toJavaIntStream(s) as \ Write(r);
-        FlixSandbox/Marshal.unmarshalIntStream(r, istrm)
+        let prim = toJavaIntStream(s) as \ Write(r);
+        Interop/Collections/Stream.newIntStream(r, prim) 
+            |> Interop/Collections/Stream.intStreamIterator
 
     pub def toSet(s: BitSet): Set[Int32] = 
         foldLeft((ac, i) -> Set.insert(i, ac), Set.empty(), s)

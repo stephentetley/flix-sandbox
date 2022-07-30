@@ -18,10 +18,10 @@
 namespace FlixSandbox/System/IO {
 
 
-    use FlixSandbox/System.FilePath;
-    use FlixSandbox/System.FilePath.{FilePath};
-    use Text.Charset;
-    use Text.Charset.{Charset};
+    use Interop/System.FilePath;
+    use Interop/System.FilePath.{FilePath};
+    use Interop/Text.Charset;
+    use Interop/Text.Charset.{Charset};
 
     /// See: https://github.com/flix/flix/issues/2040
 
@@ -116,7 +116,7 @@ namespace FlixSandbox/System/IO {
 
     /// Write as UTF_8...
     pub def writeFile(path: FilePath, content: String): Result[Unit, String] & Impure =
-        writeFileWith({path = path, charset = Text/Charset.utf_8(), mode = Create}, content)
+        writeFileWith({path = path, charset = Interop/Text/Charset.utf_8(), mode = Create}, content)
 
     pub def writeFileWith(opts: {path :: FilePath, charset :: Charset, mode:: WriteMode},
                             content: String): Result[Unit, String] & Impure =

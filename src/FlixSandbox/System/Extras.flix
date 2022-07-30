@@ -35,8 +35,8 @@ namespace FlixSandbox/System/Extras {
             let javaPath = toPath(javaFile);
             let javaStream = newDirectoryStream(javaPath, glob.glob);
             let javaIter = iterator(javaStream);
-
-            let iter = FlixSandbox/Marshal.unmarshalIterator(Static, obj -> pathToString(obj as ##java.nio.file.Path), javaIter);
+            let iter = Interop/Collections/RawIterator.new(Static, javaIter) 
+                            |> Interop/Collections/RawIterator.iteratorWith(obj -> pathToString(obj as ##java.nio.file.Path));
             Ok(iter)
         } catch {
             case ex: ##java.io.IOException =>
@@ -65,7 +65,8 @@ namespace FlixSandbox/System/Extras {
             let currentFS = getDefault();
             let matcher = getPathMatcher(currentFS, "regex:${regex.regex}");            
             let test = path -> matches(matcher, path) as & Pure;
-            let iter = FlixSandbox/Marshal.unmarshalIterator(Static, obj -> obj as ##java.nio.file.Path, javaIter);
+            let iter = Interop/Collections/RawIterator.new(Static, javaIter) 
+                            |> Interop/Collections/RawIterator.iteratorWith(obj -> obj as ##java.nio.file.Path);
             let iter1 = iter |> Iterator.filterL(test) |>  Iterator.mapL(pathToString);
             Ok(iter1)
         } catch {

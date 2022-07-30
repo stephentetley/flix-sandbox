@@ -30,13 +30,13 @@ namespace FlixSandbox/System/File/BufferedReader {
 
     use FlixSandbox/System/File.BufferedReader;
     use FlixSandbox/System/File.BufferedReader.{BufferedReader};
-    use FlixSandbox/System.FilePath;
-    use FlixSandbox/System.FilePath.{FilePath};
+    use Interop/System.FilePath;
+    use Interop/System.FilePath.{FilePath};
     
-    use Text.Charset;
-    use Text.Charset.{Charset};
+    use Interop/Text.Charset;
+    use Interop/Text.Charset.{Charset};
 
-    pub def bufferedReader(path: FlixSandbox/System.FilePath, cs: Charset): Result[BufferedReader, String] & Impure =
+    pub def bufferedReader(path: FilePath, cs: Charset): Result[BufferedReader, String] & Impure =
         import static java.nio.file.Files.newBufferedReader(##java.nio.file.Path, ##java.nio.charset.Charset): ##java.io.BufferedReader & Impure;
         try {
             let FilePath(path1) = path;

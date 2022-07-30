@@ -1,22 +1,19 @@
 # flix-sandbox
 
-Incubator project for candidate library modules for Flix.
+July 2022 - `flix-sandbox` is being deprecated as a library and 
+will become just an incubator for modules that are too under-developed
+to merit their own packages.
 
-Note November 2021 - the regex modules have been moved into a
-separate repo so they can be used without the dependencies `flix-sandbox`
-needs. The new repo is:
+"Successful" modules have been migrated into these packages:
 
-https://github.com/stephentetley/flix-regex
+https://github.com/stephentetley/interop-collections
 
-March 2022 - the project layout has changed to work with Flix's 
-package manager so it should be easier to build and use.
+https://github.com/stephentetley/interop-charset-locale
 
-July 2022 - deprecated Marshal, removed Charset and Locale. These are now 
-provided by separate packages.
+https://github.com/stephentetley/interop-text
 
-Dependencies:
+https://github.com/stephentetley/interop-filepath
 
-https://github.com/stephentetley/collection-interop
-https://github.com/stephentetley/charset-locale
+https://github.com/stephentetley/interop-process
 
-Apache Commons IO - currrently `commons-io-2.11.0.jar`
+https://github.com/stephentetley/filx-regex

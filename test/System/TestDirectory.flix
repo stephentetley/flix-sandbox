@@ -18,7 +18,7 @@ namespace TestDirectory {
 
     @test
     def contents201(): Unit & Impure =
-        match FlixSandbox/System/FilePath.tryNew("E:/coding/flix/flix-sandbox/notes") {
+        match Interop/System/FilePath.tryNew("E:/coding/flix/flix-sandbox/notes") {
             case Ok(path) => FlixSandbox/System/Directory.contents2(path) |> println
             case Err(msg) => println("contents201 Err: ${msg}")
         }
