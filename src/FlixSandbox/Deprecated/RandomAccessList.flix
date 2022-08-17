@@ -20,7 +20,7 @@
 ///
 
 
-namespace FlixSandbox/RandomAccessList {
+namespace FlixSandbox/Deprecated/RandomAccessList {
 
     enum Tree[a] with Eq, Order, ToString {
         case Leaf(a)

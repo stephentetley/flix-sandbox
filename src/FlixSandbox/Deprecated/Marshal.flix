@@ -204,9 +204,9 @@ namespace FlixSandbox/Deprecated/Marshal {
         }
 
 
-    pub def unmarshalSortedMap(downcastKey: ##java.lang.Object -> k & ef, 
-                                downcastValue: ##java.lang.Object -> v & ef, 
-                                javam: ##java.util.SortedMap): Map[k, v] & ef with Order[k] =
+    pub def unmarshalSortedMap(downcastKey: ##java.lang.Object -> k, 
+                                downcastValue: ##java.lang.Object -> v, 
+                                javam: ##java.util.SortedMap): Map[k, v] with Order[k] =
         let step = (acc, entry) -> {
             let (k, v) = unmarshalMapEntry(downcastKey, downcastValue, entry);
             Map.insert(k, v, acc)
@@ -295,7 +295,7 @@ namespace FlixSandbox/Deprecated/Marshal {
         foldMap(step, ks -> ks, javam) |> f -> f(Nil)
 
 
-    pub def marshalListToArray(upcast: a -> ##java.lang.Object & ef, l: List[a]): Array[##java.lang.Object, r] & Impure =
+    pub def marshalListToArray(upcast: a -> ##java.lang.Object, l: List[a]): Array[##java.lang.Object, r] \ {IO} =
         import java.util.ArrayList.toArray(): Array[##java.lang.Object, r] & r;
         let step = iter -> match Iterator.next(iter) {
             case Some(x)    => Some((upcast(x), iter))
@@ -305,7 +305,7 @@ namespace FlixSandbox/Deprecated/Marshal {
 
 
     /// Due to change once Iterator uses regions...
-    pub def marshalSetToArray(upcast: a -> ##java.lang.Object & ef, s: Set[a]): Array[##java.lang.Object, r] & Impure =
+    pub def marshalSetToArray(upcast: a -> ##java.lang.Object, s: Set[a]): Array[##java.lang.Object, r] \ { IO } =
         import java.util.ArrayList.toArray(): Array[##java.lang.Object, r] & r;    
         let step = iter -> match Iterator.next(iter) {
             case Some(x)    => Some((upcast(x), iter))
@@ -451,7 +451,7 @@ namespace FlixSandbox/Deprecated/Marshal {
     /// Special function to avoid Flix marshal bug:
     /// https://github.com/flix/flix/issues/3332
 
-    pub def runVaragsOfString(l: List[String], k: Array[String, r] -> a \ Read(r), _: Region[r]): a & Impure =
+    pub def runVaragsOfString(l: List[String], k: Array[String, r] -> a \ Read(r), _: Region[r]): a \ {IO, Read(r)} =
         import static flixspt.sandbox.MarshalArrayList.arrayListOfStringToStringArray(##java.util.ArrayList): Array[String, r] \ Read(r);
         let step = iter -> match Iterator.next(iter) {
             case Some(x)    => Some((x as ##java.lang.Object, iter))

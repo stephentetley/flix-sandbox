@@ -22,7 +22,7 @@ namespace Doodle {
     instance ToString [ImmArray[a]] with ToString[a] {
         pub def toString(arr: ImmArray[a]): String = 
             let ImmArray(arr1) = arr;
-            Array.toString(arr1) as & Pure
+            Array.toString(arr1) as \ {}
     }
 
 }
@@ -34,7 +34,7 @@ namespace Doodle/ImmArray {
 
     pub def fromArray(arr: Array[a, r]): ImmArray[a] \ Read(r) = fromArrayHelper(arr) as \ { Read(r) }
 
-    def fromArrayHelper(arr: Array[a, r]): ImmArray[a] & Impure = 
+    def fromArrayHelper(arr: Array[a, r]): ImmArray[a] \ IO = 
         let len = Array.length(arr);
         if (len < 1)
             ImmArray([] @ Static)
@@ -47,16 +47,16 @@ namespace Doodle/ImmArray {
 
     pub def get(i: Int32, ia: ImmArray[a]): a = 
         let ImmArray(ia1) = ia;
-        ia1[i] as & Pure
+        ia1[i] as \ {}
 
 
     pub def length(ia: ImmArray[a]): Int32 = 
         let ImmArray(ia1) = ia;
         Array.length(ia1)
 
-    pub def map(f: a -> b & ef, ia: ImmArray[a]): ImmArray[b] & ef =  mapHelper(f, ia) as & ef
+    pub def map(f: a -> b \ ef, ia: ImmArray[a]): ImmArray[b] \ ef =  mapHelper(f, ia) as \ ef
     
-    def mapHelper(f: a -> b & ef, ia: ImmArray[a]): ImmArray[b] & Impure = 
+    def mapHelper(f: a -> b \ ef, ia: ImmArray[a]): ImmArray[b] \ { IO, ef } = 
         let len = length(ia);
         if (len < 1)
             ImmArray([] @ Static)
@@ -67,8 +67,8 @@ namespace Doodle/ImmArray {
             ImmArray(arr1)
         }
 
-    pub def foreachWithIndex(f: (a, Int32) -> Unit & ef, ia: ImmArray[a]): Unit & ef =
+    pub def foreachWithIndex(f: (a, Int32) -> Unit \ ef, ia: ImmArray[a]): Unit \ ef =
         let ImmArray(ia1) = ia;
-        Array.foreachWithIndex(f, ia1) as & ef
+        Array.foreachWithIndex(f, ia1) as \ ef
 
 }

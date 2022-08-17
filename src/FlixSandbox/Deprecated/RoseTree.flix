@@ -15,36 +15,36 @@
  */
 
 
-namespace FlixSandbox {
+namespace FlixSandbox/Deprecated {
 
     pub enum RoseTree[a] {
         case Node(a, List[RoseTree[a]])
     }
 
     instance Eq[RoseTree[a]] with Eq[a] {
-        pub def eq(t1: RoseTree[a], t2: RoseTree[a]): Bool = FlixSandbox/RoseTree.equals(t1, t2)
+        pub def eq(t1: RoseTree[a], t2: RoseTree[a]): Bool = FlixSandbox/Deprecated/RoseTree.equals(t1, t2)
     }
 
     instance Functor[RoseTree] {
-        pub def map(f: a -> b & ef, t: RoseTree[a]): RoseTree[b] & ef = FlixSandbox/RoseTree.map(f, t)
+        pub def map(f: a -> b & ef, t: RoseTree[a]): RoseTree[b] & ef = FlixSandbox/Deprecated/RoseTree.map(f, t)
     }
 
     instance Applicative[RoseTree] {
-        pub def point(x: a): RoseTree[a] = FlixSandbox/RoseTree.singleton(x)
-        pub def ap(f: RoseTree[a -> b & ef], x: RoseTree[a]): RoseTree[b] & ef = FlixSandbox/RoseTree.ap(f, x)
+        pub def point(x: a): RoseTree[a] = FlixSandbox/Deprecated/RoseTree.singleton(x)
+        pub def ap(f: RoseTree[a -> b & ef], x: RoseTree[a]): RoseTree[b] & ef = FlixSandbox/Deprecated/RoseTree.ap(f, x)
     }
 
     instance Monad[RoseTree] {
-        pub def flatMap(f: a -> RoseTree[b] & ef, x: RoseTree[a]): RoseTree[b] & ef = FlixSandbox/RoseTree.flatMap(f, x)
+        pub def flatMap(f: a -> RoseTree[b] & ef, x: RoseTree[a]): RoseTree[b] & ef = FlixSandbox/Deprecated/RoseTree.flatMap(f, x)
     }
 
     pub type alias RoseForest[a] = List[RoseTree[a]]
 }
 
-namespace FlixSandbox/RoseTree {
+namespace FlixSandbox/Deprecated/RoseTree {
 
-    use FlixSandbox.{RoseTree, RoseForest};
-    use FlixSandbox.RoseTree.{Node};
+    use FlixSandbox/Deprecated.{RoseTree, RoseForest};
+    use FlixSandbox/Deprecated.RoseTree.{Node};
 
     pub def singleton(x: a): RoseTree[a] = Node(x, Nil)
 

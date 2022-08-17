@@ -226,11 +226,11 @@ namespace FlixSandbox/Deprecated/Cursor {
         fold!((s, x) -> {let (k,v) = x; Map.insert(k, v, s)}, Map#{}, src)
 
 
-    pub def foldResult!(f: (b, a) -> Result[b, e] & ef, ac: b, xs: Cursor[e, a]): Result[b, e] & Impure =
+    pub def foldResult!(f: (b, a) -> Result[b, e] & ef, ac: b, xs: Cursor[e, a]): Result[b, e] \ {IO, ef} =
         let Cursor(xs1) = xs;
         foldResultHelper(f, ac, xs1)
 
-    def foldResultHelper(f: (b, a) -> Result[b, e] & ef, ac: b, o: CursorImpl[e, a]): Result[b, e] & Impure =
+    def foldResultHelper(f: (b, a) -> Result[b, e] & ef, ac: b, o: CursorImpl[e, a]): Result[b, e] \ {IO, ef} =
         let hasNext = o.hasNext;
         match (hasNext()) {
             case true => {
